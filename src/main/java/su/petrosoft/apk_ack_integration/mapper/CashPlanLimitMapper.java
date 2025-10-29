@@ -1,0 +1,238 @@
+package su.petrosoft.apk_ack_integration.mapper;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import su.petrosoft.apk_ack_integration.model.CodeType;
+import su.petrosoft.apk_ack_integration.model.dto.request.instance.BooleanAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.request.instance.DoubleAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.request.instance.Instance;
+import su.petrosoft.apk_ack_integration.model.dto.request.UpsertInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.request.instance.LinkedAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.request.instance.LongAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.request.instance.Status;
+import su.petrosoft.apk_ack_integration.model.dto.response.GetAttributesListResponseDto;
+import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
+import su.petrosoft.apk_ack_integration.model.xml.CreateCashPlanLimitsXml.Line;
+import su.petrosoft.apk_ack_integration.model.xml.PlDirectionLine;
+import su.petrosoft.apk_ack_integration.model.xml.UpsertCashPlanLimitXml;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
+
+import static su.petrosoft.apk_ack_integration.model.CodeType.KADMR;
+import static su.petrosoft.apk_ack_integration.model.CodeType.KCSR;
+import static su.petrosoft.apk_ack_integration.model.CodeType.KDE;
+import static su.petrosoft.apk_ack_integration.model.CodeType.KDF;
+import static su.petrosoft.apk_ack_integration.model.CodeType.KDR;
+import static su.petrosoft.apk_ack_integration.model.CodeType.KESR;
+import static su.petrosoft.apk_ack_integration.model.CodeType.KFSR;
+import static su.petrosoft.apk_ack_integration.model.CodeType.KVR;
+import static su.petrosoft.apk_ack_integration.model.CodeType.PURPOSEFULGRANT;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CASH_PLAN_LIMIT_TEMPLATE_ID;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.STATUS_ACTUAL_ID;
+
+@Component
+@RequiredArgsConstructor
+public class CashPlanLimitMapper {
+
+    private final ObjectMapper objectMapper;
+
+    public CashPlanLimit toEntity(Line line) {
+
+        PlDirectionLine pl = getPlDirectionLine(line);
+
+        return CashPlanLimit.builder()
+                .year(Long.valueOf(LocalDate.now().getYear()))
+                .kfsrCode(Long.valueOf(line.kfsrCode()))
+                .kcsrCode(Long.valueOf(line.kcsrCode()))
+                .kvrCode(Long.valueOf(line.kvrCode()))
+                .kesrCode(Long.valueOf(line.kesrCode()))
+                .kadmrCode(Long.valueOf(line.kadmrCode()))
+                .kdfCode(Long.valueOf(line.kdfCode()))
+                .kdeCode(Long.valueOf(line.kdeCode()))
+                .kdrCode(Long.valueOf(line.kdrCode()))
+                .purposeCode(Long.valueOf(line.purposeFulGrantCode()))
+                .limitTotalAmt(getTotalLimit(pl))
+                .limitFederalAmt(getTotalFederal(pl))
+                .limitRegionalAmt(getTotalRegional(pl))
+                .m01Amt(line.m01Amt())
+                .m02Amt(line.m02Amt())
+                .m03Amt(line.m03Amt())
+                .m04Amt(line.m04Amt())
+                .m05Amt(line.m05Amt())
+                .m06Amt(line.m06Amt())
+                .m07Amt(line.m07Amt())
+                .m08Amt(line.m08Amt())
+                .m09Amt(line.m09Amt())
+                .m10Amt(line.m10Amt())
+                .m11Amt(line.m11Amt())
+                .m12Amt(line.m12Amt())
+                .build();
+    }
+
+    public CashPlanLimit toEntity(UpsertCashPlanLimitXml upsertPojo, Map<CodeType, Map<Long, String>> allCodes) {
+
+        PlDirectionLine pl = upsertPojo.plDirectionLineWrapper().plDirectionLine();
+
+        return CashPlanLimit.builder()
+                .year(Long.valueOf(LocalDate.now().getYear()))
+                .kadmrCode(getCodeId(allCodes, KADMR, upsertPojo.kadmrCode()))
+                .kfsrCode(getCodeId(allCodes, KFSR, upsertPojo.kfsrCode()))
+                .kcsrCode(getCodeId(allCodes, KCSR, upsertPojo.kcsrCode()))
+                .kvrCode(getCodeId(allCodes, KVR, upsertPojo.kvrCode()))
+                .kesrCode(getCodeId(allCodes, KESR, upsertPojo.kesrCode()))
+                .kdeCode(getCodeId(allCodes, KDE, upsertPojo.kdeCode()))
+                .kdrCode(getCodeId(allCodes, KDR, upsertPojo.kdrCode()))
+                .purposeCode(getCodeId(allCodes, PURPOSEFULGRANT, upsertPojo.purposeFulGrantCode()))
+                .kdfCode(getCodeId(allCodes, KDF, upsertPojo.kdfCode()))
+                .limitTotalAmt(getTotalLimit(pl))
+                .limitFederalAmt(getTotalFederal(pl))
+                .limitRegionalAmt(getTotalRegional(pl))
+                .m01Amt(upsertPojo.m01Amt())
+                .m02Amt(upsertPojo.m02Amt())
+                .m03Amt(upsertPojo.m03Amt())
+                .m04Amt(upsertPojo.m04Amt())
+                .m05Amt(upsertPojo.m05Amt())
+                .m06Amt(upsertPojo.m06Amt())
+                .m07Amt(upsertPojo.m07Amt())
+                .m08Amt(upsertPojo.m08Amt())
+                .m09Amt(upsertPojo.m09Amt())
+                .m10Amt(upsertPojo.m10Amt())
+                .m11Amt(upsertPojo.m11Amt())
+                .m12Amt(upsertPojo.m12Amt())
+                .build();
+    }
+
+    public CashPlanLimit toEntity(GetAttributesListResponseDto dto) {
+
+        List<GetAttributesListResponseDto.Attribute> attributes = dto.attributes();
+
+        return CashPlanLimit.builder()
+                .id(dto.id())
+                .version(dto.version())
+                .year(getLongValue(getValue(attributes, 3303)))
+                .kadmrCode(getLongValue(getValue(attributes, KADMR.getAttributeId())))
+                .kfsrCode(getLongValue(getValue(attributes, KFSR.getAttributeId())))
+                .kcsrCode(getLongValue(getValue(attributes, KCSR.getAttributeId())))
+                .kvrCode(getLongValue(getValue(attributes, KVR.getAttributeId())))
+                .kesrCode(getLongValue(getValue(attributes, KESR.getAttributeId())))
+                .kdeCode(getLongValue(getValue(attributes, KDE.getAttributeId())))
+                .kdrCode(getLongValue(getValue(attributes, KDR.getAttributeId())))
+                .purposeCode(getLongValue(getValue(attributes, PURPOSEFULGRANT.getAttributeId())))
+                .kdfCode(getLongValue(getValue(attributes, KDF.getAttributeId())))
+                .limitTotalAmt(getBigDecimalValue(getValue(attributes, 1609)))
+                .limitFederalAmt(getBigDecimalValue(getValue(attributes, 1828)))
+                .limitRegionalAmt(getBigDecimalValue(getValue(attributes, 1829)))
+                .m01Amt(getBigDecimalValue(getValue(attributes, 3275)))
+                .m02Amt(getBigDecimalValue(getValue(attributes, 3277)))
+                .m03Amt(getBigDecimalValue(getValue(attributes, 3279)))
+                .m04Amt(getBigDecimalValue(getValue(attributes, 3281)))
+                .m05Amt(getBigDecimalValue(getValue(attributes, 3283)))
+                .m06Amt(getBigDecimalValue(getValue(attributes, 3285)))
+                .m07Amt(getBigDecimalValue(getValue(attributes, 3287)))
+                .m08Amt(getBigDecimalValue(getValue(attributes, 3289)))
+                .m09Amt(getBigDecimalValue(getValue(attributes, 3291)))
+                .m10Amt(getBigDecimalValue(getValue(attributes, 3293)))
+                .m11Amt(getBigDecimalValue(getValue(attributes, 3295)))
+                .m12Amt(getBigDecimalValue(getValue(attributes, 3297)))
+                .build();
+    }
+
+    private BigDecimal getBigDecimalValue(String data) {
+        return data != null ? new BigDecimal(data) : null;
+    }
+
+    private Long getLongValue(String data) {
+        return data != null ? Long.valueOf(data) : null;
+    }
+
+    public UpsertInstanceRequestDto toUpsertDto(CashPlanLimit cpl) {
+        UpsertInstanceRequestDto dto = new UpsertInstanceRequestDto(
+                new Instance(
+                        cpl.getId(),
+                        CASH_PLAN_LIMIT_TEMPLATE_ID,
+                        cpl.getVersion(),
+                        new Status(STATUS_ACTUAL_ID),
+                        List.of(
+                                new LongAttribute(3303, cpl.getYear()),
+                                new BooleanAttribute(1607, true),
+                                new BooleanAttribute(1608, true),
+                                new DoubleAttribute(1609, cpl.getLimitTotalAmt()),
+                                new DoubleAttribute(1828, cpl.getLimitFederalAmt()),
+                                new DoubleAttribute(1829, cpl.getLimitRegionalAmt()),
+                                new LinkedAttribute(1733, cpl.getKadmrCode()),
+                                new LinkedAttribute(1734, cpl.getKfsrCode()),
+                                new LinkedAttribute(1735, cpl.getKcsrCode()),
+                                new LinkedAttribute(1736, cpl.getKvrCode()),
+                                new LinkedAttribute(1737, cpl.getKesrCode()),
+                                new LinkedAttribute(1739, cpl.getKdeCode()),
+                                new LinkedAttribute(1740, cpl.getKdrCode()),
+                                new LinkedAttribute(1751, cpl.getPurposeCode()),
+                                new LinkedAttribute(3448, cpl.getKdfCode()),
+                                new DoubleAttribute(3275, cpl.getM01Amt()),
+                                new DoubleAttribute(3277, cpl.getM02Amt()),
+                                new DoubleAttribute(3279, cpl.getM03Amt()),
+                                new DoubleAttribute(3281, cpl.getM04Amt()),
+                                new DoubleAttribute(3283, cpl.getM05Amt()),
+                                new DoubleAttribute(3285, cpl.getM06Amt()),
+                                new DoubleAttribute(3287, cpl.getM07Amt()),
+                                new DoubleAttribute(3289, cpl.getM08Amt()),
+                                new DoubleAttribute(3291, cpl.getM09Amt()),
+                                new DoubleAttribute(3293, cpl.getM10Amt()),
+                                new DoubleAttribute(3295, cpl.getM11Amt()),
+                                new DoubleAttribute(3297, cpl.getM12Amt())
+                        )
+                ));
+        return dto;
+    }
+
+    private Long getCodeId(Map<CodeType, Map<Long, String>> allCodes, CodeType type, String code) {
+        return allCodes.get(type).entrySet().stream()
+                .filter(entry -> entry.getValue().equals(code))
+                .findFirst()
+                .map(Map.Entry::getKey)
+                .orElseThrow(() -> new RuntimeException("There is no code %s in %s dictionary".formatted(code, type.name())));
+    }
+
+    private String getValue(List<GetAttributesListResponseDto.Attribute> attributes, long attributeId) {
+        var attribute = attributes.stream()
+                .filter(a -> a.id() == attributeId)
+                .findFirst()
+                .orElse(null);
+        return attribute != null && attribute.value() != null ? attribute.value().get(0).data() : null;
+    }
+
+    private PlDirectionLine getPlDirectionLine(Line line) {
+        if (line.plDirectionLineWrapper() != null &&
+                line.plDirectionLineWrapper().plDirectionLine() != null) {
+            return line.plDirectionLineWrapper().plDirectionLine();
+        }
+        return null;
+    }
+
+    private BigDecimal getTotalLimit(PlDirectionLine line) {
+        return sumOf(line.limitAmt1(), line.limitAmt2(), line.limitAmt3());
+    }
+
+    private BigDecimal getTotalFederal(PlDirectionLine line) {
+        return sumOf(line.limitFederalAmt1(), line.limitFederalAmt2(), line.limitFederalAmt3());
+    }
+
+    private BigDecimal getTotalRegional(PlDirectionLine line) {
+        return sumOf(line.limitRegionalAmt1(), line.limitRegionalAmt2(), line.limitRegionalAmt3());
+    }
+
+    private BigDecimal sumOf(BigDecimal... items) {
+        if (items == null) {
+            return BigDecimal.ZERO;
+        }
+        return Stream.of(items)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+}

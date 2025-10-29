@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: xml-parser-service
+logging:
+  level:
+    su.petrosoft.apk_ack_integration: DEBUG
