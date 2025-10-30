@@ -1,6 +1,24 @@
+server:
+  port: ${SERVER_PORT}
+
 spring:
   application:
-    name: xml-parser-service
+    name: ${APPLICATION_NAME}
+
+integration:
+  apk:
+    base-url: ${APK_URL}
+    username: ${APK_USERNAME}
+    password: ${APK_PASSWORD}
+  ack:
+    base-url: ${ACK_URL}
+    username: ${ACK_USERNAME}
+    password: ${ACK_PASSWORD}
+    creating:
+      path: ${ACK_CREATE_PATH}
+    updating:
+      path: ${ACK_UPSERT_PATH}
+
 logging:
   level:
     su.petrosoft.apk_ack_integration: DEBUG

@@ -4,27 +4,29 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.web.client.RestClient;
-import su.petrosoft.apk_ack_integration.client.EsbRestClient;
-import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
+import su.petrosoft.apk_ack_integration.client.AckRestClient;
+import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
 
 @Configuration
 public class RestClientConfig {
 
     @Bean
-    public EsbRestClient esbRestClient() {
-        return new EsbRestClient(
+    public AckRestClient ackRestClient(IntegrationProperties props) {
+        return new AckRestClient(props,
                 RestClient.builder()
-                        .baseUrl("http://192.168.0.177:9094")
+                        .baseUrl(props.ack().baseUrl())
                         .build()
         );
     }
 
     @Bean
-    public PlicanteRestClient plicanteRestClient() {
-        return new PlicanteRestClient(
+    public ApkPlicanteRestClient apkPlicanteRestClient(IntegrationProperties props) {
+        return new ApkPlicanteRestClient(props,
                 RestClient.builder()
-                        .baseUrl("http://plicante-apk-test-vue.plicante.ru/")
-                        .requestInterceptor(new BasicAuthenticationInterceptor("operator", "123"))
+                        .baseUrl(props.apk().baseUrl())
+                        .requestInterceptor(new BasicAuthenticationInterceptor(
+                                props.apk().username(),
+                                props.apk().password()))
                         .build()
         );
     }

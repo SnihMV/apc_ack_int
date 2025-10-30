@@ -6,6 +6,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClient;
+import su.petrosoft.apk_ack_integration.config.IntegrationProperties;
 import su.petrosoft.apk_ack_integration.model.dto.request.ChangeInstanceStatusRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.UpsertInstanceRequestDto;
@@ -16,7 +17,8 @@ import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
-public class PlicanteRestClient {
+public class ApkPlicanteRestClient {
+    private final IntegrationProperties props;
     private final RestClient restClient;
 
     public Instance createInstance(UpsertInstanceRequestDto dto) {

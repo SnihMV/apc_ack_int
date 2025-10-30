@@ -1,0 +1,150 @@
+stages:
+  - build
+  - package
+  - docker
+  - deploy
+
+default:
+  tags:
+    - dev-runner
+  cache:
+    paths:
+      - .m2/repository/
+    key: ${CI_COMMIT_REF_SLUG}
+    policy: pull-push
+
+variables:
+  MAVEN_ARGS: |
+    --batch-mode 
+    --no-transfer-progress 
+    -Dmaven.plugin.validation=brief 
+    -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
+
+.build-template:
+  image: maven:3.9.6
+  stage: build
+  script:
+    - mvn $MAVEN_ARGS clean compile
+  artifacts:
+    paths:
+      - target/classes/
+    expire_in: 1 hour
+
+build:dev:
+  extends: .build-template
+  environment:
+    name: dev
+  only:
+    - develop
+    - merge_requests
+
+build:prod:
+  extends: .build-template
+  tags:
+    - prod-runner
+  environment:
+    name: prod
+  only:
+    - main
+
+.package-template:
+  image: maven:3.9.6
+  stage: package
+  script:
+    - mvn $MAVEN_ARGS -DskipTests package
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - target/*.jar
+
+package:dev:
+  extends: .package-template
+  environment:
+    name: dev
+  dependencies:
+    - build:dev
+  only:
+    - develop
+
+package:prod:
+  extends: .package-template
+  tags:
+    - prod-runner
+  environment:
+    name: prod
+  dependencies:
+    - build:prod
+  only:
+    - main
+
+.docker-template:
+  image: docker:stable
+  stage: docker
+  variables:
+    DOCKER_TLS_CERTDIR: ''
+    DOCKER_HOST: tcp://${SERVER_IP}:2375
+    DOCKER_DRIVER: overlay2
+  script:
+    - docker build --tag ${CI_PROJECT_NAME}:${CI_COMMIT_SHA} .
+
+docker:dev:
+  extends: .docker-template
+  environment:
+    name: dev
+  dependencies:
+    - package:dev
+  only:
+    - develop
+
+docker:prod:
+  extends: .docker-template
+  tags:
+    - prod-runner
+  environment:
+    name: prod
+  dependencies:
+    - package:prod
+  only:
+    - main
+
+.deploy-template:
+  stage: deploy
+  image: docker:stable
+  variables:
+    DOCKER_HOST: tcp://${SERVER_IP}:2375
+  before_script:
+    - docker network create plicante-network || true
+    - docker stop ${CI_PROJECT_NAME} || true
+    - docker rm -v -f ${CI_PROJECT_NAME} || true
+  script:
+    - docker run -d
+      --restart=always
+      --name ${CI_PROJECT_NAME}
+      --env-file ${APP_ENV}
+      --publish 8080:8080
+      --network plicante-network
+      ${CI_PROJECT_NAME}:${CI_COMMIT_SHA}
+  after_script:
+    - docker system prune -af --filter "label!=keep"
+  resource_group: ${CI_ENVIRONMENT_SLUG}
+
+deploy:dev:
+  extends: .deploy-template
+  environment:
+    name: dev
+  needs:
+    - "docker:dev"
+  only:
+    - develop
+
+deploy:prod:
+  extends: .deploy-template
+  tags:
+    - prod-runner
+  environment:
+    name: prod
+  needs:
+    - "docker:prod"
+  only:
+    - main
+  when: manual

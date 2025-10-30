@@ -3,9 +3,8 @@ package su.petrosoft.apk_ack_integration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.filter.CharacterEncodingFilter;
-import su.petrosoft.apk_ack_integration.client.EsbRestClient;
-import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
+import su.petrosoft.apk_ack_integration.client.AckRestClient;
+import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.CodeType;
@@ -13,7 +12,7 @@ import su.petrosoft.apk_ack_integration.model.dto.request.ChangeInstanceStatusRe
 import su.petrosoft.apk_ack_integration.model.dto.request.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.UpsertInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.Instance;
-import su.petrosoft.apk_ack_integration.model.dto.response.EsbGetMessageResponseDto;
+import su.petrosoft.apk_ack_integration.model.dto.response.AckGetUpsertMessageResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.GetAttributesListResponseDto;
 import su.petrosoft.apk_ack_integration.model.xml.CreateCashPlanLimitsXml;
 import su.petrosoft.apk_ack_integration.model.xml.UpsertCashPlanLimitXml;
@@ -31,14 +30,13 @@ import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.STATUS_ACT
 @RequiredArgsConstructor
 public class XmlDataProcessor {
 
-    private final EsbRestClient esbClient;
-    private final PlicanteRestClient plicanteClient;
+    private final AckRestClient ackClient;
+    private final ApkPlicanteRestClient apkClient;
     private final CashPlanLimitMapper mapper;
     private final XmlExtractorService xmlExtractor;
-    private final CharacterEncodingFilter characterEncodingFilter;
 
     public void doUpsert() {
-        EsbGetMessageResponseDto message = esbClient.getMessage("api/esb/getMessage");
+        AckGetUpsertMessageResponseDto message = ackClient.getUpsertMessage();
         UpsertCashPlanLimitXml upsertingXml = xmlExtractor.extractXml(message, UpsertCashPlanLimitXml.class);
         if (upsertingXml == null) {
             return;
@@ -47,7 +45,7 @@ public class XmlDataProcessor {
 
         CashPlanLimit cashPlanLimitToUpsert = mapper.toEntity(upsertingXml, getAllCodes());
 
-        List<GetAttributesListResponseDto> existedCashPlanLimitDtoList = plicanteClient.getTableAttributesList(
+        List<GetAttributesListResponseDto> existedCashPlanLimitDtoList = apkClient.getTableAttributesList(
                 new GetAttributesListRequestDto(CASH_PLAN_LIMIT_TEMPLATE_ID, STATUS_ACTUAL_ID));
         log.debug("Existed Cash Plan Limits: {}", existedCashPlanLimitDtoList.size());
 
@@ -60,23 +58,23 @@ public class XmlDataProcessor {
                             cashPlanLimitToUpsert.setId(cpl.getId());
                             cashPlanLimitToUpsert.setVersion(cpl.getVersion());
                             UpsertInstanceRequestDto upsertDto = mapper.toUpsertDto(cashPlanLimitToUpsert);
-                            Instance updatedInstance = plicanteClient.updateInstance(upsertDto);
+                            Instance updatedInstance = apkClient.updateInstance(upsertDto);
                             log.debug("Instance [{}] updated", updatedInstance.id());
                         },
                         () -> {
                             log.debug("Not found Cash Plan Limit for update. Will be create new");
                             UpsertInstanceRequestDto upsertDto = mapper.toUpsertDto(cashPlanLimitToUpsert);
-                            Instance draft = plicanteClient.updateInstance(upsertDto);
+                            Instance draft = apkClient.updateInstance(upsertDto);
                             log.debug("Instance [{}] created. Status DRAFT", draft.id());
                             ChangeInstanceStatusRequestDto changeStatusDto = new ChangeInstanceStatusRequestDto(
                                     draft.id(), draft.status().id(), STATUS_ACTUAL_ID);
-                            plicanteClient.changeStatus(changeStatusDto);
+                            apkClient.changeStatus(changeStatusDto);
                             log.debug("Instance [{}] status changed to ACTUAL", draft.id());
                         });
     }
 
     public void doCreate() {
-        EsbGetMessageResponseDto message = esbClient.getMessage("api/esb/getMessageKP");
+        AckGetUpsertMessageResponseDto message = ackClient.getUpsertMessage();
         CreateCashPlanLimitsXml creatingXml = xmlExtractor.extractXml(message, CreateCashPlanLimitsXml.class);
     }
 
@@ -91,7 +89,7 @@ public class XmlDataProcessor {
     }
 
     private Map<Long, String> getCodeTypeCodes(CodeType codeType) {
-        List<GetAttributesListResponseDto> list = plicanteClient.getTableAttributesList(
+        List<GetAttributesListResponseDto> list = apkClient.getTableAttributesList(
                 new GetAttributesListRequestDto(codeType.getTemplateId(), null));
         return list.stream()
                 .filter(dto -> dto.shortForm() != null)
