@@ -1,24 +1,26 @@
 package su.petrosoft.apk_ack_integration.mapper;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.CodeType;
+import su.petrosoft.apk_ack_integration.model.dto.request.UpsertInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.BooleanAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.DoubleAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.Instance;
-import su.petrosoft.apk_ack_integration.model.dto.request.UpsertInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.LongAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.Status;
 import su.petrosoft.apk_ack_integration.model.dto.response.GetAttributesListResponseDto;
-import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
+import su.petrosoft.apk_ack_integration.model.excel.CreateCashPlanLimitExcel;
 import su.petrosoft.apk_ack_integration.model.xml.CreateCashPlanLimitsXml.Line;
 import su.petrosoft.apk_ack_integration.model.xml.PlDirectionLine;
 import su.petrosoft.apk_ack_integration.model.xml.UpsertCashPlanLimitXml;
+import su.petrosoft.apk_ack_integration.service.ApkPlicanteService;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -39,10 +41,9 @@ import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.STATUS_ACT
 @Component
 @RequiredArgsConstructor
 public class CashPlanLimitMapper {
+    private final ApkPlicanteService plicanteService;
 
-    private final ObjectMapper objectMapper;
-
-    public CashPlanLimit toEntity(Line line) {
+    public CashPlanLimit toCpl(Line line) {
 
         PlDirectionLine pl = getPlDirectionLine(line);
 
@@ -75,7 +76,7 @@ public class CashPlanLimitMapper {
                 .build();
     }
 
-    public CashPlanLimit toEntity(UpsertCashPlanLimitXml upsertPojo, Map<CodeType, Map<Long, String>> allCodes) {
+    public CashPlanLimit toCpl(UpsertCashPlanLimitXml upsertPojo, Map<CodeType, Map<Long, String>> allCodes) {
 
         PlDirectionLine pl = upsertPojo.plDirectionLineWrapper().plDirectionLine();
 
@@ -108,7 +109,7 @@ public class CashPlanLimitMapper {
                 .build();
     }
 
-    public CashPlanLimit toEntity(GetAttributesListResponseDto dto) {
+    public CashPlanLimit toCpl(GetAttributesListResponseDto dto) {
 
         List<GetAttributesListResponseDto.Attribute> attributes = dto.attributes();
 
@@ -234,5 +235,36 @@ public class CashPlanLimitMapper {
         return Stream.of(items)
                 .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public CashPlanLimit toCpl(CreateCashPlanLimitExcel cplExcel, Map<CodeType, Map<Long, String>> allCodes) {
+
+        return CashPlanLimit.builder()
+                .year(Long.valueOf(LocalDateTime.now().getYear()))
+                .kfsrCode(getCodeId(allCodes, KFSR, cplExcel.section() + cplExcel.subsection()))
+                .kadmrCode(getCodeId(allCodes, KADMR, cplExcel.kvsr()))
+                .kcsrCode(getCodeId(allCodes, KCSR, cplExcel.kcsr()))
+                .kvrCode(getCodeId(allCodes, KVR, cplExcel.kvr()))
+                .kesrCode(getCodeId(allCodes, KESR, cplExcel.kosgu()))
+                .kdeCode(getCodeId(allCodes, KDE, cplExcel.additionalEk()))
+                .kdrCode(getCodeId(allCodes, KDR, cplExcel.additionalKr()))
+                .purposeCode(getCodeId(allCodes, PURPOSEFULGRANT, cplExcel.purposeCode()))
+                .kdfCode(getCodeId(allCodes, KDF, cplExcel.additionalFk()))
+                .limitTotalAmt(BigDecimal.valueOf(cplExcel.assignTotal()))
+                .limitFederalAmt(BigDecimal.valueOf(cplExcel.assignFederal()))
+                .limitRegionalAmt(BigDecimal.valueOf(cplExcel.assignRegional()))
+                .m01Amt(BigDecimal.valueOf(cplExcel.m01Amt()))
+                .m02Amt(BigDecimal.valueOf(cplExcel.m02Amt()))
+                .m03Amt(BigDecimal.valueOf(cplExcel.m03Amt()))
+                .m04Amt(BigDecimal.valueOf(cplExcel.m04Amt()))
+                .m05Amt(BigDecimal.valueOf(cplExcel.m05Amt()))
+                .m06Amt(BigDecimal.valueOf(cplExcel.m06Amt()))
+                .m07Amt(BigDecimal.valueOf(cplExcel.m07Amt()))
+                .m08Amt(BigDecimal.valueOf(cplExcel.m08Amt()))
+                .m09Amt(BigDecimal.valueOf(cplExcel.m09Amt()))
+                .m10Amt(BigDecimal.valueOf(cplExcel.m10Amt()))
+                .m11Amt(BigDecimal.valueOf(cplExcel.m11Amt()))
+                .m12Amt(BigDecimal.valueOf(cplExcel.m12Amt()))
+                .build();
     }
 }

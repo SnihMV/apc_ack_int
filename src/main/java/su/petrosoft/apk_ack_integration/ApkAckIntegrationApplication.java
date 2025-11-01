@@ -13,8 +13,8 @@ public class ApkAckIntegrationApplication {
 
     public static void main(String[] args) {
         ConfigurableApplicationContext ctx = SpringApplication.run(ApkAckIntegrationApplication.class, args);
-        XmlDataProcessor processor = ctx.getBean(XmlDataProcessor.class);
-        processor.doUpsert();
+//        XmlDataProcessor processor = ctx.getBean(XmlDataProcessor.class);
+//        processor.doUpsert();
     }
 
 }

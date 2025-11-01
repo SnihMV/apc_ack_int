@@ -30,6 +30,7 @@ import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.STATUS_ACT
 @RequiredArgsConstructor
 public class XmlDataProcessor {
 
+    private final ApkPlicanteService apkService;
     private final AckRestClient ackClient;
     private final ApkPlicanteRestClient apkClient;
     private final CashPlanLimitMapper mapper;
@@ -43,14 +44,14 @@ public class XmlDataProcessor {
         }
         log.debug("Received request for Cash Plan Limit upsert: {}", upsertingXml);
 
-        CashPlanLimit cashPlanLimitToUpsert = mapper.toEntity(upsertingXml, getAllCodes());
+        CashPlanLimit cashPlanLimitToUpsert = mapper.toCpl(upsertingXml, apkService.getAllCodes());
 
         List<GetAttributesListResponseDto> existedCashPlanLimitDtoList = apkClient.getTableAttributesList(
                 new GetAttributesListRequestDto(CASH_PLAN_LIMIT_TEMPLATE_ID, STATUS_ACTUAL_ID));
         log.debug("Existed Cash Plan Limits: {}", existedCashPlanLimitDtoList.size());
 
         existedCashPlanLimitDtoList.stream()
-                .map(mapper::toEntity)
+                .map(mapper::toCpl)
                 .filter(cpl -> cpl.equals(cashPlanLimitToUpsert))
                 .findFirst()
                 .ifPresentOrElse(cpl -> {
@@ -78,24 +79,4 @@ public class XmlDataProcessor {
         CreateCashPlanLimitsXml creatingXml = xmlExtractor.extractXml(message, CreateCashPlanLimitsXml.class);
     }
 
-    private Map<CodeType, Map<Long, String>> getAllCodes() {
-        Map<CodeType, Map<Long, String>> codes = new EnumMap<>(CodeType.class);
-        for (CodeType codeType : CodeType.values()) {
-            codes.put(codeType, getCodeTypeCodes(codeType));
-            log.debug("{} code map", codeType.name());
-            log.debug(codes.get(codeType).toString());
-        }
-        return codes;
-    }
-
-    private Map<Long, String> getCodeTypeCodes(CodeType codeType) {
-        List<GetAttributesListResponseDto> list = apkClient.getTableAttributesList(
-                new GetAttributesListRequestDto(codeType.getTemplateId(), null));
-        return list.stream()
-                .filter(dto -> dto.shortForm() != null)
-                .collect(Collectors.toMap(
-                        GetAttributesListResponseDto::id,
-                        GetAttributesListResponseDto::shortForm
-                ));
-    }
 }
