@@ -7,20 +7,16 @@ import su.petrosoft.apk_ack_integration.client.AckRestClient;
 import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
-import su.petrosoft.apk_ack_integration.model.CodeType;
 import su.petrosoft.apk_ack_integration.model.dto.request.ChangeInstanceStatusRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.UpsertInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.Instance;
+import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.AckGetUpsertMessageResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.GetAttributesListResponseDto;
 import su.petrosoft.apk_ack_integration.model.xml.CreateCashPlanLimitsXml;
 import su.petrosoft.apk_ack_integration.model.xml.UpsertCashPlanLimitXml;
 
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CASH_PLAN_LIMIT_TEMPLATE_ID;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.STATUS_ACTUAL_ID;
@@ -30,6 +26,7 @@ import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.STATUS_ACT
 @RequiredArgsConstructor
 public class XmlDataProcessor {
 
+    private final ApkPlicanteService apkService;
     private final AckRestClient ackClient;
     private final ApkPlicanteRestClient apkClient;
     private final CashPlanLimitMapper mapper;
@@ -43,28 +40,28 @@ public class XmlDataProcessor {
         }
         log.debug("Received request for Cash Plan Limit upsert: {}", upsertingXml);
 
-        CashPlanLimit cashPlanLimitToUpsert = mapper.toEntity(upsertingXml, getAllCodes());
+        CashPlanLimit cashPlanLimitToUpsert = mapper.toCpl(upsertingXml, apkService.getAllCodes());
 
         List<GetAttributesListResponseDto> existedCashPlanLimitDtoList = apkClient.getTableAttributesList(
                 new GetAttributesListRequestDto(CASH_PLAN_LIMIT_TEMPLATE_ID, STATUS_ACTUAL_ID));
         log.debug("Existed Cash Plan Limits: {}", existedCashPlanLimitDtoList.size());
 
         existedCashPlanLimitDtoList.stream()
-                .map(mapper::toEntity)
+                .map(mapper::toCpl)
                 .filter(cpl -> cpl.equals(cashPlanLimitToUpsert))
                 .findFirst()
                 .ifPresentOrElse(cpl -> {
                             log.debug("Existed Cash Plan Limit with id {} will be updated", cpl.getId());
                             cashPlanLimitToUpsert.setId(cpl.getId());
                             cashPlanLimitToUpsert.setVersion(cpl.getVersion());
-                            UpsertInstanceRequestDto upsertDto = mapper.toUpsertDto(cashPlanLimitToUpsert);
-                            Instance updatedInstance = apkClient.updateInstance(upsertDto);
+                            UpsertInstanceRequestDto upsertDto = mapper.toUpdateDto(cashPlanLimitToUpsert);
+                            InstanceDto updatedInstance = apkClient.updateInstance(upsertDto);
                             log.debug("Instance [{}] updated", updatedInstance.id());
                         },
                         () -> {
                             log.debug("Not found Cash Plan Limit for update. Will be create new");
-                            UpsertInstanceRequestDto upsertDto = mapper.toUpsertDto(cashPlanLimitToUpsert);
-                            Instance draft = apkClient.updateInstance(upsertDto);
+                            UpsertInstanceRequestDto upsertDto = mapper.toUpdateDto(cashPlanLimitToUpsert);
+                            InstanceDto draft = apkClient.updateInstance(upsertDto);
                             log.debug("Instance [{}] created. Status DRAFT", draft.id());
                             ChangeInstanceStatusRequestDto changeStatusDto = new ChangeInstanceStatusRequestDto(
                                     draft.id(), draft.status().id(), STATUS_ACTUAL_ID);
@@ -78,24 +75,4 @@ public class XmlDataProcessor {
         CreateCashPlanLimitsXml creatingXml = xmlExtractor.extractXml(message, CreateCashPlanLimitsXml.class);
     }
 
-    private Map<CodeType, Map<Long, String>> getAllCodes() {
-        Map<CodeType, Map<Long, String>> codes = new EnumMap<>(CodeType.class);
-        for (CodeType codeType : CodeType.values()) {
-            codes.put(codeType, getCodeTypeCodes(codeType));
-            log.debug("{} code map", codeType.name());
-            log.debug(codes.get(codeType).toString());
-        }
-        return codes;
-    }
-
-    private Map<Long, String> getCodeTypeCodes(CodeType codeType) {
-        List<GetAttributesListResponseDto> list = apkClient.getTableAttributesList(
-                new GetAttributesListRequestDto(codeType.getTemplateId(), null));
-        return list.stream()
-                .filter(dto -> dto.shortForm() != null)
-                .collect(Collectors.toMap(
-                        GetAttributesListResponseDto::id,
-                        GetAttributesListResponseDto::shortForm
-                ));
-    }
 }
