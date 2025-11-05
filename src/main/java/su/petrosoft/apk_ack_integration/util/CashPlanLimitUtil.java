@@ -1,6 +1,6 @@
 package su.petrosoft.apk_ack_integration.util;
 
-import su.petrosoft.apk_ack_integration.model.CodeType;
+import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import su.petrosoft.apk_ack_integration.model.xml.PlDirectionLine;
 
 import java.math.BigDecimal;
