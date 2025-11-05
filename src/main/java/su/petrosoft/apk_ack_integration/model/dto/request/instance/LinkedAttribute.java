@@ -10,14 +10,15 @@ public record LinkedAttribute(
 ) implements Attribute {
 
     public LinkedAttribute(long id, Long data) {
-        this(id, null, "LINKED", List.of(new LinkedValue(data)));
+        this(id, null, "LINKED", List.of(new LinkedValue(data, null)));
     }
     public LinkedAttribute(String code, Long data) {
-        this(null, code, "LINKED", List.of(new LinkedValue(data)));
+        this(null, code, "LINKED", List.of(new LinkedValue(data, null)));
     }
 
     public record LinkedValue(
-            Long data
+            Long data,
+            String shortForm
     ) {
     }
 }

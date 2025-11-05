@@ -7,20 +7,16 @@ import su.petrosoft.apk_ack_integration.client.AckRestClient;
 import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
-import su.petrosoft.apk_ack_integration.model.CodeType;
 import su.petrosoft.apk_ack_integration.model.dto.request.ChangeInstanceStatusRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.UpsertInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.Instance;
+import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.AckGetUpsertMessageResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.GetAttributesListResponseDto;
 import su.petrosoft.apk_ack_integration.model.xml.CreateCashPlanLimitsXml;
 import su.petrosoft.apk_ack_integration.model.xml.UpsertCashPlanLimitXml;
 
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CASH_PLAN_LIMIT_TEMPLATE_ID;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.STATUS_ACTUAL_ID;
@@ -58,14 +54,14 @@ public class XmlDataProcessor {
                             log.debug("Existed Cash Plan Limit with id {} will be updated", cpl.getId());
                             cashPlanLimitToUpsert.setId(cpl.getId());
                             cashPlanLimitToUpsert.setVersion(cpl.getVersion());
-                            UpsertInstanceRequestDto upsertDto = mapper.toUpsertDto(cashPlanLimitToUpsert);
-                            Instance updatedInstance = apkClient.updateInstance(upsertDto);
+                            UpsertInstanceRequestDto upsertDto = mapper.toUpdateDto(cashPlanLimitToUpsert);
+                            InstanceDto updatedInstance = apkClient.updateInstance(upsertDto);
                             log.debug("Instance [{}] updated", updatedInstance.id());
                         },
                         () -> {
                             log.debug("Not found Cash Plan Limit for update. Will be create new");
-                            UpsertInstanceRequestDto upsertDto = mapper.toUpsertDto(cashPlanLimitToUpsert);
-                            Instance draft = apkClient.updateInstance(upsertDto);
+                            UpsertInstanceRequestDto upsertDto = mapper.toUpdateDto(cashPlanLimitToUpsert);
+                            InstanceDto draft = apkClient.updateInstance(upsertDto);
                             log.debug("Instance [{}] created. Status DRAFT", draft.id());
                             ChangeInstanceStatusRequestDto changeStatusDto = new ChangeInstanceStatusRequestDto(
                                     draft.id(), draft.status().id(), STATUS_ACTUAL_ID);

@@ -8,9 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClient;
 import su.petrosoft.apk_ack_integration.config.IntegrationProperties;
 import su.petrosoft.apk_ack_integration.model.dto.request.ChangeInstanceStatusRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.request.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.UpsertInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.Instance;
+import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.GetAttributesListResponseDto;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public class ApkPlicanteRestClient {
     private final IntegrationProperties props;
     private final RestClient restClient;
 
-    public Instance createInstance(UpsertInstanceRequestDto dto) {
+    public InstanceDto createInstance(CreateInstanceRequestDto dto) {
         log.debug("Attempt to create instance. {}", dto);
         try {
             return restClient
@@ -30,7 +31,7 @@ public class ApkPlicanteRestClient {
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(dto)
                     .retrieve()
-                    .body(Instance.class);
+                    .body(InstanceDto.class);
         } catch (Exception e) {
             log.error("Could not create instance [{}]. Error message: [{}]", dto.instance().id(), e.getMessage());
             throw new RuntimeException(e);
@@ -50,14 +51,14 @@ public class ApkPlicanteRestClient {
     public ResponseEntity<Void> changeStatus(ChangeInstanceStatusRequestDto dto) {
         return restClient
                 .post()
-                .uri("register-rest/operator/v2/status/change")
+                .uri("register-rest/operator/v2/status/change/group")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(dto)
                 .retrieve()
                 .toBodilessEntity();
     }
 
-    public Instance updateInstance(UpsertInstanceRequestDto dto) {
+    public InstanceDto updateInstance(UpsertInstanceRequestDto dto) {
         log.debug("Attempt to update instance [{}]", dto);
         try {
             return restClient
@@ -66,7 +67,7 @@ public class ApkPlicanteRestClient {
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(dto)
                     .retrieve()
-                    .body(Instance.class);
+                    .body(InstanceDto.class);
         } catch (Exception e) {
             log.error("Could not update instance [{}]. Error message: [{}]", dto.instance().id(), e.getMessage());
             throw new RuntimeException(e);

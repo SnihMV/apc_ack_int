@@ -38,8 +38,8 @@ public class ExcelParser {
             Map<CodeType, Map<Long, String>> allCodes = apkService.getAllCodes();
             for (int i = tableParams.firstRowIndex; i <= tableParams.lastRowIndex; i++) {
                 Row row = sheet.getRow(i);
-                CreateCashPlanLimitExcel cplExcel = mapRowToExcelPojo(row);
-                log.debug("Row mapped to pojo: {}", cplExcel);
+                CreateCashPlanLimitExcel cplExcel = mapRowToPojo(row);
+                log.debug("Excel row mapped to pojo: {}", cplExcel);
                 CashPlanLimit cpl = mapper.toCpl(cplExcel, allCodes);
                 log.debug("Pojo mapped to CashPlanLimit: {}", cpl);
                 limits.add(cpl);
@@ -49,7 +49,7 @@ public class ExcelParser {
         return limits;
     }
 
-    private CreateCashPlanLimitExcel mapRowToExcelPojo(Row row) {
+    private CreateCashPlanLimitExcel mapRowToPojo(Row row) {
         return CreateCashPlanLimitExcel.builder()
                 .section(row.getCell(0).getStringCellValue())
                 .subsection(row.getCell(1).getStringCellValue())
