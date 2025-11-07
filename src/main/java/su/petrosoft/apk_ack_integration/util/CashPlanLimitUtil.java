@@ -11,8 +11,6 @@ import java.util.stream.Stream;
 public class CashPlanLimitUtil {
 
     public static final long CASH_PLAN_LIMIT_TEMPLATE_ID = 9460;
-    public static final long STATUS_ACTUAL_ID = 9624;
-    public static final long STATUS_DRAFT_ID = 9588;
 
     public static BigDecimal getTotalLimit(PlDirectionLine line) {
         return sumOf(line.limitAmt1(), line.limitAmt2(), line.limitAmt3());
@@ -26,13 +24,13 @@ public class CashPlanLimitUtil {
         return sumOf(line.limitRegionalAmt1(), line.limitRegionalAmt2(), line.limitRegionalAmt3());
     }
 
-    public static Long getCodeId(Map<CodeType, Map<Long, String>> codes, CodeType type, String code) {
-        return codes.get(type).entrySet().stream()
+    public static Long getCodeId(Map<CodeType, Map<Long, String>> allCodes, CodeType type, String code) {
+        return allCodes.get(type).entrySet().stream()
                 .filter(entry -> entry.getValue().equals(code))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Code [%s] not found in existed [%s] collection"
-                        .formatted(code, type.getName())))
-                .getKey();
+                .map(Map.Entry::getKey)
+                .orElseThrow(() -> new RuntimeException(
+                        "There is no code %s in %s dictionary".formatted(code, type.name())));
     }
 
     private static BigDecimal sumOf(BigDecimal... items) {

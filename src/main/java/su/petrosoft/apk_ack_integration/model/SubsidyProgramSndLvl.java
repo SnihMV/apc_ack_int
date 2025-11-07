@@ -1,18 +1,17 @@
 package su.petrosoft.apk_ack_integration.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
-import java.util.Objects;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @EqualsAndHashCode(callSuper = true)
 public class SubsidyProgramSndLvl extends SubsidyProgramFstLvl {
-    private String kcsr;
+    protected String kcsr;
+
+    public SubsidyProgramSndLvl(Long parentId, String code, String kcsr, String title) {
+        this(2, parentId, code, kcsr, title);
+    }
+
+    public SubsidyProgramSndLvl(int level, Long parentId, String code, String kcsr, String title) {
+        super(level, parentId, code, title);
+        this.kcsr = kcsr;
+    }
 }

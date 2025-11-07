@@ -3,7 +3,6 @@ package su.petrosoft.apk_ack_integration.mapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
-import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import su.petrosoft.apk_ack_integration.model.dto.request.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.UpsertInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.Attribute;
@@ -11,8 +10,8 @@ import su.petrosoft.apk_ack_integration.model.dto.request.instance.DoubleAttribu
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.LongAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.Status;
 import su.petrosoft.apk_ack_integration.model.dto.response.GetAttributesListResponseDto;
+import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import su.petrosoft.apk_ack_integration.model.excel.CreateCashPlanLimitExcel;
 import su.petrosoft.apk_ack_integration.model.xml.CreateCashPlanLimitsXml.Line;
 import su.petrosoft.apk_ack_integration.model.xml.PlDirectionLine;
@@ -36,7 +35,10 @@ import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KFSR;
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KVR;
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.PURPOSEFULGRANT;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CASH_PLAN_LIMIT_TEMPLATE_ID;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.STATUS_ACTUAL_ID;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getCodeId;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalFederal;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalLimit;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalRegional;
 
 @Component
 @RequiredArgsConstructor
@@ -193,7 +195,7 @@ public class CashPlanLimitMapper {
                         cpl.getId(),
                         CASH_PLAN_LIMIT_TEMPLATE_ID,
                         cpl.getVersion(),
-                        new Status(STATUS_ACTUAL_ID),
+                        null,
                         getAttributes(cpl)
                 ));
         return dto;
@@ -236,13 +238,6 @@ public class CashPlanLimitMapper {
     private Long getLongValue(String data) {
         return data != null ? Long.valueOf(data) : null;
     }
-    private Long getCodeId(Map<CodeType, Map<Long, String>> allCodes, CodeType type, String code) {
-        return allCodes.get(type).entrySet().stream()
-                .filter(entry -> entry.getValue().equals(code))
-                .findFirst()
-                .map(Map.Entry::getKey)
-                .orElseThrow(() -> new RuntimeException("There is no code %s in %s dictionary".formatted(code, type.name())));
-    }
 
     private String getValue(List<GetAttributesListResponseDto.Attribute> attributes, long attributeId) {
         var attribute = attributes.stream()
@@ -258,26 +253,5 @@ public class CashPlanLimitMapper {
             return line.plDirectionLineWrapper().plDirectionLine();
         }
         return null;
-    }
-
-    private BigDecimal getTotalLimit(PlDirectionLine line) {
-        return sumOf(line.limitAmt1(), line.limitAmt2(), line.limitAmt3());
-    }
-
-    private BigDecimal getTotalFederal(PlDirectionLine line) {
-        return sumOf(line.limitFederalAmt1(), line.limitFederalAmt2(), line.limitFederalAmt3());
-    }
-
-    private BigDecimal getTotalRegional(PlDirectionLine line) {
-        return sumOf(line.limitRegionalAmt1(), line.limitRegionalAmt2(), line.limitRegionalAmt3());
-    }
-
-    private BigDecimal sumOf(BigDecimal... items) {
-        if (items == null) {
-            return BigDecimal.ZERO;
-        }
-        return Stream.of(items)
-                .filter(Objects::nonNull)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

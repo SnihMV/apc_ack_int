@@ -1,33 +1,17 @@
 package su.petrosoft.apk_ack_integration.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
 
-import java.util.Objects;
+@EqualsAndHashCode(callSuper = true)
+public class SubsidyProgramFstLvl extends AbstractSubsidyProgram {
+    protected String code;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class SubsidyProgramFstLvl {
-    private Long id;
-    private Long version;
-    private String shortForm;
-    private Long parentId;
-    private Long level;
-    private String code;
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        SubsidyProgramFstLvl that = (SubsidyProgramFstLvl) o;
-        return Objects.equals(level, that.level) && Objects.equals(code, that.code);
+    public SubsidyProgramFstLvl(String code, String title) {
+        this(1, null, code, title);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(level, code);
+    public SubsidyProgramFstLvl(int level, Long parentId, String code, String title) {
+        super(level, parentId, title);
+        this.code = code;
     }
 }

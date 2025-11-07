@@ -5,11 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
+import su.petrosoft.apk_ack_integration.mapper.SubsidyProgramMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
-import su.petrosoft.apk_ack_integration.model.enums.CodeType;
+import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.dto.request.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.GetAttributesListResponseDto;
+import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 
 import java.util.Collection;
 import java.util.EnumMap;
@@ -18,7 +20,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CASH_PLAN_LIMIT_TEMPLATE_ID;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.STATUS_ACTUAL_ID;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.TEMPLATE_ID;
 
 @Service
 @Slf4j
@@ -26,12 +28,22 @@ import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.STATUS_ACT
 public class ApkPlicanteService {
     private final ApkPlicanteRestClient apkRestClient;
     private final CashPlanLimitMapper cashPlanLimitMapper;
+    private final SubsidyProgramMapper spMapper;
 
     public List<CashPlanLimit> getAllCashPlanLimits() {
         List<GetAttributesListResponseDto> dtoList = apkRestClient.getTableAttributesList(
-                new GetAttributesListRequestDto(CASH_PLAN_LIMIT_TEMPLATE_ID, STATUS_ACTUAL_ID));
+                new GetAttributesListRequestDto(CASH_PLAN_LIMIT_TEMPLATE_ID, null));
         return dtoList.stream()
                 .map(cashPlanLimitMapper::toCpl)
+                .toList();
+    }
+
+    public List<SubsidyProgram> getAllSubsidyPrograms() {
+        List<GetAttributesListResponseDto> dtoList = apkRestClient.getTableAttributesList(
+                new GetAttributesListRequestDto(TEMPLATE_ID, null));
+        return dtoList.stream()
+                .map(spMapper::toSp)
+                .peek(j->log.debug(j.toString()))
                 .toList();
     }
 
