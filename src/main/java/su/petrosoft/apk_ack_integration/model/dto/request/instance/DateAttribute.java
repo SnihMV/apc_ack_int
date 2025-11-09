@@ -1,24 +1,24 @@
 package su.petrosoft.apk_ack_integration.model.dto.request.instance;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record DateAttribute(
-        Integer id,
+        Long id,
         String code,
         String type,
-        List<DateValue> value
+        List<Value> value
 ) implements Attribute {
 
-    public DateAttribute(int id, String value) {
-        this(id, null, "DATE", List.of(new DateValue(value)));
+    public DateAttribute(long id, LocalDateTime value) {
+        this(id, null, "DATE", List.of(new Value(value, null)));
     }
 
-    public DateAttribute(String code, String data) {
-        this(null, code, "DATE", List.of(new DateValue(data)));
+    public DateAttribute(String code, LocalDateTime data) {
+        this(null, code, "DATE", List.of(new Value(data, null)));
     }
 
-    public record DateValue(
-            String data
-    ) {
+    public LocalDateTime getData(){
+        return (LocalDateTime) Attribute.super.getData();
     }
 }

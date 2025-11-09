@@ -7,12 +7,12 @@ import su.petrosoft.apk_ack_integration.client.AckRestClient;
 import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
-import su.petrosoft.apk_ack_integration.model.dto.request.ChangeInstanceStatusRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.UpsertInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.AckGetUpsertMessageResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.GetAttributesListResponseDto;
+import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import su.petrosoft.apk_ack_integration.model.xml.CreateCashPlanLimitsXml;
 import su.petrosoft.apk_ack_integration.model.xml.UpsertCashPlanLimitXml;
 
@@ -39,7 +39,8 @@ public class XmlDataProcessor {
         }
         log.debug("Received request for Cash Plan Limit upsert: {}", upsertingXml);
 
-        CashPlanLimit cashPlanLimitToUpsert = mapper.toCpl(upsertingXml, apkService.getAllCodes());
+        CashPlanLimit cashPlanLimitToUpsert = mapper.toCpl(
+            upsertingXml, apkService.getCodesMap(CodeType.values()));
 
         List<GetAttributesListResponseDto> existedCashPlanLimitDtoList = apkClient.getTableAttributesList(
                 new GetAttributesListRequestDto(CASH_PLAN_LIMIT_TEMPLATE_ID, null));

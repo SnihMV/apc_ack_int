@@ -1,17 +1,17 @@
 package su.petrosoft.apk_ack_integration.util;
 
-import lombok.extern.slf4j.Slf4j;
-import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toSet;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toMap;
+import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
+import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 
 @Slf4j
 public class SubsidyProgramUtil {
+
     public static final long TEMPLATE_ID = 9492;
     public static final long LEVEL_ATTR = 3399;
     public static final long PARENT_ATTR = 3400;
@@ -27,34 +27,30 @@ public class SubsidyProgramUtil {
         }
         if (lvl == 1) {
             return sp.getCode() != null
-                    && sp.getKcsr() == null
-                    && sp.getDopKr() == null
-                    && sp.getParentId() == null;
+                   && sp.getKcsr() == null
+                   && sp.getDopKr() == null
+                   && sp.getParentId() == null;
         }
         if (lvl == 2) {
             return sp.getKcsr() != null &&
-                    sp.getDopKr() == null;
+                   sp.getDopKr() == null;
         }
         if (lvl == 3) {
             return sp.getKcsr() != null &&
-                    sp.getDopKr() != null;
+                   sp.getDopKr() != null;
         }
         return false;
     }
 
-    public static Map<Long, Map<SubsidyProgram, Long>> buildMapByLevel(List<SubsidyProgram> list) {
+    public static Map<Long, Set<SubsidyProgram>> buildMapByLevel(List<SubsidyProgram> list) {
         return list.stream()
-                .filter(SubsidyProgramUtil::validate)
-                .collect(groupingBy(SubsidyProgram::getLevel, toMap(
-                        Function.identity(),
-                        SubsidyProgram::getId,
-                        (p1, p2) -> p2
-                )));
-        log.debug("There are [{}] unique and valid SubsidyPrograms", count);
+            .filter(SubsidyProgramUtil::validate)
+            .collect(groupingBy(SubsidyProgram::getLevel, toSet()));
     }
-    public static long getCount(Map<Long, Map<SubsidyProgram, Long>> map){
-        return map.entrySet().stream()
-                .flatMap(e -> e.getValue().keySet().stream())
-                .count();
+
+    public static long getCount(Map<Long, Set<SubsidyProgram>> map) {
+        return map.values().stream()
+            .mapToLong(Set::size)
+            .sum();
     }
 }

@@ -35,7 +35,7 @@ public class ExcelRowParser {
             Sheet sheet = workbook.getSheetAt(0);
             TableBounds tableBounds = findTableBounds(sheet, "Раздел", "Итого");
 
-            Map<CodeType, Map<Long, String>> allCodes = apkService.getAllCodes();
+            Map<CodeType, Map<Long, String>> allCodes = apkService.getCodesMap();
 
             for (int i = tableBounds.firstRowIndex; i <= tableBounds.lastRowIndex; i++) {
                 CreateCashPlanLimitExcel cplExcel = mapCreateExcelRowToPojo(sheet.getRow(i));
@@ -170,7 +170,6 @@ public class ExcelRowParser {
 
     private int findLastRow(Sheet sheet, int from, String searchKey) {
         for (int i = from; i <= sheet.getLastRowNum(); i++) {
-            log.debug("Search in [{}] row", i);
             Cell cell = sheet.getRow(i).getCell(0);
             if (cell == null || cell.getStringCellValue().equalsIgnoreCase(searchKey)) {
                 log.debug("Table footer row found at [{}]", i);

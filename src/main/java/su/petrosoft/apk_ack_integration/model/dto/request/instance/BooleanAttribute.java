@@ -3,22 +3,21 @@ package su.petrosoft.apk_ack_integration.model.dto.request.instance;
 import java.util.List;
 
 public record BooleanAttribute(
-        Integer id,
+        Long id,
         String code,
         String type,
-        List<BooleanValue> value
+        List<Value> value
 ) implements Attribute {
 
-    public BooleanAttribute(int id, boolean data) {
-        this(id, null, "BOOLEAN", List.of(new BooleanValue(data)));
+    public BooleanAttribute(long id, boolean data) {
+        this(id, null, "BOOLEAN", List.of(new Value(data, null)));
     }
 
     public BooleanAttribute(String code, boolean data) {
-        this(null, code, "BOOLEAN", List.of(new BooleanValue(data)));
+        this(null, code, "BOOLEAN", List.of(new Value(data, null)));
     }
 
-    public record BooleanValue(
-            Boolean data
-    ) {
+    public Boolean getData() {
+        return (Boolean) Attribute.super.getData();
     }
 }

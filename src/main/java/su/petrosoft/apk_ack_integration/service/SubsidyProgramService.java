@@ -13,11 +13,12 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class SubsidyProgramService {
+
     private final SubsidyProgramProcessor processor;
 
 
     public void createNewProgramsFromExcel(MultipartFile file) {
-
+        processor.createNewSubsidyPrograms(file);
     }
 
 }

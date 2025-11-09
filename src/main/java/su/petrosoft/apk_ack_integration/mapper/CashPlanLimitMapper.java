@@ -1,5 +1,25 @@
 package su.petrosoft.apk_ack_integration.mapper;
 
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KADMR;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KCSR;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KDE;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KDF;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KDR;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KESR;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KFSR;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KVR;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.PURPOSEFULGRANT;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CASH_PLAN_LIMIT_TEMPLATE_ID;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalFederal;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalLimit;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalRegional;
+import static su.petrosoft.apk_ack_integration.util.DictionaryUtil.getCodeId;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
@@ -16,29 +36,6 @@ import su.petrosoft.apk_ack_integration.model.excel.CreateCashPlanLimitExcel;
 import su.petrosoft.apk_ack_integration.model.xml.CreateCashPlanLimitsXml.Line;
 import su.petrosoft.apk_ack_integration.model.xml.PlDirectionLine;
 import su.petrosoft.apk_ack_integration.model.xml.UpsertCashPlanLimitXml;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Stream;
-
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KADMR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KCSR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KDE;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KDF;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KDR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KESR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KFSR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KVR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.PURPOSEFULGRANT;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CASH_PLAN_LIMIT_TEMPLATE_ID;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getCodeId;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalFederal;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalLimit;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalRegional;
 
 @Component
 @RequiredArgsConstructor
@@ -149,7 +146,7 @@ public class CashPlanLimitMapper {
     public CashPlanLimit toCpl(CreateCashPlanLimitExcel cplExcel, Map<CodeType, Map<Long, String>> allCodes) {
 
         return CashPlanLimit.builder()
-                .year(Long.valueOf(LocalDateTime.now().getYear()))
+                .year((long) LocalDateTime.now().getYear())
                 .kfsrCode(getCodeId(allCodes, KFSR, cplExcel.section() + cplExcel.subsection()))
                 .kadmrCode(getCodeId(allCodes, KADMR, cplExcel.kvsr()))
                 .kcsrCode(getCodeId(allCodes, KCSR, cplExcel.kcsr()))

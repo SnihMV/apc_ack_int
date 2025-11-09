@@ -4,22 +4,28 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public record DoubleAttribute(
-        Integer id,
+        Long id,
         String code,
         String type,
-        List<DoubleValue> value
+        List<Value> value
 ) implements Attribute {
 
-    public DoubleAttribute(int id, BigDecimal data) {
-        this(id, null, "DOUBLE", List.of(new DoubleValue(data)));
+    public DoubleAttribute(long id, BigDecimal data) {
+        this(id, null, "DOUBLE", List.of(new Value(data, null)));
     }
 
     public DoubleAttribute(String code, BigDecimal data) {
-        this(null, code, "DOUBLE", List.of(new DoubleValue(data)));
+        this(null, code, "DOUBLE", List.of(new Value(data, null)));
     }
 
-    public record DoubleValue(
-            BigDecimal data
-    ) {
+    public BigDecimal getData() {
+        return (BigDecimal) Attribute.super.getData();
+    }
+
+    public BigDecimal getBigDecimalData(){
+        if (value == null || value.get(0) == null) {
+            return null;
+        }
+        return (BigDecimal) value.get(0).data();
     }
 }

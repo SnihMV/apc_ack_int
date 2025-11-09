@@ -6,19 +6,20 @@ public record LinkedAttribute(
         Long id,
         String code,
         String type,
-        List<LinkedValue> value
+        List<Value> value
 ) implements Attribute {
 
     public LinkedAttribute(long id, Long data) {
-        this(id, null, "LINKED", List.of(new LinkedValue(data, null)));
+        this(id, null, "LINKED", List.of(new Value(data, null)));
     }
     public LinkedAttribute(String code, Long data) {
-        this(null, code, "LINKED", List.of(new LinkedValue(data, null)));
+        this(null, code, "LINKED", List.of(new Value(data, null)));
     }
 
-    public record LinkedValue(
-            Long data,
-            String shortForm
-    ) {
+    public Long getData(){
+        Object data = Attribute.super.getData();
+        if (data instanceof Long l) return l;
+        if (data instanceof Integer i) return i.longValue();
+        return null;
     }
 }

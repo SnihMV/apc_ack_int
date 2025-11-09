@@ -35,6 +35,7 @@ public class ExcelExtractor {
                 log.debug("Excel row mapped to DTO: {}", dto);
             }
         } catch (IOException e) {
+            log.error("Can not read excel file. Error message: [{}]", e.getMessage());
             throw new RuntimeException(e);
         }
         return dtoList;
@@ -67,7 +68,6 @@ public class ExcelExtractor {
 
     private int findLastRow(Sheet sheet, int from, String searchKey) {
         for (int i = from; i <= sheet.getLastRowNum(); i++) {
-            log.debug("Search in [{}] row", i);
             Cell cell = sheet.getRow(i).getCell(0);
             if (cell == null || cell.getStringCellValue().equalsIgnoreCase(searchKey)) {
                 log.debug("Table footer row found at [{}]", i);
