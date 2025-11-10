@@ -176,25 +176,21 @@ public class CashPlanLimitMapper {
 
     public CreateInstanceRequestDto toCreateDto(CashPlanLimit cpl) {
         CreateInstanceRequestDto dto = new CreateInstanceRequestDto(
-                new InstanceDto(
-                        null,
-                        CASH_PLAN_LIMIT_TEMPLATE_ID,
-                        null,
-                        null,
-                        getAttributes(cpl)
-                ));
+                InstanceDto.builder()
+                        .templateId(CASH_PLAN_LIMIT_TEMPLATE_ID)
+                        .attributes(getAttributes(cpl))
+                        .build());
         return dto;
     }
 
     public UpsertInstanceRequestDto toUpdateDto(CashPlanLimit cpl) {
         UpsertInstanceRequestDto dto = new UpsertInstanceRequestDto(
-                new InstanceDto(
-                        cpl.getId(),
-                        CASH_PLAN_LIMIT_TEMPLATE_ID,
-                        cpl.getVersion(),
-                        null,
-                        getAttributes(cpl)
-                ));
+                InstanceDto.builder()
+                        .id(cpl.getId())
+                        .templateId(CASH_PLAN_LIMIT_TEMPLATE_ID)
+                        .version(cpl.getVersion())
+                        .attributes(getAttributes(cpl))
+                        .build());
         return dto;
     }
 

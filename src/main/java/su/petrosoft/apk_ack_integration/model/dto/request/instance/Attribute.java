@@ -1,5 +1,7 @@
 package su.petrosoft.apk_ack_integration.model.dto.request.instance;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.util.List;
@@ -36,5 +38,4 @@ public sealed interface Attribute
     default Object getData() {
         return hasValue() ? value().get(0).data() : null;
     }
-
 }

@@ -8,6 +8,11 @@ import java.util.Map;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
+import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
+import su.petrosoft.apk_ack_integration.model.dto.request.instance.LinkedAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.request.instance.LongAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.request.instance.StringAttribute;
+import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 
 @Slf4j
 public class SubsidyProgramUtil {
@@ -40,6 +45,21 @@ public class SubsidyProgramUtil {
                    sp.getDopKr() != null;
         }
         return false;
+    }
+
+    public static InstanceDto subsidyProgramRequestDto() {
+        return InstanceDto.builder()
+                .templateId(TEMPLATE_ID)
+                .viewType(ViewType.DETAILED_FORM_VIEW)
+                .attributes(List.of(
+                        new StringAttribute(NAME_ATTR),
+                        new LongAttribute(CODE_ATTR),
+                        new LongAttribute(LEVEL_ATTR),
+                        new LinkedAttribute(PARENT_ATTR),
+                        new LinkedAttribute(KCSR_ATTR),
+                        new LinkedAttribute(DOPKR_ATTR)
+                ))
+                .build();
     }
 
     public static Map<Long, Set<SubsidyProgram>> buildMapByLevel(List<SubsidyProgram> list) {

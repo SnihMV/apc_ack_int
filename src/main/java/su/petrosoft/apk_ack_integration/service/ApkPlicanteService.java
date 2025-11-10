@@ -14,6 +14,7 @@ import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.GetAttributesListResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
@@ -21,7 +22,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CASH_PLAN_LIMIT_TEMPLATE_ID;
-import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.TEMPLATE_ID;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.subsidyProgramRequestDto;
 
 @Service
 @Slf4j
@@ -41,17 +42,18 @@ public class ApkPlicanteService {
     }
 
     public List<SubsidyProgram> getAllSubsidyPrograms() {
-        List<InstanceDto> dtoList = apkRestClient.getExistedInstances(
-            new GetAttributesListRequestDto(TEMPLATE_ID, null));
+        InstanceDto requestDto = subsidyProgramRequestDto();
+        log.debug("=== REQUEST DTO === {}", requestDto);
+        List<InstanceDto> dtoList = apkRestClient.getExistedInstances(requestDto);
         return dtoList.stream()
             .map(spMapper::toSp)
-            .peek(sp -> log.debug(sp.toString()))
             .toList();
     }
 
     public SubsidyProgram createProgram(SubsidyProgram sp) {
         CreateInstanceRequestDto dto = spMapper.toCreateDto(sp);
         InstanceDto instance = apkRestClient.createInstance(dto);
+        log.debug("Subsidy Program Instance after save: [{}]", instance);
         return spMapper.toSp(instance);
     }
 
@@ -63,7 +65,10 @@ public class ApkPlicanteService {
     }
 
     public Map<CodeType, Map<Long, String>> getCodesMap(CodeType... types) {
-        log.debug("Receiving all existed codes");
+        if (types == null || types.length == 0) {
+            types = CodeType.values();
+        }
+        log.debug("Receiving existed codes for types: {}", Arrays.stream(types).map(Enum::name).collect(Collectors.joining(",")));
         Map<CodeType, Map<Long, String>> codes = new EnumMap<>(CodeType.class);
         for (CodeType codeType : types) {
             codes.put(codeType, getCodesByType(codeType));
@@ -88,5 +93,4 @@ public class ApkPlicanteService {
                 GetAttributesListResponseDto::shortForm
             ));
     }
-
 }

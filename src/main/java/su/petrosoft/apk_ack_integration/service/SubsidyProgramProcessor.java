@@ -1,17 +1,5 @@
 package su.petrosoft.apk_ack_integration.service;
 
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KCSR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KDR;
-import static su.petrosoft.apk_ack_integration.util.DictionaryUtil.getCodeId;
-import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.buildMapByLevel;
-import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.getCount;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -19,6 +7,17 @@ import org.springframework.web.multipart.MultipartFile;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import su.petrosoft.apk_ack_integration.model.excel.SubsidyProgramExcelRowDto;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KCSR;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KDR;
+import static su.petrosoft.apk_ack_integration.util.DictionaryUtil.getCodeId;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.buildMapByLevel;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.getCount;
 
 @Slf4j
 @Component
@@ -32,6 +31,11 @@ public class SubsidyProgramProcessor {
         List<SubsidyProgram> list = apkService.getAllSubsidyPrograms();
         log.debug("Received [{}] SubsidyPrograms from DB in total", list.size());
 
+        try {
+            Thread.sleep(1000000000L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         Map<Long, Set<SubsidyProgram>> subsidyProgramMap = buildMapByLevel(list);
         log.debug("There are [{}] valid and unique SubsidyPrograms of all",
             getCount(subsidyProgramMap));
@@ -51,7 +55,7 @@ public class SubsidyProgramProcessor {
 
     private void processRow(
         SubsidyProgramExcelRowDto dto,
-        Map<Long, Set<SubsidyProgram>> map,
+        Map<Long, Set<SubsidyProgram>> subsidiesMap,
         Map<CodeType, Map<Long, String>> codesMap) {
 
         SubsidyProgram fstLevelSp = SubsidyProgram.builder()
@@ -61,8 +65,8 @@ public class SubsidyProgramProcessor {
             .build();
         log.debug("First level Subsidy Program from excel row: [{}]", fstLevelSp);
 
-        Long fstLvlSpId = obtainSubsidyProgramId(map, fstLevelSp);
-        log.debug("Subsidy Program Map: {}", getCount(map));
+        Long fstLvlSpId = obtainSubsidyProgramId(subsidiesMap, fstLevelSp);
+        log.debug("Subsidy Program Map: {}", getCount(subsidiesMap));
 
         SubsidyProgram scdLevelSp = SubsidyProgram.builder()
             .level(2L)
@@ -72,8 +76,8 @@ public class SubsidyProgramProcessor {
             .build();
         log.debug("Second level Subsidy Program from excel row: [{}]", scdLevelSp);
 
-        Long scdLvlSpId = obtainSubsidyProgramId(map, scdLevelSp);
-        log.debug("Subsidy Program Map: {}", getCount(map));
+        Long scdLvlSpId = obtainSubsidyProgramId(subsidiesMap, scdLevelSp);
+        log.debug("Subsidy Program Map: {}", getCount(subsidiesMap));
 
         SubsidyProgram trdLevelSp = SubsidyProgram.builder()
             .level(3L)
@@ -84,8 +88,8 @@ public class SubsidyProgramProcessor {
             .build();
         log.debug("Third level Subsidy Program from excel row: [{}]", trdLevelSp);
 
-        Long trdLvlSpId = obtainSubsidyProgramId(map, trdLevelSp);
-        log.debug("Subsidy Program Map: {}", getCount(map));
+        Long trdLvlSpId = obtainSubsidyProgramId(subsidiesMap, trdLevelSp);
+        log.debug("Subsidy Program Map: {}", getCount(subsidiesMap));
     }
 
     private Long obtainSubsidyProgramId(Map<Long, Set<SubsidyProgram>> map, SubsidyProgram sp) {
@@ -97,22 +101,18 @@ public class SubsidyProgramProcessor {
             .map(SubsidyProgram::getId)
             .orElseGet(()->{
                 log.debug("No such Subsidy Program within existed. Trying to save it as new");
-//                SubsidyProgram saved = apkService.createProgram(sp);
-                SubsidyProgram saved = new SubsidyProgram(new Random().nextLong(), 1L,
-                    sp.getParentId(), sp.getLevel(),
-                    sp.getCode(), sp.getKcsr(), sp.getDopKr(), sp.getTitle());
-                log.debug("Subsidy Program successfully saved with id: [{}]", saved.getId());
+                SubsidyProgram saved = apkService.createProgram(sp);
+//                SubsidyProgram saved = new SubsidyProgram(new Random().nextLong(), 1L,
+//                    sp.getParentId(), sp.getLevel(),
+//                    sp.getCode(), sp.getKcsr(), sp.getDopKr(), sp.getTitle());
+                log.debug("Subsidy Program successfully saved: [{}]", saved);
                 setByLevel.add(saved);
+                try {
+                    Thread.sleep(1000000000L);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
                 return saved.getId();
             });
-//
-//        return fstLevelSet.computeIfAbsent(sp, s -> {
-//            log.debug("No such Subsidy Program within existed. Trying to save it as new");
-////            Long id = apkService.createProgram(s).getId();
-//            Long id = new Random().nextLong();
-//            log.debug("Subsidy Program successfully saved with id: [{}]", id);
-//            return id;
-//        });
     }
-
 }
