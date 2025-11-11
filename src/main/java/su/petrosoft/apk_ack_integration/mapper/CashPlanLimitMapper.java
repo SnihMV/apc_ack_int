@@ -13,6 +13,7 @@ import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CASH_PLAN_
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalFederal;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalLimit;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalRegional;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.sumOf;
 import static su.petrosoft.apk_ack_integration.util.DictionaryUtil.getCodeId;
 
 import java.math.BigDecimal;
@@ -127,18 +128,34 @@ public class CashPlanLimitMapper {
                 .limitTotalAmt(getBigDecimalValue(getValue(attributes, 1609)))
                 .limitFederalAmt(getBigDecimalValue(getValue(attributes, 1828)))
                 .limitRegionalAmt(getBigDecimalValue(getValue(attributes, 1829)))
-                .m01Amt(getBigDecimalValue(getValue(attributes, 3275)))
-                .m02Amt(getBigDecimalValue(getValue(attributes, 3277)))
-                .m03Amt(getBigDecimalValue(getValue(attributes, 3279)))
-                .m04Amt(getBigDecimalValue(getValue(attributes, 3281)))
-                .m05Amt(getBigDecimalValue(getValue(attributes, 3283)))
-                .m06Amt(getBigDecimalValue(getValue(attributes, 3285)))
-                .m07Amt(getBigDecimalValue(getValue(attributes, 3287)))
-                .m08Amt(getBigDecimalValue(getValue(attributes, 3289)))
-                .m09Amt(getBigDecimalValue(getValue(attributes, 3291)))
-                .m10Amt(getBigDecimalValue(getValue(attributes, 3293)))
-                .m11Amt(getBigDecimalValue(getValue(attributes, 3295)))
-                .m12Amt(getBigDecimalValue(getValue(attributes, 3297)))
+                .m01Amt(getBigDecimalValue(getValue(attributes, 1612)))
+                .m02Amt(getBigDecimalValue(getValue(attributes, 1613)))
+                .m03Amt(getBigDecimalValue(getValue(attributes, 1614)))
+                .m04Amt(getBigDecimalValue(getValue(attributes, 1617)))
+                .m05Amt(getBigDecimalValue(getValue(attributes, 1618)))
+                .m06Amt(getBigDecimalValue(getValue(attributes, 1619)))
+                .m07Amt(getBigDecimalValue(getValue(attributes, 1622)))
+                .m08Amt(getBigDecimalValue(getValue(attributes, 1623)))
+                .m09Amt(getBigDecimalValue(getValue(attributes, 1624)))
+                .m10Amt(getBigDecimalValue(getValue(attributes, 1627)))
+                .m11Amt(getBigDecimalValue(getValue(attributes, 1628)))
+                .m12Amt(getBigDecimalValue(getValue(attributes, 1629)))
+                .r01Amt(getBigDecimalValue(getValue(attributes, 3276)))
+                .r02Amt(getBigDecimalValue(getValue(attributes, 3278)))
+                .r03Amt(getBigDecimalValue(getValue(attributes, 3280)))
+                .r04Amt(getBigDecimalValue(getValue(attributes, 3282)))
+                .r05Amt(getBigDecimalValue(getValue(attributes, 3284)))
+                .r06Amt(getBigDecimalValue(getValue(attributes, 3286)))
+                .r07Amt(getBigDecimalValue(getValue(attributes, 3288)))
+                .r08Amt(getBigDecimalValue(getValue(attributes, 3290)))
+                .r09Amt(getBigDecimalValue(getValue(attributes, 3292)))
+                .r10Amt(getBigDecimalValue(getValue(attributes, 3294)))
+                .r11Amt(getBigDecimalValue(getValue(attributes, 3296)))
+                .r12Amt(getBigDecimalValue(getValue(attributes, 3298)))
+                .rKv1Amt(getBigDecimalValue(getValue(attributes, 1616)))
+                .rKv2Amt(getBigDecimalValue(getValue(attributes, 1621)))
+                .rKv3Amt(getBigDecimalValue(getValue(attributes, 1626)))
+                .rKv4Amt(getBigDecimalValue(getValue(attributes, 1631)))
                 .build();
     }
 
@@ -171,6 +188,22 @@ public class CashPlanLimitMapper {
                 .m10Amt(BigDecimal.valueOf(cplExcel.m10Amt()))
                 .m11Amt(BigDecimal.valueOf(cplExcel.m11Amt()))
                 .m12Amt(BigDecimal.valueOf(cplExcel.m12Amt()))
+                .r01Amt(BigDecimal.valueOf(cplExcel.m01Amt()))
+                .r02Amt(BigDecimal.valueOf(cplExcel.m02Amt()))
+                .r03Amt(BigDecimal.valueOf(cplExcel.m03Amt()))
+                .r04Amt(BigDecimal.valueOf(cplExcel.m04Amt()))
+                .r05Amt(BigDecimal.valueOf(cplExcel.m05Amt()))
+                .r06Amt(BigDecimal.valueOf(cplExcel.m06Amt()))
+                .r07Amt(BigDecimal.valueOf(cplExcel.m07Amt()))
+                .r08Amt(BigDecimal.valueOf(cplExcel.m08Amt()))
+                .r09Amt(BigDecimal.valueOf(cplExcel.m09Amt()))
+                .r10Amt(BigDecimal.valueOf(cplExcel.m10Amt()))
+                .r11Amt(BigDecimal.valueOf(cplExcel.m11Amt()))
+                .r12Amt(BigDecimal.valueOf(cplExcel.m12Amt()))
+                .rKv1Amt(sumOf(BigDecimal.valueOf(cplExcel.m01Amt()), BigDecimal.valueOf(cplExcel.m02Amt()), BigDecimal.valueOf(cplExcel.m03Amt())))
+                .rKv2Amt(sumOf(BigDecimal.valueOf(cplExcel.m04Amt()), BigDecimal.valueOf(cplExcel.m05Amt()), BigDecimal.valueOf(cplExcel.m06Amt())))
+                .rKv3Amt(sumOf(BigDecimal.valueOf(cplExcel.m07Amt()), BigDecimal.valueOf(cplExcel.m08Amt()), BigDecimal.valueOf(cplExcel.m09Amt())))
+                .rKv4Amt(sumOf(BigDecimal.valueOf(cplExcel.m10Amt()), BigDecimal.valueOf(cplExcel.m11Amt()), BigDecimal.valueOf(cplExcel.m12Amt())))
                 .build();
     }
 
@@ -220,7 +253,23 @@ public class CashPlanLimitMapper {
                 new DoubleAttribute(1624, cpl.getM09Amt()),
                 new DoubleAttribute(1627, cpl.getM10Amt()),
                 new DoubleAttribute(1628, cpl.getM11Amt()),
-                new DoubleAttribute(1629, cpl.getM12Amt())
+                new DoubleAttribute(1629, cpl.getM12Amt()),
+                new DoubleAttribute(3276, cpl.getR01Amt()),
+                new DoubleAttribute(3278, cpl.getR02Amt()),
+                new DoubleAttribute(3280, cpl.getR03Amt()),
+                new DoubleAttribute(3282, cpl.getR04Amt()),
+                new DoubleAttribute(3284, cpl.getR05Amt()),
+                new DoubleAttribute(3286, cpl.getR06Amt()),
+                new DoubleAttribute(3288, cpl.getR07Amt()),
+                new DoubleAttribute(3290, cpl.getR08Amt()),
+                new DoubleAttribute(3292, cpl.getR09Amt()),
+                new DoubleAttribute(3294, cpl.getR10Amt()),
+                new DoubleAttribute(3296, cpl.getR11Amt()),
+                new DoubleAttribute(3298, cpl.getR12Amt()),
+                new DoubleAttribute(1616, cpl.getRKv1Amt()),
+                new DoubleAttribute(1621, cpl.getRKv2Amt()),
+                new DoubleAttribute(1626, cpl.getRKv3Amt()),
+                new DoubleAttribute(1631, cpl.getRKv4Amt())
         );
     }
 

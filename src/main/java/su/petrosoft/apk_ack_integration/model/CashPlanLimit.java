@@ -40,6 +40,23 @@ public class CashPlanLimit {
     private BigDecimal m10Amt;
     private BigDecimal m11Amt;
     private BigDecimal m12Amt;
+    private BigDecimal r01Amt;
+    private BigDecimal r02Amt;
+    private BigDecimal r03Amt;
+    private BigDecimal rKv1Amt;
+    private BigDecimal r04Amt;
+    private BigDecimal r05Amt;
+    private BigDecimal r06Amt;
+    private BigDecimal rKv2Amt;
+    private BigDecimal r07Amt;
+    private BigDecimal r08Amt;
+    private BigDecimal r09Amt;
+    private BigDecimal rKv3Amt;
+    private BigDecimal r10Amt;
+    private BigDecimal r11Amt;
+    private BigDecimal r12Amt;
+    private BigDecimal rKv4Amt;
+
 
     @Override
     public boolean equals(Object o) {
