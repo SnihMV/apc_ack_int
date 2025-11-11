@@ -21,7 +21,7 @@ public class CashPlanLimitUtil {
         return sumOf(line.limitRegionalAmt1(), line.limitRegionalAmt2(), line.limitRegionalAmt3());
     }
 
-    private static BigDecimal sumOf(BigDecimal... items) {
+    public static BigDecimal sumOf(BigDecimal... items) {
         return Stream.of(items)
                 .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
