@@ -15,11 +15,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CashPlanLimitExtractor {
 
-    private final ExcelParser excelParser;
+    private final ExcelRowParser excelRowParser;
 
     public HashSet<CashPlanLimit> getFromExcelUnique(MultipartFile file) {
         try {
-            List<CashPlanLimit> allLimits = excelParser.getCashPlanLimits(file);
+            List<CashPlanLimit> allLimits = excelRowParser.getCashPlanLimits(file);
             log.debug("Extracted {} CashPlanLimits from excel file", allLimits.size());
             return new HashSet<>(allLimits);
         } catch (IOException e) {

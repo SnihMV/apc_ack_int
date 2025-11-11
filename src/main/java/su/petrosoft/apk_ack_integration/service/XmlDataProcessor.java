@@ -7,19 +7,18 @@ import su.petrosoft.apk_ack_integration.client.AckRestClient;
 import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
-import su.petrosoft.apk_ack_integration.model.dto.request.ChangeInstanceStatusRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.UpsertInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.AckGetUpsertMessageResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.GetAttributesListResponseDto;
+import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import su.petrosoft.apk_ack_integration.model.xml.CreateCashPlanLimitsXml;
 import su.petrosoft.apk_ack_integration.model.xml.UpsertCashPlanLimitXml;
 
 import java.util.List;
 
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CASH_PLAN_LIMIT_TEMPLATE_ID;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.STATUS_ACTUAL_ID;
 
 @Service
 @Slf4j
@@ -40,10 +39,11 @@ public class XmlDataProcessor {
         }
         log.debug("Received request for Cash Plan Limit upsert: {}", upsertingXml);
 
-        CashPlanLimit cashPlanLimitToUpsert = mapper.toCpl(upsertingXml, apkService.getAllCodes());
+        CashPlanLimit cashPlanLimitToUpsert = mapper.toCpl(
+            upsertingXml, apkService.getCodesMap(CodeType.values()));
 
         List<GetAttributesListResponseDto> existedCashPlanLimitDtoList = apkClient.getTableAttributesList(
-                new GetAttributesListRequestDto(CASH_PLAN_LIMIT_TEMPLATE_ID, STATUS_ACTUAL_ID));
+                new GetAttributesListRequestDto(CASH_PLAN_LIMIT_TEMPLATE_ID, null));
         log.debug("Existed Cash Plan Limits: {}", existedCashPlanLimitDtoList.size());
 
         existedCashPlanLimitDtoList.stream()
@@ -61,12 +61,8 @@ public class XmlDataProcessor {
                         () -> {
                             log.debug("Not found Cash Plan Limit for update. Will be create new");
                             UpsertInstanceRequestDto upsertDto = mapper.toUpdateDto(cashPlanLimitToUpsert);
-                            InstanceDto draft = apkClient.updateInstance(upsertDto);
-                            log.debug("Instance [{}] created. Status DRAFT", draft.id());
-                            ChangeInstanceStatusRequestDto changeStatusDto = new ChangeInstanceStatusRequestDto(
-                                    draft.id(), draft.status().id(), STATUS_ACTUAL_ID);
-                            apkClient.changeStatus(changeStatusDto);
-                            log.debug("Instance [{}] status changed to ACTUAL", draft.id());
+                            InstanceDto createdInstance = apkClient.updateInstance(upsertDto);
+                            log.debug("Instance [{}] created", createdInstance.id());
                         });
     }
 

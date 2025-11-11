@@ -1,25 +1,27 @@
 package su.petrosoft.apk_ack_integration.model.dto.request.instance;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.math.BigDecimal;
 import java.util.List;
 
 public record DoubleAttribute(
-        Integer id,
+        Long id,
         String code,
         String type,
-        List<DoubleValue> value
+        List<Value> value,
+        String name,
+        String description,
+        String attributeType
 ) implements Attribute {
 
-    public DoubleAttribute(int id, BigDecimal data) {
-        this(id, null, "DOUBLE", List.of(new DoubleValue(data)));
+    public DoubleAttribute(long id, BigDecimal data) {
+        this(id, null, "DOUBLE", List.of(new Value(data, null)), null, null, null);
     }
 
-    public DoubleAttribute(String code, BigDecimal data) {
-        this(null, code, "DOUBLE", List.of(new DoubleValue(data)));
+    @JsonIgnore
+    public BigDecimal getData() {
+        return (BigDecimal) Attribute.super.getData();
     }
 
-    public record DoubleValue(
-            BigDecimal data
-    ) {
-    }
 }

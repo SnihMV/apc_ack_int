@@ -1,24 +1,33 @@
 package su.petrosoft.apk_ack_integration.model.dto.request.instance;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Builder;
+
 import java.util.List;
 
+@Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record StringAttribute(
-        Integer id,
+        Long id,
         String code,
         String type,
-        List<StringValue> value
+        List<Value> value,
+        String name,
+        String description,
+        String attributeType
 ) implements Attribute {
 
-    public StringAttribute(int id, String data) {
-        this(id, null, "STRING", List.of(new StringValue(data)));
+    public StringAttribute(long id) {
+        this(id, null);
     }
 
-    public StringAttribute(String code, String data) {
-        this(null, code, "STRING", List.of(new StringValue(data)));
+    public StringAttribute(long id, String data) {
+        this(id, null, "STRING", List.of(new Value(data, null)), null, null, null);
     }
 
-    public record StringValue(
-            String data
-    ) {
+    @JsonIgnore
+    public String getData() {
+        return (String) Attribute.super.getData();
     }
 }

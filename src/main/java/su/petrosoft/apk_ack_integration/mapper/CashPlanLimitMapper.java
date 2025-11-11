@@ -1,9 +1,28 @@
 package su.petrosoft.apk_ack_integration.mapper;
 
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KADMR;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KCSR;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KDE;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KDF;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KDR;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KESR;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KFSR;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KVR;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.PURPOSEFULGRANT;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CASH_PLAN_LIMIT_TEMPLATE_ID;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalFederal;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalLimit;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalRegional;
+import static su.petrosoft.apk_ack_integration.util.DictionaryUtil.getCodeId;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
-import su.petrosoft.apk_ack_integration.model.CodeType;
 import su.petrosoft.apk_ack_integration.model.dto.request.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.UpsertInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.Attribute;
@@ -11,32 +30,12 @@ import su.petrosoft.apk_ack_integration.model.dto.request.instance.DoubleAttribu
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.LongAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.Status;
 import su.petrosoft.apk_ack_integration.model.dto.response.GetAttributesListResponseDto;
+import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import su.petrosoft.apk_ack_integration.model.excel.CreateCashPlanLimitExcel;
 import su.petrosoft.apk_ack_integration.model.xml.CreateCashPlanLimitsXml.Line;
 import su.petrosoft.apk_ack_integration.model.xml.PlDirectionLine;
 import su.petrosoft.apk_ack_integration.model.xml.UpsertCashPlanLimitXml;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Stream;
-
-import static su.petrosoft.apk_ack_integration.model.CodeType.KADMR;
-import static su.petrosoft.apk_ack_integration.model.CodeType.KCSR;
-import static su.petrosoft.apk_ack_integration.model.CodeType.KDE;
-import static su.petrosoft.apk_ack_integration.model.CodeType.KDF;
-import static su.petrosoft.apk_ack_integration.model.CodeType.KDR;
-import static su.petrosoft.apk_ack_integration.model.CodeType.KESR;
-import static su.petrosoft.apk_ack_integration.model.CodeType.KFSR;
-import static su.petrosoft.apk_ack_integration.model.CodeType.KVR;
-import static su.petrosoft.apk_ack_integration.model.CodeType.PURPOSEFULGRANT;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CASH_PLAN_LIMIT_TEMPLATE_ID;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.STATUS_ACTUAL_ID;
 
 @Component
 @RequiredArgsConstructor
@@ -147,7 +146,7 @@ public class CashPlanLimitMapper {
     public CashPlanLimit toCpl(CreateCashPlanLimitExcel cplExcel, Map<CodeType, Map<Long, String>> allCodes) {
 
         return CashPlanLimit.builder()
-                .year(Long.valueOf(LocalDateTime.now().getYear()))
+                .year((long) LocalDateTime.now().getYear())
                 .kfsrCode(getCodeId(allCodes, KFSR, cplExcel.section() + cplExcel.subsection()))
                 .kadmrCode(getCodeId(allCodes, KADMR, cplExcel.kvsr()))
                 .kcsrCode(getCodeId(allCodes, KCSR, cplExcel.kcsr()))
@@ -177,25 +176,21 @@ public class CashPlanLimitMapper {
 
     public CreateInstanceRequestDto toCreateDto(CashPlanLimit cpl) {
         CreateInstanceRequestDto dto = new CreateInstanceRequestDto(
-                new InstanceDto(
-                        null,
-                        CASH_PLAN_LIMIT_TEMPLATE_ID,
-                        null,
-                        null,
-                        getAttributes(cpl)
-                ));
+                InstanceDto.builder()
+                        .templateId(CASH_PLAN_LIMIT_TEMPLATE_ID)
+                        .attributes(getAttributes(cpl))
+                        .build());
         return dto;
     }
 
     public UpsertInstanceRequestDto toUpdateDto(CashPlanLimit cpl) {
         UpsertInstanceRequestDto dto = new UpsertInstanceRequestDto(
-                new InstanceDto(
-                        cpl.getId(),
-                        CASH_PLAN_LIMIT_TEMPLATE_ID,
-                        cpl.getVersion(),
-                        new Status(STATUS_ACTUAL_ID),
-                        getAttributes(cpl)
-                ));
+                InstanceDto.builder()
+                        .id(cpl.getId())
+                        .templateId(CASH_PLAN_LIMIT_TEMPLATE_ID)
+                        .version(cpl.getVersion())
+                        .attributes(getAttributes(cpl))
+                        .build());
         return dto;
     }
 
@@ -236,13 +231,6 @@ public class CashPlanLimitMapper {
     private Long getLongValue(String data) {
         return data != null ? Long.valueOf(data) : null;
     }
-    private Long getCodeId(Map<CodeType, Map<Long, String>> allCodes, CodeType type, String code) {
-        return allCodes.get(type).entrySet().stream()
-                .filter(entry -> entry.getValue().equals(code))
-                .findFirst()
-                .map(Map.Entry::getKey)
-                .orElseThrow(() -> new RuntimeException("There is no code %s in %s dictionary".formatted(code, type.name())));
-    }
 
     private String getValue(List<GetAttributesListResponseDto.Attribute> attributes, long attributeId) {
         var attribute = attributes.stream()
@@ -258,26 +246,5 @@ public class CashPlanLimitMapper {
             return line.plDirectionLineWrapper().plDirectionLine();
         }
         return null;
-    }
-
-    private BigDecimal getTotalLimit(PlDirectionLine line) {
-        return sumOf(line.limitAmt1(), line.limitAmt2(), line.limitAmt3());
-    }
-
-    private BigDecimal getTotalFederal(PlDirectionLine line) {
-        return sumOf(line.limitFederalAmt1(), line.limitFederalAmt2(), line.limitFederalAmt3());
-    }
-
-    private BigDecimal getTotalRegional(PlDirectionLine line) {
-        return sumOf(line.limitRegionalAmt1(), line.limitRegionalAmt2(), line.limitRegionalAmt3());
-    }
-
-    private BigDecimal sumOf(BigDecimal... items) {
-        if (items == null) {
-            return BigDecimal.ZERO;
-        }
-        return Stream.of(items)
-                .filter(Objects::nonNull)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

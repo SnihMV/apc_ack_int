@@ -48,6 +48,16 @@ public class ApkPlicanteRestClient {
                 .body(new ParameterizedTypeReference<>() {});
     }
 
+    public List<InstanceDto> getExistedInstances(InstanceDto dto) {
+        return restClient
+            .post()
+            .uri("register-rest/operator/v2/table/attributes/list")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(dto)
+            .retrieve()
+            .body(new ParameterizedTypeReference<>() {});
+    }
+
     public ResponseEntity<Void> changeStatus(ChangeInstanceStatusRequestDto dto) {
         return restClient
                 .post()
