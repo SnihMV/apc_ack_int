@@ -1,7 +1,5 @@
 package su.petrosoft.apk_ack_integration.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
@@ -26,29 +24,14 @@ public class ApkPlicanteRestClient {
 
     public InstanceDto createInstance(CreateInstanceRequestDto dto) {
         log.debug("Attempt to create instance. {}", dto);
-        ObjectMapper mapper = new ObjectMapper();
-        System.out.println("=== JSON ===");
         try {
-            System.out.println(mapper.writeValueAsString(dto));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        try {
-//            return restClient
-            String responseJson = restClient
+            return restClient
                     .post()
                     .uri("register-rest/operator/v2/instance/crud/create")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(dto)
                     .retrieve()
-//                    .body(InstanceDto.class);
-                    .body(String.class);
-
-            System.out.println("=== RAW RESPONSE ===");
-            System.out.println(responseJson);
-            System.out.println("====================");
-
-            return mapper.readValue(responseJson, InstanceDto.class);
+                    .body(InstanceDto.class);
         } catch (Exception e) {
             log.error("Could not create instance [{}]. Error message: [{}]", dto.instance().id(), e.getMessage());
             throw new RuntimeException(e);

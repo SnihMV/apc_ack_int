@@ -62,7 +62,6 @@ public class SubsidyProgramMapper {
 
         return attributes.stream()
                 .filter(a -> a.id().equals(attributeId))
-                .peek(System.out::println)
                 .findFirst()
                 .map(Attribute::getData)
                 .orElse(null);

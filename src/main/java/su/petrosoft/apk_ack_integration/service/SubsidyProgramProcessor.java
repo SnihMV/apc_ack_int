@@ -11,6 +11,7 @@ import su.petrosoft.apk_ack_integration.model.excel.SubsidyProgramExcelRowDto;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KCSR;
@@ -31,88 +32,93 @@ public class SubsidyProgramProcessor {
         List<SubsidyProgram> list = apkService.getAllSubsidyPrograms();
         log.debug("Received [{}] SubsidyPrograms from DB in total", list.size());
 
-        try {
-            Thread.sleep(1000000000L);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
         Map<Long, Set<SubsidyProgram>> subsidyProgramMap = buildMapByLevel(list);
-        log.debug("There are [{}] valid and unique SubsidyPrograms of all",
-            getCount(subsidyProgramMap));
+        log.debug("There are [{}] valid and unique SubsidyPrograms of all", getCount(subsidyProgramMap));
+        printSpMap(subsidyProgramMap);
 
-        List<SubsidyProgramExcelRowDto> subsidyProgramDtoList =
-            excelExtractor.getSubsidyProgramDtoList(file);
+        List<SubsidyProgramExcelRowDto> subsidyProgramDtoList = excelExtractor.getSubsidyProgramDtoList(file);
+        log.debug("Extracted from excel file: [{}] SubsidyProgramRowDto", subsidyProgramDtoList.size());
 
         if (!subsidyProgramDtoList.isEmpty()) {
             Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap(KCSR, KDR);
             subsidyProgramDtoList.forEach(dto -> processRow(dto, subsidyProgramMap, codesMap));
         }
-        subsidyProgramMap.entrySet().stream()
-            .peek(k-> System.out.println("### "+k.getKey()))
-            .flatMap(k->k.getValue().stream())
-            .forEach(System.out::println);
+        printSpMap(subsidyProgramMap);
     }
 
     private void processRow(
-        SubsidyProgramExcelRowDto dto,
-        Map<Long, Set<SubsidyProgram>> subsidiesMap,
-        Map<CodeType, Map<Long, String>> codesMap) {
+            SubsidyProgramExcelRowDto dto,
+            Map<Long, Set<SubsidyProgram>> subsidiesMap,
+            Map<CodeType, Map<Long, String>> codesMap) {
 
-        SubsidyProgram fstLevelSp = SubsidyProgram.builder()
-            .level(1L)
-            .code(dto.code())
-            .title("Направление № " + dto.code())
-            .build();
-        log.debug("First level Subsidy Program from excel row: [{}]", fstLevelSp);
+        SubsidyProgram fstLevelSp = getFirstLevelSP(dto, subsidiesMap);
+        SubsidyProgram scdLevelSp = getSecondLevelSP(dto, fstLevelSp, codesMap, subsidiesMap);
+        SubsidyProgram trdLevelSp = getThirdLevelSP(dto, scdLevelSp, codesMap, subsidiesMap);
+        log.debug("Subsidy Program Map count: {}", getCount(subsidiesMap));
+    }
 
-        Long fstLvlSpId = obtainSubsidyProgramId(subsidiesMap, fstLevelSp);
-        log.debug("Subsidy Program Map: {}", getCount(subsidiesMap));
+    private void printSpMap(Map<Long, Set<SubsidyProgram>> subsidyProgramMap) {
+        subsidyProgramMap.entrySet().stream()
+                .peek(k -> System.out.println("### " + k.getKey() +" Subsidy Program Level:"))
+                .flatMap(k -> k.getValue().stream())
+                .forEach(System.out::println);
+    }
 
-        SubsidyProgram scdLevelSp = SubsidyProgram.builder()
-            .level(2L)
-            .parentId(fstLvlSpId)
-            .title(dto.kcsrTitle())
-            .kcsr(getCodeId(codesMap, KCSR, dto.kcsr()))
-            .build();
-        log.debug("Second level Subsidy Program from excel row: [{}]", scdLevelSp);
+    private SubsidyProgram getFirstLevelSP(SubsidyProgramExcelRowDto dto, Map<Long, Set<SubsidyProgram>> map) {
+        SubsidyProgram fstLvlSp = SubsidyProgram.builder()
+                .level(1L)
+                .code(dto.code())
+                .title("Направление № " + dto.code())
+                .build();
+        Long id = obtainSubsidyProgramId(map, fstLvlSp);
+        fstLvlSp.setId(id);
+        log.debug("First level Subsidy Program from excel row: [{}]", fstLvlSp);
+        return fstLvlSp;
 
-        Long scdLvlSpId = obtainSubsidyProgramId(subsidiesMap, scdLevelSp);
-        log.debug("Subsidy Program Map: {}", getCount(subsidiesMap));
+    }
 
-        SubsidyProgram trdLevelSp = SubsidyProgram.builder()
-            .level(3L)
-            .parentId(scdLvlSpId)
-            .title(dto.dopKrTitle())
-            .kcsr(scdLevelSp.getKcsr())
-            .dopKr(getCodeId(codesMap, KDR, dto.dopKr()))
-            .build();
-        log.debug("Third level Subsidy Program from excel row: [{}]", trdLevelSp);
+    private SubsidyProgram getSecondLevelSP(
+            SubsidyProgramExcelRowDto dto, SubsidyProgram fstLevelSp,
+            Map<CodeType, Map<Long, String>> codesMap, Map<Long, Set<SubsidyProgram>> subsidiesMap) {
+        SubsidyProgram scdLvlSP = SubsidyProgram.builder()
+                .level(2L)
+                .parentId(fstLevelSp.getId())
+                .title(dto.kcsrTitle())
+                .kcsr(getCodeId(codesMap, KCSR, dto.kcsr()))
+                .build();
+        Long id = obtainSubsidyProgramId(subsidiesMap, scdLvlSP);
+        scdLvlSP.setId(id);
+        log.debug("Second level Subsidy Program from excel row: [{}]", scdLvlSP);
+        return scdLvlSP;
+    }
 
-        Long trdLvlSpId = obtainSubsidyProgramId(subsidiesMap, trdLevelSp);
-        log.debug("Subsidy Program Map: {}", getCount(subsidiesMap));
+    private SubsidyProgram getThirdLevelSP(SubsidyProgramExcelRowDto dto, SubsidyProgram scdLevelSp, Map<CodeType, Map<Long, String>> codesMap, Map<Long, Set<SubsidyProgram>> subsidiesMap) {
+        SubsidyProgram trdLvlSP = SubsidyProgram.builder()
+                .level(3L)
+                .parentId(scdLevelSp.getId())
+                .title(dto.dopKrTitle())
+                .kcsr(scdLevelSp.getKcsr())
+                .dopKr(getCodeId(codesMap, KDR, dto.dopKr()))
+                .build();
+        Long id = obtainSubsidyProgramId(subsidiesMap, trdLvlSP);
+        trdLvlSP.setId(id);
+        log.debug("Third level Subsidy Program from excel row: [{}]", trdLvlSP);
+        return trdLvlSP;
     }
 
     private Long obtainSubsidyProgramId(Map<Long, Set<SubsidyProgram>> map, SubsidyProgram sp) {
         Set<SubsidyProgram> setByLevel = map.computeIfAbsent(sp.getLevel(), m -> new HashSet<>());
 
         return setByLevel.stream()
-            .filter(existed -> existed.equals(sp))
-            .findFirst()
-            .map(SubsidyProgram::getId)
-            .orElseGet(()->{
-                log.debug("No such Subsidy Program within existed. Trying to save it as new");
-                SubsidyProgram saved = apkService.createProgram(sp);
-//                SubsidyProgram saved = new SubsidyProgram(new Random().nextLong(), 1L,
-//                    sp.getParentId(), sp.getLevel(),
-//                    sp.getCode(), sp.getKcsr(), sp.getDopKr(), sp.getTitle());
-                log.debug("Subsidy Program successfully saved: [{}]", saved);
-                setByLevel.add(saved);
-                try {
-                    Thread.sleep(1000000000L);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                return saved.getId();
-            });
+                .filter(existed -> existed.equals(sp))
+                .findFirst()
+                .map(SubsidyProgram::getId)
+                .orElseGet(() -> {
+                    log.debug("No such Subsidy Program among existing. Trying to save it");
+                    SubsidyProgram saved = apkService.createProgram(sp);
+                    log.debug("Subsidy Program successfully saved with id: [{}]", saved.getId());
+                    setByLevel.add(saved);
+                    return saved.getId();
+                });
     }
 }

@@ -1,5 +1,7 @@
 package su.petrosoft.apk_ack_integration.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,6 +34,7 @@ public class ApkPlicanteService {
     private final ApkPlicanteRestClient apkRestClient;
     private final CashPlanLimitMapper cashPlanLimitMapper;
     private final SubsidyProgramMapper spMapper;
+    private final ObjectMapper objectMapper;
 
     public List<CashPlanLimit> getAllCashPlanLimits() {
         List<GetAttributesListResponseDto> dtoList = apkRestClient.getTableAttributesList(
@@ -43,7 +46,7 @@ public class ApkPlicanteService {
 
     public List<SubsidyProgram> getAllSubsidyPrograms() {
         InstanceDto requestDto = subsidyProgramRequestDto();
-        log.debug("=== REQUEST DTO === {}", requestDto);
+        log.debug("Request to receive all existing Subsidy Programs with DTO: {}", requestDto);
         List<InstanceDto> dtoList = apkRestClient.getExistedInstances(requestDto);
         return dtoList.stream()
             .map(spMapper::toSp)
@@ -53,7 +56,6 @@ public class ApkPlicanteService {
     public SubsidyProgram createProgram(SubsidyProgram sp) {
         CreateInstanceRequestDto dto = spMapper.toCreateDto(sp);
         InstanceDto instance = apkRestClient.createInstance(dto);
-        log.debug("Subsidy Program Instance after save: [{}]", instance);
         return spMapper.toSp(instance);
     }
 

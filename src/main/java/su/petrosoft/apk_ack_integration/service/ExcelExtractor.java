@@ -32,8 +32,9 @@ public class ExcelExtractor {
                 Row row = sheet.getRow(i);
                 SubsidyProgramExcelRowDto dto = rowParser.parseToSubsidyProgramDto(row);
                 dtoList.add(dto);
-                log.debug("Excel row mapped to DTO: {}", dto);
+                log.debug("Excel row [{}] mapped to DTO: [{}]", i, dto);
             }
+
         } catch (IOException e) {
             log.error("Can not read excel file. Error message: [{}]", e.getMessage());
             throw new RuntimeException(e);
