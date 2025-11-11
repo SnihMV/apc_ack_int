@@ -1,4 +1,4 @@
-package su.petrosoft.apk_ack_integration.model;
+package su.petrosoft.apk_ack_integration.model.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

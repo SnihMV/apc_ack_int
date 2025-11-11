@@ -1,24 +1,36 @@
 package su.petrosoft.apk_ack_integration.model.dto.request.instance;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Builder;
+
 import java.util.List;
 
+@Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record LongAttribute(
         Long id,
         String code,
         String type,
-        List<LongValue> value
+        List<Value> value,
+        String name,
+        String description,
+        String attributeType
 ) implements Attribute {
 
+    public LongAttribute(long id) {
+        this(id, null);
+    }
+
     public LongAttribute(long id, Long data) {
-        this(id, null, "LONG", List.of(new LongValue(data)));
+        this(id, null, "LONG", List.of(new Value(data, null)), null, null, null);
     }
 
-    public LongAttribute(String code, Long data) {
-        this(null, code, "LONG", List.of(new LongValue(data)));
-    }
-
-    public record LongValue(
-            Long data
-    ) {
+    @JsonIgnore
+    public Long getData(){
+        Object data = Attribute.super.getData();
+        if (data instanceof Long l) return l;
+        if (data instanceof Integer i) return i.longValue();
+        return null;
     }
 }
