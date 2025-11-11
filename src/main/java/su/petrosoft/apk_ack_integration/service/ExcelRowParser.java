@@ -171,7 +171,9 @@ public class ExcelRowParser {
     private int findLastRow(Sheet sheet, int from, String searchKey) {
         for (int i = from; i <= sheet.getLastRowNum(); i++) {
             Cell cell = sheet.getRow(i).getCell(0);
-            if (cell == null || cell.getStringCellValue().equalsIgnoreCase(searchKey)) {
+            if (cell == null
+                    || cell.getStringCellValue().isBlank()
+                    || cell.getStringCellValue().equalsIgnoreCase(searchKey)) {
                 log.debug("Table footer row found at [{}]", i);
                 return i - 1;
             }

@@ -174,8 +174,10 @@ public class CashPlanLimitMapper {
                 .purposeCode(getCodeId(allCodes, PURPOSEFULGRANT, cplExcel.purposeCode()))
                 .kdfCode(getCodeId(allCodes, KDF, cplExcel.additionalFk()))
                 .limitTotalAmt(BigDecimal.valueOf(cplExcel.assignTotal()))
+                .remainTotal(BigDecimal.valueOf(cplExcel.assignTotal()))
                 .limitFederalAmt(BigDecimal.valueOf(cplExcel.assignFederal()))
                 .limitRegionalAmt(BigDecimal.valueOf(cplExcel.assignRegional()))
+                .remainTotal(BigDecimal.valueOf(cplExcel.assignTotal()))
                 .m01Amt(BigDecimal.valueOf(cplExcel.m01Amt()))
                 .m02Amt(BigDecimal.valueOf(cplExcel.m02Amt()))
                 .m03Amt(BigDecimal.valueOf(cplExcel.m03Amt()))
@@ -231,6 +233,7 @@ public class CashPlanLimitMapper {
         return List.of(
                 new LongAttribute(3303, cpl.getYear()),
                 new DoubleAttribute(1609, cpl.getLimitTotalAmt()),
+                new DoubleAttribute(1611, cpl.getRemainTotal()),
                 new DoubleAttribute(1828, cpl.getLimitFederalAmt()),
                 new DoubleAttribute(1829, cpl.getLimitRegionalAmt()),
                 new LinkedAttribute(1733, cpl.getKadmrCode()),
