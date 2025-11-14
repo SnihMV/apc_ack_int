@@ -12,9 +12,10 @@ import org.springframework.web.multipart.MultipartFile;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyProgramMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
+import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import su.petrosoft.apk_ack_integration.model.excel.CreateCashPlanLimitExcel;
-import su.petrosoft.apk_ack_integration.model.excel.SubsidyProgramExcelRowDto;
+import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRowDto;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -49,24 +50,33 @@ public class ExcelRowParser {
         return limits;
     }
 
-    public List<SubsidyProgramExcelRowDto> getSubsidyProgramDtoList(MultipartFile file) throws IOException {
-        List<SubsidyProgramExcelRowDto> dtoList = new ArrayList<>();
-        try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
-            Sheet sheet = workbook.getSheetAt(0);
-            TableBounds bounds = findTableBounds(sheet, "Код", "Итого");
-
-            for (int i = bounds.firstRowIndex; i <= bounds.lastRowIndex; i++) {
-                Row row = sheet.getRow(i);
-                SubsidyProgramExcelRowDto dto = parseToSubsidyProgramDto(row);
-                dtoList.add(dto);
-                log.debug("Excel row mapped to DTO: {}", dto);
-            }
-        }
-        return dtoList;
+    public SubsidyProgram getFirstLevelSP(UniBudgetExcelRowDto dto) {
+        return SubsidyProgram.builder()
+                .level(1L)
+                .code(dto.code())
+                .title("Направление № " + dto.code())
+                .build();
     }
 
-    public SubsidyProgramExcelRowDto parseToSubsidyProgramDto(Row row) {
-        return new SubsidyProgramExcelRowDto(
+    public SubsidyProgram getSecondLevelSP(UniBudgetExcelRowDto dto) {
+        return SubsidyProgram.builder()
+                .level(2L)
+                .title(dto.kcsrTitle())
+                .kcsr(Long.valueOf(dto.kcsr()))
+                .build();
+    }
+
+    public SubsidyProgram getThirdLevelSP(UniBudgetExcelRowDto dto) {
+        return SubsidyProgram.builder()
+                .level(3L)
+                .title(dto.dopKrTitle())
+                .kcsr(Long.valueOf(dto.kcsr()))
+                .dopKr(Long.valueOf(dto.dopKr()))
+                .build();
+    }
+
+    public UniBudgetExcelRowDto parseToSubsidyProgramDto(Row row) {
+        return new UniBudgetExcelRowDto(
                 row.getCell(0).getStringCellValue(),
                 row.getCell(1).getStringCellValue(),
                 row.getCell(2).getStringCellValue(),
@@ -180,6 +190,9 @@ public class ExcelRowParser {
         }
         log.debug("Table footer row not found. Last file row is considered as last effective row");
         return sheet.getLastRowNum();
+    }
+
+    public void createFinancingSource(UniBudgetExcelRowDto dto, Map<SubsidyProgram, Long> allExistedSpMap) {
     }
 
     private record TableBounds(

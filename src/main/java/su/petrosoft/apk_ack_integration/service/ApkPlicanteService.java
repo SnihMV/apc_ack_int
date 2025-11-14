@@ -1,8 +1,8 @@
 package su.petrosoft.apk_ack_integration.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
@@ -12,6 +12,7 @@ import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.dto.request.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.GetAttributesListRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.request.instance.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.GetAttributesListResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
@@ -21,8 +22,10 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.*;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CASH_PLAN_LIMIT_TEMPLATE_ID;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.subsidyProgramRequestDto;
 
@@ -44,9 +47,12 @@ public class ApkPlicanteService {
             .toList();
     }
 
-    public List<SubsidyProgram> getAllSubsidyPrograms() {
-        InstanceDto requestDto = subsidyProgramRequestDto();
-        log.debug("Request to receive all existing Subsidy Programs with DTO: {}", requestDto);
+    @SneakyThrows
+    public List<SubsidyProgram> getAllSubsidyPrograms(Map<Long, Object> filterMap) {
+        InstanceDto requestDto = subsidyProgramRequestDto(filterMap);
+        String s = objectMapper.writeValueAsString(requestDto);
+        log.debug("Request to receive all existing Subsidy Programs with DTO");
+        System.out.println(s);
         List<InstanceDto> dtoList = apkRestClient.getExistedInstances(requestDto);
         return dtoList.stream()
             .map(spMapper::toSp)
@@ -70,7 +76,7 @@ public class ApkPlicanteService {
         if (types == null || types.length == 0) {
             types = CodeType.values();
         }
-        log.debug("Receiving existed codes for types: {}", Arrays.stream(types).map(Enum::name).collect(Collectors.joining(",")));
+        log.debug("Receiving existed codes for types: {}", Arrays.stream(types).map(Enum::name).collect(joining(",")));
         Map<CodeType, Map<Long, String>> codes = new EnumMap<>(CodeType.class);
         for (CodeType codeType : types) {
             codes.put(codeType, getCodesByType(codeType));
@@ -90,9 +96,13 @@ public class ApkPlicanteService {
             new GetAttributesListRequestDto(codeType.getTemplateId(), null));
         return list.stream()
             .filter(dto -> dto.shortForm() != null)
-            .collect(Collectors.toMap(
+            .collect(toMap(
                 GetAttributesListResponseDto::id,
                 GetAttributesListResponseDto::shortForm
             ));
+    }
+
+    public List<SubsidyProgram> getAllSubsidyPrograms() {
+        return getAllSubsidyPrograms(null);
     }
 }

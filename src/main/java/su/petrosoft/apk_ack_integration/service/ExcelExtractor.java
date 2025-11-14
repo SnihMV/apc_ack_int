@@ -9,7 +9,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-import su.petrosoft.apk_ack_integration.model.excel.SubsidyProgramExcelRowDto;
+import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRowDto;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,15 +22,15 @@ public class ExcelExtractor {
 
     private final ExcelRowParser rowParser;
 
-    public List<SubsidyProgramExcelRowDto> getSubsidyProgramDtoList(MultipartFile file) {
-        List<SubsidyProgramExcelRowDto> dtoList = new ArrayList<>();
+    public List<UniBudgetExcelRowDto> getUniBudgetTable(MultipartFile file) {
+        List<UniBudgetExcelRowDto> dtoList = new ArrayList<>();
         try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
             TableBounds bounds = findTableBounds(sheet, "Код", "Итого");
 
             for (int i = bounds.firstRowIndex; i <= bounds.lastRowIndex; i++) {
                 Row row = sheet.getRow(i);
-                SubsidyProgramExcelRowDto dto = rowParser.parseToSubsidyProgramDto(row);
+                UniBudgetExcelRowDto dto = rowParser.parseToSubsidyProgramDto(row);
                 dtoList.add(dto);
                 log.debug("Excel row [{}] mapped to DTO: [{}]", i, dto);
             }
@@ -77,6 +77,10 @@ public class ExcelExtractor {
         }
         log.debug("Table footer row not found. Last file row is considered as last effective row");
         return sheet.getLastRowNum();
+    }
+
+    public void getFinancingSourcesDtoList(MultipartFile file) {
+
     }
 
     private record TableBounds(

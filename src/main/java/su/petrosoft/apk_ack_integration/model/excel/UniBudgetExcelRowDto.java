@@ -3,7 +3,7 @@ package su.petrosoft.apk_ack_integration.model.excel;
 import lombok.Builder;
 
 @Builder
-public record SubsidyProgramExcelRowDto(
+public record UniBudgetExcelRowDto(
         String code,
         String section,
         String subsection,

@@ -5,20 +5,31 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
-import su.petrosoft.apk_ack_integration.model.excel.SubsidyProgramExcelRowDto;
+import su.petrosoft.apk_ack_integration.model.enums.CodeType;
+import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRowDto;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.*;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KDR;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class SubsidyProgramService {
 
-    private final SubsidyProgramProcessor processor;
-
+    private final ExcelExtractor excelExtractor;
+    private final UniBudgetService budgetService;
 
     public void createNewProgramsFromExcel(MultipartFile file) {
-        processor.createNewSubsidyPrograms(file);
+        List<UniBudgetExcelRowDto> dtoList = excelExtractor.getUniBudgetTable(file);
+        log.debug("Extracted from excel file: [{}] effective rows", dtoList.size());
+        Set<SubsidyProgram> subsidyProgramsTree = new LinkedHashSet<>();
+        if (!dtoList.isEmpty()) {
+            subsidyProgramsTree = budgetService.createSubsidyProgramsTree(dtoList);
+        }
     }
-
 }
