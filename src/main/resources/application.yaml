@@ -4,6 +4,15 @@ server:
 spring:
   application:
     name: ${APPLICATION_NAME}
+  graphql:
+    cors:
+      allowed-origin-patterns:
+        - "http://192.168.0.*:[*]"
+        - "http://localhost:[*]"
+
+      allowed-methods: "GET, POST, UPDATE, PATCH"
+      allowed-headers: *
+      allow-credentials: true
 
 integration:
   apk:
