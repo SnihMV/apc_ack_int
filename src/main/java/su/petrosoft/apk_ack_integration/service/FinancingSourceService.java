@@ -4,27 +4,23 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRowDto;
 
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
-@Service
 @Slf4j
+@Service
 @RequiredArgsConstructor
-public class SubsidyProgramService {
-
+public class FinancingSourceService {
     private final ExcelExtractor excelExtractor;
-    private final UniBudgetService budgetService;
+    private final UniBudgetService uniBudgetService;
 
-    public void createNewProgramsFromExcel(MultipartFile file) {
+    public void createFinancingSources(MultipartFile file) {
         List<UniBudgetExcelRowDto> dtoList = excelExtractor.getUniBudgetRows(file);
         log.debug("Extracted from excel file: [{}] effective rows", dtoList.size());
-        Set<SubsidyProgram> subsidyProgramsTree = new LinkedHashSet<>();
+
         if (!dtoList.isEmpty()) {
-            subsidyProgramsTree = budgetService.createSubsidyProgramsTree(dtoList);
+            uniBudgetService.createFinancingSources(dtoList);
         }
     }
 }

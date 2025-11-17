@@ -1,0 +1,90 @@
+package su.petrosoft.apk_ack_integration.service;
+
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Row;
+import org.springframework.stereotype.Component;
+import su.petrosoft.apk_ack_integration.model.excel.CashPlanLimitExcelRow;
+import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRowDto;
+
+@Slf4j
+@Component
+public class ExcelRowMapper {
+
+    public UniBudgetExcelRowDto parseToUniBudgetRow(Row row) {
+        return new UniBudgetExcelRowDto(
+                row.getCell(0).getStringCellValue(),
+                row.getCell(1).getStringCellValue(),
+                row.getCell(2).getStringCellValue(),
+                row.getCell(3).getStringCellValue(),
+                row.getCell(4).getStringCellValue(),
+                row.getCell(5).getStringCellValue(),
+                row.getCell(6).getStringCellValue(),
+                row.getCell(7).getStringCellValue(),
+                row.getCell(8).getStringCellValue(),
+                row.getCell(9).getStringCellValue(),
+                row.getCell(10).getStringCellValue(),
+                row.getCell(11).getStringCellValue(),
+                row.getCell(12).getStringCellValue(),
+                row.getCell(13).getStringCellValue(),
+                row.getCell(14).getStringCellValue(),
+                row.getCell(15).getStringCellValue(),
+                row.getCell(16).getStringCellValue(),
+                row.getCell(17).getStringCellValue(),
+                row.getCell(18).getStringCellValue(),
+                row.getCell(19).getStringCellValue(),
+                row.getCell(20).getStringCellValue(),
+                row.getCell(21).getStringCellValue(),
+                row.getCell(22).getNumericCellValue(),
+                row.getCell(23).getNumericCellValue(),
+                row.getCell(24).getNumericCellValue(),
+                row.getCell(25).getNumericCellValue(),
+                row.getCell(26).getNumericCellValue(),
+                row.getCell(27).getNumericCellValue(),
+                row.getCell(28).getNumericCellValue(),
+                row.getCell(29).getNumericCellValue(),
+                row.getCell(30).getNumericCellValue(),
+                row.getCell(31).getNumericCellValue(),
+                row.getCell(32).getNumericCellValue(),
+                row.getCell(33).getNumericCellValue(),
+                row.getCell(34).getNumericCellValue(),
+                row.getCell(35).getNumericCellValue(),
+                row.getCell(36).getNumericCellValue(),
+                row.getCell(37).getNumericCellValue(),
+                row.getCell(38).getNumericCellValue(),
+                row.getCell(39).getNumericCellValue(),
+                row.getCell(40).getNumericCellValue()
+        );
+    }
+
+    public CashPlanLimitExcelRow parseToCashPlanLimitRow(Row row) {
+        return CashPlanLimitExcelRow.builder()
+                .section(row.getCell(0).getStringCellValue())
+                .subsection(row.getCell(1).getStringCellValue())
+                .kcsr(row.getCell(2).getStringCellValue())
+                .dopKr(row.getCell(3).getStringCellValue())
+                .kvr(row.getCell(4).getStringCellValue())
+                .kosgu(row.getCell(5).getStringCellValue())
+                .kvsr(row.getCell(6).getStringCellValue())
+                .dopFk(row.getCell(7).getStringCellValue())
+                .dopEk(row.getCell(8).getStringCellValue())
+                .purposeCode(row.getCell(9).getStringCellValue())
+                .assignTotal(row.getCell(10).getNumericCellValue())
+                .assignFederal(row.getCell(11).getNumericCellValue())
+                .assignRegional(row.getCell(12).getNumericCellValue())
+                .financeTotal(row.getCell(13).getNumericCellValue())
+                .requested(row.getCell(14).getNumericCellValue())
+                .m01Amt(row.getCell(15).getNumericCellValue())
+                .m02Amt(row.getCell(16).getNumericCellValue())
+                .m03Amt(row.getCell(17).getNumericCellValue())
+                .m04Amt(row.getCell(18).getNumericCellValue())
+                .m05Amt(row.getCell(19).getNumericCellValue())
+                .m06Amt(row.getCell(20).getNumericCellValue())
+                .m07Amt(row.getCell(21).getNumericCellValue())
+                .m08Amt(row.getCell(22).getNumericCellValue())
+                .m09Amt(row.getCell(23).getNumericCellValue())
+                .m10Amt(row.getCell(24).getNumericCellValue())
+                .m11Amt(row.getCell(25).getNumericCellValue())
+                .m12Amt(row.getCell(26).getNumericCellValue())
+                .build();
+    }
+}

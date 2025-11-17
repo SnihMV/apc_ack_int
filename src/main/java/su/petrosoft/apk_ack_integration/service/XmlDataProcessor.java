@@ -7,6 +7,7 @@ import su.petrosoft.apk_ack_integration.client.AckRestClient;
 import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
+import su.petrosoft.apk_ack_integration.model.dto.request.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.UpsertInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
@@ -17,6 +18,7 @@ import su.petrosoft.apk_ack_integration.model.xml.CreateCashPlanLimitsXml;
 import su.petrosoft.apk_ack_integration.model.xml.UpsertCashPlanLimitXml;
 
 import java.util.List;
+import java.util.Map;
 
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CASH_PLAN_LIMIT_TEMPLATE_ID;
 
@@ -39,11 +41,13 @@ public class XmlDataProcessor {
         }
         log.debug("Received request for Cash Plan Limit upsert: {}", upsertingXml);
 
-        CashPlanLimit cashPlanLimitToUpsert = mapper.toCpl(
-            upsertingXml, apkService.getCodesMap(CodeType.values()));
+        Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap();
+        CashPlanLimit cashPlanLimitToUpsert = mapper.toCpl(upsertingXml, codesMap);
 
-        List<GetAttributesListResponseDto> existedCashPlanLimitDtoList = apkClient.getTableAttributesList(
-                new GetAttributesListRequestDto(CASH_PLAN_LIMIT_TEMPLATE_ID, null));
+        List<InstanceDto> existedCashPlanLimitDtoList = apkClient.getExistedInstances(
+                InstanceDto.builder()
+                        .templateId(CASH_PLAN_LIMIT_TEMPLATE_ID)
+                        .build());
         log.debug("Existed Cash Plan Limits: {}", existedCashPlanLimitDtoList.size());
 
         existedCashPlanLimitDtoList.stream()
@@ -54,14 +58,14 @@ public class XmlDataProcessor {
                             log.debug("Existed Cash Plan Limit with id {} will be updated", cpl.getId());
                             cashPlanLimitToUpsert.setId(cpl.getId());
                             cashPlanLimitToUpsert.setVersion(cpl.getVersion());
-                            UpsertInstanceRequestDto upsertDto = mapper.toUpdateDto(cashPlanLimitToUpsert);
+                            UpsertInstanceRequestDto upsertDto = mapper.toUpsertDto(cashPlanLimitToUpsert, codesMap);
                             InstanceDto updatedInstance = apkClient.updateInstance(upsertDto);
                             log.debug("Instance [{}] updated", updatedInstance.id());
                         },
                         () -> {
                             log.debug("Not found Cash Plan Limit for update. Will be create new");
-                            UpsertInstanceRequestDto upsertDto = mapper.toUpdateDto(cashPlanLimitToUpsert);
-                            InstanceDto createdInstance = apkClient.updateInstance(upsertDto);
+                            CreateInstanceRequestDto createDto = mapper.toCreateDto(cashPlanLimitToUpsert, codesMap);
+                            InstanceDto createdInstance = apkClient.createInstance(createDto);
                             log.debug("Instance [{}] created", createdInstance.id());
                         });
     }

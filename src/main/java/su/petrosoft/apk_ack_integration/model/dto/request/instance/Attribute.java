@@ -38,4 +38,8 @@ public sealed interface Attribute
     default Object getData() {
         return hasValue() ? value().get(0).data() : null;
     }
+
+    default String getShortForm() {
+        return hasValue() ? value().get(0).shortForm() : null;
+    }
 }
