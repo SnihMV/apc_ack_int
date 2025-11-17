@@ -6,12 +6,16 @@ import static java.util.stream.Collectors.toSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import lombok.extern.slf4j.Slf4j;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
+import su.petrosoft.apk_ack_integration.model.dto.request.instance.Filter;
+import su.petrosoft.apk_ack_integration.model.dto.request.instance.FilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.LongAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.StringAttribute;
+import su.petrosoft.apk_ack_integration.model.enums.ValueType;
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 
 @Slf4j
@@ -32,22 +36,22 @@ public class SubsidyProgramUtil {
         }
         if (lvl == 1) {
             return sp.getCode() != null
-                   && sp.getKcsr() == null
-                   && sp.getDopKr() == null
-                   && sp.getParentId() == null;
+                    && sp.getKcsr() == null
+                    && sp.getDopKr() == null
+                    && sp.getParentId() == null;
         }
         if (lvl == 2) {
             return sp.getKcsr() != null &&
-                   sp.getDopKr() == null;
+                    sp.getDopKr() == null;
         }
         if (lvl == 3) {
             return sp.getKcsr() != null &&
-                   sp.getDopKr() != null;
+                    sp.getDopKr() != null;
         }
         return false;
     }
 
-    public static InstanceDto subsidyProgramRequestDto() {
+    public static InstanceDto subsidyProgramRequestDto(Map<Long, Object> filters) {
         return InstanceDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(ViewType.DETAILED_FORM_VIEW)
@@ -59,18 +63,16 @@ public class SubsidyProgramUtil {
                         new LinkedAttribute(KCSR_ATTR),
                         new LinkedAttribute(DOPKR_ATTR)
                 ))
+                .filter(makeSimpleFilter(filters))
                 .build();
     }
 
-    public static Map<Long, Set<SubsidyProgram>> buildMapByLevel(List<SubsidyProgram> list) {
-        return list.stream()
-            .filter(SubsidyProgramUtil::validate)
-            .collect(groupingBy(SubsidyProgram::getLevel, toSet()));
-    }
-
-    public static long getCount(Map<Long, Set<SubsidyProgram>> map) {
-        return map.values().stream()
-            .mapToLong(Set::size)
-            .sum();
+    private static Filter makeSimpleFilter(Map<Long, Object> filters) {
+        if (filters == null || filters.isEmpty()) {
+            return null;
+        }
+        return new Filter(filters.entrySet().stream()
+                .map(entry -> new FilterAttribute(ValueType.LONG, entry.getKey(), entry.getValue()))
+                .toList());
     }
 }

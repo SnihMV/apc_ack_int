@@ -2,20 +2,30 @@ package su.petrosoft.apk_ack_integration.model.excel;
 
 import lombok.Builder;
 
-import java.math.BigDecimal;
-
 @Builder
-public record CreateCashPlanLimitExcel(
+public record UniBudgetExcelRowDto(
+        String code,
         String section,
         String subsection,
+        String kfsrTitle,
         String kcsr,
-        String additionalKr,
+        String kcsrTitle,
+        String dopKr,
+        String dopKrTitle,
         String kvr,
+        String kvrTitle,
         String kosgu,
+        String kosguTitle,
         String kvsr,
-        String additionalFk,
-        String additionalEk,
+        String kvsrTitle,
+        String dopFk,
+        String dopFrTitle,
+        String dopEk,
+        String dopEkTitle,
         String purposeCode,
+        String purposeCodeTitle,
+        String kvfo,
+        String kvfoTitle,
 
         Double assignTotal,
         Double assignFederal,
@@ -39,6 +49,5 @@ public record CreateCashPlanLimitExcel(
 
         Double financeFederal,
         Double financeRegional
-
 ) {
 }

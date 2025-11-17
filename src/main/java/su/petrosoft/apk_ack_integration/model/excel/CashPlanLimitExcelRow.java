@@ -3,29 +3,17 @@ package su.petrosoft.apk_ack_integration.model.excel;
 import lombok.Builder;
 
 @Builder
-public record SubsidyProgramExcelRowDto(
-        String code,
+public record CashPlanLimitExcelRow(
         String section,
         String subsection,
-        String kfsrTitle,
         String kcsr,
-        String kcsrTitle,
         String dopKr,
-        String dopKrTitle,
         String kvr,
-        String kvrTitle,
         String kosgu,
-        String kosguTitle,
         String kvsr,
-        String kvsrTitle,
         String dopFk,
-        String dopFrTitle,
         String dopEk,
-        String dopEkTitle,
         String purposeCode,
-        String purposeCodeTitle,
-        String kvfo,
-        String kvfoTitle,
 
         Double assignTotal,
         Double assignFederal,
@@ -49,5 +37,6 @@ public record SubsidyProgramExcelRowDto(
 
         Double financeFederal,
         Double financeRegional
+
 ) {
 }

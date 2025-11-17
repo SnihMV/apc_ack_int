@@ -9,37 +9,51 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-import su.petrosoft.apk_ack_integration.model.excel.SubsidyProgramExcelRowDto;
+import su.petrosoft.apk_ack_integration.model.excel.CashPlanLimitExcelRow;
+import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRowDto;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class ExcelExtractor {
 
-    private final ExcelRowParser rowParser;
+    private final ExcelRowMapper rowMapper;
 
-    public List<SubsidyProgramExcelRowDto> getSubsidyProgramDtoList(MultipartFile file) {
-        List<SubsidyProgramExcelRowDto> dtoList = new ArrayList<>();
-        try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
+    public List<CashPlanLimitExcelRow> getCashPlanLimitsRows(MultipartFile file) {
+        return extractTableRows(file, "Раздел", "Итого", rowMapper::parseToCashPlanLimitRow);
+    }
+
+    public List<UniBudgetExcelRowDto> getUniBudgetRows(MultipartFile file) {
+        return extractTableRows(file, "Код", "Итого", rowMapper::parseToUniBudgetRow);
+    }
+
+    private <T> List<T> extractTableRows(
+            MultipartFile excelFile,
+            String headerMarker,
+            String footerMarker,
+            Function<Row, T> rowMapper
+    ) {
+        List<T> dtoList = new ArrayList<>();
+        try (Workbook workbook = WorkbookFactory.create(excelFile.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
-            TableBounds bounds = findTableBounds(sheet, "Код", "Итого");
+            TableBounds bounds = findTableBounds(sheet, headerMarker, footerMarker);
 
             for (int i = bounds.firstRowIndex; i <= bounds.lastRowIndex; i++) {
                 Row row = sheet.getRow(i);
-                SubsidyProgramExcelRowDto dto = rowParser.parseToSubsidyProgramDto(row);
+                T dto = rowMapper.apply(row);
                 dtoList.add(dto);
                 log.debug("Excel row [{}] mapped to DTO: [{}]", i, dto);
             }
-
+            return dtoList;
         } catch (IOException e) {
             log.error("Can not read excel file. Error message: [{}]", e.getMessage());
             throw new RuntimeException(e);
         }
-        return dtoList;
     }
 
     private TableBounds findTableBounds(Sheet sheet, String headerSearchKey, String footerSearchKey) {
@@ -70,7 +84,9 @@ public class ExcelExtractor {
     private int findLastRow(Sheet sheet, int from, String searchKey) {
         for (int i = from; i <= sheet.getLastRowNum(); i++) {
             Cell cell = sheet.getRow(i).getCell(0);
-            if (cell == null || cell.getStringCellValue().equalsIgnoreCase(searchKey)) {
+            if (cell == null
+                    || cell.getStringCellValue().isBlank()
+                    || cell.getStringCellValue().equalsIgnoreCase(searchKey)) {
                 log.debug("Table footer row found at [{}]", i);
                 return i - 1;
             }
