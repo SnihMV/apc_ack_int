@@ -1,5 +1,8 @@
 package su.petrosoft.apk_ack_integration.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,9 +22,17 @@ import su.petrosoft.apk_ack_integration.service.CashPlanLimitService;
 public class CashPlanLimitController {
     private final CashPlanLimitService service;
 
+    @Operation(
+            summary = "Upload Excel file with Cash Plan Limits",
+            description = "Upload an Excel file to create new Cash Plan Limits. " +
+                    "File should contain specific columns and format.")
     @PostMapping("excel")
     @ResponseStatus(HttpStatus.OK)
-    public CreateFromExcelResponseDto uploadExcel(@RequestParam MultipartFile file) {
+    public CreateFromExcelResponseDto uploadExcel(
+            @Parameter(description = "Excel file with Cash Plan Limits data",
+                    required = true,
+                    content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+            @RequestParam("file") MultipartFile file) {
         log.debug("Excel: Received file [{}]", file.getOriginalFilename());
         return service.createFromExcel(file);
     }

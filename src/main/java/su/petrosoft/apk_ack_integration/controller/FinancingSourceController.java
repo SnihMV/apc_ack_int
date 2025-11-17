@@ -1,5 +1,8 @@
 package su.petrosoft.apk_ack_integration.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,9 +19,17 @@ import su.petrosoft.apk_ack_integration.service.FinancingSourceService;
 public class FinancingSourceController {
     private final FinancingSourceService service;
 
+    @Operation(
+            summary = "Upload Excel file with financing sources",
+            description = "Upload an Excel file to create new financing sources. " +
+                    "File should contain specific columns and format.")
     @PostMapping("excel")
     @ResponseStatus(HttpStatus.OK)
-    public void createFinancingSources(@RequestParam MultipartFile file) {
+    public void createFinancingSources(
+            @Parameter(description = "Excel file with financing sources data",
+                    required = true,
+                    content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+            @RequestParam("file") MultipartFile file) {
         service.createFinancingSources(file);
     }
 }
