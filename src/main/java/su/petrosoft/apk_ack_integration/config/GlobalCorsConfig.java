@@ -18,14 +18,11 @@ public class GlobalCorsConfig {
 
         config.setAllowCredentials(true);
         config.addAllowedOriginPattern("https://plicante-apk-test-vue.plicante.ru");
+        config.addAllowedOriginPattern("http://plicante-apk-test-vue.plicante.ru");
         config.addAllowedOriginPattern("http://192.168.0.*:[*]");
         config.addAllowedOriginPattern("http://localhost:[*]");
         config.addAllowedHeader("*");
-        config.addAllowedMethod("GET");
-        config.addAllowedMethod("POST");
-        config.addAllowedMethod("PUT");
-        config.addAllowedMethod("PATCH");
-        config.addAllowedMethod("DELETE");
+        config.addAllowedMethod("*");
 
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
