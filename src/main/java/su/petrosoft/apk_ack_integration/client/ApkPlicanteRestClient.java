@@ -1,6 +1,8 @@
 package su.petrosoft.apk_ack_integration.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
@@ -22,6 +24,7 @@ public class ApkPlicanteRestClient {
     private final IntegrationProperties props;
     private final RestClient restClient;
 
+    @SneakyThrows
     public InstanceDto createInstance(CreateInstanceRequestDto dto) {
         log.debug("Attempt to create instance. {}", dto);
         try {

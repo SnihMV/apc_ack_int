@@ -277,7 +277,11 @@ public class CashPlanLimitMapper {
     }
 
     private BigDecimal getBigDecimalValue(Object data) {
-        return data != null ? BigDecimal.valueOf((double) data) : null;
+        if (data == null) return null;
+        if (data instanceof BigDecimal bd) return bd;
+        if (data instanceof Number num) return BigDecimal.valueOf(num.doubleValue());
+
+        return null;
     }
 
     private Object getAttrData(List<Attribute> attributes, long attributeId) {

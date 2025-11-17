@@ -58,8 +58,11 @@ public class ApkPlicanteService {
             .toList();
     }
 
+    @SneakyThrows
     public CashPlanLimit createCashPlanLimit(CashPlanLimit cpl, Map<CodeType, Map<Long, String>> codesMap) {
         CreateInstanceRequestDto dto = cplMapper.toCreateDto(cpl, codesMap);
+        String s = objectMapper.writeValueAsString(dto);
+        log.debug("=== JSON: {}", s);
         InstanceDto instance = apkRestClient.createInstance(dto);
         return cplMapper.toCpl(instance);
     }
