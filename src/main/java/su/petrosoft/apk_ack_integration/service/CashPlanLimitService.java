@@ -13,11 +13,13 @@ import su.petrosoft.apk_ack_integration.model.dto.request.UpsertInstanceRequestD
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.AckGetUpdateMessageResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateFromExcelResponseDto;
+import su.petrosoft.apk_ack_integration.model.dto.response.UpdateCashPlanLimitResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import su.petrosoft.apk_ack_integration.model.excel.CashPlanLimitExcelRow;
 import su.petrosoft.apk_ack_integration.model.xml.UpdateCashPlanLimitXml;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -62,29 +64,35 @@ public class CashPlanLimitService {
                         .toList());
     }
 
-    public void updateByXml() {
+    public UpdateCashPlanLimitResponseDto updateByXml() {
+        UpdateCashPlanLimitResponseDto response = new UpdateCashPlanLimitResponseDto(new ArrayList<>());
         AckGetUpdateMessageResponseDto message = ackRestClient.getUpdateMessage();
         UpdateCashPlanLimitXml updatingXml = xmlExtractor.extractXml(message, UpdateCashPlanLimitXml.class);
         if (updatingXml == null) {
-            return;
+            return response;
         }
         log.debug("Received request for Cash Plan Limit update: [{}]", updatingXml);
 
         CashPlanLimit updatingCPL = mapper.toCpl(updatingXml);
+        log.debug("Mapped to CashPlanLimit: [{}]", updatingCPL);
 
         List<CashPlanLimit> allCashPlanLimits = apkService.getAllCashPlanLimits();
-        log.debug("Existed Cash Plan Limits: {}", allCashPlanLimits.size());
+        log.debug("Existing CashPlanLimits in DB: {}", allCashPlanLimits.size());
 
-        CashPlanLimit cplToBeUpdated = allCashPlanLimits.stream()
+        CashPlanLimit cplToUpdate = allCashPlanLimits.stream()
                 .filter(cpl -> cpl.equals(updatingCPL))
                 .findFirst()
-                .orElseThrow(() -> new InstanceNotFoundException("Updating CashPlanLimit not found"));
-
-        log.debug("Trying to update CashPlanLimit [{}]", cplToBeUpdated.getId());
+                .orElse(null);
+        if (cplToUpdate == null) {
+            return response;
+        }
+        log.debug("Trying to update CashPlanLimit [{}]", cplToUpdate.getId());
         Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap();
-        updatingCPL.setId(cplToBeUpdated.getId());
-        updatingCPL.setVersion(cplToBeUpdated.getVersion());
+        updatingCPL.setId(cplToUpdate.getId());
+        updatingCPL.setVersion(cplToUpdate.getVersion());
         CashPlanLimit updatedCpl = apkService.updateInstance(updatingCPL, codesMap);
         log.info("CashPlanLimit [{}] updated", updatedCpl.getId());
+        response.updatedInstances().add(updatedCpl.getId());
+        return response;
     }
 }

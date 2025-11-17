@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
+import su.petrosoft.apk_ack_integration.mapper.FinancingSourceMapper;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyProgramMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.FinancingSource;
@@ -37,6 +38,7 @@ public class UniBudgetService {
     private final ApkPlicanteService apkService;
     private final UniBudgetRowService rowProcessor;
     private final SubsidyProgramMapper spMapper;
+    private final FinancingSourceMapper fsMapper;
 
     public Set<SubsidyProgram> createSubsidyProgramsTree(List<UniBudgetExcelRowDto> rowDtoList) {
 
@@ -55,6 +57,15 @@ public class UniBudgetService {
     }
 
     public List<FinancingSource> createFinancingSources(List<UniBudgetExcelRowDto> dtoList) {
+
+        Set<FinancingSource> allFsFromDb = apkService.getAllFinancingSources();
+        List<FinancingSource> allFsFromExcel = dtoList.stream()
+                .map(fsMapper::fromUniBudgetDto)
+                .collect(toList());
+        allFsFromExcel.removeAll(allFsFromDb);
+        if (allFsFromExcel.isEmpty()) {
+            return Collections.emptyList();
+        }
 
         Set<SubsidyProgram> allThirdLevelSpFromExcel = dtoList.stream()
                 .map(spMapper::toThirdLevelSP)
