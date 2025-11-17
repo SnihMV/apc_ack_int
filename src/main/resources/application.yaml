@@ -11,7 +11,7 @@ spring:
         - "http://localhost:[*]"
 
       allowed-methods: "GET, POST, UPDATE, PATCH"
-      allowed-headers: *
+      allowed-headers: "*"
       allow-credentials: true
 
 integration:
