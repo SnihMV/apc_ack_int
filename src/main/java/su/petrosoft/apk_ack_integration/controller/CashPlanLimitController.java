@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,5 +36,11 @@ public class CashPlanLimitController {
             @RequestParam("file") MultipartFile file) {
         log.debug("Excel: Received file [{}]", file.getOriginalFilename());
         return service.createFromExcel(file);
+    }
+
+    @PatchMapping("xml")
+    @ResponseStatus(HttpStatus.OK)
+    public void updateByXml() {
+        service.updateByXml();
     }
 }

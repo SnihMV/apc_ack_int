@@ -4,20 +4,22 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import su.petrosoft.apk_ack_integration.client.AckRestClient;
+import su.petrosoft.apk_ack_integration.exception.InstanceNotFoundException;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
-import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
+import su.petrosoft.apk_ack_integration.model.dto.request.CreateInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.request.UpsertInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
+import su.petrosoft.apk_ack_integration.model.dto.response.AckGetUpdateMessageResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateFromExcelResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import su.petrosoft.apk_ack_integration.model.excel.CashPlanLimitExcelRow;
-import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRowDto;
+import su.petrosoft.apk_ack_integration.model.xml.UpdateCashPlanLimitXml;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,7 +28,9 @@ import java.util.stream.Collectors;
 public class CashPlanLimitService {
 
     private final ApkPlicanteService apkService;
+    private final AckRestClient ackRestClient;
     private final ExcelExtractor excelExtractor;
+    private final XmlExtractor xmlExtractor;
     private final CashPlanLimitMapper mapper;
 
     public CreateFromExcelResponseDto createFromExcel(MultipartFile file) {
@@ -55,7 +59,32 @@ public class CashPlanLimitService {
                 createdLimits.size(),
                 createdLimits.stream()
                         .map(CashPlanLimit::getId)
-                        .toList()
-        );
+                        .toList());
+    }
+
+    public void updateByXml() {
+        AckGetUpdateMessageResponseDto message = ackRestClient.getUpdateMessage();
+        UpdateCashPlanLimitXml updatingXml = xmlExtractor.extractXml(message, UpdateCashPlanLimitXml.class);
+        if (updatingXml == null) {
+            return;
+        }
+        log.debug("Received request for Cash Plan Limit update: [{}]", updatingXml);
+
+        CashPlanLimit updatingCPL = mapper.toCpl(updatingXml);
+
+        List<CashPlanLimit> allCashPlanLimits = apkService.getAllCashPlanLimits();
+        log.debug("Existed Cash Plan Limits: {}", allCashPlanLimits.size());
+
+        CashPlanLimit cplToBeUpdated = allCashPlanLimits.stream()
+                .filter(cpl -> cpl.equals(updatingCPL))
+                .findFirst()
+                .orElseThrow(() -> new InstanceNotFoundException("Updating CashPlanLimit not found"));
+
+        log.debug("Trying to update CashPlanLimit [{}]", cplToBeUpdated.getId());
+        Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap();
+        updatingCPL.setId(cplToBeUpdated.getId());
+        updatingCPL.setVersion(cplToBeUpdated.getVersion());
+        CashPlanLimit updatedCpl = apkService.updateInstance(updatingCPL, codesMap);
+        log.info("CashPlanLimit [{}] updated", updatedCpl.getId());
     }
 }

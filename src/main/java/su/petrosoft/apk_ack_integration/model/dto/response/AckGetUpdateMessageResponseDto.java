@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
 
-public record AckGetUpsertMessageResponseDto(
+public record AckGetUpdateMessageResponseDto(
         @JsonProperty("Org_Taxcode") String orgTaxCode,
 
         @JsonProperty("Org_Code_FK") String orgCodeFk,

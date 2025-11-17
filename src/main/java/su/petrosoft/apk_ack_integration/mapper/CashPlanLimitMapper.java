@@ -36,7 +36,7 @@ import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import su.petrosoft.apk_ack_integration.model.excel.CashPlanLimitExcelRow;
 import su.petrosoft.apk_ack_integration.model.xml.CreateCashPlanLimitsXml.Line;
 import su.petrosoft.apk_ack_integration.model.xml.PlDirectionLine;
-import su.petrosoft.apk_ack_integration.model.xml.UpsertCashPlanLimitXml;
+import su.petrosoft.apk_ack_integration.model.xml.UpdateCashPlanLimitXml;
 
 @Component
 @RequiredArgsConstructor
@@ -75,36 +75,36 @@ public class CashPlanLimitMapper {
                 .build();
     }
 
-    public CashPlanLimit toCpl(UpsertCashPlanLimitXml upsertPojo, Map<CodeType, Map<Long, String>> allCodes) {
+    public CashPlanLimit toCpl(UpdateCashPlanLimitXml updateDto) {
 
-        PlDirectionLine pl = upsertPojo.plDirectionLineWrapper().plDirectionLine();
+        PlDirectionLine pl = updateDto.plDirectionLineWrapper().plDirectionLine();
 
         return CashPlanLimit.builder()
                 .year(Long.valueOf(LocalDate.now().getYear()))
-                .kadmrCode(upsertPojo.kadmrCode())
-                .kfsrCode(upsertPojo.kfsrCode())
-                .kcsrCode(upsertPojo.kcsrCode())
-                .kvrCode(upsertPojo.kvrCode())
-                .kesrCode(upsertPojo.kesrCode())
-                .kdeCode(upsertPojo.kdeCode())
-                .kdrCode(upsertPojo.kdrCode())
-                .purposeCode(upsertPojo.purposeFulGrantCode())
-                .kdfCode(upsertPojo.kdfCode())
+                .kadmrCode(updateDto.kadmrCode())
+                .kfsrCode(updateDto.kfsrCode())
+                .kcsrCode(updateDto.kcsrCode())
+                .kvrCode(updateDto.kvrCode())
+                .kesrCode(updateDto.kesrCode())
+                .kdeCode(updateDto.kdeCode())
+                .kdrCode(updateDto.kdrCode())
+                .purposeCode(updateDto.purposeFulGrantCode())
+                .kdfCode(updateDto.kdfCode())
                 .limitTotalAmt(getTotalLimit(pl))
                 .limitFederalAmt(getTotalFederal(pl))
                 .limitRegionalAmt(getTotalRegional(pl))
-                .m01Amt(upsertPojo.m01Amt())
-                .m02Amt(upsertPojo.m02Amt())
-                .m03Amt(upsertPojo.m03Amt())
-                .m04Amt(upsertPojo.m04Amt())
-                .m05Amt(upsertPojo.m05Amt())
-                .m06Amt(upsertPojo.m06Amt())
-                .m07Amt(upsertPojo.m07Amt())
-                .m08Amt(upsertPojo.m08Amt())
-                .m09Amt(upsertPojo.m09Amt())
-                .m10Amt(upsertPojo.m10Amt())
-                .m11Amt(upsertPojo.m11Amt())
-                .m12Amt(upsertPojo.m12Amt())
+                .m01Amt(updateDto.m01Amt())
+                .m02Amt(updateDto.m02Amt())
+                .m03Amt(updateDto.m03Amt())
+                .m04Amt(updateDto.m04Amt())
+                .m05Amt(updateDto.m05Amt())
+                .m06Amt(updateDto.m06Amt())
+                .m07Amt(updateDto.m07Amt())
+                .m08Amt(updateDto.m08Amt())
+                .m09Amt(updateDto.m09Amt())
+                .m10Amt(updateDto.m10Amt())
+                .m11Amt(updateDto.m11Amt())
+                .m12Amt(updateDto.m12Amt())
                 .build();
     }
 
@@ -218,7 +218,7 @@ public class CashPlanLimitMapper {
         return dto;
     }
 
-    public UpsertInstanceRequestDto toUpsertDto(CashPlanLimit cpl, Map<CodeType, Map<Long, String>> codesMap) {
+    public UpsertInstanceRequestDto toUpdateDto(CashPlanLimit cpl, Map<CodeType, Map<Long, String>> codesMap) {
         UpsertInstanceRequestDto dto = new UpsertInstanceRequestDto(
                 InstanceDto.builder()
                         .id(cpl.getId())

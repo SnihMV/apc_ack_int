@@ -12,6 +12,7 @@ import su.petrosoft.apk_ack_integration.model.dto.request.instance.StringAttribu
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRowDto;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -69,17 +70,21 @@ public class SubsidyProgramMapper {
     }
 
     public CreateInstanceRequestDto toCreateDto(SubsidyProgram sp, Map<CodeType, Map<Long, String>> codesMap) {
+        List<Attribute> attributes = new ArrayList<>(List.of(
+                new StringAttribute(NAME_ATTR, sp.getTitle()),
+                new StringAttribute(CODE_ATTR, sp.getCode()),
+                new LongAttribute(LEVEL_ATTR, sp.getLevel()),
+                new LinkedAttribute(PARENT_ATTR, sp.getParentId())));
+        if (sp.getLevel() != 1) {
+            attributes.add(new LinkedAttribute(KCSR_ATTR, getCodeId(codesMap, KCSR, sp.getKcsr())));
+        }
+        if (sp.getLevel() == 3) {
+            attributes.add(new LinkedAttribute(DOPKR_ATTR, getCodeId(codesMap, KDR, sp.getDopKr())));
+        }
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()
                         .templateId(TEMPLATE_ID)
-                        .attributes(List.of(
-                                new StringAttribute(NAME_ATTR, sp.getTitle()),
-                                new StringAttribute(CODE_ATTR, sp.getCode()),
-                                new LongAttribute(LEVEL_ATTR, sp.getLevel()),
-                                new LinkedAttribute(PARENT_ATTR, sp.getParentId()),
-                                new LinkedAttribute(KCSR_ATTR, getCodeId(codesMap, KCSR, sp.getKcsr())),
-                                new LinkedAttribute(DOPKR_ATTR, getCodeId(codesMap, KDR, sp.getDopKr()))
-                        ))
+                        .attributes(attributes)
                         .build()
         );
     }

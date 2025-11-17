@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @JacksonXmlRootElement(localName = "CHANGE_EXPCASHPLANDOC")
-public record UpsertCashPlanLimitXml(
+public record UpdateCashPlanLimitXml(
         @JacksonXmlProperty(isAttribute = true, localName = "ID") Long id,
         @JacksonXmlProperty(isAttribute = true, localName = "ESTIMATE_ID") Long estimateId,
         @JacksonXmlProperty(isAttribute = true, localName = "RECIPIENT_ID") Long recipientId,

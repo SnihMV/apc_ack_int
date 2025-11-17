@@ -14,12 +14,12 @@ import su.petrosoft.apk_ack_integration.model.FinancingSource;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.dto.request.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.GetAttributesListRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.request.UpsertInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.GetAttributesListResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -111,5 +111,11 @@ public class ApkPlicanteService {
         log.debug("JSON to create: [{}]", json);
         InstanceDto created = apkRestClient.createInstance(createDto);
         return fsMapper.toEntity(created);
+    }
+
+    public CashPlanLimit updateInstance(CashPlanLimit cplToUpdate, Map<CodeType, Map<Long, String>> codesMap) {
+        UpsertInstanceRequestDto updateDto = cplMapper.toUpdateDto(cplToUpdate, codesMap);
+        InstanceDto updatedInstance = apkRestClient.updateInstance(updateDto);
+        return cplMapper.toCpl(updatedInstance);
     }
 }
