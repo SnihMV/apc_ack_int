@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateFromExcelResponseDto;
+import su.petrosoft.apk_ack_integration.model.dto.response.UpdateCashPlanLimitResponseDto;
 import su.petrosoft.apk_ack_integration.service.CashPlanLimitService;
 
 @RestController
@@ -40,7 +41,7 @@ public class CashPlanLimitController {
 
     @PatchMapping("xml")
     @ResponseStatus(HttpStatus.OK)
-    public void updateByXml() {
-        service.updateByXml();
+    public UpdateCashPlanLimitResponseDto updateByXml() {
+        return service.updateByXml();
     }
 }

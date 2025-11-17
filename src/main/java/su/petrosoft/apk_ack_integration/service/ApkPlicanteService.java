@@ -23,9 +23,11 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static java.util.stream.Collectors.*;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CASH_PLAN_LIMIT_TEMPLATE_ID;
+import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.*;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.subsidyProgramRequestDto;
 
 @Service
@@ -51,18 +53,26 @@ public class ApkPlicanteService {
 
     public List<SubsidyProgram> getAllSubsidyPrograms(Map<Long, Object> filterMap) {
         InstanceDto requestDto = subsidyProgramRequestDto(filterMap);
-        log.debug("Request to receive all existing Subsidy Programs with DTO");
         List<InstanceDto> dtoList = apkRestClient.getExistedInstances(requestDto);
         return dtoList.stream()
             .map(spMapper::toEntity)
             .toList();
     }
 
-    @SneakyThrows
+    public Set<FinancingSource> getAllFinancingSources() {
+        List<InstanceDto> dtoList = apkRestClient.getExistedInstances(
+                InstanceDto.builder()
+                        .templateId(TEMPLATE_ID)
+                        .build()
+        );
+        return dtoList.stream()
+                .map(fsMapper::toEntity)
+                .collect(toSet());
+    }
+
+
     public CashPlanLimit createCashPlanLimit(CashPlanLimit cpl, Map<CodeType, Map<Long, String>> codesMap) {
         CreateInstanceRequestDto dto = cplMapper.toCreateDto(cpl, codesMap);
-        String s = objectMapper.writeValueAsString(dto);
-        log.debug("=== JSON: {}", s);
         InstanceDto instance = apkRestClient.createInstance(dto);
         return cplMapper.toCpl(instance);
     }
@@ -116,8 +126,8 @@ public class ApkPlicanteService {
         return fsMapper.toEntity(created);
     }
 
-    public CashPlanLimit updateInstance(CashPlanLimit cplToUpdate, Map<CodeType, Map<Long, String>> codesMap) {
-        UpsertInstanceRequestDto updateDto = cplMapper.toUpdateDto(cplToUpdate, codesMap);
+    public CashPlanLimit updateInstance(CashPlanLimit updatedCpl, Map<CodeType, Map<Long, String>> codesMap) {
+        UpsertInstanceRequestDto updateDto = cplMapper.toUpdateDto(updatedCpl, codesMap);
         InstanceDto updatedInstance = apkRestClient.updateInstance(updateDto);
         return cplMapper.toCpl(updatedInstance);
     }

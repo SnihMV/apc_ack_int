@@ -16,15 +16,15 @@ public class CashPlanLimit {
     private Long id;
     private Long version;
     private Long year;
-    private String kfsrCode;
-    private String kcsrCode;
-    private String kvrCode;
-    private String kesrCode;
-    private String kadmrCode;
-    private String kdfCode;
-    private String kdeCode;
-    private String kdrCode;
-    private String purposeCode;
+    private String kfsr;
+    private String kcsr;
+    private String kvr;
+    private String kosgu;
+    private String kvsr;
+    private String dopFk;
+    private String dopEk;
+    private String dopKr;
+    private String purpose;
     private BigDecimal limitTotalAmt;
     private BigDecimal limitFederalAmt;
     private BigDecimal limitRegionalAmt;
@@ -80,16 +80,16 @@ public class CashPlanLimit {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         CashPlanLimit that = (CashPlanLimit) o;
-        return Objects.equals(year, that.year) && Objects.equals(kfsrCode, that.kfsrCode)
-                && Objects.equals(kcsrCode, that.kcsrCode) && Objects.equals(kvrCode, that.kvrCode)
-                && Objects.equals(kesrCode, that.kesrCode) && Objects.equals(kadmrCode, that.kadmrCode)
-                && Objects.equals(kdfCode, that.kdfCode) && Objects.equals(kdeCode, that.kdeCode)
-                && Objects.equals(kdrCode, that.kdrCode) && Objects.equals(purposeCode, that.purposeCode);
+        return Objects.equals(year, that.year) && Objects.equals(kfsr, that.kfsr)
+                && Objects.equals(kcsr, that.kcsr) && Objects.equals(kvr, that.kvr)
+                && Objects.equals(kosgu, that.kosgu) && Objects.equals(kvsr, that.kvsr)
+                && Objects.equals(dopFk, that.dopFk) && Objects.equals(dopEk, that.dopEk)
+                && Objects.equals(dopKr, that.dopKr) && Objects.equals(purpose, that.purpose);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(
-                year, kfsrCode, kcsrCode, kvrCode, kesrCode, kadmrCode, kdfCode, kdeCode, kdrCode, purposeCode);
+                year, kfsr, kcsr, kvr, kosgu, kvsr, dopFk, dopEk, dopKr, purpose);
     }
 }

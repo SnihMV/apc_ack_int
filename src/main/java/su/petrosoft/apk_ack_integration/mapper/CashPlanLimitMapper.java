@@ -48,15 +48,15 @@ public class CashPlanLimitMapper {
 
         return CashPlanLimit.builder()
                 .year(Long.valueOf(LocalDate.now().getYear()))
-                .kfsrCode(line.kfsrCode())
-                .kcsrCode(line.kcsrCode())
-                .kvrCode(line.kvrCode())
-                .kesrCode(line.kesrCode())
-                .kadmrCode(line.kadmrCode())
-                .kdfCode(line.kdfCode())
-                .kdeCode(line.kdeCode())
-                .kdrCode(line.kdrCode())
-                .purposeCode(line.purposeFulGrantCode())
+                .kfsr(line.kfsrCode())
+                .kcsr(line.kcsrCode())
+                .kvr(line.kvrCode())
+                .kosgu(line.kesrCode())
+                .kvsr(line.kadmrCode())
+                .dopFk(line.kdfCode())
+                .dopEk(line.kdeCode())
+                .dopKr(line.kdrCode())
+                .purpose(line.purposeFulGrantCode())
                 .limitTotalAmt(getTotalLimit(pl))
                 .limitFederalAmt(getTotalFederal(pl))
                 .limitRegionalAmt(getTotalRegional(pl))
@@ -81,15 +81,15 @@ public class CashPlanLimitMapper {
 
         return CashPlanLimit.builder()
                 .year(Long.valueOf(LocalDate.now().getYear()))
-                .kadmrCode(updateDto.kadmrCode())
-                .kfsrCode(updateDto.kfsrCode())
-                .kcsrCode(updateDto.kcsrCode())
-                .kvrCode(updateDto.kvrCode())
-                .kesrCode(updateDto.kesrCode())
-                .kdeCode(updateDto.kdeCode())
-                .kdrCode(updateDto.kdrCode())
-                .purposeCode(updateDto.purposeFulGrantCode())
-                .kdfCode(updateDto.kdfCode())
+                .kvsr(updateDto.kadmrCode())
+                .kfsr(updateDto.kfsrCode())
+                .kcsr(updateDto.kcsrCode())
+                .kvr(updateDto.kvrCode())
+                .kosgu(updateDto.kesrCode())
+                .dopEk(updateDto.kdeCode())
+                .dopKr(updateDto.kdrCode())
+                .purpose(updateDto.purposeFulGrantCode())
+                .dopFk(updateDto.kdfCode())
                 .limitTotalAmt(getTotalLimit(pl))
                 .limitFederalAmt(getTotalFederal(pl))
                 .limitRegionalAmt(getTotalRegional(pl))
@@ -116,15 +116,15 @@ public class CashPlanLimitMapper {
                 .id(dto.id())
                 .version(dto.version())
                 .year((Long) getAttrData(attributes, 3303))
-                .kadmrCode(getAttrShortForm(attributes, KADMR.getAttributeId()))
-                .kfsrCode(getAttrShortForm(attributes, KFSR.getAttributeId()))
-                .kcsrCode(getAttrShortForm(attributes, KCSR.getAttributeId()))
-                .kvrCode(getAttrShortForm(attributes, KVR.getAttributeId()))
-                .kesrCode(getAttrShortForm(attributes, KESR.getAttributeId()))
-                .kdeCode(getAttrShortForm(attributes, KDE.getAttributeId()))
-                .kdrCode(getAttrShortForm(attributes, KDR.getAttributeId()))
-                .purposeCode(getAttrShortForm(attributes, PURPOSEFULGRANT.getAttributeId()))
-                .kdfCode(getAttrShortForm(attributes, KDF.getAttributeId()))
+                .kvsr(getAttrShortForm(attributes, KADMR.getAttributeId()))
+                .kfsr(getAttrShortForm(attributes, KFSR.getAttributeId()))
+                .kcsr(getAttrShortForm(attributes, KCSR.getAttributeId()))
+                .kvr(getAttrShortForm(attributes, KVR.getAttributeId()))
+                .kosgu(getAttrShortForm(attributes, KESR.getAttributeId()))
+                .dopEk(getAttrShortForm(attributes, KDE.getAttributeId()))
+                .dopKr(getAttrShortForm(attributes, KDR.getAttributeId()))
+                .purpose(getAttrShortForm(attributes, PURPOSEFULGRANT.getAttributeId()))
+                .dopFk(getAttrShortForm(attributes, KDF.getAttributeId()))
                 .limitTotalAmt(getBigDecimalValue(getAttrData(attributes, 1609)))
                 .limitFederalAmt(getBigDecimalValue(getAttrData(attributes, 1828)))
                 .limitRegionalAmt(getBigDecimalValue(getAttrData(attributes, 1829)))
@@ -164,15 +164,15 @@ public class CashPlanLimitMapper {
 
         return CashPlanLimit.builder()
                 .year((long) LocalDateTime.now().getYear())
-                .kfsrCode(cplExcel.section() + cplExcel.subsection())
-                .kadmrCode(cplExcel.kvsr())
-                .kcsrCode(cplExcel.kcsr())
-                .kvrCode(cplExcel.kvr())
-                .kesrCode(cplExcel.kosgu())
-                .kdeCode(cplExcel.dopEk())
-                .kdrCode(cplExcel.dopKr())
-                .purposeCode(cplExcel.purposeCode())
-                .kdfCode(cplExcel.dopFk())
+                .kfsr(cplExcel.section() + cplExcel.subsection())
+                .kvsr(cplExcel.kvsr())
+                .kcsr(cplExcel.kcsr())
+                .kvr(cplExcel.kvr())
+                .kosgu(cplExcel.kosgu())
+                .dopEk(cplExcel.dopEk())
+                .dopKr(cplExcel.dopKr())
+                .purpose(cplExcel.purposeCode())
+                .dopFk(cplExcel.dopFk())
                 .limitTotalAmt(BigDecimal.valueOf(cplExcel.assignTotal()))
                 .remainTotal(BigDecimal.valueOf(cplExcel.assignTotal()))
                 .limitFederalAmt(BigDecimal.valueOf(cplExcel.assignFederal()))
@@ -213,7 +213,7 @@ public class CashPlanLimitMapper {
         CreateInstanceRequestDto dto = new CreateInstanceRequestDto(
                 InstanceDto.builder()
                         .templateId(CASH_PLAN_LIMIT_TEMPLATE_ID)
-                        .attributes(getAttributes(cpl, codesMap))
+                        .attributes(buildAttributeList(cpl, codesMap))
                         .build());
         return dto;
     }
@@ -224,27 +224,27 @@ public class CashPlanLimitMapper {
                         .id(cpl.getId())
                         .templateId(CASH_PLAN_LIMIT_TEMPLATE_ID)
                         .version(cpl.getVersion())
-                        .attributes(getAttributes(cpl, codesMap))
+                        .attributes(buildAttributeList(cpl, codesMap))
                         .build());
         return dto;
     }
 
-    private static List<Attribute> getAttributes(CashPlanLimit cpl, Map<CodeType, Map<Long, String>> codesMap) {
+    private static List<Attribute> buildAttributeList(CashPlanLimit cpl, Map<CodeType, Map<Long, String>> codesMap) {
         return List.of(
                 new LongAttribute(3303, cpl.getYear()),
                 new DoubleAttribute(1609, cpl.getLimitTotalAmt()),
                 new DoubleAttribute(1611, cpl.getRemainTotal()),
                 new DoubleAttribute(1828, cpl.getLimitFederalAmt()),
                 new DoubleAttribute(1829, cpl.getLimitRegionalAmt()),
-                new LinkedAttribute(1733, getCodeId(codesMap, KADMR, cpl.getKadmrCode())),
-                new LinkedAttribute(1734, getCodeId(codesMap, KFSR, cpl.getKfsrCode())),
-                new LinkedAttribute(1735, getCodeId(codesMap, KCSR, cpl.getKcsrCode())),
-                new LinkedAttribute(1736, getCodeId(codesMap, KVR, cpl.getKvrCode())),
-                new LinkedAttribute(1737, getCodeId(codesMap, KESR, cpl.getKesrCode())),
-                new LinkedAttribute(1739, getCodeId(codesMap, KDE, cpl.getKdeCode())),
-                new LinkedAttribute(1740, getCodeId(codesMap, KDR, cpl.getKdrCode())),
-                new LinkedAttribute(1751, getCodeId(codesMap, PURPOSEFULGRANT, cpl.getPurposeCode())),
-                new LinkedAttribute(3448, getCodeId(codesMap, KDF, cpl.getKdfCode())),
+                new LinkedAttribute(1733, getCodeId(codesMap, KADMR, cpl.getKvsr())),
+                new LinkedAttribute(1734, getCodeId(codesMap, KFSR, cpl.getKfsr())),
+                new LinkedAttribute(1735, getCodeId(codesMap, KCSR, cpl.getKcsr())),
+                new LinkedAttribute(1736, getCodeId(codesMap, KVR, cpl.getKvr())),
+                new LinkedAttribute(1737, getCodeId(codesMap, KESR, cpl.getKosgu())),
+                new LinkedAttribute(1739, getCodeId(codesMap, KDE, cpl.getDopEk())),
+                new LinkedAttribute(1740, getCodeId(codesMap, KDR, cpl.getDopKr())),
+                new LinkedAttribute(1751, getCodeId(codesMap, PURPOSEFULGRANT, cpl.getPurpose())),
+                new LinkedAttribute(3448, getCodeId(codesMap, KDF, cpl.getDopFk())),
                 new DoubleAttribute(1612, cpl.getM01Amt()),
                 new DoubleAttribute(1613, cpl.getM02Amt()),
                 new DoubleAttribute(1614, cpl.getM03Amt()),
