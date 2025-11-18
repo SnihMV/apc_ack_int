@@ -41,7 +41,11 @@ public class FinancingSourceMapper {
                 .kfsr(getAttrShortForm(attributes, KFSR_ATTR))
                 .kcsr(getAttrShortForm(attributes, KCSR_ATTR))
                 .kvr(getAttrShortForm(attributes, KVR_ATTR))
-                .kosgu(getAttrShortForm(attributes, KOSGU_ATTR))
+                .kosgu(getAttrShortForm(attributes, 3453L))
+                .dopEk(getAttrShortForm(attributes, 3455L))
+                .dopFk(getAttrShortForm(attributes, 3454L))
+                .dopKr(getAttrShortForm(attributes, 3456L))
+                .purpose(getAttrShortForm(attributes, 3457L))
                 .subsidyProgramId((Long) getAttrData(attributes, DIRECTION_ATTR))
                 .build();
     }
@@ -54,6 +58,10 @@ public class FinancingSourceMapper {
                 .kcsr(dto.kcsr())
                 .kvr(dto.kvr())
                 .kosgu(dto.kosgu())
+                .dopKr(dto.dopKr())
+                .dopEk(dto.dopEk())
+                .dopFk(dto.dopFk())
+                .purpose(dto.purposeCode())
                 .build();
     }
 
@@ -68,6 +76,10 @@ public class FinancingSourceMapper {
                                 new LinkedAttribute(KCSR_ATTR, getCodeId(codesMap, KCSR, fs.getKcsr())),
                                 new LinkedAttribute(KVR_ATTR, getCodeId(codesMap, KVR, fs.getKvr())),
                                 new LinkedAttribute(KOSGU_ATTR, getCodeId(codesMap, KESR, fs.getKosgu())),
+                                new LinkedAttribute(3455L, getCodeId(codesMap, KDE, fs.getDopEk())),
+                                new LinkedAttribute(3454L, getCodeId(codesMap, KDF, fs.getDopFk())),
+                                new LinkedAttribute(3456L, getCodeId(codesMap, KDR, fs.getDopKr())),
+                                new LinkedAttribute(3457L, getCodeId(codesMap, PURPOSEFULGRANT, fs.getPurpose())),
                                 new LinkedAttribute(DIRECTION_ATTR, fs.getSubsidyProgramId())
                         ))
                         .build()

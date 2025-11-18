@@ -20,19 +20,21 @@ public class FinancingSource {
     private String kcsr;
     private String kvr;
     private String kosgu;
+    private String dopFk;
+    private String dopEk;
+    private String dopKr;
+    private String purpose;
     private Long subsidyProgramId;
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         FinancingSource that = (FinancingSource) o;
-        return Objects.equals(year, that.year) && Objects.equals(kvsr, that.kvsr)
-                && Objects.equals(kfsr, that.kfsr) && Objects.equals(kcsr, that.kcsr)
-                && Objects.equals(kvr, that.kvr) && Objects.equals(kosgu, that.kosgu);
+        return Objects.equals(kvsr, that.kvsr) && Objects.equals(kfsr, that.kfsr) && Objects.equals(kcsr, that.kcsr) && Objects.equals(kvr, that.kvr) && Objects.equals(kosgu, that.kosgu) && Objects.equals(dopFk, that.dopFk) && Objects.equals(dopEk, that.dopEk) && Objects.equals(dopKr, that.dopKr) && Objects.equals(purpose, that.purpose);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(year, kvsr, kfsr, kcsr, kvr, kosgu);
+        return Objects.hash(kvsr, kfsr, kcsr, kvr, kosgu, dopFk, dopEk, dopKr, purpose);
     }
 }
