@@ -94,7 +94,7 @@ public class UniBudgetService {
                 .map(dto -> rowProcessor.buildFinancingSource(dto, allValidThirdLvlSPFromDb))
                 .toList();
         log.info("[{}] Financing Sources ready to save", list.size());
-        Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap(KADMR, KFSR, KCSR, KVR, KESR);
+        Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap();
         List<FinancingSource> createdFS = list.stream()
                 .map(fs -> apkService.createFinancingSource(fs, codesMap))
                 .toList();
