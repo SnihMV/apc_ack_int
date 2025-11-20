@@ -22,8 +22,8 @@ public record UniBudgetExcelRowDto(
         String dopFrTitle,
         String dopEk,
         String dopEkTitle,
-        String purposeCode,
-        String purposeCodeTitle,
+        String purpose,
+        String purposeTitle,
         String kvfo,
         String kvfoTitle,
 

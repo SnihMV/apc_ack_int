@@ -3,31 +3,23 @@ package su.petrosoft.apk_ack_integration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.mapper.FinancingSourceMapper;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyProgramMapper;
-import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.FinancingSource;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
-import su.petrosoft.apk_ack_integration.model.excel.CashPlanLimitExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRowDto;
 import su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static java.util.stream.Collectors.*;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KADMR;
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KCSR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KDR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KESR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KFSR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KVR;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.DOPKR;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.LEVEL_ATTR;
 
 @Slf4j
@@ -50,7 +42,7 @@ public class UniBudgetService {
                 .collect(toSet());
         log.debug("There are [{}] valid and unique SubsidyPrograms of all", existingSP.size());
 
-        Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap(KCSR, KDR);
+        Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap(KCSR, DOPKR);
         Set<SubsidyProgram> createdSP = new LinkedHashSet<>();
         rowDtoList.forEach(dto -> rowProcessor.createSubsidyPrograms(dto, existingSP, codesMap));
         return createdSP;

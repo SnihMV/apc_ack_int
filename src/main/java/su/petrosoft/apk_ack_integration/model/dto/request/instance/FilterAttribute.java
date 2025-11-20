@@ -25,7 +25,8 @@ public record FilterAttribute(
         record Value(
                 Object data,
                 String shortForm
-        ){}
+        ) {
+        }
     }
 
     public FilterAttribute(ValueType type, Long id, Object data) {

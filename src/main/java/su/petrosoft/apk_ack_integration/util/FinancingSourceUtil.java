@@ -8,5 +8,9 @@ public class FinancingSourceUtil {
     public static final long KCSR_ATTR = 3451;
     public static final long KVR_ATTR = 3452;
     public static final long KOSGU_ATTR = 3453;
+    public static final long DOPFK_ATTR = 3454;
+    public static final long DOPEK_ATTR = 3455;
+    public static final long DOPKR_ATTR = 3456;
+    public static final long PURPOSE_ATTR = 3457;
     public static final long DIRECTION_ATTR = 3461;
 }
