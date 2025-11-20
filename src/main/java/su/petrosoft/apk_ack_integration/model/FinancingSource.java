@@ -30,7 +30,11 @@ public class FinancingSource {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         FinancingSource that = (FinancingSource) o;
-        return Objects.equals(kvsr, that.kvsr) && Objects.equals(kfsr, that.kfsr) && Objects.equals(kcsr, that.kcsr) && Objects.equals(kvr, that.kvr) && Objects.equals(kosgu, that.kosgu) && Objects.equals(dopFk, that.dopFk) && Objects.equals(dopEk, that.dopEk) && Objects.equals(dopKr, that.dopKr) && Objects.equals(purpose, that.purpose);
+        return Objects.equals(kvsr, that.kvsr) && Objects.equals(kfsr, that.kfsr)
+                && Objects.equals(kcsr, that.kcsr) && Objects.equals(kvr, that.kvr)
+                && Objects.equals(kosgu, that.kosgu) && Objects.equals(dopFk, that.dopFk)
+                && Objects.equals(dopEk, that.dopEk) && Objects.equals(dopKr, that.dopKr)
+                && Objects.equals(purpose, that.purpose);
     }
 
     @Override

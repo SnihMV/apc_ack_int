@@ -79,7 +79,7 @@ public class SubsidyProgramMapper {
             attributes.add(new LinkedAttribute(KCSR_ATTR, getCodeId(codesMap, KCSR, sp.getKcsr())));
         }
         if (sp.getLevel() == 3) {
-            attributes.add(new LinkedAttribute(DOPKR_ATTR, getCodeId(codesMap, KDR, sp.getDopKr())));
+            attributes.add(new LinkedAttribute(DOPKR_ATTR, getCodeId(codesMap, DOPKR, sp.getDopKr())));
         }
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()

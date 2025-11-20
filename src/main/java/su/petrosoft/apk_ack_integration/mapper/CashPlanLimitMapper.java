@@ -1,20 +1,8 @@
 package su.petrosoft.apk_ack_integration.mapper;
 
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KADMR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KCSR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KDE;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KDF;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KDR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KESR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KFSR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KVR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.PURPOSEFULGRANT;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CASH_PLAN_LIMIT_TEMPLATE_ID;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalFederal;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalLimit;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalRegional;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.sumOf;
 import static su.petrosoft.apk_ack_integration.util.DictionaryUtil.getCodeId;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.*;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -57,21 +45,21 @@ public class CashPlanLimitMapper {
                 .dopEk(line.kdeCode())
                 .dopKr(line.kdrCode())
                 .purpose(line.purposeFulGrantCode())
-                .limitTotalAmt(getTotalLimit(pl))
-                .limitFederalAmt(getTotalFederal(pl))
-                .limitRegionalAmt(getTotalRegional(pl))
-                .m01Amt(line.m01Amt())
-                .m02Amt(line.m02Amt())
-                .m03Amt(line.m03Amt())
-                .m04Amt(line.m04Amt())
-                .m05Amt(line.m05Amt())
-                .m06Amt(line.m06Amt())
-                .m07Amt(line.m07Amt())
-                .m08Amt(line.m08Amt())
-                .m09Amt(line.m09Amt())
-                .m10Amt(line.m10Amt())
-                .m11Amt(line.m11Amt())
-                .m12Amt(line.m12Amt())
+                .totalLimit(getTotalLimit(pl))
+                .federalBudget(getTotalFederal(pl))
+                .regionalBudget(getTotalRegional(pl))
+                .janLimit(line.m01Amt())
+                .febLimit(line.m02Amt())
+                .marLimit(line.m03Amt())
+                .aprLimit(line.m04Amt())
+                .mayLimit(line.m05Amt())
+                .junLimit(line.m06Amt())
+                .julLimit(line.m07Amt())
+                .augLimit(line.m08Amt())
+                .sepLimit(line.m09Amt())
+                .octLimit(line.m10Amt())
+                .novLimit(line.m11Amt())
+                .decLimit(line.m12Amt())
                 .build();
     }
 
@@ -90,21 +78,21 @@ public class CashPlanLimitMapper {
                 .dopKr(updateDto.kdrCode())
                 .purpose(updateDto.purposeFulGrantCode())
                 .dopFk(updateDto.kdfCode())
-                .limitTotalAmt(getTotalLimit(pl))
-                .limitFederalAmt(getTotalFederal(pl))
-                .limitRegionalAmt(getTotalRegional(pl))
-                .m01Amt(updateDto.m01Amt())
-                .m02Amt(updateDto.m02Amt())
-                .m03Amt(updateDto.m03Amt())
-                .m04Amt(updateDto.m04Amt())
-                .m05Amt(updateDto.m05Amt())
-                .m06Amt(updateDto.m06Amt())
-                .m07Amt(updateDto.m07Amt())
-                .m08Amt(updateDto.m08Amt())
-                .m09Amt(updateDto.m09Amt())
-                .m10Amt(updateDto.m10Amt())
-                .m11Amt(updateDto.m11Amt())
-                .m12Amt(updateDto.m12Amt())
+                .totalLimit(getTotalLimit(pl))
+                .federalBudget(getTotalFederal(pl))
+                .regionalBudget(getTotalRegional(pl))
+                .janLimit(updateDto.m01Amt())
+                .febLimit(updateDto.m02Amt())
+                .marLimit(updateDto.m03Amt())
+                .aprLimit(updateDto.m04Amt())
+                .mayLimit(updateDto.m05Amt())
+                .junLimit(updateDto.m06Amt())
+                .julLimit(updateDto.m07Amt())
+                .augLimit(updateDto.m08Amt())
+                .sepLimit(updateDto.m09Amt())
+                .octLimit(updateDto.m10Amt())
+                .novLimit(updateDto.m11Amt())
+                .decLimit(updateDto.m12Amt())
                 .build();
     }
 
@@ -115,47 +103,47 @@ public class CashPlanLimitMapper {
         return CashPlanLimit.builder()
                 .id(dto.id())
                 .version(dto.version())
-                .year((Long) getAttrData(attributes, 3303))
-                .kvsr(getAttrShortForm(attributes, KADMR.getAttributeId()))
-                .kfsr(getAttrShortForm(attributes, KFSR.getAttributeId()))
-                .kcsr(getAttrShortForm(attributes, KCSR.getAttributeId()))
-                .kvr(getAttrShortForm(attributes, KVR.getAttributeId()))
-                .kosgu(getAttrShortForm(attributes, KESR.getAttributeId()))
-                .dopEk(getAttrShortForm(attributes, KDE.getAttributeId()))
-                .dopKr(getAttrShortForm(attributes, KDR.getAttributeId()))
-                .purpose(getAttrShortForm(attributes, PURPOSEFULGRANT.getAttributeId()))
-                .dopFk(getAttrShortForm(attributes, KDF.getAttributeId()))
-                .limitTotalAmt(getBigDecimalValue(getAttrData(attributes, 1609)))
-                .limitFederalAmt(getBigDecimalValue(getAttrData(attributes, 1828)))
-                .limitRegionalAmt(getBigDecimalValue(getAttrData(attributes, 1829)))
-                .m01Amt(getBigDecimalValue(getAttrData(attributes, 1612)))
-                .m02Amt(getBigDecimalValue(getAttrData(attributes, 1613)))
-                .m03Amt(getBigDecimalValue(getAttrData(attributes, 1614)))
-                .m04Amt(getBigDecimalValue(getAttrData(attributes, 1617)))
-                .m05Amt(getBigDecimalValue(getAttrData(attributes, 1618)))
-                .m06Amt(getBigDecimalValue(getAttrData(attributes, 1619)))
-                .m07Amt(getBigDecimalValue(getAttrData(attributes, 1622)))
-                .m08Amt(getBigDecimalValue(getAttrData(attributes, 1623)))
-                .m09Amt(getBigDecimalValue(getAttrData(attributes, 1624)))
-                .m10Amt(getBigDecimalValue(getAttrData(attributes, 1627)))
-                .m11Amt(getBigDecimalValue(getAttrData(attributes, 1628)))
-                .m12Amt(getBigDecimalValue(getAttrData(attributes, 1629)))
-                .r01Amt(getBigDecimalValue(getAttrData(attributes, 3276)))
-                .r02Amt(getBigDecimalValue(getAttrData(attributes, 3278)))
-                .r03Amt(getBigDecimalValue(getAttrData(attributes, 3280)))
-                .r04Amt(getBigDecimalValue(getAttrData(attributes, 3282)))
-                .r05Amt(getBigDecimalValue(getAttrData(attributes, 3284)))
-                .r06Amt(getBigDecimalValue(getAttrData(attributes, 3286)))
-                .r07Amt(getBigDecimalValue(getAttrData(attributes, 3288)))
-                .r08Amt(getBigDecimalValue(getAttrData(attributes, 3290)))
-                .r09Amt(getBigDecimalValue(getAttrData(attributes, 3292)))
-                .r10Amt(getBigDecimalValue(getAttrData(attributes, 3294)))
-                .r11Amt(getBigDecimalValue(getAttrData(attributes, 3296)))
-                .r12Amt(getBigDecimalValue(getAttrData(attributes, 3298)))
-                .rKv1Amt(getBigDecimalValue(getAttrData(attributes, 1616)))
-                .rKv2Amt(getBigDecimalValue(getAttrData(attributes, 1621)))
-                .rKv3Amt(getBigDecimalValue(getAttrData(attributes, 1626)))
-                .rKv4Amt(getBigDecimalValue(getAttrData(attributes, 1631)))
+                .year((Long) getAttrData(attributes, YEAR_ATTR))
+                .kvsr(getAttrShortForm(attributes, KVSR_ATTR))
+                .kfsr(getAttrShortForm(attributes, KFSR_ATTR))
+                .kcsr(getAttrShortForm(attributes, KCSR_ATTR))
+                .kvr(getAttrShortForm(attributes, KVR_ATTR))
+                .kosgu(getAttrShortForm(attributes, KOSGU_ATTR))
+                .dopEk(getAttrShortForm(attributes, DOPEK_ATTR))
+                .dopKr(getAttrShortForm(attributes, DOPKR_ATTR))
+                .purpose(getAttrShortForm(attributes, PURPOSE_ATTR))
+                .dopFk(getAttrShortForm(attributes, DOPFK_ATTR))
+                .totalLimit(getBigDecimalValue(getAttrData(attributes, TOTAL_LIMIT_ATTR)))
+                .federalBudget(getBigDecimalValue(getAttrData(attributes, FEDERAL_BUDGET_ATTR)))
+                .regionalBudget(getBigDecimalValue(getAttrData(attributes, REGIONAL_BUDGET_ATTR)))
+                .janLimit(getBigDecimalValue(getAttrData(attributes, JAN_LIMIT_ATTR)))
+                .febLimit(getBigDecimalValue(getAttrData(attributes, FEB_LIMIT_ATTR)))
+                .marLimit(getBigDecimalValue(getAttrData(attributes, MAR_LIMIT_ATTR)))
+                .aprLimit(getBigDecimalValue(getAttrData(attributes, APR_LIMIT_ATTR)))
+                .mayLimit(getBigDecimalValue(getAttrData(attributes, MAY_LIMIT_ATTR)))
+                .junLimit(getBigDecimalValue(getAttrData(attributes, JUN_LIMIT_ATTR)))
+                .julLimit(getBigDecimalValue(getAttrData(attributes, JUL_LIMIT_ATTR)))
+                .augLimit(getBigDecimalValue(getAttrData(attributes, AUG_LIMIT_ATTR)))
+                .sepLimit(getBigDecimalValue(getAttrData(attributes, SEP_LIMIT_ATTR)))
+                .octLimit(getBigDecimalValue(getAttrData(attributes, OCT_LIMIT_ATTR)))
+                .novLimit(getBigDecimalValue(getAttrData(attributes, NOV_LIMIT_ATTR)))
+                .decLimit(getBigDecimalValue(getAttrData(attributes, DEC_LIMIT_ATTR)))
+                .janBalance(getBigDecimalValue(getAttrData(attributes, JAN_BALANCE_ATTR)))
+                .febBalance(getBigDecimalValue(getAttrData(attributes, FEB_BALANCE_ATTR)))
+                .marBalance(getBigDecimalValue(getAttrData(attributes, MAR_BALANCE_ATTR)))
+                .aprBalance(getBigDecimalValue(getAttrData(attributes, APR_BALANCE_ATTR)))
+                .mayBalance(getBigDecimalValue(getAttrData(attributes, MAY_BALANCE_ATTR)))
+                .junBalance(getBigDecimalValue(getAttrData(attributes, JUN_BALANCE_ATTR)))
+                .julBalance(getBigDecimalValue(getAttrData(attributes, JUL_BALANCE_ATTR)))
+                .augBalance(getBigDecimalValue(getAttrData(attributes, AUG_BALANCE_ATTR)))
+                .sepBalance(getBigDecimalValue(getAttrData(attributes, SEP_BALANCE_ATTR)))
+                .octBalance(getBigDecimalValue(getAttrData(attributes, OCT_BALANCE_ATTR)))
+                .novBalance(getBigDecimalValue(getAttrData(attributes, NOV_BALANCE_ATTR)))
+                .decBalance(getBigDecimalValue(getAttrData(attributes, DEC_BALANCE_ATTR)))
+                .fstQuarterBalance(getBigDecimalValue(getAttrData(attributes, QUARTER_1_BAL_ATTR)))
+                .scdQuarterBalance(getBigDecimalValue(getAttrData(attributes, QUARTER_2_BAL_ATTR)))
+                .trdQuarterBalance(getBigDecimalValue(getAttrData(attributes, QUARTER_3_BAL_ATTR)))
+                .frtQuarterBalance(getBigDecimalValue(getAttrData(attributes, QUARTER_4_BAL_ATTR)))
                 .build();
     }
 
@@ -173,39 +161,39 @@ public class CashPlanLimitMapper {
                 .dopKr(cplExcel.dopKr())
                 .purpose(cplExcel.purposeCode())
                 .dopFk(cplExcel.dopFk())
-                .limitTotalAmt(BigDecimal.valueOf(cplExcel.assignTotal()))
-                .remainTotal(BigDecimal.valueOf(cplExcel.assignTotal()))
-                .limitFederalAmt(BigDecimal.valueOf(cplExcel.assignFederal()))
-                .limitRegionalAmt(BigDecimal.valueOf(cplExcel.assignRegional()))
-                .remainTotal(BigDecimal.valueOf(cplExcel.assignTotal()))
-                .m01Amt(BigDecimal.valueOf(cplExcel.m01Amt()))
-                .m02Amt(BigDecimal.valueOf(cplExcel.m02Amt()))
-                .m03Amt(BigDecimal.valueOf(cplExcel.m03Amt()))
-                .m04Amt(BigDecimal.valueOf(cplExcel.m04Amt()))
-                .m05Amt(BigDecimal.valueOf(cplExcel.m05Amt()))
-                .m06Amt(BigDecimal.valueOf(cplExcel.m06Amt()))
-                .m07Amt(BigDecimal.valueOf(cplExcel.m07Amt()))
-                .m08Amt(BigDecimal.valueOf(cplExcel.m08Amt()))
-                .m09Amt(BigDecimal.valueOf(cplExcel.m09Amt()))
-                .m10Amt(BigDecimal.valueOf(cplExcel.m10Amt()))
-                .m11Amt(BigDecimal.valueOf(cplExcel.m11Amt()))
-                .m12Amt(BigDecimal.valueOf(cplExcel.m12Amt()))
-                .r01Amt(BigDecimal.valueOf(cplExcel.m01Amt()))
-                .r02Amt(BigDecimal.valueOf(cplExcel.m02Amt()))
-                .r03Amt(BigDecimal.valueOf(cplExcel.m03Amt()))
-                .r04Amt(BigDecimal.valueOf(cplExcel.m04Amt()))
-                .r05Amt(BigDecimal.valueOf(cplExcel.m05Amt()))
-                .r06Amt(BigDecimal.valueOf(cplExcel.m06Amt()))
-                .r07Amt(BigDecimal.valueOf(cplExcel.m07Amt()))
-                .r08Amt(BigDecimal.valueOf(cplExcel.m08Amt()))
-                .r09Amt(BigDecimal.valueOf(cplExcel.m09Amt()))
-                .r10Amt(BigDecimal.valueOf(cplExcel.m10Amt()))
-                .r11Amt(BigDecimal.valueOf(cplExcel.m11Amt()))
-                .r12Amt(BigDecimal.valueOf(cplExcel.m12Amt()))
-                .rKv1Amt(sumOf(BigDecimal.valueOf(cplExcel.m01Amt()), BigDecimal.valueOf(cplExcel.m02Amt()), BigDecimal.valueOf(cplExcel.m03Amt())))
-                .rKv2Amt(sumOf(BigDecimal.valueOf(cplExcel.m04Amt()), BigDecimal.valueOf(cplExcel.m05Amt()), BigDecimal.valueOf(cplExcel.m06Amt())))
-                .rKv3Amt(sumOf(BigDecimal.valueOf(cplExcel.m07Amt()), BigDecimal.valueOf(cplExcel.m08Amt()), BigDecimal.valueOf(cplExcel.m09Amt())))
-                .rKv4Amt(sumOf(BigDecimal.valueOf(cplExcel.m10Amt()), BigDecimal.valueOf(cplExcel.m11Amt()), BigDecimal.valueOf(cplExcel.m12Amt())))
+                .totalLimit(BigDecimal.valueOf(cplExcel.assignTotal()))
+                .totalBalance(BigDecimal.valueOf(cplExcel.assignTotal()))
+                .federalBudget(BigDecimal.valueOf(cplExcel.assignFederal()))
+                .regionalBudget(BigDecimal.valueOf(cplExcel.assignRegional()))
+                .totalBalance(BigDecimal.valueOf(cplExcel.assignTotal()))
+                .janLimit(BigDecimal.valueOf(cplExcel.m01Amt()))
+                .febLimit(BigDecimal.valueOf(cplExcel.m02Amt()))
+                .marLimit(BigDecimal.valueOf(cplExcel.m03Amt()))
+                .aprLimit(BigDecimal.valueOf(cplExcel.m04Amt()))
+                .mayLimit(BigDecimal.valueOf(cplExcel.m05Amt()))
+                .junLimit(BigDecimal.valueOf(cplExcel.m06Amt()))
+                .julLimit(BigDecimal.valueOf(cplExcel.m07Amt()))
+                .augLimit(BigDecimal.valueOf(cplExcel.m08Amt()))
+                .sepLimit(BigDecimal.valueOf(cplExcel.m09Amt()))
+                .octLimit(BigDecimal.valueOf(cplExcel.m10Amt()))
+                .novLimit(BigDecimal.valueOf(cplExcel.m11Amt()))
+                .decLimit(BigDecimal.valueOf(cplExcel.m12Amt()))
+                .janBalance(BigDecimal.valueOf(cplExcel.m01Amt()))
+                .janBalance(BigDecimal.valueOf(cplExcel.m02Amt()))
+                .janBalance(BigDecimal.valueOf(cplExcel.m03Amt()))
+                .janBalance(BigDecimal.valueOf(cplExcel.m04Amt()))
+                .janBalance(BigDecimal.valueOf(cplExcel.m05Amt()))
+                .janBalance(BigDecimal.valueOf(cplExcel.m06Amt()))
+                .janBalance(BigDecimal.valueOf(cplExcel.m07Amt()))
+                .janBalance(BigDecimal.valueOf(cplExcel.m08Amt()))
+                .janBalance(BigDecimal.valueOf(cplExcel.m09Amt()))
+                .janBalance(BigDecimal.valueOf(cplExcel.m10Amt()))
+                .janBalance(BigDecimal.valueOf(cplExcel.m11Amt()))
+                .janBalance(BigDecimal.valueOf(cplExcel.m12Amt()))
+                .fstQuarterBalance(sumOf(BigDecimal.valueOf(cplExcel.m01Amt()), BigDecimal.valueOf(cplExcel.m02Amt()), BigDecimal.valueOf(cplExcel.m03Amt())))
+                .scdQuarterBalance(sumOf(BigDecimal.valueOf(cplExcel.m04Amt()), BigDecimal.valueOf(cplExcel.m05Amt()), BigDecimal.valueOf(cplExcel.m06Amt())))
+                .trdQuarterBalance(sumOf(BigDecimal.valueOf(cplExcel.m07Amt()), BigDecimal.valueOf(cplExcel.m08Amt()), BigDecimal.valueOf(cplExcel.m09Amt())))
+                .frtQuarterBalance(sumOf(BigDecimal.valueOf(cplExcel.m10Amt()), BigDecimal.valueOf(cplExcel.m11Amt()), BigDecimal.valueOf(cplExcel.m12Amt())))
                 .build();
     }
 
@@ -231,48 +219,48 @@ public class CashPlanLimitMapper {
 
     private static List<Attribute> buildAttributeList(CashPlanLimit cpl, Map<CodeType, Map<Long, String>> codesMap) {
         return List.of(
-                new LongAttribute(3303, cpl.getYear()),
-                new DoubleAttribute(1609, cpl.getLimitTotalAmt()),
-                new DoubleAttribute(1611, cpl.getRemainTotal()),
-                new DoubleAttribute(1828, cpl.getLimitFederalAmt()),
-                new DoubleAttribute(1829, cpl.getLimitRegionalAmt()),
-                new LinkedAttribute(1733, getCodeId(codesMap, KADMR, cpl.getKvsr())),
-                new LinkedAttribute(1734, getCodeId(codesMap, KFSR, cpl.getKfsr())),
-                new LinkedAttribute(1735, getCodeId(codesMap, KCSR, cpl.getKcsr())),
-                new LinkedAttribute(1736, getCodeId(codesMap, KVR, cpl.getKvr())),
-                new LinkedAttribute(1737, getCodeId(codesMap, KESR, cpl.getKosgu())),
-                new LinkedAttribute(1739, getCodeId(codesMap, KDE, cpl.getDopEk())),
-                new LinkedAttribute(1740, getCodeId(codesMap, KDR, cpl.getDopKr())),
-                new LinkedAttribute(1751, getCodeId(codesMap, PURPOSEFULGRANT, cpl.getPurpose())),
-                new LinkedAttribute(3448, getCodeId(codesMap, KDF, cpl.getDopFk())),
-                new DoubleAttribute(1612, cpl.getM01Amt()),
-                new DoubleAttribute(1613, cpl.getM02Amt()),
-                new DoubleAttribute(1614, cpl.getM03Amt()),
-                new DoubleAttribute(1617, cpl.getM04Amt()),
-                new DoubleAttribute(1618, cpl.getM05Amt()),
-                new DoubleAttribute(1619, cpl.getM06Amt()),
-                new DoubleAttribute(1622, cpl.getM07Amt()),
-                new DoubleAttribute(1623, cpl.getM08Amt()),
-                new DoubleAttribute(1624, cpl.getM09Amt()),
-                new DoubleAttribute(1627, cpl.getM10Amt()),
-                new DoubleAttribute(1628, cpl.getM11Amt()),
-                new DoubleAttribute(1629, cpl.getM12Amt()),
-                new DoubleAttribute(3276, cpl.getR01Amt()),
-                new DoubleAttribute(3278, cpl.getR02Amt()),
-                new DoubleAttribute(3280, cpl.getR03Amt()),
-                new DoubleAttribute(3282, cpl.getR04Amt()),
-                new DoubleAttribute(3284, cpl.getR05Amt()),
-                new DoubleAttribute(3286, cpl.getR06Amt()),
-                new DoubleAttribute(3288, cpl.getR07Amt()),
-                new DoubleAttribute(3290, cpl.getR08Amt()),
-                new DoubleAttribute(3292, cpl.getR09Amt()),
-                new DoubleAttribute(3294, cpl.getR10Amt()),
-                new DoubleAttribute(3296, cpl.getR11Amt()),
-                new DoubleAttribute(3298, cpl.getR12Amt()),
-                new DoubleAttribute(1616, cpl.getRKv1Amt()),
-                new DoubleAttribute(1621, cpl.getRKv2Amt()),
-                new DoubleAttribute(1626, cpl.getRKv3Amt()),
-                new DoubleAttribute(1631, cpl.getRKv4Amt())
+                new LongAttribute(YEAR_ATTR, cpl.getYear()),
+                new DoubleAttribute(TOTAL_LIMIT_ATTR, cpl.getTotalLimit()),
+                new DoubleAttribute(TOTAL_BALANCE_ATTR, cpl.getTotalBalance()),
+                new DoubleAttribute(FEDERAL_BUDGET_ATTR, cpl.getFederalBudget()),
+                new DoubleAttribute(REGIONAL_BUDGET_ATTR, cpl.getRegionalBudget()),
+                new LinkedAttribute(KVSR_ATTR, getCodeId(codesMap, KVSR, cpl.getKvsr())),
+                new LinkedAttribute(KFSR_ATTR, getCodeId(codesMap, KFSR, cpl.getKfsr())),
+                new LinkedAttribute(KCSR_ATTR, getCodeId(codesMap, KCSR, cpl.getKcsr())),
+                new LinkedAttribute(KVR_ATTR, getCodeId(codesMap, KVR, cpl.getKvr())),
+                new LinkedAttribute(KOSGU_ATTR, getCodeId(codesMap, KOSGU, cpl.getKosgu())),
+                new LinkedAttribute(DOPFK_ATTR, getCodeId(codesMap, DOPFK, cpl.getDopFk())),
+                new LinkedAttribute(DOPEK_ATTR, getCodeId(codesMap, DOPEK, cpl.getDopEk())),
+                new LinkedAttribute(DOPKR_ATTR, getCodeId(codesMap, DOPKR, cpl.getDopKr())),
+                new LinkedAttribute(PURPOSE_ATTR, getCodeId(codesMap, PURPOSE, cpl.getPurpose())),
+                new DoubleAttribute(JAN_LIMIT_ATTR, cpl.getJanLimit()),
+                new DoubleAttribute(FEB_LIMIT_ATTR, cpl.getFebLimit()),
+                new DoubleAttribute(MAR_LIMIT_ATTR, cpl.getMarLimit()),
+                new DoubleAttribute(APR_LIMIT_ATTR, cpl.getAprLimit()),
+                new DoubleAttribute(MAY_LIMIT_ATTR, cpl.getMayLimit()),
+                new DoubleAttribute(JUN_LIMIT_ATTR, cpl.getJunLimit()),
+                new DoubleAttribute(JUL_LIMIT_ATTR, cpl.getJulLimit()),
+                new DoubleAttribute(AUG_LIMIT_ATTR, cpl.getAugLimit()),
+                new DoubleAttribute(SEP_LIMIT_ATTR, cpl.getSepLimit()),
+                new DoubleAttribute(OCT_LIMIT_ATTR, cpl.getOctLimit()),
+                new DoubleAttribute(NOV_LIMIT_ATTR, cpl.getNovLimit()),
+                new DoubleAttribute(DEC_LIMIT_ATTR, cpl.getDecLimit()),
+                new DoubleAttribute(JAN_BALANCE_ATTR, cpl.getJanBalance()),
+                new DoubleAttribute(FEB_BALANCE_ATTR, cpl.getFebBalance()),
+                new DoubleAttribute(MAR_BALANCE_ATTR, cpl.getMarBalance()),
+                new DoubleAttribute(APR_BALANCE_ATTR, cpl.getAprBalance()),
+                new DoubleAttribute(MAY_BALANCE_ATTR, cpl.getMayBalance()),
+                new DoubleAttribute(JUN_BALANCE_ATTR, cpl.getJunBalance()),
+                new DoubleAttribute(JUL_BALANCE_ATTR, cpl.getJulBalance()),
+                new DoubleAttribute(AUG_BALANCE_ATTR, cpl.getAugBalance()),
+                new DoubleAttribute(SEP_BALANCE_ATTR, cpl.getSepBalance()),
+                new DoubleAttribute(OCT_BALANCE_ATTR, cpl.getOctBalance()),
+                new DoubleAttribute(NOV_BALANCE_ATTR, cpl.getNovBalance()),
+                new DoubleAttribute(DEC_BALANCE_ATTR, cpl.getDecBalance()),
+                new DoubleAttribute(QUARTER_1_BAL_ATTR, cpl.getFstQuarterBalance()),
+                new DoubleAttribute(QUARTER_2_BAL_ATTR, cpl.getScdQuarterBalance()),
+                new DoubleAttribute(QUARTER_3_BAL_ATTR, cpl.getTrdQuarterBalance()),
+                new DoubleAttribute(QUARTER_4_BAL_ATTR, cpl.getFrtQuarterBalance())
         );
     }
 
@@ -282,6 +270,15 @@ public class CashPlanLimitMapper {
         if (data instanceof Number num) return BigDecimal.valueOf(num.doubleValue());
 
         return null;
+    }
+
+    private <T> T getAttrData(List<Attribute> attributes, long attributeId, Class<T> klass) {
+        Object o = attributes.stream()
+                .filter(a -> a.id().equals(attributeId))
+                .findFirst()
+                .map(Attribute::getData)
+                .orElse(null);
+        return klass.cast(o);
     }
 
     private Object getAttrData(List<Attribute> attributes, long attributeId) {
