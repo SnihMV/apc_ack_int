@@ -10,7 +10,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import su.petrosoft.apk_ack_integration.model.excel.CashPlanLimitExcelRow;
-import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRowDto;
+import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRow;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public class ExcelExtractor {
         return extractTableRows(file, "Раздел", "Итого", rowMapper::parseToCashPlanLimitRow);
     }
 
-    public List<UniBudgetExcelRowDto> getUniBudgetRows(MultipartFile file) {
+    public List<UniBudgetExcelRow> getUniBudgetRows(MultipartFile file) {
         return extractTableRows(file, "Код", "Итого", rowMapper::parseToUniBudgetRow);
     }
 
@@ -49,6 +49,7 @@ public class ExcelExtractor {
                 dtoList.add(dto);
                 log.debug("Excel row [{}] mapped to DTO: [{}]", i, dto);
             }
+            log.info("Extracted from excel file: [{}] effective rows", dtoList.size());
             return dtoList;
         } catch (IOException e) {
             log.error("Can not read excel file. Error message: [{}]", e.getMessage());

@@ -1,6 +1,6 @@
 package su.petrosoft.apk_ack_integration.mapper;
 
-import static su.petrosoft.apk_ack_integration.util.DictionaryUtil.getCodeId;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getCodeId;
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.*;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.*;
 
@@ -22,6 +22,7 @@ import su.petrosoft.apk_ack_integration.model.dto.request.instance.LinkedAttribu
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.LongAttribute;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import su.petrosoft.apk_ack_integration.model.excel.CashPlanLimitExcelRow;
+import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRow;
 import su.petrosoft.apk_ack_integration.model.xml.CreateCashPlanLimitsXml.Line;
 import su.petrosoft.apk_ack_integration.model.xml.PlDirectionLine;
 import su.petrosoft.apk_ack_integration.model.xml.UpdateCashPlanLimitXml;
@@ -197,10 +198,59 @@ public class CashPlanLimitMapper {
                 .build();
     }
 
+    public CashPlanLimit toCpl(UniBudgetExcelRow rowDto) {
+
+        return CashPlanLimit.builder()
+                .year((long) LocalDateTime.now().getYear())
+                .kfsr(rowDto.section() + rowDto.subsection())
+                .kvsr(rowDto.kvsr())
+                .kcsr(rowDto.kcsr())
+                .kvr(rowDto.kvr())
+                .kosgu(rowDto.kosgu())
+                .dopEk(rowDto.dopEk())
+                .dopKr(rowDto.dopKr())
+                .purpose(rowDto.purpose())
+                .dopFk(rowDto.dopFk())
+                .totalLimit(BigDecimal.valueOf(rowDto.assignTotal()))
+                .totalBalance(BigDecimal.valueOf(rowDto.assignTotal()))
+                .federalBudget(BigDecimal.valueOf(rowDto.assignFederal()))
+                .regionalBudget(BigDecimal.valueOf(rowDto.assignRegional()))
+                .totalBalance(BigDecimal.valueOf(rowDto.assignTotal()))
+                .janLimit(BigDecimal.valueOf(rowDto.m01Amt()))
+                .febLimit(BigDecimal.valueOf(rowDto.m02Amt()))
+                .marLimit(BigDecimal.valueOf(rowDto.m03Amt()))
+                .aprLimit(BigDecimal.valueOf(rowDto.m04Amt()))
+                .mayLimit(BigDecimal.valueOf(rowDto.m05Amt()))
+                .junLimit(BigDecimal.valueOf(rowDto.m06Amt()))
+                .julLimit(BigDecimal.valueOf(rowDto.m07Amt()))
+                .augLimit(BigDecimal.valueOf(rowDto.m08Amt()))
+                .sepLimit(BigDecimal.valueOf(rowDto.m09Amt()))
+                .octLimit(BigDecimal.valueOf(rowDto.m10Amt()))
+                .novLimit(BigDecimal.valueOf(rowDto.m11Amt()))
+                .decLimit(BigDecimal.valueOf(rowDto.m12Amt()))
+                .janBalance(BigDecimal.valueOf(rowDto.m01Amt()))
+                .febBalance(BigDecimal.valueOf(rowDto.m02Amt()))
+                .marBalance(BigDecimal.valueOf(rowDto.m03Amt()))
+                .aprBalance(BigDecimal.valueOf(rowDto.m04Amt()))
+                .mayBalance(BigDecimal.valueOf(rowDto.m05Amt()))
+                .junBalance(BigDecimal.valueOf(rowDto.m06Amt()))
+                .julBalance(BigDecimal.valueOf(rowDto.m07Amt()))
+                .augBalance(BigDecimal.valueOf(rowDto.m08Amt()))
+                .sepBalance(BigDecimal.valueOf(rowDto.m09Amt()))
+                .octBalance(BigDecimal.valueOf(rowDto.m10Amt()))
+                .novBalance(BigDecimal.valueOf(rowDto.m11Amt()))
+                .decBalance(BigDecimal.valueOf(rowDto.m12Amt()))
+                .fstQuarterBalance(sumOf(BigDecimal.valueOf(rowDto.m01Amt()), BigDecimal.valueOf(rowDto.m02Amt()), BigDecimal.valueOf(rowDto.m03Amt())))
+                .scdQuarterBalance(sumOf(BigDecimal.valueOf(rowDto.m04Amt()), BigDecimal.valueOf(rowDto.m05Amt()), BigDecimal.valueOf(rowDto.m06Amt())))
+                .trdQuarterBalance(sumOf(BigDecimal.valueOf(rowDto.m07Amt()), BigDecimal.valueOf(rowDto.m08Amt()), BigDecimal.valueOf(rowDto.m09Amt())))
+                .frtQuarterBalance(sumOf(BigDecimal.valueOf(rowDto.m10Amt()), BigDecimal.valueOf(rowDto.m11Amt()), BigDecimal.valueOf(rowDto.m12Amt())))
+                .build();
+    }
+
     public CreateInstanceRequestDto toCreateDto(CashPlanLimit cpl, Map<CodeType, Map<Long, String>> codesMap) {
         CreateInstanceRequestDto dto = new CreateInstanceRequestDto(
                 InstanceDto.builder()
-                        .templateId(CASH_PLAN_LIMIT_TEMPLATE_ID)
+                        .templateId(TEMPLATE_ID)
                         .attributes(buildAttributeList(cpl, codesMap))
                         .build());
         return dto;
@@ -210,7 +260,7 @@ public class CashPlanLimitMapper {
         UpsertInstanceRequestDto dto = new UpsertInstanceRequestDto(
                 InstanceDto.builder()
                         .id(cpl.getId())
-                        .templateId(CASH_PLAN_LIMIT_TEMPLATE_ID)
+                        .templateId(TEMPLATE_ID)
                         .version(cpl.getVersion())
                         .attributes(buildAttributeList(cpl, codesMap))
                         .build());

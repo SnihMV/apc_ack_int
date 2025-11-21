@@ -16,12 +16,14 @@ import org.springframework.web.multipart.MultipartFile;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateFromExcelResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.UpdateCashPlanLimitResponseDto;
 import su.petrosoft.apk_ack_integration.service.CashPlanLimitService;
+import su.petrosoft.apk_ack_integration.service.ExtendedLimitService;
 
 @RestController
 @Slf4j
 @RequestMapping("api/v1/cashPlanLimits")
 @RequiredArgsConstructor
 public class CashPlanLimitController {
+    private final ExtendedLimitService xService;
     private final CashPlanLimitService service;
 
     @Operation(
@@ -36,7 +38,8 @@ public class CashPlanLimitController {
                     content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
             @RequestParam("file") MultipartFile file) {
         log.debug("Excel: Received file [{}]", file.getOriginalFilename());
-        return service.createFromExcel(file);
+        return xService.createLimits(file);
+//        return service.createFromExcel(file);
     }
 
     @PatchMapping("xml")

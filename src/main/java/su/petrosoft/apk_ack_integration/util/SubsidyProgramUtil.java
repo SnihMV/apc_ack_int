@@ -1,11 +1,10 @@
 package su.petrosoft.apk_ack_integration.util;
 
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toSet;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.makeSimpleFilter;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
@@ -51,7 +50,7 @@ public class SubsidyProgramUtil {
         return false;
     }
 
-    public static InstanceDto subsidyProgramRequestDto(Map<Long, Object> filters) {
+    public static InstanceDto subsidyProgramsRequestDto(Map<Long, Object> filters) {
         return InstanceDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(ViewType.DETAILED_FORM_VIEW)
@@ -67,12 +66,4 @@ public class SubsidyProgramUtil {
                 .build();
     }
 
-    private static Filter makeSimpleFilter(Map<Long, Object> filters) {
-        if (filters == null || filters.isEmpty()) {
-            return null;
-        }
-        return new Filter(filters.entrySet().stream()
-                .map(entry -> new FilterAttribute(ValueType.LONG, entry.getKey(), entry.getValue()))
-                .toList());
-    }
 }

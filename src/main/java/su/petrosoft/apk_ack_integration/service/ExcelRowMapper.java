@@ -4,14 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.excel.CashPlanLimitExcelRow;
-import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRowDto;
+import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRow;
 
 @Slf4j
 @Component
 public class ExcelRowMapper {
 
-    public UniBudgetExcelRowDto parseToUniBudgetRow(Row row) {
-        return new UniBudgetExcelRowDto(
+    public UniBudgetExcelRow parseToUniBudgetRow(Row row) {
+        return new UniBudgetExcelRow(
                 row.getCell(0).getStringCellValue(),
                 row.getCell(1).getStringCellValue(),
                 row.getCell(2).getStringCellValue(),

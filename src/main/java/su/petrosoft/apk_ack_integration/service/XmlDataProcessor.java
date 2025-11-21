@@ -15,8 +15,11 @@ import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import su.petrosoft.apk_ack_integration.model.xml.CreateCashPlanLimitsXml;
 import su.petrosoft.apk_ack_integration.model.xml.UpdateCashPlanLimitXml;
 
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Set;
+
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.cashPlanLimitsCodesByCurrentYear;
 
 @Service
 @Slf4j
@@ -40,8 +43,8 @@ public class XmlDataProcessor {
         Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap();
         CashPlanLimit cplToUpdate = mapper.toCpl(upsertingXml);
 
-        List<CashPlanLimit> allCashPlanLimits = apkService.getAllCashPlanLimits();
-        log.debug("Existed Cash Plan Limits: {}", allCashPlanLimits.size());
+        Set<CashPlanLimit> allCashPlanLimits = apkService.getAllCashPlanLimits(cashPlanLimitsCodesByCurrentYear());
+        log.debug("Exist [{}] CashPlanLimits for [{}] year in DB", allCashPlanLimits.size(), LocalDateTime.now().getYear());
 
         allCashPlanLimits.stream()
                 .filter(cpl -> cpl.equals(cplToUpdate))

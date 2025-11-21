@@ -25,6 +25,8 @@ public class FinancingSource {
     private String dopKr;
     private String purpose;
     private Long subsidyProgramId;
+    private Long cashPlanLimitId;
+    private String concatenatedKBK;
 
     @Override
     public boolean equals(Object o) {

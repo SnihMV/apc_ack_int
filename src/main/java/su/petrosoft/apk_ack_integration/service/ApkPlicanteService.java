@@ -26,9 +26,8 @@ import java.util.Map;
 import java.util.Set;
 
 import static java.util.stream.Collectors.*;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CASH_PLAN_LIMIT_TEMPLATE_ID;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.*;
-import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.subsidyProgramRequestDto;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.subsidyProgramsRequestDto;
 
 @Service
 @Slf4j
@@ -41,22 +40,19 @@ public class ApkPlicanteService {
     private final FinancingSourceMapper fsMapper;
     private final ObjectMapper objectMapper;
 
-    public List<CashPlanLimit> getAllCashPlanLimits() {
-        List<InstanceDto> dtoList = apkRestClient.getExistedInstances(
-            InstanceDto.builder()
-                    .templateId(CASH_PLAN_LIMIT_TEMPLATE_ID)
-                    .build());
-        return dtoList.stream()
-            .map(cplMapper::toCpl)
-            .toList();
-    }
-
-    public List<SubsidyProgram> getAllSubsidyPrograms(Map<Long, Object> filterMap) {
-        InstanceDto requestDto = subsidyProgramRequestDto(filterMap);
+    public Set<CashPlanLimit> getAllCashPlanLimits(InstanceDto requestDto) {
         List<InstanceDto> dtoList = apkRestClient.getExistedInstances(requestDto);
         return dtoList.stream()
-            .map(spMapper::toEntity)
-            .toList();
+                .map(cplMapper::toCpl)
+                .collect(toSet());
+    }
+
+    public Set<SubsidyProgram> getAllSubsidyPrograms(Map<Long, Object> filterMap) {
+        InstanceDto requestDto = subsidyProgramsRequestDto(filterMap);
+        List<InstanceDto> dtoList = apkRestClient.getExistedInstances(requestDto);
+        return dtoList.stream()
+                .map(spMapper::toEntity)
+                .collect(toSet());
     }
 
     public Set<FinancingSource> getAllFinancingSources() {
@@ -95,8 +91,8 @@ public class ApkPlicanteService {
             log.debug(codes.get(codeType).toString());
         }
         long count = codes.values().stream()
-            .flatMap(map -> map.entrySet().stream())
-            .count();
+                .flatMap(map -> map.entrySet().stream())
+                .count();
         log.debug("Found {} codes overall", count);
         return codes;
     }
@@ -104,16 +100,16 @@ public class ApkPlicanteService {
     private Map<Long, String> getCodesByType(CodeType codeType) {
         log.debug("Receiving codes for type {}", codeType.name());
         List<GetAttributesListResponseDto> list = apkRestClient.getTableAttributesList(
-            new GetAttributesListRequestDto(codeType.getTemplateId(), null));
+                new GetAttributesListRequestDto(codeType.getTemplateId(), null));
         return list.stream()
-            .filter(dto -> dto.shortForm() != null)
-            .collect(toMap(
-                GetAttributesListResponseDto::id,
-                GetAttributesListResponseDto::shortForm
-            ));
+                .filter(dto -> dto.shortForm() != null)
+                .collect(toMap(
+                        GetAttributesListResponseDto::id,
+                        GetAttributesListResponseDto::shortForm
+                ));
     }
 
-    public List<SubsidyProgram> getAllSubsidyPrograms() {
+    public Set<SubsidyProgram> getAllSubsidyPrograms() {
         return getAllSubsidyPrograms(null);
     }
 
