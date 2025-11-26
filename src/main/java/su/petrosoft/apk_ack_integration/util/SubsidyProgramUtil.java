@@ -1,11 +1,11 @@
 package su.petrosoft.apk_ack_integration.util;
 
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toSet;
+import static su.petrosoft.apk_ack_integration.model.enums.ViewType.DETAILED_FORM_VIEW;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.makeSimpleFilter;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
@@ -22,6 +22,8 @@ import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 public class SubsidyProgramUtil {
 
     public static final long TEMPLATE_ID = 9492;
+    public static final String SP_TITLE = "Направления (программы) субсидирования";
+
     public static final long LEVEL_ATTR = 3399;
     public static final long PARENT_ATTR = 3400;
     public static final long NAME_ATTR = 1759;
@@ -51,10 +53,17 @@ public class SubsidyProgramUtil {
         return false;
     }
 
-    public static InstanceDto subsidyProgramRequestDto(Map<Long, Object> filters) {
+    public static InstanceDto getAllSubsidyProgramsRequestDto() {
         return InstanceDto.builder()
                 .templateId(TEMPLATE_ID)
-                .viewType(ViewType.DETAILED_FORM_VIEW)
+                .viewType(DETAILED_FORM_VIEW)
+                .build();
+    }
+
+    public static InstanceDto getThirdLevelSpRequestDto() {
+        return InstanceDto.builder()
+                .templateId(TEMPLATE_ID)
+                .viewType(DETAILED_FORM_VIEW)
                 .attributes(List.of(
                         new StringAttribute(NAME_ATTR),
                         new LongAttribute(CODE_ATTR),
@@ -63,16 +72,8 @@ public class SubsidyProgramUtil {
                         new LinkedAttribute(KCSR_ATTR),
                         new LinkedAttribute(DOPKR_ATTR)
                 ))
-                .filter(makeSimpleFilter(filters))
+                .filter(makeSimpleFilter(Map.of(LEVEL_ATTR, 3)))
                 .build();
     }
 
-    private static Filter makeSimpleFilter(Map<Long, Object> filters) {
-        if (filters == null || filters.isEmpty()) {
-            return null;
-        }
-        return new Filter(filters.entrySet().stream()
-                .map(entry -> new FilterAttribute(ValueType.LONG, entry.getKey(), entry.getValue()))
-                .toList());
-    }
 }

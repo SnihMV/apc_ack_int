@@ -25,20 +25,22 @@ public class FinancingSource {
     private String dopKr;
     private String purpose;
     private Long subsidyProgramId;
+    private Long cashPlanLimitId;
+    private String concatenatedKBK;
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         FinancingSource that = (FinancingSource) o;
-        return Objects.equals(kvsr, that.kvsr) && Objects.equals(kfsr, that.kfsr)
-                && Objects.equals(kcsr, that.kcsr) && Objects.equals(kvr, that.kvr)
-                && Objects.equals(kosgu, that.kosgu) && Objects.equals(dopFk, that.dopFk)
-                && Objects.equals(dopEk, that.dopEk) && Objects.equals(dopKr, that.dopKr)
-                && Objects.equals(purpose, that.purpose);
+        return Objects.equals(year, that.year) && Objects.equals(kvsr, that.kvsr)
+                && Objects.equals(kfsr, that.kfsr) && Objects.equals(kcsr, that.kcsr)
+                && Objects.equals(kvr, that.kvr) && Objects.equals(kosgu, that.kosgu)
+                && Objects.equals(dopFk, that.dopFk) && Objects.equals(dopEk, that.dopEk)
+                && Objects.equals(dopKr, that.dopKr) && Objects.equals(purpose, that.purpose);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(kvsr, kfsr, kcsr, kvr, kosgu, dopFk, dopEk, dopKr, purpose);
+        return Objects.hash(year, kvsr, kfsr, kcsr, kvr, kosgu, dopFk, dopEk, dopKr, purpose);
     }
 }

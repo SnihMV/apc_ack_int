@@ -13,15 +13,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import su.petrosoft.apk_ack_integration.model.dto.response.CreateFromExcelResponseDto;
+import su.petrosoft.apk_ack_integration.model.dto.response.CreateInstancesFromFileResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.UpdateCashPlanLimitResponseDto;
 import su.petrosoft.apk_ack_integration.service.CashPlanLimitService;
+import su.petrosoft.apk_ack_integration.service.ExcelExtractor;
 
 @RestController
 @Slf4j
 @RequestMapping("api/v1/cashPlanLimits")
 @RequiredArgsConstructor
 public class CashPlanLimitController {
+    private final ExcelExtractor excelExtractor;
     private final CashPlanLimitService service;
 
     @Operation(
@@ -30,18 +32,33 @@ public class CashPlanLimitController {
                     "File should contain specific columns and format.")
     @PostMapping("excel")
     @ResponseStatus(HttpStatus.OK)
-    public CreateFromExcelResponseDto uploadExcel(
+    public CreateInstancesFromFileResponseDto createFromExcel(
             @Parameter(description = "Excel file with Cash Plan Limits data",
                     required = true,
                     content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
             @RequestParam("file") MultipartFile file) {
-        log.debug("Excel: Received file [{}]", file.getOriginalFilename());
-        return service.createFromExcel(file);
+        log.debug("Received file [{}] to create CashPlanLimits", file.getOriginalFilename());
+        CreateInstancesFromFileResponseDto fromUniBudgetExcel = service.createFromUniBudgetExcel(file);
+        return fromUniBudgetExcel;
     }
 
     @PatchMapping("xml")
     @ResponseStatus(HttpStatus.OK)
     public UpdateCashPlanLimitResponseDto updateByXml() {
         return service.updateByXml();
+    }
+
+    @Operation(
+            summary = "Upload Excel file with Cash Plan Limits",
+            description = "Upload an Excel file to update existing Cash Plan Limits. " +
+                    "File should contain specific columns and format.")
+    @PatchMapping("excel")
+    @ResponseStatus(HttpStatus.OK)
+    public UpdateCashPlanLimitResponseDto updateByExcel(
+            @Parameter(description = "Excel file with Cash Plan Limits data",
+                    required = true,
+                    content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+            @RequestParam MultipartFile file) {
+        return service.updateByExcel(file);
     }
 }

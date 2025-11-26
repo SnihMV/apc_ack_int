@@ -1,42 +1,59 @@
 package su.petrosoft.apk_ack_integration.model.excel;
 
-import lombok.Builder;
+public sealed interface CashPlanLimitExcelRow
+        permits UniBudgetExcelRow, UniBudgetCodedExcelRow, RosterKbkExcelRow {
 
-@Builder
-public record CashPlanLimitExcelRow(
-        String section,
-        String subsection,
-        String kcsr,
-        String dopKr,
-        String kvr,
-        String kosgu,
-        String kvsr,
-        String dopFk,
-        String dopEk,
-        String purposeCode,
+    String section();
 
-        Double assignTotal,
-        Double assignFederal,
-        Double assignRegional,
+    String subsection();
 
-        Double financeTotal,
-        Double requested,
+    String kvsr();
 
-        Double m01Amt,
-        Double m02Amt,
-        Double m03Amt,
-        Double m04Amt,
-        Double m05Amt,
-        Double m06Amt,
-        Double m07Amt,
-        Double m08Amt,
-        Double m09Amt,
-        Double m10Amt,
-        Double m11Amt,
-        Double m12Amt,
+    String kcsr();
 
-        Double financeFederal,
-        Double financeRegional
+    String kvr();
 
-) {
+    String kosgu();
+
+    String dopEk();
+
+    String dopKr();
+
+    String purpose();
+
+    String dopFk();
+
+    Double assignTotal();
+
+    Double assignFederal();
+
+    Double assignRegional();
+
+    Double m01Amt();
+
+    Double m02Amt();
+
+    Double m03Amt();
+
+    Double m04Amt();
+
+    Double m05Amt();
+
+    Double m06Amt();
+
+    Double m07Amt();
+
+    Double m08Amt();
+
+    Double m09Amt();
+
+    Double m10Amt();
+
+    Double m11Amt();
+
+    Double m12Amt();
+
+    default String getKfsr() {
+        return section() + subsection();
+    }
 }

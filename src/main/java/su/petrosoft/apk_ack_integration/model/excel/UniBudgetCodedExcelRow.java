@@ -3,7 +3,7 @@ package su.petrosoft.apk_ack_integration.model.excel;
 import lombok.Builder;
 
 @Builder
-public record UniBudgetExcelRowDto(
+public record UniBudgetCodedExcelRow(
         String code,
         String section,
         String subsection,
@@ -49,5 +49,5 @@ public record UniBudgetExcelRowDto(
 
         Double financeFederal,
         Double financeRegional
-) {
+) implements CashPlanLimitExcelRow {
 }

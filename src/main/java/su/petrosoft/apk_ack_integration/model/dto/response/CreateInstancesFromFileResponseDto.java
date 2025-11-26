@@ -5,9 +5,9 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-public record UpdateCashPlanLimitResponseDto(
+public record CreateInstancesFromFileResponseDto(
         int incomingCount,
-        int intersectedCount,
-        List<Long> updatedIds
+        int disjointCount,
+        List<Long> persistedIds
 ) {
 }
