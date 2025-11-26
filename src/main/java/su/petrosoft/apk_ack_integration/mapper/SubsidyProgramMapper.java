@@ -10,14 +10,14 @@ import su.petrosoft.apk_ack_integration.model.dto.request.instance.LinkedAttribu
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.LongAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
-import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRowDto;
+import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedExcelRow;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.*;
-import static su.petrosoft.apk_ack_integration.util.DictionaryUtil.getCodeId;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getCodeId;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.CODE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.DOPKR_ATTR;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.KCSR_ATTR;
@@ -44,7 +44,7 @@ public class SubsidyProgramMapper {
                 .build();
     }
 
-    public SubsidyProgram toFirstLevelSP(UniBudgetExcelRowDto dto) {
+    public SubsidyProgram toFirstLevelSP(UniBudgetCodedExcelRow dto) {
         return SubsidyProgram.builder()
                 .level(1L)
                 .code(dto.code())
@@ -52,7 +52,7 @@ public class SubsidyProgramMapper {
                 .build();
     }
 
-    public SubsidyProgram toSecondLevelSP(UniBudgetExcelRowDto dto) {
+    public SubsidyProgram toSecondLevelSP(UniBudgetCodedExcelRow dto) {
         return SubsidyProgram.builder()
                 .level(2L)
                 .title(dto.kcsrTitle())
@@ -60,7 +60,7 @@ public class SubsidyProgramMapper {
                 .build();
     }
 
-    public SubsidyProgram toThirdLevelSP(UniBudgetExcelRowDto dto) {
+    public SubsidyProgram toThirdLevelSP(UniBudgetCodedExcelRow dto) {
         return SubsidyProgram.builder()
                 .level(3L)
                 .title(dto.dopKrTitle())

@@ -1,6 +1,6 @@
 package su.petrosoft.apk_ack_integration.mapper;
 
-import static su.petrosoft.apk_ack_integration.util.DictionaryUtil.getCodeId;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getCodeId;
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.*;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.*;
 
@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.dto.request.CreateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.request.UpsertInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.request.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.DoubleAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
@@ -22,6 +22,7 @@ import su.petrosoft.apk_ack_integration.model.dto.request.instance.LinkedAttribu
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.LongAttribute;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import su.petrosoft.apk_ack_integration.model.excel.CashPlanLimitExcelRow;
+import su.petrosoft.apk_ack_integration.model.excel.RosterKbkExcelRow;
 import su.petrosoft.apk_ack_integration.model.xml.CreateCashPlanLimitsXml.Line;
 import su.petrosoft.apk_ack_integration.model.xml.PlDirectionLine;
 import su.petrosoft.apk_ack_integration.model.xml.UpdateCashPlanLimitXml;
@@ -148,7 +149,7 @@ public class CashPlanLimitMapper {
     }
 
 
-    public CashPlanLimit toCpl(CashPlanLimitExcelRow cplExcel) {
+    public CashPlanLimit toCpl(RosterKbkExcelRow cplExcel) {
 
         return CashPlanLimit.builder()
                 .year((long) LocalDateTime.now().getYear())
@@ -159,7 +160,7 @@ public class CashPlanLimitMapper {
                 .kosgu(cplExcel.kosgu())
                 .dopEk(cplExcel.dopEk())
                 .dopKr(cplExcel.dopKr())
-                .purpose(cplExcel.purposeCode())
+                .purpose(cplExcel.purpose())
                 .dopFk(cplExcel.dopFk())
                 .totalLimit(BigDecimal.valueOf(cplExcel.assignTotal()))
                 .totalBalance(BigDecimal.valueOf(cplExcel.assignTotal()))
@@ -197,27 +198,76 @@ public class CashPlanLimitMapper {
                 .build();
     }
 
+    public CashPlanLimit toCpl(CashPlanLimitExcelRow rowDto) {
+
+        return CashPlanLimit.builder()
+                .year((long) LocalDateTime.now().getYear())
+                .kfsr(rowDto.getKfsr())
+                .kvsr(rowDto.kvsr())
+                .kcsr(rowDto.kcsr())
+                .kvr(rowDto.kvr())
+                .kosgu(rowDto.kosgu())
+                .dopEk(rowDto.dopEk())
+                .dopKr(rowDto.dopKr())
+                .purpose(rowDto.purpose())
+                .dopFk(rowDto.dopFk())
+                .totalLimit(BigDecimal.valueOf(rowDto.assignTotal()))
+                .totalBalance(BigDecimal.valueOf(rowDto.assignTotal()))
+                .federalBudget(BigDecimal.valueOf(rowDto.assignFederal()))
+                .regionalBudget(BigDecimal.valueOf(rowDto.assignRegional()))
+                .totalBalance(BigDecimal.valueOf(rowDto.assignTotal()))
+                .janLimit(BigDecimal.valueOf(rowDto.m01Amt()))
+                .febLimit(BigDecimal.valueOf(rowDto.m02Amt()))
+                .marLimit(BigDecimal.valueOf(rowDto.m03Amt()))
+                .aprLimit(BigDecimal.valueOf(rowDto.m04Amt()))
+                .mayLimit(BigDecimal.valueOf(rowDto.m05Amt()))
+                .junLimit(BigDecimal.valueOf(rowDto.m06Amt()))
+                .julLimit(BigDecimal.valueOf(rowDto.m07Amt()))
+                .augLimit(BigDecimal.valueOf(rowDto.m08Amt()))
+                .sepLimit(BigDecimal.valueOf(rowDto.m09Amt()))
+                .octLimit(BigDecimal.valueOf(rowDto.m10Amt()))
+                .novLimit(BigDecimal.valueOf(rowDto.m11Amt()))
+                .decLimit(BigDecimal.valueOf(rowDto.m12Amt()))
+                .janBalance(BigDecimal.valueOf(rowDto.m01Amt()))
+                .febBalance(BigDecimal.valueOf(rowDto.m02Amt()))
+                .marBalance(BigDecimal.valueOf(rowDto.m03Amt()))
+                .aprBalance(BigDecimal.valueOf(rowDto.m04Amt()))
+                .mayBalance(BigDecimal.valueOf(rowDto.m05Amt()))
+                .junBalance(BigDecimal.valueOf(rowDto.m06Amt()))
+                .julBalance(BigDecimal.valueOf(rowDto.m07Amt()))
+                .augBalance(BigDecimal.valueOf(rowDto.m08Amt()))
+                .sepBalance(BigDecimal.valueOf(rowDto.m09Amt()))
+                .octBalance(BigDecimal.valueOf(rowDto.m10Amt()))
+                .novBalance(BigDecimal.valueOf(rowDto.m11Amt()))
+                .decBalance(BigDecimal.valueOf(rowDto.m12Amt()))
+                .fstQuarterBalance(sumOf(BigDecimal.valueOf(rowDto.m01Amt()), BigDecimal.valueOf(rowDto.m02Amt()), BigDecimal.valueOf(rowDto.m03Amt())))
+                .scdQuarterBalance(sumOf(BigDecimal.valueOf(rowDto.m04Amt()), BigDecimal.valueOf(rowDto.m05Amt()), BigDecimal.valueOf(rowDto.m06Amt())))
+                .trdQuarterBalance(sumOf(BigDecimal.valueOf(rowDto.m07Amt()), BigDecimal.valueOf(rowDto.m08Amt()), BigDecimal.valueOf(rowDto.m09Amt())))
+                .frtQuarterBalance(sumOf(BigDecimal.valueOf(rowDto.m10Amt()), BigDecimal.valueOf(rowDto.m11Amt()), BigDecimal.valueOf(rowDto.m12Amt())))
+                .build();
+    }
+
     public CreateInstanceRequestDto toCreateDto(CashPlanLimit cpl, Map<CodeType, Map<Long, String>> codesMap) {
         CreateInstanceRequestDto dto = new CreateInstanceRequestDto(
                 InstanceDto.builder()
-                        .templateId(CASH_PLAN_LIMIT_TEMPLATE_ID)
-                        .attributes(buildAttributeList(cpl, codesMap))
+                        .templateId(TEMPLATE_ID)
+                        .attributes(buildAttributeListToCreate(cpl, codesMap))
                         .build());
         return dto;
     }
 
-    public UpsertInstanceRequestDto toUpdateDto(CashPlanLimit cpl, Map<CodeType, Map<Long, String>> codesMap) {
-        UpsertInstanceRequestDto dto = new UpsertInstanceRequestDto(
+    public UpdateInstanceRequestDto toUpdateDto(CashPlanLimit cpl) {
+        UpdateInstanceRequestDto dto = new UpdateInstanceRequestDto(
                 InstanceDto.builder()
                         .id(cpl.getId())
-                        .templateId(CASH_PLAN_LIMIT_TEMPLATE_ID)
+                        .templateId(TEMPLATE_ID)
                         .version(cpl.getVersion())
-                        .attributes(buildAttributeList(cpl, codesMap))
+                        .attributes(buildAttributeListToUpdate(cpl))
                         .build());
         return dto;
     }
 
-    private static List<Attribute> buildAttributeList(CashPlanLimit cpl, Map<CodeType, Map<Long, String>> codesMap) {
+    private static List<Attribute> buildAttributeListToCreate(CashPlanLimit cpl, Map<CodeType, Map<Long, String>> codesMap) {
         return List.of(
                 new LongAttribute(YEAR_ATTR, cpl.getYear()),
                 new DoubleAttribute(TOTAL_LIMIT_ATTR, cpl.getTotalLimit()),
@@ -233,6 +283,43 @@ public class CashPlanLimitMapper {
                 new LinkedAttribute(DOPEK_ATTR, getCodeId(codesMap, DOPEK, cpl.getDopEk())),
                 new LinkedAttribute(DOPKR_ATTR, getCodeId(codesMap, DOPKR, cpl.getDopKr())),
                 new LinkedAttribute(PURPOSE_ATTR, getCodeId(codesMap, PURPOSE, cpl.getPurpose())),
+                new DoubleAttribute(JAN_LIMIT_ATTR, cpl.getJanLimit()),
+                new DoubleAttribute(FEB_LIMIT_ATTR, cpl.getFebLimit()),
+                new DoubleAttribute(MAR_LIMIT_ATTR, cpl.getMarLimit()),
+                new DoubleAttribute(APR_LIMIT_ATTR, cpl.getAprLimit()),
+                new DoubleAttribute(MAY_LIMIT_ATTR, cpl.getMayLimit()),
+                new DoubleAttribute(JUN_LIMIT_ATTR, cpl.getJunLimit()),
+                new DoubleAttribute(JUL_LIMIT_ATTR, cpl.getJulLimit()),
+                new DoubleAttribute(AUG_LIMIT_ATTR, cpl.getAugLimit()),
+                new DoubleAttribute(SEP_LIMIT_ATTR, cpl.getSepLimit()),
+                new DoubleAttribute(OCT_LIMIT_ATTR, cpl.getOctLimit()),
+                new DoubleAttribute(NOV_LIMIT_ATTR, cpl.getNovLimit()),
+                new DoubleAttribute(DEC_LIMIT_ATTR, cpl.getDecLimit()),
+                new DoubleAttribute(JAN_BALANCE_ATTR, cpl.getJanBalance()),
+                new DoubleAttribute(FEB_BALANCE_ATTR, cpl.getFebBalance()),
+                new DoubleAttribute(MAR_BALANCE_ATTR, cpl.getMarBalance()),
+                new DoubleAttribute(APR_BALANCE_ATTR, cpl.getAprBalance()),
+                new DoubleAttribute(MAY_BALANCE_ATTR, cpl.getMayBalance()),
+                new DoubleAttribute(JUN_BALANCE_ATTR, cpl.getJunBalance()),
+                new DoubleAttribute(JUL_BALANCE_ATTR, cpl.getJulBalance()),
+                new DoubleAttribute(AUG_BALANCE_ATTR, cpl.getAugBalance()),
+                new DoubleAttribute(SEP_BALANCE_ATTR, cpl.getSepBalance()),
+                new DoubleAttribute(OCT_BALANCE_ATTR, cpl.getOctBalance()),
+                new DoubleAttribute(NOV_BALANCE_ATTR, cpl.getNovBalance()),
+                new DoubleAttribute(DEC_BALANCE_ATTR, cpl.getDecBalance()),
+                new DoubleAttribute(QUARTER_1_BAL_ATTR, cpl.getFstQuarterBalance()),
+                new DoubleAttribute(QUARTER_2_BAL_ATTR, cpl.getScdQuarterBalance()),
+                new DoubleAttribute(QUARTER_3_BAL_ATTR, cpl.getTrdQuarterBalance()),
+                new DoubleAttribute(QUARTER_4_BAL_ATTR, cpl.getFrtQuarterBalance())
+        );
+    }
+
+    private static List<Attribute> buildAttributeListToUpdate(CashPlanLimit cpl) {
+        return List.of(
+                new DoubleAttribute(TOTAL_LIMIT_ATTR, cpl.getTotalLimit()),
+                new DoubleAttribute(TOTAL_BALANCE_ATTR, cpl.getTotalBalance()),
+                new DoubleAttribute(FEDERAL_BUDGET_ATTR, cpl.getFederalBudget()),
+                new DoubleAttribute(REGIONAL_BUDGET_ATTR, cpl.getRegionalBudget()),
                 new DoubleAttribute(JAN_LIMIT_ATTR, cpl.getJanLimit()),
                 new DoubleAttribute(FEB_LIMIT_ATTR, cpl.getFebLimit()),
                 new DoubleAttribute(MAR_LIMIT_ATTR, cpl.getMarLimit()),

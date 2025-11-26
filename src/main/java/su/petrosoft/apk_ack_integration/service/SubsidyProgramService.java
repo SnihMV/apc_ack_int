@@ -3,28 +3,28 @@ package su.petrosoft.apk_ack_integration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
-import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRowDto;
+import su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil;
 
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
+
+import static java.util.stream.Collectors.toSet;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.getThirdLevelSpRequestDto;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class SubsidyProgramService {
 
-    private final ExcelExtractor excelExtractor;
-    private final UniBudgetService budgetService;
+    private final ApkPlicanteService apkService;
 
-    public void createNewProgramsFromExcel(MultipartFile file) {
-        List<UniBudgetExcelRowDto> dtoList = excelExtractor.getUniBudgetRows(file);
-        log.debug("Extracted from excel file: [{}] effective rows", dtoList.size());
-        Set<SubsidyProgram> subsidyProgramsTree = new LinkedHashSet<>();
-        if (!dtoList.isEmpty()) {
-            subsidyProgramsTree = budgetService.createSubsidyProgramsTree(dtoList);
-        }
+    public Set<SubsidyProgram> getAllThirdLevelSpFromDb() {
+        Set<SubsidyProgram> allThirdLevelSpFromDB = apkService.findSubsidyPrograms(getThirdLevelSpRequestDto());
+        log.debug("Found [{}] Subsidy Programs in DB with level 3", allThirdLevelSpFromDB.size());
+        Set<SubsidyProgram> allValidThirdLvlSPFromDb = allThirdLevelSpFromDB.stream()
+                .filter(SubsidyProgramUtil::validate)
+                .collect(toSet());
+        log.info("Found [{}] valid Subsidy Programs in DB with level 3", allValidThirdLvlSPFromDb.size());
+        return allValidThirdLvlSPFromDb;
     }
 }

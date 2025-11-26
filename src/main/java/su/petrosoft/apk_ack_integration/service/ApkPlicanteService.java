@@ -14,7 +14,7 @@ import su.petrosoft.apk_ack_integration.model.FinancingSource;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.dto.request.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.GetAttributesListRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.request.UpsertInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.request.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.GetAttributesListResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
@@ -23,12 +23,12 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
-import static java.util.stream.Collectors.*;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CASH_PLAN_LIMIT_TEMPLATE_ID;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.*;
-import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.subsidyProgramRequestDto;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 @Service
 @Slf4j
@@ -41,30 +41,22 @@ public class ApkPlicanteService {
     private final FinancingSourceMapper fsMapper;
     private final ObjectMapper objectMapper;
 
-    public List<CashPlanLimit> getAllCashPlanLimits() {
-        List<InstanceDto> dtoList = apkRestClient.getExistedInstances(
-            InstanceDto.builder()
-                    .templateId(CASH_PLAN_LIMIT_TEMPLATE_ID)
-                    .build());
-        return dtoList.stream()
-            .map(cplMapper::toCpl)
-            .toList();
-    }
-
-    public List<SubsidyProgram> getAllSubsidyPrograms(Map<Long, Object> filterMap) {
-        InstanceDto requestDto = subsidyProgramRequestDto(filterMap);
+    public Set<CashPlanLimit> findCashPlanLimits(InstanceDto requestDto) {
         List<InstanceDto> dtoList = apkRestClient.getExistedInstances(requestDto);
         return dtoList.stream()
-            .map(spMapper::toEntity)
-            .toList();
+                .map(cplMapper::toCpl)
+                .collect(toSet());
     }
 
-    public Set<FinancingSource> getAllFinancingSources() {
-        List<InstanceDto> dtoList = apkRestClient.getExistedInstances(
-                InstanceDto.builder()
-                        .templateId(TEMPLATE_ID)
-                        .build()
-        );
+    public Set<SubsidyProgram> findSubsidyPrograms(InstanceDto requestDto) {
+        List<InstanceDto> dtoList = apkRestClient.getExistedInstances(requestDto);
+        return dtoList.stream()
+                .map(spMapper::toEntity)
+                .collect(toSet());
+    }
+
+    public Set<FinancingSource> findFinancingSources(InstanceDto requestDto) {
+        List<InstanceDto> dtoList = apkRestClient.getExistedInstances(requestDto);
         return dtoList.stream()
                 .map(fsMapper::toEntity)
                 .collect(toSet());
@@ -87,47 +79,39 @@ public class ApkPlicanteService {
         if (types == null || types.length == 0) {
             types = CodeType.values();
         }
-        log.debug("Receiving existed codes for types: {}", Arrays.stream(types).map(Enum::name).collect(joining(",")));
+        log.info("Receiving existed codes for types: {}", Arrays.stream(types).map(Enum::name).collect(joining(",")));
         Map<CodeType, Map<Long, String>> codes = new EnumMap<>(CodeType.class);
         for (CodeType codeType : types) {
             codes.put(codeType, getCodesByType(codeType));
-            log.debug("{} code map", codeType.name());
-            log.debug(codes.get(codeType).toString());
+            log.debug("{} code map:\n[{}]", codeType.name(), codes.get(codeType).toString());
         }
         long count = codes.values().stream()
-            .flatMap(map -> map.entrySet().stream())
-            .count();
-        log.debug("Found {} codes overall", count);
+                .flatMap(map -> map.entrySet().stream())
+                .count();
+        log.info("Extracted {} codes", count);
         return codes;
     }
 
     private Map<Long, String> getCodesByType(CodeType codeType) {
         log.debug("Receiving codes for type {}", codeType.name());
         List<GetAttributesListResponseDto> list = apkRestClient.getTableAttributesList(
-            new GetAttributesListRequestDto(codeType.getTemplateId(), null));
+                new GetAttributesListRequestDto(codeType.getTemplateId(), null));
         return list.stream()
-            .filter(dto -> dto.shortForm() != null)
-            .collect(toMap(
-                GetAttributesListResponseDto::id,
-                GetAttributesListResponseDto::shortForm
-            ));
+                .filter(dto -> dto.shortForm() != null)
+                .collect(toMap(
+                        GetAttributesListResponseDto::id,
+                        GetAttributesListResponseDto::shortForm
+                ));
     }
 
-    public List<SubsidyProgram> getAllSubsidyPrograms() {
-        return getAllSubsidyPrograms(null);
-    }
-
-    @SneakyThrows
     public FinancingSource createFinancingSource(FinancingSource financingSource, Map<CodeType, Map<Long, String>> codesMap) {
         CreateInstanceRequestDto createDto = fsMapper.toCreateDto(financingSource, codesMap);
-        String json = objectMapper.writeValueAsString(createDto);
-        log.debug("JSON to create: [{}]", json);
         InstanceDto created = apkRestClient.createInstance(createDto);
         return fsMapper.toEntity(created);
     }
 
-    public CashPlanLimit updateInstance(CashPlanLimit updatedCpl, Map<CodeType, Map<Long, String>> codesMap) {
-        UpsertInstanceRequestDto updateDto = cplMapper.toUpdateDto(updatedCpl, codesMap);
+    public CashPlanLimit updateCashPlanLimit(CashPlanLimit updatedCpl) {
+        UpdateInstanceRequestDto updateDto = cplMapper.toUpdateDto(updatedCpl);
         InstanceDto updatedInstance = apkRestClient.updateInstance(updateDto);
         return cplMapper.toCpl(updatedInstance);
     }

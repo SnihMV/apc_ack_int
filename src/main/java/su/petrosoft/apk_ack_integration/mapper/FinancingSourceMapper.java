@@ -8,27 +8,18 @@ import su.petrosoft.apk_ack_integration.model.dto.request.instance.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.LongAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.request.instance.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
-import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRowDto;
+import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedExcelRow;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.*;
-import static su.petrosoft.apk_ack_integration.util.DictionaryUtil.getCodeId;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.DIRECTION_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.DOPEK_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.DOPFK_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.DOPKR_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.KCSR_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.KFSR_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.KOSGU_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.KVR_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.KVSR_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.PURPOSE_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.TEMPLATE_ID;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.YEAR_ATTR;
+import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.*;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getCodeId;
 
 @Slf4j
 @Component
@@ -49,22 +40,25 @@ public class FinancingSourceMapper {
                 .dopEk(getAttrShortForm(attributes, DOPEK_ATTR))
                 .dopKr(getAttrShortForm(attributes, DOPKR_ATTR))
                 .purpose(getAttrShortForm(attributes, PURPOSE_ATTR))
-                .subsidyProgramId((Long) getAttrData(attributes, DIRECTION_ATTR))
+                .subsidyProgramId((Long) getAttrData(attributes, SUBSIDY_PROGRAM_ATTR))
+                .cashPlanLimitId((Long) getAttrData(attributes, CASH_PLAN_LIMIT_ATTR))
+                .concatenatedKBK((String) getAttrData(attributes, CONCAT_KBK_ATTR))
                 .build();
     }
 
-    public FinancingSource fromUniBudgetDto(UniBudgetExcelRowDto dto) {
+    public FinancingSource toEntity(UniBudgetCodedExcelRow row) {
         return FinancingSource.builder()
                 .year((long) LocalDate.now().getYear())
-                .kvsr(dto.kvsr())
-                .kfsr(dto.section() + dto.subsection())
-                .kcsr(dto.kcsr())
-                .kvr(dto.kvr())
-                .kosgu(dto.kosgu())
-                .dopFk(dto.dopFk())
-                .dopEk(dto.dopEk())
-                .dopKr(dto.dopKr())
-                .purpose(dto.purpose())
+                .kvsr(row.kvsr())
+                .kfsr(row.section() + row.subsection())
+                .kcsr(row.kcsr())
+                .kvr(row.kvr())
+                .kosgu(row.kosgu())
+                .dopFk(row.dopFk())
+                .dopEk(row.dopEk())
+                .dopKr(row.dopKr())
+                .purpose(row.purpose())
+                .concatenatedKBK(concatKBK(row))
                 .build();
     }
 
@@ -83,10 +77,26 @@ public class FinancingSourceMapper {
                                 new LinkedAttribute(DOPFK_ATTR, getCodeId(codesMap, DOPFK, fs.getDopFk())),
                                 new LinkedAttribute(DOPKR_ATTR, getCodeId(codesMap, DOPKR, fs.getDopKr())),
                                 new LinkedAttribute(PURPOSE_ATTR, getCodeId(codesMap, PURPOSE, fs.getPurpose())),
-                                new LinkedAttribute(DIRECTION_ATTR, fs.getSubsidyProgramId())
+                                new LinkedAttribute(SUBSIDY_PROGRAM_ATTR, fs.getSubsidyProgramId()),
+                                new LinkedAttribute(CASH_PLAN_LIMIT_ATTR, fs.getCashPlanLimitId()),
+                                new StringAttribute(CONCAT_KBK_ATTR, fs.getConcatenatedKBK())
                         ))
                         .build()
         );
+    }
+
+    private String concatKBK(UniBudgetCodedExcelRow row) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(LocalDateTime.now().getYear());
+        sb.append("-");
+        sb.append(row.kvsr());
+        sb.append(row.section());
+        sb.append(row.subsection());
+        sb.append(row.kcsr());
+        sb.append(row.kvr());
+        sb.append("-");
+        sb.append(row.dopKr());
+        return sb.toString();
     }
 
     private Object getAttrData(List<Attribute> attributes, Long attributeId) {

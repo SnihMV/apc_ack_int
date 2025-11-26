@@ -1,6 +1,5 @@
 package su.petrosoft.apk_ack_integration.client;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +11,7 @@ import su.petrosoft.apk_ack_integration.config.IntegrationProperties;
 import su.petrosoft.apk_ack_integration.model.dto.request.ChangeInstanceStatusRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.GetAttributesListRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.request.UpsertInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.request.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.GetAttributesListResponseDto;
 
@@ -26,7 +25,7 @@ public class ApkPlicanteRestClient {
 
     @SneakyThrows
     public InstanceDto createInstance(CreateInstanceRequestDto dto) {
-        log.debug("Attempt to create instance. {}", dto);
+        log.debug("Creating instance [{}]", dto);
         try {
             return restClient
                     .post()
@@ -71,8 +70,8 @@ public class ApkPlicanteRestClient {
                 .toBodilessEntity();
     }
 
-    public InstanceDto updateInstance(UpsertInstanceRequestDto dto) {
-        log.debug("Attempt to update instance [{}]", dto);
+    public InstanceDto updateInstance(UpdateInstanceRequestDto dto) {
+        log.debug("Updating instance [{}]", dto);
         try {
             return restClient
                     .post()

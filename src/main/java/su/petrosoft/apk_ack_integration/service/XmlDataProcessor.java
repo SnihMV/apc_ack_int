@@ -8,15 +8,18 @@ import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.dto.request.CreateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.request.UpsertInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.request.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.AckGetUpdateMessageResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import su.petrosoft.apk_ack_integration.model.xml.CreateCashPlanLimitsXml;
 import su.petrosoft.apk_ack_integration.model.xml.UpdateCashPlanLimitXml;
 
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Set;
+
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getCplCodesOnlyByCurrentYearRequestDto;
 
 @Service
 @Slf4j
@@ -40,8 +43,8 @@ public class XmlDataProcessor {
         Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap();
         CashPlanLimit cplToUpdate = mapper.toCpl(upsertingXml);
 
-        List<CashPlanLimit> allCashPlanLimits = apkService.getAllCashPlanLimits();
-        log.debug("Existed Cash Plan Limits: {}", allCashPlanLimits.size());
+        Set<CashPlanLimit> allCashPlanLimits = apkService.findCashPlanLimits(getCplCodesOnlyByCurrentYearRequestDto());
+        log.debug("Exist [{}] CashPlanLimits for [{}] year in DB", allCashPlanLimits.size(), LocalDateTime.now().getYear());
 
         allCashPlanLimits.stream()
                 .filter(cpl -> cpl.equals(cplToUpdate))
@@ -50,7 +53,7 @@ public class XmlDataProcessor {
                             log.debug("Existed Cash Plan Limit with id {} will be updated", cpl.getId());
                             cplToUpdate.setId(cpl.getId());
                             cplToUpdate.setVersion(cpl.getVersion());
-                            UpsertInstanceRequestDto upsertDto = mapper.toUpdateDto(cplToUpdate, codesMap);
+                            UpdateInstanceRequestDto upsertDto = mapper.toUpdateDto(cplToUpdate);
                             InstanceDto updatedInstance = apkClient.updateInstance(upsertDto);
                             log.info("CashPlanLimit [{}] updated", updatedInstance.id());
                         },

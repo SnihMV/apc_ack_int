@@ -6,13 +6,17 @@ import org.springframework.stereotype.Service;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.mapper.FinancingSourceMapper;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyProgramMapper;
+import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.FinancingSource;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
-import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRowDto;
+import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedExcelRow;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 @Slf4j
@@ -22,10 +26,15 @@ public class UniBudgetRowService {
     private final CashPlanLimitMapper cplMapper;
     private final SubsidyProgramMapper spMapper;
     private final FinancingSourceMapper fsMapper;
-    private final ExcelExtractor extractor;
+    private final ExcelRowMapper excelRowMapper;
 
-    public SubsidyProgram createSubsidyPrograms(
-            UniBudgetExcelRowDto dto,
+    public CashPlanLimit saveCashPlanLimit(UniBudgetCodedExcelRow dto, Map<CodeType, Map<Long, String>> codesMap) {
+        CashPlanLimit cplFromRow = cplMapper.toCpl(dto);
+        return apkService.createCashPlanLimit(cplFromRow, codesMap);
+    }
+
+    public SubsidyProgram getOrCreateSubsidyProgram(
+            UniBudgetCodedExcelRow dto,
             Set<SubsidyProgram> existingSP,
             Map<CodeType, Map<Long, String>> codesMap) {
 
@@ -36,21 +45,46 @@ public class UniBudgetRowService {
         return trdLevelSp;
     }
 
-    public FinancingSource buildFinancingSource(UniBudgetExcelRowDto dto, Set<SubsidyProgram> allValidThirdLvlSPFromDb) {
-        FinancingSource financingSource = fsMapper.fromUniBudgetDto(dto);
+    public FinancingSource buildFinancingSource(
+            UniBudgetCodedExcelRow dto,
+            Set<CashPlanLimit> existingCashPlanLimits,
+            Set<SubsidyProgram> allValidThirdLvlSPFromDb,
+            Map<CodeType, Map<Long, String>> codesMap) {
+        FinancingSource financingSource = fsMapper.toEntity(dto);
+        existingCashPlanLimits.stream()
+                .filter(cpl -> cpl.equals(cplMapper.toCpl(dto)))
+                .findFirst()
+                .map(CashPlanLimit::getId)
+                .ifPresentOrElse(financingSource::setCashPlanLimitId,
+                        () -> {
+                            CashPlanLimit savedCpl = saveCashPlanLimit(dto, codesMap);
+                            financingSource.setCashPlanLimitId(savedCpl.getId());
+                        });
         allValidThirdLvlSPFromDb.stream()
                 .filter(sp -> sp.equals(spMapper.toThirdLevelSP(dto)))
                 .findFirst()
                 .map(SubsidyProgram::getId)
-                .ifPresent(financingSource::setSubsidyProgramId);
+                .ifPresentOrElse(financingSource::setSubsidyProgramId,
+                        () -> {
+                            SubsidyProgram sp = getOrCreateSubsidyProgram(dto, allValidThirdLvlSPFromDb, codesMap);
+                            financingSource.setSubsidyProgramId(sp.getId());
+                        });
         return financingSource;
     }
 
+    public List<CashPlanLimit> getLimitsFromExcel(List<UniBudgetCodedExcelRow> rows) {
+        List<CashPlanLimit> limitsFromExcel = rows.stream()
+                .map(cplMapper::toCpl)
+                .collect(toList());
+        log.info("Limits from excel file count: [{}]", limitsFromExcel.size());
+        return limitsFromExcel;
+    }
+
     private SubsidyProgram buildFirstLevelSP(
-            UniBudgetExcelRowDto dto,
+            UniBudgetCodedExcelRow dto,
             Set<SubsidyProgram> existingSP,
             Map<CodeType, Map<Long, String>> codesMap
-            ) {
+    ) {
         SubsidyProgram fstLvlSp = spMapper.toFirstLevelSP(dto);
         Long id = obtainSubsidyProgramId(fstLvlSp, existingSP, codesMap);
         fstLvlSp.setId(id);
@@ -59,7 +93,7 @@ public class UniBudgetRowService {
     }
 
     private SubsidyProgram buildSecondLevelSP(
-            UniBudgetExcelRowDto dto,
+            UniBudgetCodedExcelRow dto,
             Set<SubsidyProgram> existingSP,
             Map<CodeType, Map<Long, String>> codesMap,
             SubsidyProgram fstLevelSp) {
@@ -73,7 +107,7 @@ public class UniBudgetRowService {
     }
 
     private SubsidyProgram buildThirdLevelSP(
-            UniBudgetExcelRowDto dto,
+            UniBudgetCodedExcelRow dto,
             Set<SubsidyProgram> existingSP,
             Map<CodeType, Map<Long, String>> codesMap,
             SubsidyProgram scdLevelSp) {
@@ -90,7 +124,7 @@ public class UniBudgetRowService {
             SubsidyProgram sp,
             Set<SubsidyProgram> existingSP,
             Map<CodeType, Map<Long, String>> codesMap
-            ) {
+    ) {
 
         return existingSP.stream()
                 .filter(existing -> existing.equals(sp))
@@ -103,5 +137,16 @@ public class UniBudgetRowService {
                     existingSP.add(saved);
                     return saved.getId();
                 });
+    }
+
+    public FinancingSource saveFinancingSource(
+            UniBudgetCodedExcelRow row,
+            CashPlanLimit savedCpl,
+            SubsidyProgram trdLevelSp,
+            Map<CodeType, Map<Long, String>> codesMap) {
+        FinancingSource financingSource = fsMapper.toEntity(row);
+        financingSource.setCashPlanLimitId(savedCpl.getId());
+        financingSource.setSubsidyProgramId(trdLevelSp.getId());
+        return apkService.createFinancingSource(financingSource, codesMap);
     }
 }
