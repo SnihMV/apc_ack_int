@@ -22,6 +22,7 @@ public class FinancingSourceUtil {
     public static final long DOPEK_ATTR = 3455;
     public static final long DOPKR_ATTR = 3456;
     public static final long PURPOSE_ATTR = 3457;
+    public static final long OWNERSHIP_FORM_ATTR = 3394;
     public static final long SUBSIDY_PROGRAM_ATTR = 3461;
     public static final long CASH_PLAN_LIMIT_ATTR = 3835;
     public static final long CONCAT_KBK_ATTR = 3842;

@@ -26,7 +26,7 @@ import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getCode
 public class FinancingSourceMapper {
 
     public FinancingSource toEntity(InstanceDto dto) {
-        List<Attribute> attributes = dto.attributes();
+        List<Attribute<?>> attributes = dto.attributes();
         return FinancingSource.builder()
                 .id(dto.id())
                 .version(dto.version())
@@ -40,6 +40,7 @@ public class FinancingSourceMapper {
                 .dopEk(getAttrShortForm(attributes, DOPEK_ATTR))
                 .dopKr(getAttrShortForm(attributes, DOPKR_ATTR))
                 .purpose(getAttrShortForm(attributes, PURPOSE_ATTR))
+                .ownershipForm(getAttrShortForm(attributes, OWNERSHIP_FORM_ATTR))
                 .subsidyProgramId((Long) getAttrData(attributes, SUBSIDY_PROGRAM_ATTR))
                 .cashPlanLimitId((Long) getAttrData(attributes, CASH_PLAN_LIMIT_ATTR))
                 .concatenatedKBK((String) getAttrData(attributes, CONCAT_KBK_ATTR))
@@ -58,6 +59,7 @@ public class FinancingSourceMapper {
                 .dopEk(row.dopEk())
                 .dopKr(row.dopKr())
                 .purpose(row.purpose())
+                .ownershipForm(defineOwnershipForm(row))
                 .concatenatedKBK(concatKBK(row))
                 .build();
     }
@@ -77,12 +79,22 @@ public class FinancingSourceMapper {
                                 new LinkedAttribute(DOPFK_ATTR, getCodeId(codesMap, DOPFK, fs.getDopFk())),
                                 new LinkedAttribute(DOPKR_ATTR, getCodeId(codesMap, DOPKR, fs.getDopKr())),
                                 new LinkedAttribute(PURPOSE_ATTR, getCodeId(codesMap, PURPOSE, fs.getPurpose())),
+                                new LinkedAttribute(OWNERSHIP_FORM_ATTR, getCodeId(codesMap, OWNERSHIP_FORM, fs.getOwnershipForm())),
                                 new LinkedAttribute(SUBSIDY_PROGRAM_ATTR, fs.getSubsidyProgramId()),
                                 new LinkedAttribute(CASH_PLAN_LIMIT_ATTR, fs.getCashPlanLimitId()),
                                 new StringAttribute(CONCAT_KBK_ATTR, fs.getConcatenatedKBK())
                         ))
                         .build()
         );
+    }
+
+    private String defineOwnershipForm(UniBudgetCodedExcelRow row) {
+        return switch (row.kosgu()) {
+            case "244" -> "гос";
+            case "245" -> "негос";
+            case "246" -> "ИП";
+            default -> "все";
+        };
     }
 
     private String concatKBK(UniBudgetCodedExcelRow row) {
@@ -99,7 +111,7 @@ public class FinancingSourceMapper {
         return sb.toString();
     }
 
-    private Object getAttrData(List<Attribute> attributes, Long attributeId) {
+    private Object getAttrData(List<Attribute<?>> attributes, Long attributeId) {
         return attributes.stream()
                 .filter(a -> a.id().equals(attributeId))
                 .findFirst()
@@ -107,7 +119,7 @@ public class FinancingSourceMapper {
                 .orElse(null);
     }
 
-    private String getAttrShortForm(List<Attribute> attributes, Long attributeId) {
+    private String getAttrShortForm(List<Attribute<?>> attributes, Long attributeId) {
         return attributes.stream()
                 .filter(a -> a.id().equals(attributeId))
                 .findFirst()

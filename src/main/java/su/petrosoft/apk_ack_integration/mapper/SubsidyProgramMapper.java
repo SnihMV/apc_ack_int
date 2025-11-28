@@ -31,7 +31,7 @@ import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.TEMPLATE_
 public class SubsidyProgramMapper {
 
     public SubsidyProgram toEntity(InstanceDto dto) {
-        List<Attribute> attributes = dto.attributes();
+        List<Attribute<?>> attributes = dto.attributes();
         return SubsidyProgram.builder()
                 .id(dto.id())
                 .version(dto.version())
@@ -70,7 +70,7 @@ public class SubsidyProgramMapper {
     }
 
     public CreateInstanceRequestDto toCreateDto(SubsidyProgram sp, Map<CodeType, Map<Long, String>> codesMap) {
-        List<Attribute> attributes = new ArrayList<>(List.of(
+        List<Attribute<?>> attributes = new ArrayList<>(List.of(
                 new StringAttribute(NAME_ATTR, sp.getTitle()),
                 new StringAttribute(CODE_ATTR, sp.getCode()),
                 new LongAttribute(LEVEL_ATTR, sp.getLevel()),
@@ -89,7 +89,7 @@ public class SubsidyProgramMapper {
         );
     }
 
-    private Object getAttrData(List<Attribute> attributes, Long attributeId) {
+    private Object getAttrData(List<Attribute<?>> attributes, Long attributeId) {
         return attributes.stream()
                 .filter(a -> a.id().equals(attributeId))
                 .findFirst()
@@ -97,7 +97,7 @@ public class SubsidyProgramMapper {
                 .orElse(null);
     }
 
-    private String getAttrShortForm(List<Attribute> attributes, Long attributeId) {
+    private String getAttrShortForm(List<Attribute<?>> attributes, Long attributeId) {
         return attributes.stream()
                 .filter(a -> a.id().equals(attributeId))
                 .findFirst()

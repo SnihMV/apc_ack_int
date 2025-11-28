@@ -2,6 +2,7 @@ package su.petrosoft.apk_ack_integration.model.dto.request.instance;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 
 import java.util.List;
@@ -12,22 +13,27 @@ public record StringAttribute(
         Long id,
         String code,
         String type,
-        List<Value> value,
-        String name,
-        String description,
-        String attributeType
-) implements Attribute {
+        List<StringValue> value
+) implements Attribute<StringValue> {
 
     public StringAttribute(long id) {
         this(id, null);
     }
 
     public StringAttribute(long id, String data) {
-        this(id, null, "STRING", List.of(new Value(data, null)), null, null, null);
+        this(id, null, "STRING", List.of(new StringValue(data)));
     }
 
+    @Override
+    @JsonIgnore
+    public StringValue getFirstValue() {
+        return Attribute.super.getFirstValue();
+    }
+
+    @Override
     @JsonIgnore
     public String getData() {
-        return (String) Attribute.super.getData();
+        StringValue firstValue = getFirstValue();
+        return firstValue != null ? firstValue.data() : null;
     }
 }

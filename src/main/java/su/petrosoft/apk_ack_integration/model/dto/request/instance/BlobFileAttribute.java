@@ -3,38 +3,27 @@ package su.petrosoft.apk_ack_integration.model.dto.request.instance;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.ToString;
 
 import java.util.List;
 
-@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record LinkedAttribute(
+public record BlobFileAttribute(
         Long id,
         String code,
         String type,
-        List<LinkedValue> value
-) implements Attribute<LinkedValue> {
-
-    public LinkedAttribute(long id) {
-        this(id, null);
-    }
-
-    public LinkedAttribute(long id, Long data) {
-        this(id, null, "LINKED", List.of(new LinkedValue(data, null)));
-    }
+        List<BlobFileValue> value
+) implements Attribute<BlobFileValue> {
 
     @Override
     @JsonIgnore
-    public LinkedValue getFirstValue() {
+    public BlobFileValue getFirstValue() {
         return Attribute.super.getFirstValue();
     }
 
     @Override
     @JsonIgnore
-    public Long getData() {
-        LinkedValue firstValue = getFirstValue();
+    public String getData() {
+        BlobFileValue firstValue = getFirstValue();
         return firstValue != null ? firstValue.data() : null;
     }
 }

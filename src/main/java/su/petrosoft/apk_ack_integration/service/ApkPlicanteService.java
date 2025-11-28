@@ -104,9 +104,14 @@ public class ApkPlicanteService {
                 ));
     }
 
+    @SneakyThrows
     public FinancingSource createFinancingSource(FinancingSource financingSource, Map<CodeType, Map<Long, String>> codesMap) {
         CreateInstanceRequestDto createDto = fsMapper.toCreateDto(financingSource, codesMap);
+        String ss = objectMapper.writeValueAsString(createDto);
+        log.debug("Financing Source Creating JSON [{}]", ss);
         InstanceDto created = apkRestClient.createInstance(createDto);
+        String s = objectMapper.writeValueAsString(created);
+        log.debug("Financing Source Created JSON [{}]", s);
         return fsMapper.toEntity(created);
     }
 

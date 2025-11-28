@@ -2,6 +2,7 @@ package su.petrosoft.apk_ack_integration.model.dto.request.instance;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -9,17 +10,23 @@ public record BooleanAttribute(
         Long id,
         String code,
         String type,
-        List<Value> value,
-        String name,
-        String description,
-        String attributeType
-) implements Attribute {
+        List<BooleanValue> value
+) implements Attribute<BooleanValue> {
+
     public BooleanAttribute(long id, boolean data) {
-        this(id, null, "BOOLEAN", List.of(new Value(data, null)), null, null, null);
+        this(id, null, "BOOLEAN", List.of(new BooleanValue(data)));
     }
 
+    @Override
+    @JsonIgnore
+    public BooleanValue getFirstValue() {
+        return Attribute.super.getFirstValue();
+    }
+
+    @Override
     @JsonIgnore
     public Boolean getData() {
-        return (Boolean) Attribute.super.getData();
+        BooleanValue firstValue = getFirstValue();
+        return firstValue != null ? firstValue.data() : null;
     }
 }
