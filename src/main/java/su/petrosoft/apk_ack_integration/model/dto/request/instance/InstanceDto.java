@@ -14,6 +14,7 @@ public record InstanceDto(
         Long version,
         Status status,
         ViewType viewType,
+        String shortForm,
         List<Attribute<?>> attributes,
         Filter filter
 ) {

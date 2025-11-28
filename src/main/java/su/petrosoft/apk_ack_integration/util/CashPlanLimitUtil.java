@@ -14,7 +14,7 @@ import su.petrosoft.apk_ack_integration.model.dto.request.instance.StringAttribu
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 import su.petrosoft.apk_ack_integration.model.xml.PlDirectionLine;
 
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.makeSimpleFilter;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.makeSimpleLongAttributeFilter;
 
 public class CashPlanLimitUtil {
 
@@ -80,7 +80,7 @@ public class CashPlanLimitUtil {
                         new LinkedAttribute(DOPKR_ATTR),
                         new LinkedAttribute(PURPOSE_ATTR)
                 ))
-                .filter(makeSimpleFilter(Map.of(YEAR_ATTR, LocalDateTime.now().getYear())))
+                .filter(makeSimpleLongAttributeFilter(Map.of(YEAR_ATTR, LocalDateTime.now().getYear())))
                 .build();
     }
 

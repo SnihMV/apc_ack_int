@@ -34,7 +34,7 @@ public class PlicanteInstanceUtil {
                         "There is no code %s in %s dictionary".formatted(code, type.name())));
     }
 
-    public static Filter makeSimpleFilter(Map<Long, Object> filters) {
+    public static Filter makeSimpleLongAttributeFilter(Map<Long, Long> filters) {
         if (filters == null || filters.isEmpty()) {
             return null;
         }
@@ -42,5 +42,6 @@ public class PlicanteInstanceUtil {
                 .map(entry -> new FilterAttribute(ValueType.LONG, entry.getKey(), entry.getValue()))
                 .toList());
     }
+    public static Filter makeFilter()
 
 }

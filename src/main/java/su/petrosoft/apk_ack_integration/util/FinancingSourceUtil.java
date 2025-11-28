@@ -6,7 +6,7 @@ import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.makeSimpleFilter;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.makeSimpleLongAttributeFilter;
 
 public class FinancingSourceUtil {
     public static final long TEMPLATE_ID = 25387;
@@ -31,7 +31,7 @@ public class FinancingSourceUtil {
         return InstanceDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(ViewType.DETAILED_FORM_VIEW)
-                .filter(makeSimpleFilter(Map.of(YEAR_ATTR, LocalDateTime.now().getYear())))
+                .filter(makeSimpleLongAttributeFilter(Map.of(YEAR_ATTR, LocalDateTime.now().getYear())))
                 .build();
     }
 }

@@ -39,7 +39,7 @@ public class ApkPlicanteRestClient {
         }
     }
 
-    public List<GetAttributesListResponseDto> getTableAttributesList(GetAttributesListRequestDto dto) {
+    public List<InstanceDto> getTableAttributesList(GetAttributesListRequestDto dto) {
         return restClient
                 .post()
                 .uri("register-rest/operator/v2/table/attributes/list")

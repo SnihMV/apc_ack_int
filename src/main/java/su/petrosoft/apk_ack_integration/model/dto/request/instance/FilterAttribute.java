@@ -11,9 +11,9 @@ import java.util.List;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record FilterAttribute(
+        Long id,
         ValueType type,
         AttributeType attributeType,
-        Long id,
         Condition condition
 ) {
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -30,7 +30,7 @@ public record FilterAttribute(
     }
 
     public FilterAttribute(ValueType type, Long id, Object data) {
-        this(type, null, id, new Condition(
+        this(id, type, null, new Condition(
                 List.of(SqlOperation.EQUALS),
                 List.of(new Condition.Value(data, null))));
     }
