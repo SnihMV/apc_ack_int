@@ -8,9 +8,11 @@ import org.springframework.stereotype.Service;
 import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.mapper.FinancingSourceMapper;
+import su.petrosoft.apk_ack_integration.mapper.OperationalReportMapper;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyProgramMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.FinancingSource;
+import su.petrosoft.apk_ack_integration.model.OperationalReport;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.FillingMainFormRequestDto;
@@ -39,6 +41,7 @@ public class ApkPlicanteService {
     private final CashPlanLimitMapper cplMapper;
     private final SubsidyProgramMapper spMapper;
     private final FinancingSourceMapper fsMapper;
+    private final OperationalReportMapper orMapper;
     private final ObjectMapper objectMapper;
 
     public Set<CashPlanLimit> findCashPlanLimits(InstanceDto requestDto) {
@@ -64,13 +67,16 @@ public class ApkPlicanteService {
     }
 
     @SneakyThrows
-    public void getReportsForSowingCampaignFilling(FillingMainFormRequestDto dto) {
+    public List<OperationalReport> getReportsForSowingCampaignFilling(FillingMainFormRequestDto dto) {
         GetAttributesListRequestDto createDto = buildGetReportsForFillingMainFormRequestDto(dto.date());
         String ss = objectMapper.writeValueAsString(createDto);
         log.debug("Reports Getting JSON [{}]", ss);
         List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(createDto);
         String s = objectMapper.writeValueAsString(dtoList);
         log.debug("Reports Got JSON [{}]", s);
+        return dtoList.stream()
+            .map(orMapper::toEntity)
+            .toList();
     }
 
     public CashPlanLimit createCashPlanLimit(CashPlanLimit cpl, Map<CodeType, Map<Long, String>> codesMap) {

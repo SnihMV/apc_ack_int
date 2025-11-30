@@ -1,5 +1,6 @@
 package su.petrosoft.apk_ack_integration.util;
 
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateInstancesFromFileResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 
@@ -29,6 +30,22 @@ public class PlicanteInstanceUtil {
                 .map(Map.Entry::getKey)
                 .orElseThrow(() -> new RuntimeException(
                         "There is no code %s in %s dictionary".formatted(code, type.name())));
+    }
+
+    public static Object getAttrData(List<Attribute<?>> attributes, Long attributeId) {
+        return attributes.stream()
+            .filter(a -> a.id().equals(attributeId))
+            .findFirst()
+            .map(Attribute::getData)
+            .orElse(null);
+    }
+
+    public static String getAttrShortForm(List<Attribute<?>> attributes, Long attributeId) {
+        return attributes.stream()
+            .filter(a -> a.id().equals(attributeId))
+            .findFirst()
+            .map(Attribute::getShortForm)
+            .orElse(null);
     }
 
 }
