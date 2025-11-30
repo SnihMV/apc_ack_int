@@ -7,7 +7,7 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribu
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 
 import java.util.List;
 

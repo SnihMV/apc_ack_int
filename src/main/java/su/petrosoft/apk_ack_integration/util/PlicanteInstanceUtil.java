@@ -1,14 +1,11 @@
 package su.petrosoft.apk_ack_integration.util;
 
+import su.petrosoft.apk_ack_integration.model.dto.response.CreateInstancesFromFileResponseDto;
+import su.petrosoft.apk_ack_integration.model.enums.CodeType;
+
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-
-import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.FilterAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.response.CreateInstancesFromFileResponseDto;
-import su.petrosoft.apk_ack_integration.model.enums.CodeType;
-import su.petrosoft.apk_ack_integration.model.enums.ValueType;
 
 public class PlicanteInstanceUtil {
 

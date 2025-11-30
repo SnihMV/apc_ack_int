@@ -1,20 +1,17 @@
 package su.petrosoft.apk_ack_integration.client;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClient;
 import su.petrosoft.apk_ack_integration.config.IntegrationProperties;
-import su.petrosoft.apk_ack_integration.model.dto.request.ChangeInstanceStatusRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.request.CreateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.request.GetAttributesListRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.request.UpdateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.dto.response.GetAttributesListResponseDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.ChangeInstanceStatusRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 
 import java.util.List;
 

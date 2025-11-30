@@ -2,7 +2,7 @@ package su.petrosoft.apk_ack_integration.util;
 
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 
 import java.time.LocalDateTime;
