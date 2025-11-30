@@ -2,7 +2,7 @@ package su.petrosoft.apk_ack_integration.model.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.Filter;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 
 import java.util.List;
@@ -14,7 +14,7 @@ public record GetAttributesListRequestDto(
         Long statusId,
         ViewType viewType,
         Boolean getBinaries,
-        List<AttributeDefinition> attributes,
+        List<RequestedAttribute> attributes,
         Filter filter
 ) {
 }

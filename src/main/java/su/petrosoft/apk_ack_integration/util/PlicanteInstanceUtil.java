@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.Filter;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.FilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateInstancesFromFileResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
@@ -33,15 +33,5 @@ public class PlicanteInstanceUtil {
                 .orElseThrow(() -> new RuntimeException(
                         "There is no code %s in %s dictionary".formatted(code, type.name())));
     }
-
-    public static Filter makeSimpleLongAttributeFilter(Map<Long, Long> filters) {
-        if (filters == null || filters.isEmpty()) {
-            return null;
-        }
-        return new Filter(filters.entrySet().stream()
-                .map(entry -> new FilterAttribute(ValueType.LONG, entry.getKey(), entry.getValue()))
-                .toList());
-    }
-    public static Filter makeFilter()
 
 }

@@ -1,12 +1,12 @@
 package su.petrosoft.apk_ack_integration.util;
 
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 
 import java.time.LocalDateTime;
-import java.util.Map;
-
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.makeSimpleLongAttributeFilter;
+import java.util.List;
 
 public class FinancingSourceUtil {
     public static final long TEMPLATE_ID = 25387;
@@ -31,7 +31,7 @@ public class FinancingSourceUtil {
         return InstanceDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(ViewType.DETAILED_FORM_VIEW)
-                .filter(makeSimpleLongAttributeFilter(Map.of(YEAR_ATTR, LocalDateTime.now().getYear())))
+                .filter(new Filter(List.of(new LongFilterAttribute(YEAR_ATTR, (long) LocalDateTime.now().getYear()))))
                 .build();
     }
 }

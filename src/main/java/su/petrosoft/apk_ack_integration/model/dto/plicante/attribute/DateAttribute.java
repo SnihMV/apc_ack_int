@@ -1,8 +1,8 @@
-package su.petrosoft.apk_ack_integration.model.dto.request.instance;
+package su.petrosoft.apk_ack_integration.model.dto.plicante.attribute;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.value.LongValue;
 
 import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)

@@ -1,9 +1,8 @@
-package su.petrosoft.apk_ack_integration.model.dto.request.instance;
+package su.petrosoft.apk_ack_integration.model.dto.plicante.attribute;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.extern.slf4j.Slf4j;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.value.DoubleValue;
 
 import java.math.BigDecimal;
 import java.util.List;

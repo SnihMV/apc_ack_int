@@ -1,18 +1,17 @@
 package su.petrosoft.apk_ack_integration.util;
 
-import static java.util.stream.Collectors.groupingBy;
-import static su.petrosoft.apk_ack_integration.model.enums.ViewType.DETAILED_FORM_VIEW;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.makeSimpleLongAttributeFilter;
-
-import java.util.List;
-import java.util.Map;
-
 import lombok.extern.slf4j.Slf4j;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.LinkedAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.LongAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.StringAttribute;
+
+import java.util.List;
+
+import static su.petrosoft.apk_ack_integration.model.enums.ViewType.DETAILED_FORM_VIEW;
 
 @Slf4j
 public class SubsidyProgramUtil {
@@ -68,7 +67,7 @@ public class SubsidyProgramUtil {
                         new LinkedAttribute(KCSR_ATTR),
                         new LinkedAttribute(DOPKR_ATTR)
                 ))
-                .filter(makeSimpleLongAttributeFilter(Map.of(LEVEL_ATTR, 3)))
+                .filter(new Filter(List.of(new LongFilterAttribute(LEVEL_ATTR, 3))))
                 .build();
     }
 

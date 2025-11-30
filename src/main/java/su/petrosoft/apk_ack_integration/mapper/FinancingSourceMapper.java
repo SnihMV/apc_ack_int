@@ -4,11 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.FinancingSource;
 import su.petrosoft.apk_ack_integration.model.dto.request.CreateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.Attribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.LinkedAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.LongAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.StringAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedExcelRow;
 
