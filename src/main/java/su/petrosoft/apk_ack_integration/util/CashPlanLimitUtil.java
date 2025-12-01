@@ -1,20 +1,19 @@
 package su.petrosoft.apk_ack_integration.util;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Stream;
-
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.LinkedAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.LongAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.StringAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 import su.petrosoft.apk_ack_integration.model.xml.PlDirectionLine;
 
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.makeSimpleFilter;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 public class CashPlanLimitUtil {
 
@@ -80,7 +79,8 @@ public class CashPlanLimitUtil {
                         new LinkedAttribute(DOPKR_ATTR),
                         new LinkedAttribute(PURPOSE_ATTR)
                 ))
-                .filter(makeSimpleFilter(Map.of(YEAR_ATTR, LocalDateTime.now().getYear())))
+                .filter(new Filter(List.of(
+                        new LongFilterAttribute(YEAR_ATTR, (long) LocalDateTime.now().getYear()))))
                 .build();
     }
 

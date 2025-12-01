@@ -1,12 +1,12 @@
 package su.petrosoft.apk_ack_integration.util;
 
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 
 import java.time.LocalDateTime;
-import java.util.Map;
-
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.makeSimpleFilter;
+import java.util.List;
 
 public class FinancingSourceUtil {
     public static final long TEMPLATE_ID = 25387;
@@ -22,6 +22,7 @@ public class FinancingSourceUtil {
     public static final long DOPEK_ATTR = 3455;
     public static final long DOPKR_ATTR = 3456;
     public static final long PURPOSE_ATTR = 3457;
+    public static final long OWNERSHIP_FORM_ATTR = 3394;
     public static final long SUBSIDY_PROGRAM_ATTR = 3461;
     public static final long CASH_PLAN_LIMIT_ATTR = 3835;
     public static final long CONCAT_KBK_ATTR = 3842;
@@ -30,7 +31,7 @@ public class FinancingSourceUtil {
         return InstanceDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(ViewType.DETAILED_FORM_VIEW)
-                .filter(makeSimpleFilter(Map.of(YEAR_ATTR, LocalDateTime.now().getYear())))
+                .filter(new Filter(List.of(new LongFilterAttribute(YEAR_ATTR, (long) LocalDateTime.now().getYear()))))
                 .build();
     }
 }

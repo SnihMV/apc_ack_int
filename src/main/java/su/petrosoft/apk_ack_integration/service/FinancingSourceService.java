@@ -17,7 +17,6 @@ public class FinancingSourceService {
 
     public void createFinancingSources(MultipartFile file) {
         List<UniBudgetCodedExcelRow> dtoList = excelExtractor.getUniBudgetCodedRows(file);
-        log.debug("Extracted from excel file: [{}] effective rows", dtoList.size());
 
         if (!dtoList.isEmpty()) {
             budgetItemService.createFinancingSources(dtoList);

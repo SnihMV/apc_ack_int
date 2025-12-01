@@ -80,23 +80,25 @@ public class BudgetItemService {
         return createdSP;
     }
 
-    public List<FinancingSource> createFinancingSources(List<UniBudgetCodedExcelRow> dtoList) {
+    public List<FinancingSource> createFinancingSources(List<UniBudgetCodedExcelRow> rowList) {
 
         Set<FinancingSource> allFinancingSourcesFromDb = apkService.findFinancingSources(getAllFsByCurrentYearRequestDto());
-        List<FinancingSource> allFinancingSourcesFromExcel = dtoList.stream()
-                .map(fsMapper::toEntity)
-                .collect(toList());
-        allFinancingSourcesFromExcel.removeAll(allFinancingSourcesFromDb);
-        if (allFinancingSourcesFromExcel.isEmpty()) {
-            log.info("Nothing to save. All Financing Sources already exist in DB");
+
+        List<UniBudgetCodedExcelRow> uniqueFinancingSourcesFromExcel = rowList.stream()
+                .filter(row -> !allFinancingSourcesFromDb.contains(fsMapper.toEntity(row)))
+                .toList();
+
+        if (uniqueFinancingSourcesFromExcel.isEmpty()) {
+            log.info("All Financing Sources received from Excel already exist in DB");
             return emptyList();
         }
+        log.info("Received [{}] Financing Sources from Excel to save", uniqueFinancingSourcesFromExcel.size());
 
         Set<CashPlanLimit> existingCashPlanLimits = cashPlanLimitService.getLimitsForCurrentYear();
         Set<SubsidyProgram> existingSubsidyPrograms = subsidyProgramService.getAllThirdLevelSpFromDb();
 
         Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap();
-        List<FinancingSource> list = dtoList.stream()
+        List<FinancingSource> list = rowList.stream()
                 .map(dto -> rowProcessor.buildFinancingSource(dto, existingCashPlanLimits, existingSubsidyPrograms, codesMap))
                 .toList();
         log.info("[{}] Financing Sources ready to save", list.size());

@@ -13,13 +13,13 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
-import su.petrosoft.apk_ack_integration.model.dto.request.CreateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.request.UpdateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.Attribute;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.DoubleAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.LinkedAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.LongAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DoubleAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import su.petrosoft.apk_ack_integration.model.excel.CashPlanLimitExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.RosterKbkExcelRow;
@@ -99,7 +99,7 @@ public class CashPlanLimitMapper {
 
     public CashPlanLimit toCpl(InstanceDto dto) {
 
-        List<Attribute> attributes = dto.attributes();
+        List<Attribute<?>> attributes = dto.attributes();
 
         return CashPlanLimit.builder()
                 .id(dto.id())
@@ -267,7 +267,7 @@ public class CashPlanLimitMapper {
         return dto;
     }
 
-    private static List<Attribute> buildAttributeListToCreate(CashPlanLimit cpl, Map<CodeType, Map<Long, String>> codesMap) {
+    private static List<Attribute<?>> buildAttributeListToCreate(CashPlanLimit cpl, Map<CodeType, Map<Long, String>> codesMap) {
         return List.of(
                 new LongAttribute(YEAR_ATTR, cpl.getYear()),
                 new DoubleAttribute(TOTAL_LIMIT_ATTR, cpl.getTotalLimit()),
@@ -314,7 +314,7 @@ public class CashPlanLimitMapper {
         );
     }
 
-    private static List<Attribute> buildAttributeListToUpdate(CashPlanLimit cpl) {
+    private static List<Attribute<?>> buildAttributeListToUpdate(CashPlanLimit cpl) {
         return List.of(
                 new DoubleAttribute(TOTAL_LIMIT_ATTR, cpl.getTotalLimit()),
                 new DoubleAttribute(TOTAL_BALANCE_ATTR, cpl.getTotalBalance()),
@@ -368,7 +368,7 @@ public class CashPlanLimitMapper {
         return klass.cast(o);
     }
 
-    private Object getAttrData(List<Attribute> attributes, long attributeId) {
+    private Object getAttrData(List<Attribute<?>> attributes, long attributeId) {
         return attributes.stream()
                 .filter(a -> a.id().equals(attributeId))
                 .findFirst()
@@ -376,7 +376,7 @@ public class CashPlanLimitMapper {
                 .orElse(null);
     }
 
-    private String getAttrShortForm(List<Attribute> attributes, Long attributeId) {
+    private String getAttrShortForm(List<Attribute<?>> attributes, Long attributeId) {
         return attributes.stream()
                 .filter(a -> a.id().equals(attributeId))
                 .findFirst()

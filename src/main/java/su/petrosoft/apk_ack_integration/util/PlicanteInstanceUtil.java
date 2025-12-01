@@ -1,14 +1,12 @@
 package su.petrosoft.apk_ack_integration.util;
 
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
+import su.petrosoft.apk_ack_integration.model.dto.response.CreateInstancesFromFileResponseDto;
+import su.petrosoft.apk_ack_integration.model.enums.CodeType;
+
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.Filter;
-import su.petrosoft.apk_ack_integration.model.dto.request.instance.FilterAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.response.CreateInstancesFromFileResponseDto;
-import su.petrosoft.apk_ack_integration.model.enums.CodeType;
-import su.petrosoft.apk_ack_integration.model.enums.ValueType;
 
 public class PlicanteInstanceUtil {
 
@@ -34,13 +32,20 @@ public class PlicanteInstanceUtil {
                         "There is no code %s in %s dictionary".formatted(code, type.name())));
     }
 
-    public static Filter makeSimpleFilter(Map<Long, Object> filters) {
-        if (filters == null || filters.isEmpty()) {
-            return null;
-        }
-        return new Filter(filters.entrySet().stream()
-                .map(entry -> new FilterAttribute(ValueType.LONG, entry.getKey(), entry.getValue()))
-                .toList());
+    public static Object getAttrData(List<Attribute<?>> attributes, Long attributeId) {
+        return attributes.stream()
+            .filter(a -> a.id().equals(attributeId))
+            .findFirst()
+            .map(Attribute::getData)
+            .orElse(null);
+    }
+
+    public static String getAttrShortForm(List<Attribute<?>> attributes, Long attributeId) {
+        return attributes.stream()
+            .filter(a -> a.id().equals(attributeId))
+            .findFirst()
+            .map(Attribute::getShortForm)
+            .orElse(null);
     }
 
 }

@@ -14,7 +14,8 @@ public enum CodeType {
     DOPEK("Доп.ЭК", 10834L),
     DOPKR("Доп.КР", 10885L),
     DOPFK("Доп.ФК", 19070L),
-    PURPOSE("Код цели", 11006L);
+    PURPOSE("Код цели", 11006L),
+    OWNERSHIP_FORM("Форма собственности", 25265L);
 
     private final String name;
     private final Long templateId;
