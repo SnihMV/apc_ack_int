@@ -24,6 +24,7 @@ public class FinancingSource {
     private String dopEk;
     private String dopKr;
     private String purpose;
+    private String ownershipForm;
     private Long subsidyProgramId;
     private Long cashPlanLimitId;
     private String concatenatedKBK;

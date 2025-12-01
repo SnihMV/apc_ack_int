@@ -1,4 +1,4 @@
-package su.petrosoft.apk_ack_integration.model.dto.request;
+package su.petrosoft.apk_ack_integration.model.dto.plicante;
 
 import java.util.Set;
 
