@@ -73,7 +73,7 @@ public class ApkPlicanteService {
         log.debug("Reports Getting JSON [{}]", ss);
         List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(createDto);
         String s = objectMapper.writeValueAsString(dtoList);
-        log.debug("Reports Got JSON [{}]", s);
+        log.debug("Reports Received JSON [{}]", s);
         return dtoList.stream()
             .map(orMapper::toEntity)
             .toList();
