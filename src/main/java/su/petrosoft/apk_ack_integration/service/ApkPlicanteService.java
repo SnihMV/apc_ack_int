@@ -7,10 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
+import su.petrosoft.apk_ack_integration.mapper.CropProductionMainFormMapper;
 import su.petrosoft.apk_ack_integration.mapper.FinancingSourceMapper;
 import su.petrosoft.apk_ack_integration.mapper.OperationalReportMapper;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyProgramMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
+import su.petrosoft.apk_ack_integration.model.CropProductionMainForm;
 import su.petrosoft.apk_ack_integration.model.FinancingSource;
 import su.petrosoft.apk_ack_integration.model.OperationalReport;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
@@ -41,6 +43,7 @@ public class ApkPlicanteService {
     private final CashPlanLimitMapper cplMapper;
     private final SubsidyProgramMapper spMapper;
     private final FinancingSourceMapper fsMapper;
+    private final CropProductionMainFormMapper cpmfMapper;
     private final OperationalReportMapper orMapper;
     private final ObjectMapper objectMapper;
 
@@ -123,6 +126,17 @@ public class ApkPlicanteService {
         UpdateInstanceRequestDto updateDto = cplMapper.toUpdateDto(updatedCpl);
         InstanceDto updatedInstance = apkRestClient.updateInstance(updateDto);
         return cplMapper.toCpl(updatedInstance);
+    }
+
+    @SneakyThrows
+    public CropProductionMainForm updateCropProductionMainForm(CropProductionMainForm updatedMainForm) {
+        UpdateInstanceRequestDto dto = cpmfMapper.toUpdateDto(updatedMainForm);
+        String updatingJson = objectMapper.writeValueAsString(dto);
+        log.debug("Crop Production Main Form updating JSON: [{}]", updatingJson);
+        InstanceDto instanceDto = apkRestClient.updateInstance(dto);
+        String updatedJson = objectMapper.writeValueAsString(instanceDto);
+        log.debug("Updated Crop Production Main Form JSON [{}]", updatedJson);
+        return cpmfMapper.toEntity(instanceDto);
     }
 
     private Map<Long, String> getCodesByType(CodeType codeType) {

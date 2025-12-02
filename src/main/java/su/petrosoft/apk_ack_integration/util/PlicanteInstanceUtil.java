@@ -32,6 +32,15 @@ public class PlicanteInstanceUtil {
                         "There is no code %s in %s dictionary".formatted(code, type.name())));
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> T getAttrData(List<Attribute<?>> attributes, long attributeId) {
+        return (T) attributes.stream()
+                .filter(a -> a.id().equals(attributeId))
+                .findFirst()
+                .map(Attribute::getData)
+                .orElse(null);
+    }
+
     public static Object getAttrData(List<Attribute<?>> attributes, Long attributeId) {
         return attributes.stream()
             .filter(a -> a.id().equals(attributeId))

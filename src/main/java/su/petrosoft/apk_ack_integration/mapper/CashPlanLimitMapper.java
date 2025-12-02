@@ -267,7 +267,7 @@ public class CashPlanLimitMapper {
         return dto;
     }
 
-    private static List<Attribute<?>> buildAttributeListToCreate(CashPlanLimit cpl, Map<CodeType, Map<Long, String>> codesMap) {
+    private List<Attribute<?>> buildAttributeListToCreate(CashPlanLimit cpl, Map<CodeType, Map<Long, String>> codesMap) {
         return List.of(
                 new LongAttribute(YEAR_ATTR, cpl.getYear()),
                 new DoubleAttribute(TOTAL_LIMIT_ATTR, cpl.getTotalLimit()),
@@ -357,15 +357,6 @@ public class CashPlanLimitMapper {
         if (data instanceof Number num) return BigDecimal.valueOf(num.doubleValue());
 
         return null;
-    }
-
-    private <T> T getAttrData(List<Attribute> attributes, long attributeId, Class<T> klass) {
-        Object o = attributes.stream()
-                .filter(a -> a.id().equals(attributeId))
-                .findFirst()
-                .map(Attribute::getData)
-                .orElse(null);
-        return klass.cast(o);
     }
 
     private Object getAttrData(List<Attribute<?>> attributes, long attributeId) {
