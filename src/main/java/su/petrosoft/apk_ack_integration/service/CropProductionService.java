@@ -24,11 +24,15 @@ public class CropProductionService {
             log.info("Could not found Operational Reports for Sowing Campaign filling by date [{}]", dto.date());
             return;
         }
-        CropProductionMainForm updatedMainForm = CropProductionMainForm.builder()
+        CropProductionMainForm mainForm = CropProductionMainForm.builder()
                 .id(dto.id())
                 .version(dto.version())
                 .date(dto.date())
                 .build();
-        CropProductionUtil.fillSowingCampaign(updatedMainForm, reports);
+        CropProductionUtil.fillSowingCampaignFields(mainForm, reports);
+        log.debug("Updated Main Form after Sowing Campaign filling: [{}]", mainForm);
+
+        CropProductionMainForm cropProductionMainForm = plicanteService.updateCropProductionMainForm(mainForm);
+
     }
 }

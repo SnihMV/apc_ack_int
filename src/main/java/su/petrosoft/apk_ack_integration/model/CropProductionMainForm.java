@@ -65,6 +65,12 @@ public class CropProductionMainForm {
     private BigDecimal b1_l8_a4;
     private BigDecimal b1_l8_a5;
 
+    private BigDecimal b1_l16_a1;
+    private BigDecimal b1_l16_a2;
+    private BigDecimal b1_l16_a3;
+    private BigDecimal b1_l16_a4;
+    private BigDecimal b1_l16_a5;
+
     private BigDecimal b1_l9_a1;
     private BigDecimal b1_l9_a2;
 

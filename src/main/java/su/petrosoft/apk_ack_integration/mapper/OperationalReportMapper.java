@@ -4,16 +4,19 @@ import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.FILE_J
 import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.REPORT_TYPE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getAttrData;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
+
+import java.math.BigDecimal;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.OperationalReport;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.ReportFieldDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.ReportType;
@@ -31,19 +34,55 @@ public class OperationalReportMapper {
             .id(dto.id())
             .version(dto.version())
             .reportType(ReportType.getById((long) getAttrData(attributes, REPORT_TYPE_ATTR)))
-            .reportFile(converting((String) getAttrData(attributes, FILE_JSON_ATTR)))
+            .reportValues(extractDataAsBigDecimalMap((String) getAttrData(attributes, FILE_JSON_ATTR)))
             .build();
     }
 
-    private List<ReportFieldDto> converting(String attrData) {
+    private Map<String, BigDecimal> extractDataAsBigDecimalMap(String attrData) {
         byte[] rawData = Base64.getDecoder().decode(attrData);
         try {
-            return objectMapper.readValue(rawData, new TypeReference<>() {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(rawData);
+            JsonNode dataNode = root.path("data");
+
+            if (dataNode.isMissingNode() || !dataNode.isObject()) {
+                return Map.of();
+            }
+
+            Map<String, BigDecimal> result = new HashMap<>();
+
+            dataNode.fields().forEachRemaining(entry -> {
+                String key = entry.getKey();
+                JsonNode valueNode = entry.getValue();
+
+                if (!valueNode.isNull()) {
+                    BigDecimal decimalValue = convertJsonNodeToBigDecimal(valueNode);
+                    if (decimalValue != null) {
+                        result.put(key, decimalValue);
+                    }
+                }
             });
-        } catch (IOException e) {
-            log.error("Converting JSON to List<ReportFieldDto> error: [{}]", e.getMessage());
-            throw new RuntimeException("Converting JSON error: ".concat(e.getMessage()));
+
+            return result;
+        } catch (Exception e) {
+            throw new RuntimeException("Error parsing JSON: " + e.getMessage(), e);
         }
+    }
+
+    private BigDecimal convertJsonNodeToBigDecimal(JsonNode node) {
+        try {
+            if (node.isNumber()) {
+                return node.decimalValue();
+            } else if (node.isTextual()) {
+                String text = node.asText().trim();
+                if (!text.isEmpty()) {
+                    return new BigDecimal(text);
+                }
+            }
+        } catch (NumberFormatException e) {
+            log.error("Cannot convert value to BigDecimal: [{}]", node);
+        }
+        return null;
     }
 
 }
