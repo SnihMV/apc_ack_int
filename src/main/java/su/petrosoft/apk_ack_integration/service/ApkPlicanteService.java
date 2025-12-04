@@ -105,23 +105,6 @@ public class ApkPlicanteService {
         return fsMapper.toEntity(created);
     }
 
-    public Map<CodeType, Map<Long, String>> getCodesMap(CodeType... types) {
-        if (types == null || types.length == 0) {
-            types = CodeType.values();
-        }
-        log.info("Receiving existed codes for types: {}", Arrays.stream(types).map(Enum::name).collect(joining(",")));
-        Map<CodeType, Map<Long, String>> codes = new EnumMap<>(CodeType.class);
-        for (CodeType codeType : types) {
-            codes.put(codeType, getCodesByType(codeType));
-            log.debug("{} code map:\n[{}]", codeType.name(), codes.get(codeType).toString());
-        }
-        long count = codes.values().stream()
-                .flatMap(map -> map.entrySet().stream())
-                .count();
-        log.info("Extracted {} codes", count);
-        return codes;
-    }
-
     public CashPlanLimit updateCashPlanLimit(CashPlanLimit updatedCpl) {
         UpdateInstanceRequestDto updateDto = cplMapper.toUpdateDto(updatedCpl);
         InstanceDto updatedInstance = apkRestClient.updateInstance(updateDto);
@@ -137,6 +120,23 @@ public class ApkPlicanteService {
         String updatedJson = objectMapper.writeValueAsString(instanceDto);
         log.debug("Updated Crop Production Main Form JSON [{}]", updatedJson);
         return cpmfMapper.toEntity(instanceDto);
+    }
+
+    public Map<CodeType, Map<Long, String>> getCodesMap(CodeType... types) {
+        if (types == null || types.length == 0) {
+            types = CodeType.values();
+        }
+        log.info("Receiving existed codes for types: {}", Arrays.stream(types).map(Enum::name).collect(joining(",")));
+        Map<CodeType, Map<Long, String>> codes = new EnumMap<>(CodeType.class);
+        for (CodeType codeType : types) {
+            codes.put(codeType, getCodesByType(codeType));
+            log.debug("{} code map:\n[{}]", codeType.name(), codes.get(codeType).toString());
+        }
+        long count = codes.values().stream()
+                .flatMap(map -> map.entrySet().stream())
+                .count();
+        log.info("Extracted {} codes", count);
+        return codes;
     }
 
     private Map<Long, String> getCodesByType(CodeType codeType) {

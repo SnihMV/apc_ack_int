@@ -24,7 +24,7 @@ import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import su.petrosoft.apk_ack_integration.model.excel.CashPlanLimitExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.RosterKbkExcelRow;
 import su.petrosoft.apk_ack_integration.model.xml.CreateCashPlanLimitsXml.Line;
-import su.petrosoft.apk_ack_integration.model.xml.PlDirectionLine;
+import su.petrosoft.apk_ack_integration.model.xml.rpl.PlDirectionLine;
 import su.petrosoft.apk_ack_integration.model.xml.UpdateCashPlanLimitXml;
 
 @Component

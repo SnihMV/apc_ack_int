@@ -2,6 +2,7 @@ package su.petrosoft.apk_ack_integration.model.xml;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import su.petrosoft.apk_ack_integration.model.xml.rpl.PlDirectionLine;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

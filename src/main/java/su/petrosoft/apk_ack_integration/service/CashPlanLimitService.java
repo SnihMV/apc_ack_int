@@ -87,7 +87,7 @@ public class CashPlanLimitService {
                 .updatedIds(new ArrayList<>())
                 .build();
         AckGetUpdateMessageResponseDto message = ackRestClient.getUpdateMessage();
-        UpdateCashPlanLimitXml updatingXml = xmlExtractor.extractXml(message, UpdateCashPlanLimitXml.class);
+        UpdateCashPlanLimitXml updatingXml = xmlExtractor.convertBase64String(message, UpdateCashPlanLimitXml.class);
         if (updatingXml == null) {
             return response;
         }

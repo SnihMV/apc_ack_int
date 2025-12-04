@@ -23,7 +23,6 @@ import su.petrosoft.apk_ack_integration.service.ExcelExtractor;
 @RequestMapping("api/v1/cashPlanLimits")
 @RequiredArgsConstructor
 public class CashPlanLimitController {
-    private final ExcelExtractor excelExtractor;
     private final CashPlanLimitService service;
 
     @Operation(

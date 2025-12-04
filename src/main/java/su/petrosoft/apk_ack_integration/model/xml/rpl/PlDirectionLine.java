@@ -115,4 +115,5 @@ public record PlDirectionLine(
         @JacksonXmlProperty(isAttribute = true, localName = "M_SETTLEMENT_10_AMT") BigDecimal mSettlement10Amt,
         @JacksonXmlProperty(isAttribute = true, localName = "M_SETTLEMENT_11_AMT") BigDecimal mSettlement11Amt,
         @JacksonXmlProperty(isAttribute = true, localName = "M_SETTLEMENT_12_AMT") BigDecimal mSettlement12Amt
-) {}
+) {
+}
