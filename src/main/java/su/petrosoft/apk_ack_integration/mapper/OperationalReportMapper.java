@@ -1,5 +1,6 @@
 package su.petrosoft.apk_ack_integration.mapper;
 
+import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.CURRENT_DATE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.FILE_JSON_ATTR;
 import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.REPORT_TYPE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getAttrData;
@@ -31,11 +32,12 @@ public class OperationalReportMapper {
     public OperationalReport toEntity(InstanceDto dto) {
         List<Attribute<?>> attributes = dto.attributes();
         return OperationalReport.builder()
-            .id(dto.id())
-            .version(dto.version())
-            .reportType(ReportType.getById((long) getAttrData(attributes, REPORT_TYPE_ATTR)))
-            .reportValues(extractDataAsBigDecimalMap((String) getAttrData(attributes, FILE_JSON_ATTR)))
-            .build();
+                .id(dto.id())
+                .version(dto.version())
+                .reportType(ReportType.getById(getAttrData(attributes, REPORT_TYPE_ATTR)))
+                .reportDate(getAttrData(attributes, CURRENT_DATE_ATTR))
+                .reportValues(extractDataAsBigDecimalMap(getAttrData(attributes, FILE_JSON_ATTR)))
+                .build();
     }
 
     private Map<String, BigDecimal> extractDataAsBigDecimalMap(String attrData) {

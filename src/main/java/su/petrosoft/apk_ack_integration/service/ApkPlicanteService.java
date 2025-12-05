@@ -22,6 +22,7 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequ
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
+import su.petrosoft.apk_ack_integration.model.enums.ReportType;
 
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -32,7 +33,8 @@ import java.util.Set;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
-import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.buildGetReportsForFillingMainFormRequestDto;
+import static su.petrosoft.apk_ack_integration.model.enums.ReportType.*;
+import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.buildGettingOperationalReportsRequestDto;
 
 @Service
 @Slf4j
@@ -70,13 +72,11 @@ public class ApkPlicanteService {
     }
 
     @SneakyThrows
-    public List<OperationalReport> getReportsForSowingCampaignFilling(FillingMainFormRequestDto dto) {
-        GetAttributesListRequestDto createDto = buildGetReportsForFillingMainFormRequestDto(dto.date());
-        String ss = objectMapper.writeValueAsString(createDto);
-        log.debug("Reports Getting JSON [{}]", ss);
+    public List<OperationalReport> getOperationalReports(ReportType reportType, long date) {
+        GetAttributesListRequestDto createDto = buildGettingOperationalReportsRequestDto(reportType, date);
+        String requestJson = objectMapper.writeValueAsString(createDto);
+        log.debug("Operational Reports Getting JSON [{}]", requestJson);
         List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(createDto);
-        String s = objectMapper.writeValueAsString(dtoList);
-        log.debug("Reports Received JSON [{}]", s);
         return dtoList.stream()
             .map(orMapper::toEntity)
             .toList();
@@ -116,9 +116,8 @@ public class ApkPlicanteService {
         UpdateInstanceRequestDto dto = cpmfMapper.toUpdateDto(updatedMainForm);
         String updatingJson = objectMapper.writeValueAsString(dto);
         log.debug("Crop Production Main Form updating JSON: [{}]", updatingJson);
+
         InstanceDto instanceDto = apkRestClient.updateInstance(dto);
-        String updatedJson = objectMapper.writeValueAsString(instanceDto);
-        log.debug("Updated Crop Production Main Form JSON [{}]", updatedJson);
         return cpmfMapper.toEntity(instanceDto);
     }
 

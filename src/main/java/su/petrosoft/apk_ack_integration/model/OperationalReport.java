@@ -17,6 +17,7 @@ public class OperationalReport {
     private Long id;
     private Long version;
     private ReportType reportType;
+    private Long reportDate;
     private Map<String, BigDecimal> reportValues;
 
 }
