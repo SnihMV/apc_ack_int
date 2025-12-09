@@ -1,5 +1,6 @@
 package su.petrosoft.apk_ack_integration.util;
 
+import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
@@ -27,11 +28,11 @@ public class FinancingSourceUtil {
     public static final long CASH_PLAN_LIMIT_ATTR = 3835;
     public static final long CONCAT_KBK_ATTR = 3842;
 
-    public static InstanceDto getAllFsByCurrentYearRequestDto() {
-        return InstanceDto.builder()
+    public static GetAttributesListRequestDto getAllFsByCurrentYearRequestDto() {
+        return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(ViewType.DETAILED_FORM_VIEW)
-                .filter(new Filter(List.of(new LongFilterAttribute(YEAR_ATTR, (long) LocalDateTime.now().getYear()))))
+                .filter(new Filter(List.of(new LongFilterAttribute(YEAR_ATTR, LocalDateTime.now().getYear()))))
                 .build();
     }
 }

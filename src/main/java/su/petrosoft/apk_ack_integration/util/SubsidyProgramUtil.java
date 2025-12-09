@@ -2,10 +2,13 @@ package su.petrosoft.apk_ack_integration.util;
 
 import lombok.extern.slf4j.Slf4j;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LinkedFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 
@@ -25,6 +28,7 @@ public class SubsidyProgramUtil {
     public static final long CODE_ATTR = 3398;
     public static final long KCSR_ATTR = 3548;
     public static final long DOPKR_ATTR = 3549;
+    public static final long COFIN_LVL_ATTR = 3418;
 
     public static boolean validate(SubsidyProgram sp) {
         Long lvl = sp.getLevel();
@@ -48,26 +52,50 @@ public class SubsidyProgramUtil {
         return false;
     }
 
-    public static InstanceDto getAllSubsidyProgramsRequestDto() {
-        return InstanceDto.builder()
+    public static GetAttributesListRequestDto getAllSubsidyProgramsRequestDto() {
+        return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(DETAILED_FORM_VIEW)
                 .build();
     }
 
-    public static InstanceDto getThirdLevelSpRequestDto() {
-        return InstanceDto.builder()
+    public static GetAttributesListRequestDto getThirdLevelSpRequestDto() {
+        return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(DETAILED_FORM_VIEW)
                 .attributes(List.of(
-                        new StringAttribute(NAME_ATTR),
-                        new LongAttribute(CODE_ATTR),
-                        new LongAttribute(LEVEL_ATTR),
-                        new LinkedAttribute(PARENT_ATTR),
-                        new LinkedAttribute(KCSR_ATTR),
-                        new LinkedAttribute(DOPKR_ATTR)
+                        new RequestedAttribute(NAME_ATTR),
+                        new RequestedAttribute(CODE_ATTR),
+                        new RequestedAttribute(LEVEL_ATTR),
+                        new RequestedAttribute(PARENT_ATTR),
+                        new RequestedAttribute(KCSR_ATTR),
+                        new RequestedAttribute(DOPKR_ATTR)
                 ))
                 .filter(new Filter(List.of(new LongFilterAttribute(LEVEL_ATTR, 3))))
+                .build();
+    }
+
+    public static GetAttributesListRequestDto getSpForCreateCofinLevelsRequestDto() {
+        return GetAttributesListRequestDto.builder()
+                .templateId(TEMPLATE_ID)
+                .viewType(DETAILED_FORM_VIEW)
+                .attributes(List.of(
+                        new RequestedAttribute(KCSR_ATTR),
+                        new RequestedAttribute(DOPKR_ATTR),
+                        new RequestedAttribute(COFIN_LVL_ATTR)))
+                .filter(new Filter(List.of(new LongFilterAttribute(LEVEL_ATTR, 3))))
+                .build();
+    }
+
+    public static GetAttributesListRequestDto getSpByKcsrAndDopkrRequestDto(String kcsrCode, String dopkrCode) {
+        return GetAttributesListRequestDto.builder()
+                .templateId(TEMPLATE_ID)
+                .viewType(DETAILED_FORM_VIEW)
+                .attributes(List.of(new RequestedAttribute(COFIN_LVL_ATTR)))
+                .filter(new Filter(List.of(
+                        new LongFilterAttribute(LEVEL_ATTR, 3),
+                        new LinkedFilterAttribute(KCSR_ATTR, kcsrCode),
+                        new LinkedFilterAttribute(DOPKR_ATTR, dopkrCode))))
                 .build();
     }
 

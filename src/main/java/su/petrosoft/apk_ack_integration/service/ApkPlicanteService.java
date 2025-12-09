@@ -49,21 +49,26 @@ public class ApkPlicanteService {
     private final OperationalReportMapper orMapper;
     private final ObjectMapper objectMapper;
 
-    public Set<CashPlanLimit> findCashPlanLimits(InstanceDto requestDto) {
+    public Set<CashPlanLimit> findCashPlanLimits(GetAttributesListRequestDto requestDto) {
         List<InstanceDto> dtoList = apkRestClient.getExistedInstances(requestDto);
         return dtoList.stream()
                 .map(cplMapper::toCpl)
                 .collect(toSet());
     }
 
-    public Set<SubsidyProgram> findSubsidyPrograms(InstanceDto requestDto) {
+    @SneakyThrows
+    public Set<SubsidyProgram> findSubsidyPrograms(GetAttributesListRequestDto requestDto) {
+        String ss = objectMapper.writeValueAsString(requestDto);
+        log.debug("SPro Creating JSON [{}]", ss);
         List<InstanceDto> dtoList = apkRestClient.getExistedInstances(requestDto);
+        String s = objectMapper.writeValueAsString(dtoList);
+        log.debug("SPro Created JSON [{}]", s);
         return dtoList.stream()
                 .map(spMapper::toEntity)
                 .collect(toSet());
     }
 
-    public Set<FinancingSource> findFinancingSources(InstanceDto requestDto) {
+    public Set<FinancingSource> findFinancingSources(GetAttributesListRequestDto requestDto) {
         List<InstanceDto> dtoList = apkRestClient.getExistedInstances(requestDto);
         log.info("Received [{}] Financing Sources in DB", dtoList.size());
         return dtoList.stream()

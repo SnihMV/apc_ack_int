@@ -3,7 +3,7 @@ package su.petrosoft.apk_ack_integration.mapper;
 import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.CURRENT_DATE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.FILE_JSON_ATTR;
 import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.REPORT_TYPE_ATTR;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getAttrData;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractAttributeData;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,9 +34,9 @@ public class OperationalReportMapper {
         return OperationalReport.builder()
                 .id(dto.id())
                 .version(dto.version())
-                .reportType(ReportType.getById(getAttrData(attributes, REPORT_TYPE_ATTR)))
-                .reportDate(getAttrData(attributes, CURRENT_DATE_ATTR))
-                .reportValues(extractDataAsBigDecimalMap(getAttrData(attributes, FILE_JSON_ATTR)))
+                .reportType(ReportType.getById(extractAttributeData(attributes, REPORT_TYPE_ATTR)))
+                .reportDate(extractAttributeData(attributes, CURRENT_DATE_ATTR))
+                .reportValues(extractDataAsBigDecimalMap(extractAttributeData(attributes, FILE_JSON_ATTR)))
                 .build();
     }
 

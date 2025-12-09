@@ -46,7 +46,7 @@ public class ApkPlicanteRestClient {
                 .body(new ParameterizedTypeReference<>() {});
     }
 
-    public List<InstanceDto> getExistedInstances(InstanceDto dto) {
+    public List<InstanceDto> getExistedInstances(GetAttributesListRequestDto dto) {
         return restClient
             .post()
             .uri("register-rest/operator/v2/table/attributes/list")

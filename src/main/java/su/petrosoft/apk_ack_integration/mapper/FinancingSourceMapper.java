@@ -10,14 +10,17 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttri
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
+import su.petrosoft.apk_ack_integration.model.enums.OwnershipForm;
 import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedExcelRow;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.*;
+import static su.petrosoft.apk_ack_integration.model.enums.OwnershipForm.*;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.*;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getCodeId;
 
@@ -89,12 +92,11 @@ public class FinancingSourceMapper {
     }
 
     private String defineOwnershipForm(UniBudgetCodedExcelRow row) {
-        return switch (row.kosgu()) {
-            case "244" -> "гос";
-            case "245" -> "негос";
-            case "246" -> "ИП";
-            default -> "все";
-        };
+        return Arrays.stream(OwnershipForm.values())
+                .filter(form -> form.getKosgu().equals(row.kosgu()))
+                .findFirst()
+                .map(OwnershipForm::getName)
+                .orElse(ALL.getName());
     }
 
     private String concatKBK(UniBudgetCodedExcelRow row) {

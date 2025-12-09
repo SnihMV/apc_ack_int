@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.value.LinkedValue;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)

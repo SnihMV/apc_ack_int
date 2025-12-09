@@ -6,17 +6,18 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public enum CodeType {
-    KVSR("КВСР", 10528L),
-    KFSR("КФСР", 10579L),
-    KCSR("КЦСР", 10630L),
-    KVR("КВР", 10681L),
-    KOSGU("КОСГУ", 10732L),
-    DOPEK("Доп.ЭК", 10834L),
-    DOPKR("Доп.КР", 10885L),
-    DOPFK("Доп.ФК", 19070L),
-    PURPOSE("Код цели", 11006L),
-    OWNERSHIP_FORM("Форма собственности", 25265L);
+    KVSR("КВСР", 10528),
+    KFSR("КФСР", 10579),
+    KCSR("КЦСР", 10630),
+    KVR("КВР", 10681),
+    KOSGU("КОСГУ", 10732),
+    DOPEK("Доп.ЭК", 10834),
+    DOPKR("Доп.КР", 10885),
+    DOPFK("Доп.ФК", 19070),
+    PURPOSE("Код цели", 11006),
+    OWNERSHIP_FORM("Форма собственности", 25265),
+    FINANCING_FORM("Форма финансирования", 25327);
 
     private final String name;
-    private final Long templateId;
+    private final long templateId;
 }

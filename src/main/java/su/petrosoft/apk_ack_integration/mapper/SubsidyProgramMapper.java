@@ -5,10 +5,10 @@ import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedExcelRow;
 
@@ -16,9 +16,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.*;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.DOPKR;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KCSR;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractAllData;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractAttributeData;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getAttrShortForm;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getCodeId;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.CODE_ATTR;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.COFIN_LVL_ATTR;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.DOPKR_ATTR;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.KCSR_ATTR;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.LEVEL_ATTR;
@@ -35,12 +40,13 @@ public class SubsidyProgramMapper {
         return SubsidyProgram.builder()
                 .id(dto.id())
                 .version(dto.version())
-                .title((String) getAttrData(attributes, NAME_ATTR))
-                .code((String) getAttrData(attributes, CODE_ATTR))
-                .level((Long) getAttrData(attributes, LEVEL_ATTR))
-                .parentId((Long) getAttrData(attributes, PARENT_ATTR))
+                .title(extractAttributeData(attributes, NAME_ATTR))
+                .code(extractAttributeData(attributes, CODE_ATTR))
+                .level(extractAttributeData(attributes, LEVEL_ATTR))
+                .parentId(extractAttributeData(attributes, PARENT_ATTR))
                 .kcsr(getAttrShortForm(attributes, KCSR_ATTR))
                 .dopKr(getAttrShortForm(attributes, DOPKR_ATTR))
+                .cofinancingLevelIds(extractAllData(attributes, COFIN_LVL_ATTR))
                 .build();
     }
 
@@ -88,20 +94,20 @@ public class SubsidyProgramMapper {
                         .build()
         );
     }
-
-    private Object getAttrData(List<Attribute<?>> attributes, Long attributeId) {
-        return attributes.stream()
-                .filter(a -> a.id().equals(attributeId))
-                .findFirst()
-                .map(Attribute::getData)
-                .orElse(null);
-    }
-
-    private String getAttrShortForm(List<Attribute<?>> attributes, Long attributeId) {
-        return attributes.stream()
-                .filter(a -> a.id().equals(attributeId))
-                .findFirst()
-                .map(Attribute::getShortForm)
-                .orElse(null);
-    }
+//
+//    private Object getAttrData(List<Attribute<?>> attributes, Long attributeId) {
+//        return attributes.stream()
+//                .filter(a -> a.id().equals(attributeId))
+//                .findFirst()
+//                .map(Attribute::getData)
+//                .orElse(null);
+//    }
+//
+//    private String getAttrShortForm(List<Attribute<?>> attributes, Long attributeId) {
+//        return attributes.stream()
+//                .filter(a -> a.id().equals(attributeId))
+//                .findFirst()
+//                .map(Attribute::getShortForm)
+//                .orElse(null);
+//    }
 }
