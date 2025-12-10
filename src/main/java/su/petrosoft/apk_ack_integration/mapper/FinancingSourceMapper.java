@@ -67,7 +67,7 @@ public class FinancingSourceMapper {
                 .build();
     }
 
-    public CreateInstanceRequestDto toCreateDto(FinancingSource fs, Map<CodeType, Map<Long, String>> codesMap) {
+    public CreateInstanceRequestDto toCreatingDto(FinancingSource fs, Map<CodeType, Map<Long, String>> codesMap) {
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()
                         .templateId(TEMPLATE_ID)

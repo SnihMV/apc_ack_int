@@ -5,6 +5,9 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateInstancesFromFileResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +15,8 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public class PlicanteInstanceUtil {
+
+    public static final ZoneId MOSCOW_ZONE = ZoneId.of("Europe/Moscow");
 
     public static <T> CreateInstancesFromFileResponseDto getCreationInstancesFromFileResponse(
             List<?> dtoList,
@@ -28,21 +33,33 @@ public class PlicanteInstanceUtil {
 
     public static Long getCodeId(Map<CodeType, Map<Long, String>> allCodes, CodeType type, String code) {
         return allCodes.get(type).entrySet().stream()
-                .filter(entry -> entry.getValue().equals(code))
+                .filter(entry -> entry.getValue().equalsIgnoreCase(code))
                 .findFirst()
                 .map(Map.Entry::getKey)
                 .orElseThrow(() -> new RuntimeException(
                         "There is no code %s in %s dictionary".formatted(code, type.name())));
     }
 
+    public static long toEpochMilli(LocalDate day) {
+        return day.atStartOfDay(MOSCOW_ZONE)
+                .toInstant()
+                .toEpochMilli();
+    }
+
+    public static LocalDate toLocalDate(long epochMilli) {
+        return Instant.ofEpochMilli(epochMilli)
+                .atZone(MOSCOW_ZONE)
+                .toLocalDate();
+    }
+
     @SuppressWarnings("unchecked")
-    public static <T> T extractAttributeData(List<Attribute<?>> attributes, long attributeId) {
+    public static <T> T extractData(List<Attribute<?>> attributes, long attributeId) {
         return findAttribute(attributes, attributeId)
                 .map(attr -> (T) attr.getData())
                 .orElse(null);
     }
 
-    public static String getAttrShortForm(List<Attribute<?>> attributes, Long attributeId) {
+    public static String extractShortForm(List<Attribute<?>> attributes, Long attributeId) {
         return findAttribute(attributes, attributeId)
                 .map(Attribute::getShortForm)
                 .orElse(null);
@@ -61,7 +78,7 @@ public class PlicanteInstanceUtil {
                 .orElse(Collections.emptyList());
     }
 
-    public static Pair extractAttributePair(List<Attribute<?>> attributes, long attributeId) {
+    public static Pair extractPair(List<Attribute<?>> attributes, long attributeId) {
         return findAttribute(attributes, attributeId)
                 .map(Attribute::getPair)
                 .orElse(null);

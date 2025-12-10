@@ -20,4 +20,5 @@ public enum CodeType {
 
     private final String name;
     private final long templateId;
+    private final long valuedAttrId;
 }

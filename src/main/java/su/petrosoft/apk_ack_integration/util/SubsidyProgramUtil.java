@@ -4,13 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LinkedFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 
 import java.util.List;
 
@@ -75,11 +71,12 @@ public class SubsidyProgramUtil {
                 .build();
     }
 
-    public static GetAttributesListRequestDto getSpForCreateCofinLevelsRequestDto() {
+    public static GetAttributesListRequestDto buildGettingSubsidyProgramsForCreationCofinancingLevelsRequestDto() {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(DETAILED_FORM_VIEW)
                 .attributes(List.of(
+                        new RequestedAttribute(LEVEL_ATTR),
                         new RequestedAttribute(KCSR_ATTR),
                         new RequestedAttribute(DOPKR_ATTR),
                         new RequestedAttribute(COFIN_LVL_ATTR)))

@@ -19,11 +19,15 @@ public record LinkedAttribute(
 ) implements Attribute<LinkedValue> {
 
     public LinkedAttribute(long id) {
-        this(id, null);
+        this(id, null, "LINKED", null);
     }
 
     public LinkedAttribute(long id, Long data) {
-        this(id, null, "LINKED", List.of(new LinkedValue(data, null)));
+        this(id, null, "LINKED", List.of(new LinkedValue(data)));
+    }
+
+    public LinkedAttribute(long id, List<LinkedValue> values) {
+        this(id, null, "LINKED", values);
     }
 
     @Override
