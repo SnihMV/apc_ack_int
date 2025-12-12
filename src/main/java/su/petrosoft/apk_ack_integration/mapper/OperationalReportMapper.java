@@ -43,8 +43,7 @@ public class OperationalReportMapper {
     private Map<String, BigDecimal> extractDataAsBigDecimalMap(String attrData) {
         byte[] rawData = Base64.getDecoder().decode(attrData);
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(rawData);
+            JsonNode root = objectMapper.readTree(rawData);
             JsonNode dataNode = root.path("data");
 
             if (dataNode.isMissingNode() || !dataNode.isObject()) {
@@ -53,7 +52,7 @@ public class OperationalReportMapper {
 
             Map<String, BigDecimal> result = new HashMap<>();
 
-            dataNode.fields().forEachRemaining(entry -> {
+            dataNode.properties().forEach(entry -> {
                 String key = entry.getKey();
                 JsonNode valueNode = entry.getValue();
 

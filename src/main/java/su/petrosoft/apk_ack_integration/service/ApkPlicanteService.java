@@ -36,6 +36,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.buildGettingOperationalReportsRequestDto;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
 
 @Service
 @Slf4j
@@ -52,7 +53,7 @@ public class ApkPlicanteService {
     private final ObjectMapper objectMapper;
 
     public Set<CashPlanLimit> findCashPlanLimits(GetAttributesListRequestDto requestDto) {
-        List<InstanceDto> dtoList = apkRestClient.getExistedInstances(requestDto);
+        List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(requestDto);
         return dtoList.stream()
                 .map(cplMapper::toCpl)
                 .collect(toSet());
@@ -62,7 +63,7 @@ public class ApkPlicanteService {
     public Set<SubsidyProgram> findSubsidyPrograms(GetAttributesListRequestDto requestDto) {
         String ss = objectMapper.writeValueAsString(requestDto);
         log.debug("SPro Creating JSON [{}]", ss);
-        List<InstanceDto> dtoList = apkRestClient.getExistedInstances(requestDto);
+        List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(requestDto);
         String s = objectMapper.writeValueAsString(dtoList);
         log.debug("SPro Created JSON [{}]", s);
         return dtoList.stream()
@@ -71,7 +72,7 @@ public class ApkPlicanteService {
     }
 
     public Set<FinancingSource> findFinancingSources(GetAttributesListRequestDto requestDto) {
-        List<InstanceDto> dtoList = apkRestClient.getExistedInstances(requestDto);
+        List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(requestDto);
         log.info("Received [{}] Financing Sources in DB", dtoList.size());
         return dtoList.stream()
                 .map(fsMapper::toEntity)
@@ -169,17 +170,15 @@ public class ApkPlicanteService {
     }
 
     private Map<Long, String> getCodesByType(CodeType codeType) {
-        log.debug("Receiving codes for type {}", codeType.name());
         List<InstanceDto> list = apkRestClient.getTableAttributesList(
                 GetAttributesListRequestDto.builder()
                         .templateId(codeType.getTemplateId())
                         .attributes(List.of(new RequestedAttribute(codeType.getValuedAttrId())))
                         .build());
         return list.stream()
-                .filter(dto -> dto.shortForm() != null)
                 .collect(toMap(
                         InstanceDto::id,
-                        InstanceDto::shortForm
+                        dto -> extractData(dto.attributes(), codeType.getValuedAttrId())
                 ));
     }
 }

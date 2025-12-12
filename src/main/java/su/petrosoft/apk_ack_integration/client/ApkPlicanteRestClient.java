@@ -11,7 +11,10 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.ChangeInstanceStatusR
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
+import su.petrosoft.apk_ack_integration.model.dto.request.GettingInstanceRepresentationRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.response.AttributeRepresentationDto;
 
 import java.util.List;
 
@@ -20,6 +23,17 @@ import java.util.List;
 public class ApkPlicanteRestClient {
     private final IntegrationProperties props;
     private final RestClient restClient;
+
+    public List<InstanceDto> getTableAttributesList(GetAttributesListRequestDto dto) {
+        return restClient
+                .post()
+                .uri("register-rest/operator/v2/table/attributes/list")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(dto)
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {
+                });
+    }
 
     public InstanceDto createInstance(CreateInstanceRequestDto dto) {
         try {
@@ -36,24 +50,15 @@ public class ApkPlicanteRestClient {
         }
     }
 
-    public List<InstanceDto> getTableAttributesList(GetAttributesListRequestDto dto) {
+    public List<AttributeRepresentationDto> getInstanceRepresentation(GettingInstanceRepresentationRequestDto dto) {
         return restClient
                 .post()
-                .uri("register-rest/operator/v2/table/attributes/list")
+                .uri("register-rest/operator/v2/representation/instance/data-view")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(dto)
                 .retrieve()
-                .body(new ParameterizedTypeReference<>() {});
-    }
-
-    public List<InstanceDto> getExistedInstances(GetAttributesListRequestDto dto) {
-        return restClient
-            .post()
-            .uri("register-rest/operator/v2/table/attributes/list")
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(dto)
-            .retrieve()
-            .body(new ParameterizedTypeReference<>() {});
+                .body(new ParameterizedTypeReference<>() {
+                });
     }
 
     public ResponseEntity<Void> changeStatus(ChangeInstanceStatusRequestDto dto) {

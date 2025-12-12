@@ -10,11 +10,11 @@ import java.util.function.BiPredicate;
 @Getter
 @AllArgsConstructor
 public enum FinancingForm {
-    OB("ОБ (областной бюджет)", (ob, fb) -> ob.compareTo(BigDecimal.ONE) == 0 && fb.compareTo(BigDecimal.ZERO) == 0),
+    OB("OB", (ob, fb) -> ob.compareTo(BigDecimal.ONE) == 0 && fb.compareTo(BigDecimal.ZERO) == 0),
 
-    OFB("ОФБ (областной + федеральный бюджет)", (ob, fb) -> ob.compareTo(BigDecimal.ZERO) > 0 && ob.compareTo(BigDecimal.ONE) < 0
+    OFB("OBFB", (ob, fb) -> ob.compareTo(BigDecimal.ZERO) > 0 && ob.compareTo(BigDecimal.ONE) < 0
             && fb.compareTo(BigDecimal.ZERO) > 0 && fb.compareTo(BigDecimal.ONE) < 0),
-    OVER("Сверх (областной + федеральный бюджет + дополнительные областные деньги)", (ob, fb) -> ob.compareTo(BigDecimal.ZERO) == 0 && fb.compareTo(BigDecimal.ZERO) == 0);
+    OVER("OVER", (ob, fb) -> ob.compareTo(BigDecimal.ZERO) == 0 && fb.compareTo(BigDecimal.ZERO) == 0);
 
     private String name;
     private BiPredicate<BigDecimal, BigDecimal> matcher;
