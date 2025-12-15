@@ -2,6 +2,7 @@ package su.petrosoft.apk_ack_integration.model.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import su.petrosoft.apk_ack_integration.model.excel.CofinancingLevelExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.RosterKbkExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRow;
@@ -22,7 +23,12 @@ public enum ExcelFileType {
     ROSTER_KBK(
             List.of("Раздел", "Подраздел", "КЦСР", "Доп. КР", "КВР", "КОСГУ", "КВСР"),
             "Итого",
-            RosterKbkExcelRow.class);
+            RosterKbkExcelRow.class),
+    COFINANCING_LEVEL(
+            List.of("Код", "Раздел", "Подраздел", "Наименование КФСР", "КЦСР", "Наименование КЦСР", "Доп. КР"),
+            "Итого",
+            CofinancingLevelExcelRow.class
+    );
 
     private final List<String> columnNames;
     private final String footerSearchKey;

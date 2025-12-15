@@ -3,7 +3,7 @@ package su.petrosoft.apk_ack_integration.mapper;
 import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.CURRENT_DATE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.FILE_JSON_ATTR;
 import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.REPORT_TYPE_ATTR;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getAttrData;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,17 +34,16 @@ public class OperationalReportMapper {
         return OperationalReport.builder()
                 .id(dto.id())
                 .version(dto.version())
-                .reportType(ReportType.getById(getAttrData(attributes, REPORT_TYPE_ATTR)))
-                .reportDate(getAttrData(attributes, CURRENT_DATE_ATTR))
-                .reportValues(extractDataAsBigDecimalMap(getAttrData(attributes, FILE_JSON_ATTR)))
+                .reportType(ReportType.getById(extractData(attributes, REPORT_TYPE_ATTR)))
+                .reportDate(extractData(attributes, CURRENT_DATE_ATTR))
+                .reportValues(extractDataAsBigDecimalMap(extractData(attributes, FILE_JSON_ATTR)))
                 .build();
     }
 
     private Map<String, BigDecimal> extractDataAsBigDecimalMap(String attrData) {
         byte[] rawData = Base64.getDecoder().decode(attrData);
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(rawData);
+            JsonNode root = objectMapper.readTree(rawData);
             JsonNode dataNode = root.path("data");
 
             if (dataNode.isMissingNode() || !dataNode.isObject()) {
@@ -53,7 +52,7 @@ public class OperationalReportMapper {
 
             Map<String, BigDecimal> result = new HashMap<>();
 
-            dataNode.fields().forEachRemaining(entry -> {
+            dataNode.properties().forEach(entry -> {
                 String key = entry.getKey();
                 JsonNode valueNode = entry.getValue();
 
@@ -64,7 +63,6 @@ public class OperationalReportMapper {
                     }
                 }
             });
-
             return result;
         } catch (Exception e) {
             throw new RuntimeException("Error parsing JSON: " + e.getMessage(), e);

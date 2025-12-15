@@ -3,6 +3,7 @@ package su.petrosoft.apk_ack_integration.service;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.springframework.stereotype.Component;
+import su.petrosoft.apk_ack_integration.model.excel.CofinancingLevelExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.RosterKbkExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRow;
@@ -128,6 +129,16 @@ public class ExcelRowMapper {
                 .m12Amt(row.getCell(34).getNumericCellValue())
                 .financeFederal(row.getCell(35).getNumericCellValue())
                 .financeRegional(row.getCell(36).getNumericCellValue())
+                .build();
+    }
+
+    public CofinancingLevelExcelRow toCofinancingLevelRow(Row row) {
+        return CofinancingLevelExcelRow.builder()
+                .kcsr(row.getCell(4).getStringCellValue())
+                .dopKr(row.getCell(6).getStringCellValue())
+                .kosgu(row.getCell(10).getStringCellValue())
+                .obCoeff(row.getCell(22).getNumericCellValue())
+                .fbCoeff(row.getCell(23).getNumericCellValue())
                 .build();
     }
 }

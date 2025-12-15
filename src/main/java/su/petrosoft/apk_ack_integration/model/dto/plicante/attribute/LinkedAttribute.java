@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.value.LinkedValue;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -17,11 +19,15 @@ public record LinkedAttribute(
 ) implements Attribute<LinkedValue> {
 
     public LinkedAttribute(long id) {
-        this(id, null);
+        this(id, null, "LINKED", null);
     }
 
     public LinkedAttribute(long id, Long data) {
-        this(id, null, "LINKED", List.of(new LinkedValue(data, null)));
+        this(id, null, "LINKED", List.of(new LinkedValue(data)));
+    }
+
+    public LinkedAttribute(long id, List<LinkedValue> values) {
+        this(id, null, "LINKED", values);
     }
 
     @Override
