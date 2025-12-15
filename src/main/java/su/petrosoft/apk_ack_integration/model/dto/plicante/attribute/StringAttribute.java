@@ -26,12 +26,6 @@ public record StringAttribute(
 
     @Override
     @JsonIgnore
-    public StringValue getFirstValue() {
-        return Attribute.super.getFirstValue();
-    }
-
-    @Override
-    @JsonIgnore
     public String getData() {
         StringValue firstValue = getFirstValue();
         return firstValue != null ? firstValue.data() : null;

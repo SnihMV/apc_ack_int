@@ -1,16 +1,14 @@
 package su.petrosoft.apk_ack_integration.util;
 
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 import su.petrosoft.apk_ack_integration.model.xml.rpl.PlDirectionLine;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -63,24 +61,24 @@ public class CashPlanLimitUtil {
     public static final long QUARTER_3_BAL_ATTR = 1626;
     public static final long QUARTER_4_BAL_ATTR = 1631;
 
-    public static InstanceDto getCplCodesOnlyByCurrentYearRequestDto() {
-        return InstanceDto.builder()
+    public static GetAttributesListRequestDto getCplCodesOnlyByCurrentYearRequestDto() {
+        return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(ViewType.DETAILED_FORM_VIEW)
                 .attributes(List.of(
-                        new StringAttribute(YEAR_ATTR),
-                        new LongAttribute(KVSR_ATTR),
-                        new LongAttribute(KFSR_ATTR),
-                        new LinkedAttribute(KCSR_ATTR),
-                        new LinkedAttribute(KVR_ATTR),
-                        new LinkedAttribute(KOSGU_ATTR),
-                        new LinkedAttribute(DOPFK_ATTR),
-                        new LinkedAttribute(DOPEK_ATTR),
-                        new LinkedAttribute(DOPKR_ATTR),
-                        new LinkedAttribute(PURPOSE_ATTR)
+                        new RequestedAttribute(YEAR_ATTR),
+                        new RequestedAttribute(KVSR_ATTR),
+                        new RequestedAttribute(KFSR_ATTR),
+                        new RequestedAttribute(KCSR_ATTR),
+                        new RequestedAttribute(KVR_ATTR),
+                        new RequestedAttribute(KOSGU_ATTR),
+                        new RequestedAttribute(DOPFK_ATTR),
+                        new RequestedAttribute(DOPEK_ATTR),
+                        new RequestedAttribute(DOPKR_ATTR),
+                        new RequestedAttribute(PURPOSE_ATTR)
                 ))
                 .filter(new Filter(List.of(
-                        new LongFilterAttribute(YEAR_ATTR, (long) LocalDateTime.now().getYear()))))
+                        new LongFilterAttribute(YEAR_ATTR, LocalDate.now().getYear()))))
                 .build();
     }
 

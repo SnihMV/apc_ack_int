@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import su.petrosoft.apk_ack_integration.exception.ExcelFileException;
 import su.petrosoft.apk_ack_integration.model.enums.ExcelFileType;
+import su.petrosoft.apk_ack_integration.model.excel.CofinancingLevelExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.RosterKbkExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRow;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import static su.petrosoft.apk_ack_integration.model.enums.ExcelFileType.COFINANCING_LEVEL;
 import static su.petrosoft.apk_ack_integration.model.enums.ExcelFileType.ROSTER_KBK;
 import static su.petrosoft.apk_ack_integration.model.enums.ExcelFileType.UNI_BUDGET;
 import static su.petrosoft.apk_ack_integration.model.enums.ExcelFileType.UNI_BUDGET_CODED;
@@ -42,6 +44,10 @@ public class ExcelExtractor {
 
     public List<RosterKbkExcelRow> getRosterKbkRows(MultipartFile file) {
         return extractTableRows(file, ROSTER_KBK, mapper::parseToRosterKbkRow);
+    }
+
+    public List<CofinancingLevelExcelRow> getCofinancingLevelRows(MultipartFile file) {
+        return extractTableRows(file, COFINANCING_LEVEL, mapper::toCofinancingLevelRow);
     }
 
     private <T> List<T> extractTableRows(MultipartFile excelFile, ExcelFileType type, Function<Row, T> rowMapper) {
@@ -86,7 +92,7 @@ public class ExcelExtractor {
             }
         }
         log.error("Could not found table header");
-        throw new IllegalArgumentException("Invalid excel file format");
+        throw new ExcelFileException("Could not found table header");
     }
 
     private int findLastRow(Sheet sheet, int from, String searchKey) {

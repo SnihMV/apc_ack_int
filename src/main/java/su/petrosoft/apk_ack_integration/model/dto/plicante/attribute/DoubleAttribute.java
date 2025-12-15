@@ -21,12 +21,6 @@ public record DoubleAttribute(
 
     @Override
     @JsonIgnore
-    public DoubleValue getFirstValue() {
-        return Attribute.super.getFirstValue();
-    }
-
-    @Override
-    @JsonIgnore
     public BigDecimal getData() {
         DoubleValue firstValue = getFirstValue();
         return firstValue != null ? firstValue.data() : null;

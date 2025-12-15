@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Objects;
 
 @Data
@@ -20,6 +21,7 @@ public class SubsidyProgram {
     private String kcsr;
     private String dopKr;
     private String title;
+    private List<Long> cofinancingLevelIds;
 
     @Override
     public boolean equals(Object o) {

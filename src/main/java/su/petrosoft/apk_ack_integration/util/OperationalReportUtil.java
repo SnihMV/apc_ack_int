@@ -10,8 +10,6 @@ import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 
 import java.util.List;
 
-import static su.petrosoft.apk_ack_integration.model.enums.ReportType.FORM_1;
-
 public class OperationalReportUtil {
     public static final long TEMPLATE_ID = 5575;
 
