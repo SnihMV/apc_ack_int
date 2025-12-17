@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import su.petrosoft.apk_ack_integration.model.enums.FinancingForm;
+import su.petrosoft.apk_ack_integration.model.enums.OwnershipForm;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -21,6 +23,7 @@ public class CofinancingLevel {
     private BigDecimal obCoeff;
     private BigDecimal fbCoeff;
     private String financingForm;
+    private String ownershipForm;
 
     @Override
     public boolean equals(Object o) {
@@ -28,12 +31,13 @@ public class CofinancingLevel {
         CofinancingLevel that = (CofinancingLevel) o;
         return Objects.equals(year, that.year)
                 && Objects.equals(obCoeff, that.obCoeff)
-                && Objects.equals(fbCoeff, that.fbCoeff);
+                && Objects.equals(fbCoeff, that.fbCoeff)
+                && Objects.equals(ownershipForm, that.ownershipForm);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(year, obCoeff, fbCoeff);
+        return Objects.hash(year, obCoeff, fbCoeff, ownershipForm);
     }
 }
 

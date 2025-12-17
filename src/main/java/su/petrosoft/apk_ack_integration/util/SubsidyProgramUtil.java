@@ -4,9 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LinkedFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 
 import java.util.List;
 
@@ -80,7 +83,8 @@ public class SubsidyProgramUtil {
                         new RequestedAttribute(KCSR_ATTR),
                         new RequestedAttribute(DOPKR_ATTR),
                         new RequestedAttribute(COFIN_LVL_ATTR)))
-                .filter(new Filter(List.of(new LongFilterAttribute(LEVEL_ATTR, 3))))
+                .filter(new Filter(List.of(
+                        new LongFilterAttribute(LEVEL_ATTR, 3))))
                 .build();
     }
 
@@ -96,4 +100,14 @@ public class SubsidyProgramUtil {
                 .build();
     }
 
+    public static UpdateInstanceRequestDto buildUpdatingByCofinLevelsRequestDto(SubsidyProgram updatedSP) {
+        return new UpdateInstanceRequestDto(
+                InstanceDto.builder()
+                        .id(updatedSP.getId())
+                        .templateId(TEMPLATE_ID)
+                        .version(updatedSP.getVersion())
+                        .attributes(List.of(
+                                new LinkedAttribute(COFIN_LVL_ATTR, updatedSP.getCofinancingLevelIds())))
+                        .build());
+    }
 }

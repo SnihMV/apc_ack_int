@@ -23,8 +23,15 @@ import java.util.Set;
 
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.DOPEK;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.DOPFK;
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KCSR;
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.DOPKR;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KFSR;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KOSGU;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KVR;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KVSR;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.PURPOSE;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CPL_TITLE;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getCplCodesOnlyByCurrentYearRequestDto;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.FS_TITLE;
@@ -55,7 +62,8 @@ public class BudgetItemService {
                     .incomingCount(rows.size())
                     .build();
         }
-        Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap();
+        Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap(
+                KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
         Set<CashPlanLimit> savedCplList = new LinkedHashSet<>();
         for (UniBudgetCodedExcelRow row : uniqueRowsByCpl) {
             savedCplList.add(rowProcessor.saveCashPlanLimit(row, codesMap));
@@ -97,7 +105,8 @@ public class BudgetItemService {
         Set<CashPlanLimit> existingCashPlanLimits = cashPlanLimitService.getLimitsForCurrentYear();
         Set<SubsidyProgram> existingSubsidyPrograms = subsidyProgramService.getAllThirdLevelSpFromDb();
 
-        Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap();
+        Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap(
+                KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
         List<FinancingSource> list = rowList.stream()
                 .map(dto -> rowProcessor.buildFinancingSource(dto, existingCashPlanLimits, existingSubsidyPrograms, codesMap))
                 .toList();
@@ -115,7 +124,8 @@ public class BudgetItemService {
             return new CreateBudgetItemsResponseDto(emptyMap());
         }
         log.info("[{}] BudgetItems from excel left as unique to be processed", rowsToProcess.size());
-        Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap();
+        Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap(
+                KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
         Set<SubsidyProgram> existingSpList = apkService.findSubsidyPrograms(getAllSubsidyProgramsRequestDto());
         log.info("Found [{}] Subsidy Programs in DB", existingSpList.size());
 

@@ -8,6 +8,7 @@ import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +69,7 @@ public class PlicanteInstanceUtil {
     public static <T> List<T> extractAllData(List<Attribute<?>> attributes, long attributeId) {
         return findAttribute(attributes, attributeId)
                 .map(attr -> (List<T>) attr.getAllData())
-                .orElse(Collections.emptyList());
+                .orElse(new ArrayList<>());
     }
 
     public static List<String> extractAllShortForms(List<Attribute<?>> attributes, long attributeId) {

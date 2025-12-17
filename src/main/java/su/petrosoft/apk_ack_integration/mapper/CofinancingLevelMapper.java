@@ -11,6 +11,8 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttri
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
+import su.petrosoft.apk_ack_integration.model.enums.FinancingForm;
+import su.petrosoft.apk_ack_integration.model.enums.OwnershipForm;
 import su.petrosoft.apk_ack_integration.model.excel.CofinancingLevelExcelRow;
 
 import java.math.BigDecimal;
@@ -19,10 +21,10 @@ import java.util.List;
 import java.util.Map;
 
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.*;
-import static su.petrosoft.apk_ack_integration.model.enums.FinancingForm.define;
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.COEFF_FB_ATTR;
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.COEFF_OB_ATTR;
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.FIN_FORM_ATTR;
+import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.OWN_FORM_ATTR;
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.START_DATE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.TEMPLATE_ID;
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.YEAR_ATTR;
@@ -43,7 +45,8 @@ public class CofinancingLevelMapper {
                 .startDate(LocalDate.of(LocalDate.now().getYear(), 1, 1))
                 .obCoeff(obCoeff)
                 .fbCoeff(fbCoeff)
-                .financingForm(define(obCoeff, fbCoeff).getName())
+                .financingForm(FinancingForm.define(obCoeff, fbCoeff).getName())
+                .ownershipForm(OwnershipForm.define(row.kosgu()).getName())
                 .build();
     }
 
@@ -69,10 +72,9 @@ public class CofinancingLevelMapper {
                                 new DateAttribute(START_DATE_ATTR, toEpochMilli(cl.getStartDate())),
                                 new DoubleAttribute(COEFF_FB_ATTR, cl.getFbCoeff()),
                                 new DoubleAttribute(COEFF_OB_ATTR, cl.getObCoeff()),
-                                new LinkedAttribute(FIN_FORM_ATTR, getCodeId(codesMap, FINANCING_FORM, cl.getFinancingForm()))
-                        ))
-                        .build()
-        );
+                                new LinkedAttribute(OWN_FORM_ATTR, getCodeId(codesMap, OWNERSHIP_FORM, cl.getOwnershipForm())),
+                                new LinkedAttribute(FIN_FORM_ATTR, getCodeId(codesMap, FINANCING_FORM, cl.getFinancingForm()))))
+                        .build());
     }
 
 }

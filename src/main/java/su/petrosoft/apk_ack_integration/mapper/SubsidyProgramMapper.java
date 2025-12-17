@@ -115,15 +115,9 @@ public class SubsidyProgramMapper {
                         .id(subsidyProgram.getId())
                         .templateId(CropProductionUtil.TEMPLATE_ID)
                         .version(subsidyProgram.getVersion())
-                        .attributes(buildAttributeListToUpdate(subsidyProgram))
-                        .build()
-        );
-    }
-
-    private List<Attribute<?>> buildAttributeListToUpdate(SubsidyProgram subsidyProgram) {
-        return List.of(
-                new LinkedAttribute(COFIN_LVL_ATTR, getLinkedValuesFromIds(subsidyProgram.getCofinancingLevelIds()))
-        );
+                        .attributes(List.of(
+                                new LinkedAttribute(COFIN_LVL_ATTR, subsidyProgram.getCofinancingLevelIds())))
+                        .build());
     }
 
     private List<LinkedValue> getLinkedValuesFromIds(List<Long> linkedIds) {
@@ -131,20 +125,4 @@ public class SubsidyProgramMapper {
                 .map(LinkedValue::new)
                 .toList();
     }
-//
-//    private Object getAttrData(List<Attribute<?>> attributes, Long attributeId) {
-//        return attributes.stream()
-//                .filter(a -> a.id().equals(attributeId))
-//                .findFirst()
-//                .map(Attribute::getData)
-//                .orElse(null);
-//    }
-//
-//    private String getAttrShortForm(List<Attribute<?>> attributes, Long attributeId) {
-//        return attributes.stream()
-//                .filter(a -> a.id().equals(attributeId))
-//                .findFirst()
-//                .map(Attribute::getShortForm)
-//                .orElse(null);
-//    }
 }

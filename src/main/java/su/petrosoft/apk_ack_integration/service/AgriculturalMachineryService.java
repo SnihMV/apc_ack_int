@@ -50,6 +50,7 @@ import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUti
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.JSON_FILE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.RECIPIENT_ID;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.buildRequestDtoForReportProcessing;
+import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.*;
 
 @Slf4j
 @Service
@@ -85,11 +86,8 @@ public class AgriculturalMachineryService {
                 log.debug("Park [{}] been created", instance.id());
                 savedIds.add(instance.id());
             }
-            List<LinkedValue> linkedValues = savedIds.stream()
-                    .map(LinkedValue::new)
-                    .toList();
 
-            GetAttributesListRequestDto dto = SubsidyRecipientUtil.buildRequestDtoToFindById(report.getRecipientId());
+            GetAttributesListRequestDto dto = buildRequestDtoToFindById(report.getRecipientId());
             String s = objectMapper.writeValueAsString(dto);
             log.debug("===Getting JSON [{}]", s);
 
@@ -102,11 +100,10 @@ public class AgriculturalMachineryService {
             UpdateInstanceRequestDto updatingDto = new UpdateInstanceRequestDto(
                     InstanceDto.builder()
                             .id(recipient.getId())
-                            .templateId(SubsidyRecipientUtil.TEMPLATE_ID)
+                            .templateId(TEMPLATE_ID)
                             .version(recipient.getVersion())
                             .attributes(List.of(
-                                    new LinkedAttribute(SubsidyRecipientUtil.MACHINE_PARK_ATTR, linkedValues)
-                            ))
+                                    new LinkedAttribute(MACHINE_PARK_ATTR, savedIds)))
                             .build());
             String s1 = objectMapper.writeValueAsString(updatingDto);
             log.debug("===Updating JSON {}", s1);

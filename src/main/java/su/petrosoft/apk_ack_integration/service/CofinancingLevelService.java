@@ -1,15 +1,23 @@
 package su.petrosoft.apk_ack_integration.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.resource.ResourceTransformer;
+import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
 import su.petrosoft.apk_ack_integration.mapper.CofinancingLevelMapper;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyProgramMapper;
 import su.petrosoft.apk_ack_integration.model.CofinancingLevel;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import su.petrosoft.apk_ack_integration.model.excel.CofinancingLevelExcelRow;
+import su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil;
+import su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +28,9 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toSet;
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.FINANCING_FORM;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.OWNERSHIP_FORM;
+import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.*;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.*;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.buildGettingSubsidyProgramsForCreationCofinancingLevelsRequestDto;
 
 @Slf4j
@@ -30,7 +41,11 @@ public class CofinancingLevelService {
     private final ApkPlicanteService plicanteService;
     private final CofinancingLevelMapper cflMapper;
     private final SubsidyProgramMapper spMapper;
+    private final ApkPlicanteRestClient apkPlicanteRestClient;
+    private final ResourceTransformer resourceTransformer;
+    private final ObjectMapper objectMapper;
 
+    @SneakyThrows
     public void createFromExcel(MultipartFile file) {
         List<CofinancingLevelExcelRow> rows = excelExtractor.getCofinancingLevelRows(file);
         if (rows.isEmpty()) {
@@ -41,6 +56,7 @@ public class CofinancingLevelService {
                 .collect(groupingBy(
                         spMapper::toEntity,
                         mapping(cflMapper::toEntity, toSet())));
+        log.debug("=== EXCEL ROW === [{}]", excelEntitiesMap);
         log.info("Unique Subsidy Programs from Excel count [{}]", excelEntitiesMap.size());
 
         Set<SubsidyProgram> existedSPs = plicanteService.findSubsidyPrograms(
@@ -54,46 +70,29 @@ public class CofinancingLevelService {
             log.info("No Subsidy Programs to update");
             return;
         }
-        Map<CodeType, Map<Long, String>> codesMap = plicanteService.getCodesMap(FINANCING_FORM);
+        Map<CodeType, Map<Long, String>> codesMap = plicanteService.getCodesMap(OWNERSHIP_FORM, FINANCING_FORM);
 
         for (SubsidyProgram updatedSP : existedSPs) {
+            log.debug("=== Existed SP === [{}]", updatedSP);
+
+            List<Long> currentCflIds = updatedSP.getCofinancingLevelIds();
             Set<CofinancingLevel> cflListToSave = excelEntitiesMap.get(updatedSP);
-            List<CofinancingLevel> savedCfls = new ArrayList<>();
+            
+            List<Long> savedCflIds = new ArrayList<>();
             for (CofinancingLevel cflToSave : cflListToSave) {
-//                TODO: continue developing
-
+                CreateInstanceRequestDto creatingRequestDto = getCreatingRequestDto(cflToSave, codesMap);
+                String s = objectMapper.writeValueAsString(creatingRequestDto);
+                log.debug("=== CFL creating JSON === [{}]", s);
+                InstanceDto savedInstance = apkPlicanteRestClient.createInstance(
+                        creatingRequestDto);
+                savedCflIds.add(savedInstance.id());
             }
+            currentCflIds.addAll(savedCflIds);
+            log.debug("=== Updated SP === [{}]", updatedSP);
+            InstanceDto updatedInstance = apkPlicanteRestClient.updateInstance(
+                    buildUpdatingByCofinLevelsRequestDto(updatedSP));
+            log.debug("=== Updated SP Instance === [{}]", updatedInstance);
+
         }
-
-        for (Map.Entry<SubsidyProgram, Set<CofinancingLevel>> entry : excelEntitiesMap.entrySet()) {
-            List<Long> savedCflIds = entry.getValue().stream()
-                    .map(cfl -> plicanteService.createCofinancingLevel(cfl, codesMap))
-                    .map(CofinancingLevel::getId)
-                    .toList();
-            SubsidyProgram sp = entry.getKey();
-            sp.getCofinancingLevelIds().addAll(savedCflIds);
-            plicanteService.updateSubsidyProgram(sp);
-            log.debug("=== UPDATED SP === [{}]", sp);
-        }
-
-
-//        for (CofinancingLevelExcelRow row : rows) {
-//            SubsidyProgram sp = spMapper.toEntity(row);
-//            log.debug("+++ EXCEL SP +++ [{}]", sp);
-//            Optional<SubsidyProgram> optionalSP = existedSPs.stream()
-//                    .filter(sp::equals)
-//                    .findFirst();
-//            if (optionalSP.isEmpty()) {
-//                continue;
-//            }
-//            SubsidyProgram foundSP = optionalSP.get();
-//            CofinancingLevel excelCFL = cflMapper.toEntity(row);
-//            CofinancingLevel createdCFL = plicanteService.createCofinancingLevel(excelCFL, codesMap);
-//            ArrayList<Long> copiedCflIds = new ArrayList<>(foundSP.getCofinancingLevelIds());
-//            copiedCflIds.add(createdCFL.getId());
-//            foundSP.setCofinancingLevelIds(copiedCflIds);
-//            SubsidyProgram updatedSP = plicanteService.updateSubsidyProgram(foundSP);
-//            log.debug("=== UPDATED SP === [{}]", updatedSP);
-//        }
     }
 }

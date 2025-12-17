@@ -7,9 +7,11 @@ import su.petrosoft.apk_ack_integration.model.Pair;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.value.LinkedValue;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.value.Value;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -71,12 +73,12 @@ public sealed interface Attribute<T>
 
     @JsonIgnore
     default List<?> getAllData() {
-        if (value() == null) return Collections.emptyList();
+        if (value() == null) return new ArrayList<>();
         return value().stream()
                 .map(Value.class::cast)
                 .map(Value::data)
                 .filter(Objects::nonNull)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @JsonIgnore

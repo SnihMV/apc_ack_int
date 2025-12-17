@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.*;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getCplCodesOnlyByCurrentYearRequestDto;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getCreationInstancesFromFileResponse;
 
@@ -55,7 +56,8 @@ public class CashPlanLimitService {
 
             limitsFromExcel.removeAll(existedLimits);
             if (!limitsFromExcel.isEmpty()) {
-                Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap();
+                Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap(
+                        KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
                 limitsFromExcel.stream()
                         .map(cpl -> apkService.createCashPlanLimit(cpl, codesMap))
                         .forEach(createdLimits::add);

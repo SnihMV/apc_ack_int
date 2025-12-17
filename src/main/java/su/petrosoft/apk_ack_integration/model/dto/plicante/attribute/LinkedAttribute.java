@@ -26,8 +26,8 @@ public record LinkedAttribute(
         this(id, null, "LINKED", List.of(new LinkedValue(data)));
     }
 
-    public LinkedAttribute(long id, List<LinkedValue> values) {
-        this(id, null, "LINKED", values);
+    public LinkedAttribute(long id, List<Long> values) {
+        this(id, null, "LINKED", values.stream().map(LinkedValue::new).toList());
     }
 
     @Override
