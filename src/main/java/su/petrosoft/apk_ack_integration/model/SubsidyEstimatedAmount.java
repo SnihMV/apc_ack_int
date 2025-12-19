@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,7 +17,7 @@ public class SubsidyEstimatedAmount {
     private Long year;
     private Long recipientId;
     private Long subsidyProgramId;
-    private Long sob;
-    private Long sst;
-    private Long sn;
+    private BigDecimal sob;
+    private BigDecimal sst;
+    private BigDecimal sn;
 }
