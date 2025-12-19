@@ -17,14 +17,6 @@ public class SubsidyRecipientUtil {
     public static final long INN_ATTR = 3360;
     public static final long KPP_ATTR = 3361;
 
-    public static GettingInstanceRepresentationRequestDto buildRequestDtoToFindMachineParkByRecipientId(Long id) {
-        return GettingInstanceRepresentationRequestDto.builder()
-                .instance(InstanceDto.builder()
-                        .id(id)
-                        .build())
-                .build();
-    }
-
     public static GetAttributesListRequestDto buildRequestDtoToFindById(Long id) {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)

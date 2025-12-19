@@ -37,7 +37,7 @@ public class XmlExtractor {
         return convertString(xml, xmlType);
     }
 
-    public <T> T convertString(String str, Class<T> xmlType) {
+    private <T> T convertString(String str, Class<T> xmlType) {
         try {
             return xmlMapper.readValue(str, xmlType);
         } catch (Exception e) {

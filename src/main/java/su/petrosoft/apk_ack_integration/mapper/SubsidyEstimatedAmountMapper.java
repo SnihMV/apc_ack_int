@@ -12,7 +12,7 @@ public class SubsidyEstimatedAmountMapper {
     public SubsidyEstimatedAmount toEntity(SubsidyEstimatedAmountXml xml) {
        return SubsidyEstimatedAmount.builder()
                 .year(xml.year())
-//                .applicantId(getApplicantIdByInn(xml.applicantINN()))
+//                .applicantId(getApplicantIdByInn(xml.recipientINN()))
                 .sob(xml.subsidyAmountNextYear())
                 .sst(xml.subsidyForObligations())
                 .sn(xml.subsidyForCreditAgreements())

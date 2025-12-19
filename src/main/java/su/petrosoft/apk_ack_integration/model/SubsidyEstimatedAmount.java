@@ -13,7 +13,7 @@ public class SubsidyEstimatedAmount {
     private Long id;
     private Long version;
     private Long year;
-    private Long applicantId;
+    private Long recipientId;
     private Long subsidyProgramId;
     private Long sob;
     private Long sst;

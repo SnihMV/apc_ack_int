@@ -18,16 +18,16 @@ public record CreateSubsidiesEstimatedAmountsXml(
             Long year,
 
             @JacksonXmlProperty(localName = "ApplicantINN")
-            String applicantINN,
+            String recipientINN,
 
             @JacksonXmlProperty(localName = "SubsidyAmountNextYear")
-            Long subsidyAmountNextYear,
+            BigDecimal sob,
 
             @JacksonXmlProperty(localName = "SubsidyForObligations")
-            Long subsidyForObligations,
+            BigDecimal sst,
 
             @JacksonXmlProperty(localName = "SubsidyForCreditAgreements")
-            Long subsidyForCreditAgreements,
+            BigDecimal sn,
 
             @JacksonXmlProperty(localName = "Direction")
             String kcsr,
