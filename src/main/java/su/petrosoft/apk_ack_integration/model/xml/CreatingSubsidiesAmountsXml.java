@@ -8,26 +8,26 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @JacksonXmlRootElement(localName = "Objects")
-public record CreateSubsidiesEstimatedAmountsXml(
+public record CreatingSubsidiesAmountsXml(
         @JacksonXmlElementWrapper(useWrapping = false)
         @JacksonXmlProperty(localName = "Object")
-        List<SubsidyEstimatedAmountXml> objects
+        List<SubsidyAmountXml> objects
 ) {
-    public record SubsidyEstimatedAmountXml(
+    public record SubsidyAmountXml(
             @JacksonXmlProperty(localName = "Year")
             Long year,
 
             @JacksonXmlProperty(localName = "ApplicantINN")
-            String applicantINN,
+            String recipientINN,
 
             @JacksonXmlProperty(localName = "SubsidyAmountNextYear")
-            Long subsidyAmountNextYear,
+            BigDecimal sob,
 
             @JacksonXmlProperty(localName = "SubsidyForObligations")
-            Long subsidyForObligations,
+            BigDecimal sst,
 
             @JacksonXmlProperty(localName = "SubsidyForCreditAgreements")
-            Long subsidyForCreditAgreements,
+            BigDecimal sn,
 
             @JacksonXmlProperty(localName = "Direction")
             String kcsr,

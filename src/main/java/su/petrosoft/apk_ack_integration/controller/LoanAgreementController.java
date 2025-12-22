@@ -7,18 +7,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import su.petrosoft.apk_ack_integration.service.SubsidyEstimatedAmountService;
+import su.petrosoft.apk_ack_integration.service.LoanAgreementService;
 
 @Slf4j
 @RestController
-@RequestMapping("api/v1/subsidiesEstimatedAmounts")
+@RequestMapping("api/v1/loanAgreements")
 @RequiredArgsConstructor
-public class SubsidyEstimatedAmountController {
-    private final SubsidyEstimatedAmountService service;
+public class LoanAgreementController {
+    private final LoanAgreementService service;
 
-    @PostMapping("xml")
+    @PostMapping("subsidyAmounts/xml")
     public void createAllFromXml(@RequestParam(name = "file") MultipartFile file) {
         log.info("Received file: [{}]", file.getOriginalFilename());
-        service.createAllFromXml(file);
+        service.createSubsidiesAmountsFromXml(file);
     }
 }
