@@ -6,10 +6,10 @@ public record FillingMainFormRequestDto(
         @Schema(description = "Crop Production Main Form Instance id", example = "1337")
         Long id,
 
-        @Schema(description = "Crop Production Main Form Instance version", example = "0")
+        @Schema(description = "Crop Production Main Form Instance version", example = "3")
         Long version,
 
-        @Schema(description = "Crop Production Main Form 'formation date' attribute value in " +
+        @Schema(description = "Crop Production Main Form's 'formation date' attribute value in " +
                 "Epoch Unix Timestamp format", example = "1764536400000")
         Long date
 ) {

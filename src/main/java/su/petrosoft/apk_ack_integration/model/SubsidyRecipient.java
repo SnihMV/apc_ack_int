@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.util.Objects;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,6 +15,22 @@ import lombok.NoArgsConstructor;
 public class SubsidyRecipient {
     private Long id;
     private Long version;
+    private String fullTitle;
+    private String shortTitle;
     private String inn;
+    private String ogrn;
+    private LocalDate ogrnDate;
     private String kpp;
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        SubsidyRecipient that = (SubsidyRecipient) o;
+        return Objects.equals(inn, that.inn);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(inn);
+    }
 }

@@ -8,12 +8,12 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @JacksonXmlRootElement(localName = "Objects")
-public record CreateSubsidiesEstimatedAmountsXml(
+public record CreatingSubsidiesAmountsXml(
         @JacksonXmlElementWrapper(useWrapping = false)
         @JacksonXmlProperty(localName = "Object")
-        List<SubsidyEstimatedAmountXml> objects
+        List<SubsidyAmountXml> objects
 ) {
-    public record SubsidyEstimatedAmountXml(
+    public record SubsidyAmountXml(
             @JacksonXmlProperty(localName = "Year")
             Long year,
 

@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import su.petrosoft.apk_ack_integration.model.CropProductionMainForm;
 import su.petrosoft.apk_ack_integration.model.OperationalReport;
 import su.petrosoft.apk_ack_integration.model.dto.request.FillingMainFormRequestDto;
-import su.petrosoft.apk_ack_integration.model.enums.ReportType;
 import su.petrosoft.apk_ack_integration.util.CropProductionUtil;
 
 import static su.petrosoft.apk_ack_integration.model.enums.ReportType.*;
@@ -27,20 +26,28 @@ public class CropProductionService {
                 .date(dto.date())
                 .build();
 
-        List<OperationalReport> sowingCampaignReports = plicanteService.getOperationalReports(FORM_1, dto.date());
-        if (sowingCampaignReports.isEmpty()) {
-            log.info("Could not found Operational Reports for Sowing Campaign filling by date [{}]", dto.date());
+        List<OperationalReport> sowingReports = plicanteService.getOperationalReports(FORM_1, dto.date());
+        if (sowingReports.isEmpty()) {
+            log.info("Could not found Operational Reports for Sowing filling by date [{}]", dto.date());
         } else {
-            log.info("Found [{}] Operational Reports for Sowing Campaign", sowingCampaignReports.size());
-            CropProductionUtil.fillSowingCampaignFields(mainForm, sowingCampaignReports);
+            log.info("Found [{}] Operational Reports for Sowing", sowingReports.size());
+            CropProductionUtil.fillSowingFields(mainForm, sowingReports);
         }
 
-        List<OperationalReport> fodderHarvestingReports = plicanteService.getOperationalReports(FORM_2, dto.date());
-        if (fodderHarvestingReports.isEmpty()) {
-            log.info("Could not found Operational Reports for Fodder Harvesting filling by date [{}]", dto.date());
+        List<OperationalReport> fodderReports = plicanteService.getOperationalReports(FORM_2, dto.date());
+        if (fodderReports.isEmpty()) {
+            log.info("Could not found Operational Reports for Fodder filling by date [{}]", dto.date());
         } else {
-            log.info("Found [{}] Operational Reports for Fodder Harvesting", fodderHarvestingReports.size());
-            CropProductionUtil.fillFodderHarvestingFields(mainForm, fodderHarvestingReports);
+            log.info("Found [{}] Operational Reports for Fodder", fodderReports.size());
+            CropProductionUtil.fillFodderFields(mainForm, fodderReports);
+        }
+
+        List<OperationalReport> harvestingReports = plicanteService.getOperationalReports(FORM_3, dto.date());
+        if (harvestingReports.isEmpty()) {
+            log.info("Could not found Operational Reports for Harvesting filling by date [{}]", dto.date());
+        } else {
+            log.info("Found [{}] Operational Reports for Harvesting", harvestingReports.size());
+            CropProductionUtil.fillHarvestingFields(mainForm, harvestingReports);
         }
 
         CropProductionMainForm cropProductionMainForm = plicanteService.updateCropProductionMainForm(mainForm);
