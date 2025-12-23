@@ -11,7 +11,7 @@ public record LinkedValue(
     public LinkedValue(String shortForm) {
         this(null, shortForm);
     }
-    public LinkedValue(long id) {
+    public LinkedValue(Long id) {
         this(id, null);
     }
 }
