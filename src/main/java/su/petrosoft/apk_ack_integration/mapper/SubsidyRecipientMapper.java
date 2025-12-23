@@ -2,11 +2,17 @@ package su.petrosoft.apk_ack_integration.mapper;
 
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
+import su.petrosoft.apk_ack_integration.model.dto.nifi.GetCompanyByInnResponseDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DateAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
+import su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil;
 
 import java.util.List;
 
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.*;
 
@@ -24,5 +30,30 @@ public class SubsidyRecipientMapper {
                 .ogrn(extractData(attributes, OGRN_ATTR))
                 .build();
 
+    }
+
+    public SubsidyRecipient toEntity(GetCompanyByInnResponseDto dto) {
+        return SubsidyRecipient.builder()
+                .ogrn(dto.ogrn())
+                .ogrnDate(dto.ogrnDate())
+                .kpp(dto.kpp())
+                .fullTitle(dto.fullTitle())
+                .shortTitle(dto.shortTitle())
+                .build();
+    }
+
+    public CreateInstanceRequestDto toCreatingDto(SubsidyRecipient recipient) {
+        return new CreateInstanceRequestDto(
+                InstanceDto.builder()
+                        .templateId(TEMPLATE_ID)
+                        .attributes(List.of(
+                                new StringAttribute(FULL_TITLE_ATTR, recipient.getFullTitle()),
+                                new StringAttribute(SHORT_TITLE_ATTR, recipient.getShortTitle()),
+                                new StringAttribute(KPP_ATTR, recipient.getKpp()),
+                                new StringAttribute(INN_ATTR, recipient.getInn()),
+                                new StringAttribute(OGRN_ATTR, recipient.getOgrn()),
+                                new DateAttribute(OGRN_DATE_ATTR, toEpochMilli(recipient.getOgrnDate()))))
+                        .build()
+        );
     }
 }

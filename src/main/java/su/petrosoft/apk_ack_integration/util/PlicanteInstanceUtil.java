@@ -40,7 +40,10 @@ public class PlicanteInstanceUtil {
                 .orElse(type.getDefaultValue());
     }
 
-    public static long toEpochMilli(LocalDate day) {
+    public static Long toEpochMilli(LocalDate day) {
+        if (day == null) {
+            return null;
+        }
         return day.atStartOfDay(MOSCOW_ZONE)
                 .toInstant()
                 .toEpochMilli();

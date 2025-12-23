@@ -8,6 +8,9 @@ import su.petrosoft.apk_ack_integration.client.AckRestClient;
 import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
 import su.petrosoft.apk_ack_integration.exception.InvalidXmlException;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyRecipientMapper;
+import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
+import su.petrosoft.apk_ack_integration.model.dto.nifi.GetCompanyByInnResponseDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.xml.CreatingSubsidiesAmountsXml;
 import su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil;
@@ -52,9 +55,21 @@ public class LoanAgreementService {
                         InstanceDto::id
                 ));
 
+        log.debug("Inn map: [{}]", innToIdMap);
+
         innListFromXml.removeAll(innToIdMap.keySet());
+
         for (String inn : innListFromXml) {
+            GetCompanyByInnResponseDto dto = ackRestClient.getCompanyByInn(inn);
+            log.debug("Found company by INN [{}] from NiFi: [{}]", inn, dto);
+            SubsidyRecipient recipient = srMapper.toEntity(dto);
+            recipient.setInn(inn);
+            log.debug("Company to be save: [{}]", recipient);
+            CreateInstanceRequestDto creatingDto = srMapper.toCreatingDto(recipient);
+            InstanceDto createdInstance = plicanteRestClient.createInstance(creatingDto);
+            innToIdMap.put(inn, createdInstance.id());
         }
+        log.debug("Updated map: [{}]", innToIdMap);
 
     }
 }

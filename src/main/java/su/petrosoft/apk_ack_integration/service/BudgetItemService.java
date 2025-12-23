@@ -31,10 +31,12 @@ import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KFSR;
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KOSGU;
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KVR;
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KVSR;
+import static su.petrosoft.apk_ack_integration.model.enums.CodeType.OWNERSHIP_FORM;
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.PURPOSE;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CPL_TITLE;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getCplCodesOnlyByCurrentYearRequestDto;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.FS_TITLE;
+import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.OWNERSHIP_FORM_ATTR;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.getAllFsByCurrentYearRequestDto;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.SP_TITLE;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.getAllSubsidyProgramsRequestDto;
@@ -106,7 +108,7 @@ public class BudgetItemService {
         Set<SubsidyProgram> existingSubsidyPrograms = subsidyProgramService.getAllThirdLevelSpFromDb();
 
         Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap(
-                KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
+                KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE, OWNERSHIP_FORM);
         List<FinancingSource> list = rowList.stream()
                 .map(dto -> rowProcessor.buildFinancingSource(dto, existingCashPlanLimits, existingSubsidyPrograms, codesMap))
                 .toList();

@@ -75,7 +75,7 @@ public class CashPlanLimitService {
 
         List<CashPlanLimit> createdLimits = new ArrayList<>();
         if (!fromExcelCPL.isEmpty()) {
-            Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap();
+            Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
 
             createdLimits = fromExcelCPL.stream()
                     .map(cpl -> apkService.createCashPlanLimit(cpl, codesMap))
