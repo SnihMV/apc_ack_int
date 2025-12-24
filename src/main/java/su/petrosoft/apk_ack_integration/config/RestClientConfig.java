@@ -1,20 +1,18 @@
 package su.petrosoft.apk_ack_integration.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.web.client.RestClient;
-import su.petrosoft.apk_ack_integration.client.AckRestClient;
+import su.petrosoft.apk_ack_integration.client.NiFiRestClient;
 import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
 
 @Configuration
 public class RestClientConfig {
 
     @Bean
-    public AckRestClient ackRestClient(IntegrationProperties props) {
-        return new AckRestClient(props,
+    public NiFiRestClient ackRestClient(IntegrationProperties props) {
+        return new NiFiRestClient(props,
                 RestClient.builder()
                         .baseUrl(props.ack().baseUrl())
                         .build()

@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SubsidyEstimatedAmount {
+public class SubsidyAmount {
     private Long id;
     private Long version;
     private Long year;

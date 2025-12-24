@@ -70,7 +70,8 @@ public class SubsidyProgramUtil {
                         new RequestedAttribute(KCSR_ATTR),
                         new RequestedAttribute(DOPKR_ATTR)
                 ))
-                .filter(new Filter(List.of(new LongFilterAttribute(LEVEL_ATTR, 3))))
+                .filter(new Filter(List.of(
+                        new LongFilterAttribute(LEVEL_ATTR, 3))))
                 .build();
     }
 
@@ -92,7 +93,8 @@ public class SubsidyProgramUtil {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(DETAILED_FORM_VIEW)
-                .attributes(List.of(new RequestedAttribute(COFIN_LVL_ATTR)))
+                .attributes(List.of(
+                        new RequestedAttribute(COFIN_LVL_ATTR)))
                 .filter(new Filter(List.of(
                         new LongFilterAttribute(LEVEL_ATTR, 3),
                         new LinkedFilterAttribute(KCSR_ATTR, kcsrCode),

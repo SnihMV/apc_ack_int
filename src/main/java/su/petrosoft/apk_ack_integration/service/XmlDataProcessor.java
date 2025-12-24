@@ -3,7 +3,7 @@ package su.petrosoft.apk_ack_integration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import su.petrosoft.apk_ack_integration.client.AckRestClient;
+import su.petrosoft.apk_ack_integration.client.NiFiRestClient;
 import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
@@ -27,7 +27,7 @@ import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getCplCode
 public class XmlDataProcessor {
 
     private final ApkPlicanteService apkService;
-    private final AckRestClient ackClient;
+    private final NiFiRestClient ackClient;
     private final ApkPlicanteRestClient apkClient;
     private final CashPlanLimitMapper mapper;
     private final XmlExtractor xmlExtractor;

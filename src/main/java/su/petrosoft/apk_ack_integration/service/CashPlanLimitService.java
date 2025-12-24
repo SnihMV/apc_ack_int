@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import su.petrosoft.apk_ack_integration.client.AckRestClient;
+import su.petrosoft.apk_ack_integration.client.NiFiRestClient;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.dto.response.AckGetUpdateMessageResponseDto;
@@ -34,7 +34,7 @@ import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getCrea
 public class CashPlanLimitService {
 
     private final ApkPlicanteService apkService;
-    private final AckRestClient ackRestClient;
+    private final NiFiRestClient niFiRestClient;
     private final ExcelExtractor excelExtractor;
     private final XmlExtractor xmlExtractor;
     private final CashPlanLimitMapper mapper;
@@ -88,7 +88,7 @@ public class CashPlanLimitService {
         UpdateCashPlanLimitResponseDto response = UpdateCashPlanLimitResponseDto.builder()
                 .updatedIds(new ArrayList<>())
                 .build();
-        AckGetUpdateMessageResponseDto message = ackRestClient.getUpdateMessage();
+        AckGetUpdateMessageResponseDto message = niFiRestClient.getUpdateMessage();
         UpdateCashPlanLimitXml updatingXml = xmlExtractor.convertBase64String(message, UpdateCashPlanLimitXml.class);
         if (updatingXml == null) {
             return response;

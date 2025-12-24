@@ -7,7 +7,7 @@ import su.petrosoft.apk_ack_integration.model.dto.nifi.GetCompanyByInnResponseDt
 import su.petrosoft.apk_ack_integration.model.dto.response.AckGetUpdateMessageResponseDto;
 
 @RequiredArgsConstructor
-public class AckRestClient {
+public class NiFiRestClient {
     private final IntegrationProperties props;
     private final RestClient restClient;
 

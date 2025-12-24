@@ -19,6 +19,6 @@ public class LoanAgreementController {
     @PostMapping("subsidyAmounts/xml")
     public void createAllFromXml(@RequestParam(name = "file") MultipartFile file) {
         log.info("Received file: [{}]", file.getOriginalFilename());
-        service.createSubsidiesAmountsFromXml(file);
+        service.createSubsidyAmountsFromXml(file);
     }
 }

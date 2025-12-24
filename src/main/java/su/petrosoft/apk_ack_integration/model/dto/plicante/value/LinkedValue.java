@@ -8,10 +8,10 @@ public record LinkedValue(
         String shortForm
 ) implements Value<Long> {
 
+    public LinkedValue(Long data) {
+        this(data, null);
+    }
     public LinkedValue(String shortForm) {
         this(null, shortForm);
-    }
-    public LinkedValue(Long id) {
-        this(id, null);
     }
 }
