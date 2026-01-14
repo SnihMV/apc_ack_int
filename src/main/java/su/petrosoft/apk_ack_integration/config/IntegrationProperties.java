@@ -5,24 +5,32 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "integration")
 public record IntegrationProperties(
         Apk apk,
-        Ack ack
+        NiFi niFi,
+        Technolog technolog
 ) {
+
+    public record Technolog(
+            String soapUrl,
+            String username,
+            String password
+    ){}
+
     public record Apk(
             String baseUrl,
             String username,
             String password
     ){}
-    public record Ack(
+    public record NiFi(
             String baseUrl,
             String username,
             String password,
-            Creating creating,
-            Updating updating
+            CreateLimits createLimits,
+            UpsertLimits upsertLimits
     ){
-        public record Creating(
+        public record CreateLimits(
                 String path
         ){}
-        public record Updating(
+        public record UpsertLimits(
                 String path
         ){}
     }

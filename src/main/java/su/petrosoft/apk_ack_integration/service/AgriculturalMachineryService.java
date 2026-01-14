@@ -7,6 +7,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
+import su.petrosoft.apk_ack_integration.client.TechPlicanteSoapClient;
 import su.petrosoft.apk_ack_integration.mapper.AgriculturalMachineryParkMapper;
 import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryPark;
 import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryReport;
@@ -50,6 +51,7 @@ import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUti
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.JSON_FILE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.RECIPIENT_ID;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.buildRequestDtoForReportProcessing;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.*;
 
 @Slf4j
@@ -61,15 +63,14 @@ public class AgriculturalMachineryService {
     //    private final AgriculturalMachineryReportMapper amrMapper;
     private final AgriculturalMachineryParkMapper ampMapper;
     private final ObjectMapper objectMapper;
-
+    private final TechPlicanteSoapClient techPlicanteSoapClient;
 
     public void processReport(Long id) {
         AgriculturalMachineryReport report = getAgriculturalMachineryReport(id);
         removeRecipientParks(report.getRecipientId());
         byte[] rawReport = Base64.getDecoder().decode(report.getCodedReport());
         try {
-            List<AgriculturalMachineryPark> agriculturalMachineryParks =
-                    parseJsonAndCreateObjects(id, report.getRecipientId(), rawReport);
+            List<AgriculturalMachineryPark> agriculturalMachineryParks = parseJsonAndCreateObjects(rawReport);
             log.debug("===");
             agriculturalMachineryParks.stream()
                     .peek(park -> park.setRecipientId(report.getRecipientId()))
@@ -114,7 +115,38 @@ public class AgriculturalMachineryService {
         }
     }
 
-    public List<AgriculturalMachineryPark> parseJsonAndCreateObjects(Long id, Long recipientId, byte[] rawReport) throws Exception {
+    private AgriculturalMachineryReport getAgriculturalMachineryReport(Long id) {
+        List<Attribute<?>> attributes = plicanteRestClient.getInstanceRepresentation(
+                buildRequestDtoForReportProcessing(id));
+
+        Long recipientId = extractData(attributes, RECIPIENT_ID);
+        log.debug("Recipient id [{}]", recipientId);
+
+        String codedJsonFile = extractData(attributes, JSON_FILE_ATTR);
+
+        return AgriculturalMachineryReport.builder()
+                .id(id)
+                .recipientId(recipientId)
+                .codedReport(codedJsonFile)
+                .build();
+    }
+
+    private void removeRecipientParks(long recipientId) {
+        List<InstanceDto> instanceDtoList = plicanteRestClient.getTableAttributesList(
+                buildRequestDtoToFindMachineryParkByRecipientId(recipientId));
+
+        List<Long> parkIds = instanceDtoList.stream()
+                .map(InstanceDto::id)
+                .toList();
+        log.debug("For Recipient [{}] found [{}] Machinery Park Instances: {}", recipientId, parkIds.size(), parkIds);
+
+        techPlicanteSoapClient.deleteInstances(parkIds);
+
+        plicanteRestClient.changeStatus(new ChangeGroupStatusRequestDto(STATUS_INACTIVE, parkIds));
+        log.debug("Status changed for instances: [{}]", parkIds);
+    }
+
+    private List<AgriculturalMachineryPark> parseJsonAndCreateObjects(byte[] rawReport) throws Exception {
         Map<Integer, List<String>> groupedData = parseValueFields(rawReport);
         log.debug("=== {}", groupedData);
 
@@ -126,8 +158,7 @@ public class AgriculturalMachineryService {
      * Шаг 1: Парсим поле data и группируем значения value_x_y_z по объектам (y)
      */
     private Map<Integer, List<String>> parseValueFields(byte[] rawReport) throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode root = mapper.readTree(rawReport);
+        JsonNode root = objectMapper.readTree(rawReport);
         JsonNode dataNode = root.path("data");
 
         if (dataNode.isMissingNode()) {
@@ -155,16 +186,11 @@ public class AgriculturalMachineryService {
                         // Инициализируем список для объекта, если его еще нет
                         List<String> objectFields = result.computeIfAbsent(
                                 objectNumber,
-                                k -> new ArrayList<>(Collections.nCopies(12, null)) // индексы 1-11
+                                k -> new ArrayList<>(11)
                         );
 
-                        // Увеличиваем список при необходимости
-                        while (objectFields.size() <= fieldIndex) {
-                            objectFields.add(null);
-                        }
-
                         // Сохраняем значение по индексу z
-                        objectFields.set(fieldIndex, fieldValue);
+                        objectFields.set(fieldIndex-1, fieldValue);
 
                     } catch (NumberFormatException e) {
                         // Игнорируем некорректные поля
@@ -265,58 +291,4 @@ public class AgriculturalMachineryService {
                 "1".equals(trimmed);
     }
 
-//    private Map<String, Object> createNewParks(String codedReport) {
-//        byte[] rawReport = Base64.getDecoder().decode(codedReport);
-//        JsonNode root = null;
-//        try {
-//            root = objectMapper.readTree(rawReport);
-//            JsonNode dataNode = root.path("data");
-//            if (dataNode.isMissingNode() || !dataNode.isObject()) {
-//                return Map.of();
-//            }
-//
-//            dataNode.properties().forEach(
-//                    entry-> {
-//                        String key = entry.getKey();
-//                        JsonNode valueNode = entry.getValue();
-//                    }
-//            );
-//
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-
-    @SneakyThrows
-    private AgriculturalMachineryReport getAgriculturalMachineryReport(Long id) {
-        List<Attribute<?>> attributes = plicanteRestClient.getInstanceRepresentation(
-                buildRequestDtoForReportProcessing(id));
-
-        String json = objectMapper.writeValueAsString(attributes);
-        log.debug("Get instance [{}] attributes response json [{}]", id, json);
-
-        Long recipientId = PlicanteInstanceUtil.extractData(attributes, RECIPIENT_ID);
-        log.debug("Recipient id [{}]", recipientId);
-
-        String codedJsonFile = PlicanteInstanceUtil.extractData(attributes, JSON_FILE_ATTR);
-
-        return AgriculturalMachineryReport.builder()
-                .id(id)
-                .recipientId(recipientId)
-                .codedReport(codedJsonFile)
-                .build();
-    }
-
-    private void removeRecipientParks(Long recipientId) {
-        List<InstanceDto> instanceDtoList = plicanteRestClient.getTableAttributesList(
-                buildRequestDtoToFindMachineryParkByRecipientId(recipientId));
-        log.debug("Instances dto: [{}]", instanceDtoList);
-
-        List<Long> parkIds = instanceDtoList.stream()
-                .map(InstanceDto::id)
-                .toList();
-
-        plicanteRestClient.changeStatus(new ChangeGroupStatusRequestDto(STATUS_INACTIVE, parkIds));
-        log.debug("Status changed for instances: [{}]", parkIds);
-    }
 }

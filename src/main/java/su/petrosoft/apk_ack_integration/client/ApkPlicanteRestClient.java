@@ -6,23 +6,19 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClient;
-import su.petrosoft.apk_ack_integration.config.IntegrationProperties;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.ChangeGroupStatusRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.ChangeInstanceStatusRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.GettingInstanceRepresentationRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.response.AttributeRepresentationDto;
 
 import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
 public class ApkPlicanteRestClient {
-    private final IntegrationProperties props;
     private final RestClient restClient;
 
     public List<InstanceDto> getTableAttributesList(GetAttributesListRequestDto dto) {

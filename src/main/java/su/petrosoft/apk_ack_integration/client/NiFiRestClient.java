@@ -14,7 +14,7 @@ public class NiFiRestClient {
     public AckGetUpdateMessageResponseDto getUpdateMessage() {
         return restClient
                 .get()
-                .uri(props.ack().updating().path())
+                .uri(props.niFi().upsertLimits().path())
                 .retrieve()
                 .body(AckGetUpdateMessageResponseDto.class);
     }

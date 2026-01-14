@@ -10,14 +10,18 @@ integration:
     base-url: ${APK_URL}
     username: ${APK_USERNAME}
     password: ${APK_PASSWORD}
-  ack:
-    base-url: ${ACK_URL}
-    username: ${ACK_USERNAME}
-    password: ${ACK_PASSWORD}
-    creating:
-      path: ${ACK_CREATE_PATH}
-    updating:
-      path: ${ACK_UPSERT_PATH}
+  ni-fi:
+    base-url: ${NIFI_URL}
+    username: ${NIFI_USERNAME}
+    password: ${NIFI_PASSWORD}
+    create-limits:
+      path: ${NIFI_CREATE_LIMITS_PATH}
+    upsert-limits:
+      path: ${NIFI_UPSERT_LIMITS_PATH}
+  technolog:
+    soap-url: ${TECH_SOAP_URL}
+    username: ${TECH_USERNAME}
+    password: ${TECH_PASSWORD}
 
 logging:
   level:

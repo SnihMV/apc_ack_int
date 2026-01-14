@@ -21,6 +21,8 @@ public class SubsidyRecipient {
     private String ogrn;
     private LocalDate ogrnDate;
     private String kpp;
+    private Long machinePark;
+    private Long
 
     @Override
     public boolean equals(Object o) {
