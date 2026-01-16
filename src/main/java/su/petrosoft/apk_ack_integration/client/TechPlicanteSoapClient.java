@@ -3,6 +3,7 @@ package su.petrosoft.apk_ack_integration.client;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.client.RestClient;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.soap.DeleteInstancesListSoapRequestDto;
 
 import java.util.List;
 
@@ -32,6 +33,8 @@ public class TechPlicanteSoapClient {
     }
 
     public void deleteInstances(List<Long> instanceIds) {
+        restClient.post()
+                .body(new DeleteInstancesListSoapRequestDto(instanceIds))
 
     }
 }
