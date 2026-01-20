@@ -3,8 +3,10 @@ package su.petrosoft.apk_ack_integration.util;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LinkedFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.StringFilterAttribute;
+import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 
 import java.util.List;
 
@@ -21,9 +23,10 @@ public class SubsidyRecipientUtil {
     public static final long KPP_ATTR = 546;
     public static final long OGRN_ATTR = 550;
     public static final long OGRN_DATE_ATTR = 554;
+    public static final long APP_TYPE_ATTR = 3420;
     public static final long MACHINE_PARK_ATTR = 4321;
 
-    public static GetAttributesListRequestDto buildRequestDtoToFindById(Long id) {
+    public static GetAttributesListRequestDto buildRequestDtoToFindRecipientById(long id) {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .attributes(List.of(
@@ -44,6 +47,18 @@ return GetAttributesListRequestDto.builder()
                 new StringFilterAttribute(INN_ATTR, List.of(IN), innListFromXml.toArray(String[]::new))
         )))
         .build();
+    }
 
+    public static GetAttributesListRequestDto buildRequestDtoToFindRecipientInnsByAppType(long appTypeId) {
+        return GetAttributesListRequestDto.builder()
+                .templateId(TEMPLATE_ID)
+                .viewType(ViewType.DETAILED_FORM_VIEW)
+                .attributes(List.of(
+                        new RequestedAttribute(INN_ATTR)
+                ))
+                .filter(new Filter(List.of(
+                        new LinkedFilterAttribute(APP_TYPE_ATTR, appTypeId)
+                )))
+                .build();
     }
 }

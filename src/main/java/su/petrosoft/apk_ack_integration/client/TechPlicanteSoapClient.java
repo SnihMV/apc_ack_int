@@ -3,6 +3,7 @@ package su.petrosoft.apk_ack_integration.client;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.client.RestClient;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.soap.DeleteInstanceSoapRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.soap.DeleteInstancesListSoapRequestDto;
 
 import java.util.List;
@@ -12,29 +13,20 @@ import java.util.List;
 public class TechPlicanteSoapClient {
     private final RestClient restClient;
 
-    private static final String DELETE_INSTANCE_BY_ID_XML = """
-            <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"\s
-            xmlns:reg="http://ru.petrosoft/register">
-                       <soapenv:Header/>
-                       <soapenv:Body>
-                          <reg:deleteInstance>
-                             <instanceId>%d</instanceId>
-                          </reg:deleteInstance>
-                       </soapenv:Body>
-                    </soapenv:Envelope>
-            """;
-
     public void deleteInstanceById(long instanceId) {
         log.info("Sending request to delete instance with ID: {}", instanceId);
         restClient.post()
-                .body(DELETE_INSTANCE_BY_ID_XML.formatted(instanceId))
+                .body(new DeleteInstanceSoapRequestDto(instanceId))
                 .retrieve()
                 .toBodilessEntity();
     }
 
-    public void deleteInstances(List<Long> instanceIds) {
+    public void deleteInstancesList(List<Long> ids) {
+        log.info("Sending request to delete instances with IDs: {}", ids);
         restClient.post()
-                .body(new DeleteInstancesListSoapRequestDto(instanceIds))
-
+                .body(new DeleteInstancesListSoapRequestDto(ids))
+                .retrieve()
+                .toBodilessEntity();
     }
+
 }

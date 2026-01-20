@@ -3,7 +3,6 @@ package su.petrosoft.apk_ack_integration.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
@@ -12,22 +11,17 @@ import su.petrosoft.apk_ack_integration.mapper.AgriculturalMachineryParkMapper;
 import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryPark;
 import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryReport;
 import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.ChangeGroupStatusRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.value.LinkedValue;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
-import su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil;
-import su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +40,6 @@ import static su.petrosoft.apk_ack_integration.model.enums.CodeType.PROD_COUNTRY
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.TECH_FISHING;
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.TECH_STATE;
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.TR_V_M;
-import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.STATUS_INACTIVE;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.buildRequestDtoToFindMachineryParkByRecipientId;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.JSON_FILE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.RECIPIENT_ID;
@@ -88,7 +81,7 @@ public class AgriculturalMachineryService {
                 savedIds.add(instance.id());
             }
 
-            GetAttributesListRequestDto dto = buildRequestDtoToFindById(report.getRecipientId());
+            GetAttributesListRequestDto dto = buildRequestDtoToFindRecipientById(report.getRecipientId());
             String s = objectMapper.writeValueAsString(dto);
             log.debug("===Getting JSON [{}]", s);
 
@@ -140,10 +133,9 @@ public class AgriculturalMachineryService {
                 .toList();
         log.debug("For Recipient [{}] found [{}] Machinery Park Instances: {}", recipientId, parkIds.size(), parkIds);
 
-        techPlicanteSoapClient.deleteInstances(parkIds);
+        techPlicanteSoapClient.deleteInstancesList(parkIds);
 
-        plicanteRestClient.changeStatus(new ChangeGroupStatusRequestDto(STATUS_INACTIVE, parkIds));
-        log.debug("Status changed for instances: [{}]", parkIds);
+        log.info("Machinery Park Instances [{}] deleted", parkIds);
     }
 
     private List<AgriculturalMachineryPark> parseJsonAndCreateObjects(byte[] rawReport) throws Exception {
@@ -209,7 +201,6 @@ public class AgriculturalMachineryService {
         List<AgriculturalMachineryPark> result = new ArrayList<>();
 
         for (Map.Entry<Integer, List<String>> entry : groupedData.entrySet()) {
-            Integer objectNumber = entry.getKey();
             List<String> fields = entry.getValue();
 
             if (fields == null || fields.isEmpty()) {

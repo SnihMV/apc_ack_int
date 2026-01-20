@@ -22,6 +22,8 @@ import java.util.Map;
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.*;
 import static su.petrosoft.apk_ack_integration.model.enums.OwnershipForm.*;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.*;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractShortForm;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getCodeId;
 
 @Slf4j
@@ -33,20 +35,20 @@ public class FinancingSourceMapper {
         return FinancingSource.builder()
                 .id(dto.id())
                 .version(dto.version())
-                .year((Long) getAttrData(attributes, YEAR_ATTR))
-                .kvsr(getAttrShortForm(attributes, KVSR_ATTR))
-                .kfsr(getAttrShortForm(attributes, KFSR_ATTR))
-                .kcsr(getAttrShortForm(attributes, KCSR_ATTR))
-                .kvr(getAttrShortForm(attributes, KVR_ATTR))
-                .kosgu(getAttrShortForm(attributes, KOSGU_ATTR))
-                .dopFk(getAttrShortForm(attributes, DOPFK_ATTR))
-                .dopEk(getAttrShortForm(attributes, DOPEK_ATTR))
-                .dopKr(getAttrShortForm(attributes, DOPKR_ATTR))
-                .purpose(getAttrShortForm(attributes, PURPOSE_ATTR))
-                .ownershipForm(getAttrShortForm(attributes, OWNERSHIP_FORM_ATTR))
-                .subsidyProgramId((Long) getAttrData(attributes, SUBSIDY_PROGRAM_ATTR))
-                .cashPlanLimitId((Long) getAttrData(attributes, CASH_PLAN_LIMIT_ATTR))
-                .concatenatedKBK((String) getAttrData(attributes, CONCAT_KBK_ATTR))
+                .year(extractData(attributes, YEAR_ATTR))
+                .kvsr(extractShortForm(attributes, KVSR_ATTR))
+                .kfsr(extractShortForm(attributes, KFSR_ATTR))
+                .kcsr(extractShortForm(attributes, KCSR_ATTR))
+                .kvr(extractShortForm(attributes, KVR_ATTR))
+                .kosgu(extractShortForm(attributes, KOSGU_ATTR))
+                .dopFk(extractShortForm(attributes, DOPFK_ATTR))
+                .dopEk(extractShortForm(attributes, DOPEK_ATTR))
+                .dopKr(extractShortForm(attributes, DOPKR_ATTR))
+                .purpose(extractShortForm(attributes, PURPOSE_ATTR))
+                .ownershipForm(extractShortForm(attributes, OWNERSHIP_FORM_ATTR))
+                .subsidyProgramId(extractData(attributes, SUBSIDY_PROGRAM_ATTR))
+                .cashPlanLimitId(extractData(attributes, CASH_PLAN_LIMIT_ATTR))
+                .concatenatedKBK(extractData(attributes, CONCAT_KBK_ATTR))
                 .build();
     }
 
@@ -111,21 +113,5 @@ public class FinancingSourceMapper {
         sb.append("-");
         sb.append(row.dopKr());
         return sb.toString();
-    }
-
-    private Object getAttrData(List<Attribute<?>> attributes, Long attributeId) {
-        return attributes.stream()
-                .filter(a -> a.id().equals(attributeId))
-                .findFirst()
-                .map(Attribute::getData)
-                .orElse(null);
-    }
-
-    private String getAttrShortForm(List<Attribute<?>> attributes, Long attributeId) {
-        return attributes.stream()
-                .filter(a -> a.id().equals(attributeId))
-                .findFirst()
-                .map(Attribute::getShortForm)
-                .orElse(null);
     }
 }
