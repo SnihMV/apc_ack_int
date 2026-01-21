@@ -48,9 +48,9 @@ public record UniBudgetExcelRow(
 
         Double financeFederal,
         Double financeRegional
-) implements CashPlanLimitExcelRow {
+) implements BaseUniBudgetExcelRow {
     @Override
     public String kfsr() {
-        return "";
+        return section + subsection;
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import su.petrosoft.apk_ack_integration.model.excel.BaseUniBudgetExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedExcelRow;
 import su.petrosoft.apk_ack_integration.service.BudgetItemService;
 import su.petrosoft.apk_ack_integration.service.ExcelExtractor;
@@ -37,7 +38,7 @@ public class SubsidyProgramController {
                     required = true,
                     content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
             @RequestParam("file") MultipartFile file) {
-        List<UniBudgetCodedExcelRow> uniBudgetRows = excelExtractor.getUniBudgetCodedRows(file);
+        List<BaseUniBudgetExcelRow> uniBudgetRows = excelExtractor.getUniBudgetCodedRows(file);
         service.createSubsidyProgramsTree(uniBudgetRows);
     }
 }

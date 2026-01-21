@@ -19,7 +19,7 @@ public record UniBudgetCodedExcelRow(
         String kvsr,
         String kvsrTitle,
         String dopFk,
-        String dopFrTitle,
+        String dopFkTitle,
         String dopEk,
         String dopEkTitle,
         String purpose,
@@ -49,9 +49,9 @@ public record UniBudgetCodedExcelRow(
 
         Double financeFederal,
         Double financeRegional
-) implements CashPlanLimitExcelRow {
+) implements BaseUniBudgetExcelRow {
     @Override
     public String kfsr() {
-        return "";
+        return section + subsection;
     }
 }

@@ -49,5 +49,5 @@ public record UniBudget2026ExcelRow(
 
         Double financeFederal,
         Double financeRegional
-) implements CashPlanLimitExcelRow {
+) implements BaseUniBudgetExcelRow {
 }

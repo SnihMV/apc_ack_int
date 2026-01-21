@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import su.petrosoft.apk_ack_integration.model.excel.CofinancingLevelExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.RosterKbkExcelRow;
+import su.petrosoft.apk_ack_integration.model.excel.UniBudget2026ClarifiedExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRow;
 
@@ -12,9 +13,9 @@ import java.util.List;
 @Getter
 @RequiredArgsConstructor
 public enum ExcelFileType {
-    UNI_BUDGET_2026(List.of("КВСР", "КФСР", "Подраздел", "Наименование КФСР", "КЦСР", "Наименование КЦСР", "Доп. КР"),
+    UNI_BUDGET_2026_CLARIFIED(List.of("КВСР", "Наименование КВСР", "КФСР", "Наименование КФСР", "КЦСР", "Наименование КЦСР", "Доп. КР"),
             "Итого",
-            UniBudgetCodedExcelRow.class),
+            UniBudget2026ClarifiedExcelRow.class),
     UNI_BUDGET_CODED(
             List.of("Код", "Раздел", "Подраздел", "Наименование КФСР", "КЦСР", "Наименование КЦСР", "Доп. КР"),
             "Итого",

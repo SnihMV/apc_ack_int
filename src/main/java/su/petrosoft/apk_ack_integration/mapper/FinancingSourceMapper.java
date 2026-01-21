@@ -11,13 +11,13 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribu
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
 import su.petrosoft.apk_ack_integration.model.enums.OwnershipForm;
-import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedExcelRow;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import su.petrosoft.apk_ack_integration.model.excel.BaseUniBudgetExcelRow;
 
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.*;
 import static su.petrosoft.apk_ack_integration.model.enums.OwnershipForm.*;
@@ -52,11 +52,11 @@ public class FinancingSourceMapper {
                 .build();
     }
 
-    public FinancingSource toEntity(UniBudgetCodedExcelRow row) {
+    public FinancingSource toEntity(BaseUniBudgetExcelRow row) {
         return FinancingSource.builder()
                 .year((long) LocalDate.now().getYear())
                 .kvsr(row.kvsr())
-                .kfsr(row.section() + row.subsection())
+                .kfsr(row.kfsr())
                 .kcsr(row.kcsr())
                 .kvr(row.kvr())
                 .kosgu(row.kosgu())
@@ -93,7 +93,7 @@ public class FinancingSourceMapper {
         );
     }
 
-    private String defineOwnershipForm(UniBudgetCodedExcelRow row) {
+    private String defineOwnershipForm(BaseUniBudgetExcelRow row) {
         return Arrays.stream(OwnershipForm.values())
                 .filter(form -> form.getKosgu().equals(row.kosgu()))
                 .findFirst()
@@ -101,13 +101,12 @@ public class FinancingSourceMapper {
                 .orElse(ALL.getName());
     }
 
-    private String concatKBK(UniBudgetCodedExcelRow row) {
+    private String concatKBK(BaseUniBudgetExcelRow row) {
         StringBuilder sb = new StringBuilder();
         sb.append(LocalDateTime.now().getYear());
         sb.append("-");
         sb.append(row.kvsr());
-        sb.append(row.section());
-        sb.append(row.subsection());
+        sb.append(row.kfsr());
         sb.append(row.kcsr());
         sb.append(row.kvr());
         sb.append("-");

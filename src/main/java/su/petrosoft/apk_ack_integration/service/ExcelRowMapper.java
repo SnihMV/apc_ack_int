@@ -3,8 +3,10 @@ package su.petrosoft.apk_ack_integration.service;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.springframework.stereotype.Component;
+import su.petrosoft.apk_ack_integration.model.excel.BaseUniBudgetExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.CofinancingLevelExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.RosterKbkExcelRow;
+import su.petrosoft.apk_ack_integration.model.excel.UniBudget2026ClarifiedExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRow;
 
@@ -12,7 +14,54 @@ import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRow;
 @Component
 public class ExcelRowMapper {
 
-    public UniBudgetCodedExcelRow parseToUniBudgetCodedRow(Row row) {
+    public BaseUniBudgetExcelRow parseToUniBudget2026ClarifiedRow(Row row) {
+        return new UniBudget2026ClarifiedExcelRow(
+            row.getCell(0).getStringCellValue(),
+            row.getCell(1).getStringCellValue(),
+            row.getCell(2).getStringCellValue(),
+            row.getCell(3).getStringCellValue(),
+            row.getCell(4).getStringCellValue(),
+            row.getCell(5).getStringCellValue(),
+            row.getCell(6).getStringCellValue(),
+            row.getCell(7).getStringCellValue(),
+            row.getCell(8).getStringCellValue(),
+            row.getCell(9).getStringCellValue(),
+            row.getCell(10).getStringCellValue(),
+            row.getCell(11).getStringCellValue(),
+            row.getCell(12).getStringCellValue(),
+            row.getCell(13).getStringCellValue(),
+            row.getCell(14).getStringCellValue(),
+            row.getCell(15).getStringCellValue(),
+            row.getCell(16).getStringCellValue(),
+            row.getCell(17).getStringCellValue(),
+            row.getCell(18).getStringCellValue(),
+            row.getCell(19).getStringCellValue(),
+            row.getCell(20).getStringCellValue(),
+            row.getCell(21).getStringCellValue(),
+            row.getCell(22).getStringCellValue(),
+            row.getCell(23).getNumericCellValue(),
+            row.getCell(24).getNumericCellValue(),
+            row.getCell(25).getNumericCellValue(),
+            row.getCell(26).getNumericCellValue(),
+            row.getCell(27).getNumericCellValue(),
+            row.getCell(28).getNumericCellValue(),
+            row.getCell(29).getNumericCellValue(),
+            row.getCell(30).getNumericCellValue(),
+            row.getCell(31).getNumericCellValue(),
+            row.getCell(32).getNumericCellValue(),
+            row.getCell(33).getNumericCellValue(),
+            row.getCell(34).getNumericCellValue(),
+            row.getCell(35).getNumericCellValue(),
+            row.getCell(36).getNumericCellValue(),
+            row.getCell(37).getNumericCellValue(),
+            row.getCell(38).getNumericCellValue(),
+            row.getCell(39).getNumericCellValue(),
+            row.getCell(40).getNumericCellValue(),
+            row.getCell(41).getNumericCellValue()
+        );
+    }
+
+    public BaseUniBudgetExcelRow parseToUniBudgetCodedRow(Row row) {
         return new UniBudgetCodedExcelRow(
                 row.getCell(0).getStringCellValue(),
                 row.getCell(1).getStringCellValue(),
@@ -58,7 +107,7 @@ public class ExcelRowMapper {
         );
     }
 
-    public RosterKbkExcelRow parseToRosterKbkRow(Row row) {
+    public BaseUniBudgetExcelRow parseToRosterKbkRow(Row row) {
         return RosterKbkExcelRow.builder()
                 .section(row.getCell(0).getStringCellValue())
                 .subsection(row.getCell(1).getStringCellValue())
@@ -90,7 +139,7 @@ public class ExcelRowMapper {
                 .build();
     }
 
-    public UniBudgetExcelRow parseToUniBudgetRow(Row row) {
+    public BaseUniBudgetExcelRow parseToUniBudgetRow(Row row) {
         return UniBudgetExcelRow.builder()
                 .section(row.getCell(0).getStringCellValue())
                 .subsection(row.getCell(1).getStringCellValue())

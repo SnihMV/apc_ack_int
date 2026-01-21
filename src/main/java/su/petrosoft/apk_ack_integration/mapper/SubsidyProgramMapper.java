@@ -13,6 +13,7 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttri
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.value.LinkedValue;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
+import su.petrosoft.apk_ack_integration.model.excel.BaseUniBudgetExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.CofinancingLevelExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedExcelRow;
 import su.petrosoft.apk_ack_integration.util.CropProductionUtil;
@@ -55,7 +56,7 @@ public class SubsidyProgramMapper {
                 .build();
     }
 
-    public SubsidyProgram toFirstLevelSP(UniBudgetCodedExcelRow dto) {
+    public SubsidyProgram toFirstLevelSP(BaseUniBudgetExcelRow dto) {
         return SubsidyProgram.builder()
                 .level(1L)
                 .code(dto.code())
@@ -63,7 +64,7 @@ public class SubsidyProgramMapper {
                 .build();
     }
 
-    public SubsidyProgram toSecondLevelSP(UniBudgetCodedExcelRow dto) {
+    public SubsidyProgram toSecondLevelSP(BaseUniBudgetExcelRow dto) {
         return SubsidyProgram.builder()
                 .level(2L)
                 .title(dto.kcsrTitle())
@@ -71,7 +72,7 @@ public class SubsidyProgramMapper {
                 .build();
     }
 
-    public SubsidyProgram toThirdLevelSP(UniBudgetCodedExcelRow dto) {
+    public SubsidyProgram toThirdLevelSP(BaseUniBudgetExcelRow dto) {
         return SubsidyProgram.builder()
                 .level(3L)
                 .title(dto.dopKrTitle())

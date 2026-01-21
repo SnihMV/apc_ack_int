@@ -14,6 +14,6 @@ public class ApkAckIntegrationApplication {
     public static void main(String[] args) {
         ConfigurableApplicationContext ctx = SpringApplication.run(ApkAckIntegrationApplication.class, args);
         ScriptService bean = ctx.getBean(ScriptService.class);
-        bean.refreshMunicipalitiesData();
+//        bean.refreshMunicipalitiesData();
     }
 }

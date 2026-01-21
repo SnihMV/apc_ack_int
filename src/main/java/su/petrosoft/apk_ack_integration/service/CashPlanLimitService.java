@@ -11,6 +11,7 @@ import su.petrosoft.apk_ack_integration.model.dto.response.AckGetUpdateMessageRe
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateInstancesFromFileResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.UpdateCashPlanLimitResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
+import su.petrosoft.apk_ack_integration.model.excel.BaseUniBudgetExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.RosterKbkExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRow;
@@ -43,7 +44,7 @@ public class CashPlanLimitService {
 
     public CreateInstancesFromFileResponseDto createFromRosterKBKExcel(MultipartFile file) {
 
-        List<RosterKbkExcelRow> dtoList = excelExtractor.getRosterKbkRows(file);
+        List<BaseUniBudgetExcelRow> dtoList = excelExtractor.getRosterKbkRows(file);
         log.debug("Extracted from excel file: [{}] CashPlanLimit rows", dtoList.size());
         List<CashPlanLimit> createdLimits = new ArrayList<>();
         if (!dtoList.isEmpty()) {
@@ -67,7 +68,7 @@ public class CashPlanLimitService {
     }
 
     public CreateInstancesFromFileResponseDto createFromUniBudgetExcel(MultipartFile file) {
-        List<UniBudgetCodedExcelRow> dtoList = excelExtractor.getUniBudgetCodedRows(file);
+        List<BaseUniBudgetExcelRow> dtoList = excelExtractor.getUniBudgetCodedRows(file);
         Set<CashPlanLimit> existingCPL = getLimitsForCurrentYear();
         List<CashPlanLimit> fromExcelCPL = uniBudgetRowService.getLimitsFromExcel(dtoList);
         fromExcelCPL.removeAll(existingCPL);
@@ -125,7 +126,7 @@ public class CashPlanLimitService {
 
     public UpdateCashPlanLimitResponseDto updateByExcel(MultipartFile file) {
 
-        List<UniBudgetExcelRow> uniBudgetExcelRows = excelExtractor.uniBudgetExcelRows(file);
+        List<BaseUniBudgetExcelRow> uniBudgetExcelRows = excelExtractor.uniBudgetExcelRows(file);
         Set<CashPlanLimit> limitsFromExcel = uniBudgetExcelRows.stream()
                 .map(mapper::toCpl)
                 .collect(Collectors.toSet());
