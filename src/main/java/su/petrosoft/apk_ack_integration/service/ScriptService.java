@@ -12,7 +12,7 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 
 import java.util.List;
 
-import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.buildRequestDtoToFindRecipientInnsByAppType;
+import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.requestDtoToFindRecipientsByAppTypeForUpdate;
 
 @Slf4j
 @Service
@@ -24,15 +24,15 @@ public class ScriptService {
 
     public void refreshMunicipalitiesData() {
         List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(
-                buildRequestDtoToFindRecipientInnsByAppType(652));
+                requestDtoToFindRecipientsByAppTypeForUpdate(652));
         int i = 0;
         for (InstanceDto dto : dtoList) {
+            log.debug("=== DTO : [{}]", dto);
             SubsidyRecipient recipient = recipientMapper.toEntity(dto);
+            log.debug("Recipient: [{}]", recipient);
             System.out.print(++i + " Inn: " + recipient.getInn() + " Data: ");
                     GetCompanyByInnResponseDto company = niFiRestClient.getCompanyByInn(recipient.getInn());
             System.out.println(company);
-            updateRecipientByNotNullValues(recipient, company);
-
 
         }
     }

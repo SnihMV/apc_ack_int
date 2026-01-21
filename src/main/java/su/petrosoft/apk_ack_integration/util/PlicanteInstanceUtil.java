@@ -49,7 +49,10 @@ public class PlicanteInstanceUtil {
                 .toEpochMilli();
     }
 
-    public static LocalDate toLocalDate(long epochMilli) {
+    public static LocalDate toLocalDate(Long epochMilli) {
+        if (epochMilli == null) {
+            return null;
+        }
         return Instant.ofEpochMilli(epochMilli)
                 .atZone(MOSCOW_ZONE)
                 .toLocalDate();

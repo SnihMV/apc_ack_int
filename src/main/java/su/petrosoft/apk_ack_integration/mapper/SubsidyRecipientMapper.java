@@ -32,6 +32,7 @@ public class SubsidyRecipientMapper {
                 .inn(extractData(attributes, INN_ATTR))
                 .kpp(extractData(attributes, KPP_ATTR))
                 .ogrn(extractData(attributes, OGRN_ATTR))
+                .ogrnDate(toLocalDate(extractData(attributes, OGRN_DATE_ATTR)))
                 .build();
 
     }

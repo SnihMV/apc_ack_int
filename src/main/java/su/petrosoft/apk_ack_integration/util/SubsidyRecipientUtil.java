@@ -49,12 +49,17 @@ return GetAttributesListRequestDto.builder()
         .build();
     }
 
-    public static GetAttributesListRequestDto buildRequestDtoToFindRecipientInnsByAppType(long appTypeId) {
+    public static GetAttributesListRequestDto requestDtoToFindRecipientsByAppTypeForUpdate(long appTypeId) {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(ViewType.DETAILED_FORM_VIEW)
                 .attributes(List.of(
-                        new RequestedAttribute(INN_ATTR)
+                        new RequestedAttribute(INN_ATTR),
+                        new RequestedAttribute(FULL_TITLE_ATTR),
+                        new RequestedAttribute(SHORT_TITLE_ATTR),
+                        new RequestedAttribute(OGRN_ATTR),
+                        new RequestedAttribute(OGRN_DATE_ATTR),
+                        new RequestedAttribute(KPP_ATTR)
                 ))
                 .filter(new Filter(List.of(
                         new LinkedFilterAttribute(APP_TYPE_ATTR, appTypeId)
