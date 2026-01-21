@@ -202,7 +202,7 @@ public class CashPlanLimitMapper {
 
         return CashPlanLimit.builder()
                 .year((long) LocalDateTime.now().getYear())
-                .kfsr(rowDto.getKfsr())
+                .kfsr(rowDto.kfsr())
                 .kvsr(rowDto.kvsr())
                 .kcsr(rowDto.kcsr())
                 .kvr(rowDto.kvr())

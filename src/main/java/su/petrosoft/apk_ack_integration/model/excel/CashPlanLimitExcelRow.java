@@ -1,11 +1,10 @@
 package su.petrosoft.apk_ack_integration.model.excel;
 
 public sealed interface CashPlanLimitExcelRow
-        permits UniBudgetExcelRow, UniBudgetCodedExcelRow, RosterKbkExcelRow {
+        permits RosterKbkExcelRow, UniBudget2026ClarifiedExcelRow, UniBudget2026ExcelRow,
+        UniBudgetCodedExcelRow, UniBudgetExcelRow {
 
-    String section();
-
-    String subsection();
+    String kfsr();
 
     String kvsr();
 
@@ -52,8 +51,4 @@ public sealed interface CashPlanLimitExcelRow
     Double m11Amt();
 
     Double m12Amt();
-
-    default String getKfsr() {
-        return section() + subsection();
-    }
 }

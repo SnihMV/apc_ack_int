@@ -3,10 +3,8 @@ package su.petrosoft.apk_ack_integration.model.excel;
 import lombok.Builder;
 
 @Builder
-public record UniBudgetCodedExcelRow(
-        String code,
-        String section,
-        String subsection,
+public record UniBudget2026ClarifiedExcelRow(
+        String kfsr,
         String kfsrTitle,
         String kcsr,
         String kcsrTitle,
@@ -26,6 +24,10 @@ public record UniBudgetCodedExcelRow(
         String purposeTitle,
         String kvfo,
         String kvfoTitle,
+
+        String recipientName,
+        String recipientInn,
+        String recipientKpp,
 
         Double assignTotal,
         Double assignFederal,
@@ -50,8 +52,4 @@ public record UniBudgetCodedExcelRow(
         Double financeFederal,
         Double financeRegional
 ) implements CashPlanLimitExcelRow {
-    @Override
-    public String kfsr() {
-        return "";
-    }
 }

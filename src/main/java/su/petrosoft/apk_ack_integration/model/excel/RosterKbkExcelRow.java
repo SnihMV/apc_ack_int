@@ -39,4 +39,8 @@ public record RosterKbkExcelRow(
         Double financeRegional
 
 ) implements CashPlanLimitExcelRow {
+    @Override
+    public String kfsr() {
+        return section + subsection;
+    }
 }

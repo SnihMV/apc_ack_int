@@ -12,6 +12,9 @@ import java.util.List;
 @Getter
 @RequiredArgsConstructor
 public enum ExcelFileType {
+    UNI_BUDGET_2026(List.of("КВСР", "КФСР", "Подраздел", "Наименование КФСР", "КЦСР", "Наименование КЦСР", "Доп. КР"),
+            "Итого",
+            UniBudgetCodedExcelRow.class),
     UNI_BUDGET_CODED(
             List.of("Код", "Раздел", "Подраздел", "Наименование КФСР", "КЦСР", "Наименование КЦСР", "Доп. КР"),
             "Итого",
