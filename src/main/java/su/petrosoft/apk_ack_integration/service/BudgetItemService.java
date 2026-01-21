@@ -83,9 +83,19 @@ public class BudgetItemService {
         Set<SubsidyProgram> existingSubsidyPrograms = subsidyProgramService.getAllThirdLevelSpFromDb();
         log.info("Found [{}] valid Subsidy Programs in DB with level 3", existingSubsidyPrograms.size());
 
-        Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap(KCSR, DOPKR);
+        List<BudgetItemExcelRow> unknownSpRows = rowDtoList.stream()
+                .filter(row -> !existingSubsidyPrograms.contains(spMapper.toThirdLevelSP(row)))
+                .toList();
+
         Set<SubsidyProgram> createdSP = new LinkedHashSet<>();
-        rowDtoList.forEach(dto -> rowProcessor.getOrCreateSubsidyProgram(dto, existingSubsidyPrograms, codesMap));
+
+        if (unknownSpRows.isEmpty()) {
+            return createdSP;
+        }
+
+        log.info("Rows with unknown SP: [{}]", unknownSpRows.size());
+        Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap(KCSR, DOPKR);
+        unknownSpRows.forEach(dto -> rowProcessor.getOrCreateSubsidyProgram(dto, existingSubsidyPrograms, codesMap));
         return createdSP;
     }
 

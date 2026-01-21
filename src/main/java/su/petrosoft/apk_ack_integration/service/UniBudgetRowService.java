@@ -43,7 +43,7 @@ public class UniBudgetRowService {
         SubsidyProgram fstLevelSp = buildFirstLevelSP(dto, existingSP, codesMap);
         SubsidyProgram scdLevelSp = buildSecondLevelSP(dto, existingSP, codesMap, fstLevelSp);
         SubsidyProgram trdLevelSp = buildThirdLevelSP(dto, existingSP, codesMap, scdLevelSp);
-        log.debug("Subsidy Program Map count: {}", existingSP);
+        log.debug("Subsidy Program Map count: {}", existingSP.size());
         return trdLevelSp;
     }
 
