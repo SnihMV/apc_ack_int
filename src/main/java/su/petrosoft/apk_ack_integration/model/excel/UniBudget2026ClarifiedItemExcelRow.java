@@ -3,7 +3,7 @@ package su.petrosoft.apk_ack_integration.model.excel;
 import lombok.Builder;
 
 @Builder
-public record UniBudget2026ClarifiedExcelRow(
+public record UniBudget2026ClarifiedItemExcelRow(
     String kvsr,
     String kvsrTitle,
     String kfsr,
@@ -52,5 +52,5 @@ public record UniBudget2026ClarifiedExcelRow(
     Double m11Amt,
     Double m12Amt
 
-) implements BaseUniBudgetExcelRow {
+) implements BudgetItemExcelRow {
 }

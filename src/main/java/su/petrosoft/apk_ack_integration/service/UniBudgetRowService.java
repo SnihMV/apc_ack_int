@@ -10,8 +10,7 @@ import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.FinancingSource;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
-import su.petrosoft.apk_ack_integration.model.excel.BaseUniBudgetExcelRow;
-import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedExcelRow;
+import su.petrosoft.apk_ack_integration.model.excel.BudgetItemExcelRow;
 
 import java.util.List;
 import java.util.Map;
@@ -30,14 +29,14 @@ public class UniBudgetRowService {
     private final FinancingSourceMapper fsMapper;
     private final ExcelRowMapper excelRowMapper;
 
-    public CashPlanLimit saveCashPlanLimit(BaseUniBudgetExcelRow dto,
-        Map<CodeType, Map<Long, String>> codesMap) {
+    public CashPlanLimit saveCashPlanLimit(BudgetItemExcelRow dto,
+                                           Map<CodeType, Map<Long, String>> codesMap) {
         CashPlanLimit cplFromRow = cplMapper.toCpl(dto);
         return apkService.createCashPlanLimit(cplFromRow, codesMap);
     }
 
     public SubsidyProgram getOrCreateSubsidyProgram(
-        BaseUniBudgetExcelRow dto,
+        BudgetItemExcelRow dto,
         Set<SubsidyProgram> existingSP,
         Map<CodeType, Map<Long, String>> codesMap) {
 
@@ -49,7 +48,7 @@ public class UniBudgetRowService {
     }
 
     public FinancingSource buildFinancingSource(
-        BaseUniBudgetExcelRow row,
+        BudgetItemExcelRow row,
         Set<CashPlanLimit> existingCashPlanLimits,
         Set<SubsidyProgram> allValidThirdLvlSPFromDb,
         Map<CodeType, Map<Long, String>> codesMap) {
@@ -76,7 +75,7 @@ public class UniBudgetRowService {
         return financingSource;
     }
 
-    public List<CashPlanLimit> getLimitsFromExcel(List<BaseUniBudgetExcelRow> rows) {
+    public List<CashPlanLimit> getLimitsFromExcel(List<BudgetItemExcelRow> rows) {
         List<CashPlanLimit> limitsFromExcel = rows.stream()
             .map(cplMapper::toCpl)
             .collect(toList());
@@ -85,7 +84,7 @@ public class UniBudgetRowService {
     }
 
     private SubsidyProgram buildFirstLevelSP(
-        BaseUniBudgetExcelRow dto,
+        BudgetItemExcelRow dto,
         Set<SubsidyProgram> existingSP,
         Map<CodeType, Map<Long, String>> codesMap
     ) {
@@ -97,7 +96,7 @@ public class UniBudgetRowService {
     }
 
     private SubsidyProgram buildSecondLevelSP(
-        BaseUniBudgetExcelRow dto,
+        BudgetItemExcelRow dto,
         Set<SubsidyProgram> existingSP,
         Map<CodeType, Map<Long, String>> codesMap,
         SubsidyProgram fstLevelSp) {
@@ -111,7 +110,7 @@ public class UniBudgetRowService {
     }
 
     private SubsidyProgram buildThirdLevelSP(
-        BaseUniBudgetExcelRow dto,
+        BudgetItemExcelRow dto,
         Set<SubsidyProgram> existingSP,
         Map<CodeType, Map<Long, String>> codesMap,
         SubsidyProgram scdLevelSp) {
@@ -144,7 +143,7 @@ public class UniBudgetRowService {
     }
 
     public FinancingSource saveFinancingSource(
-        BaseUniBudgetExcelRow row,
+        BudgetItemExcelRow row,
         CashPlanLimit savedCpl,
         SubsidyProgram trdLevelSp,
         Map<CodeType, Map<Long, String>> codesMap) {

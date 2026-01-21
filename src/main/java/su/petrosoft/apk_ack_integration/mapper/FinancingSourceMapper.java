@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import su.petrosoft.apk_ack_integration.model.excel.BaseUniBudgetExcelRow;
+import su.petrosoft.apk_ack_integration.model.excel.BudgetItemExcelRow;
 
 import static su.petrosoft.apk_ack_integration.model.enums.CodeType.*;
 import static su.petrosoft.apk_ack_integration.model.enums.OwnershipForm.*;
@@ -52,7 +52,7 @@ public class FinancingSourceMapper {
                 .build();
     }
 
-    public FinancingSource toEntity(BaseUniBudgetExcelRow row) {
+    public FinancingSource toEntity(BudgetItemExcelRow row) {
         return FinancingSource.builder()
                 .year((long) LocalDate.now().getYear())
                 .kvsr(row.kvsr())
@@ -93,7 +93,7 @@ public class FinancingSourceMapper {
         );
     }
 
-    private String defineOwnershipForm(BaseUniBudgetExcelRow row) {
+    private String defineOwnershipForm(BudgetItemExcelRow row) {
         return Arrays.stream(OwnershipForm.values())
                 .filter(form -> form.getKosgu().equals(row.kosgu()))
                 .findFirst()
@@ -101,7 +101,7 @@ public class FinancingSourceMapper {
                 .orElse(ALL.getName());
     }
 
-    private String concatKBK(BaseUniBudgetExcelRow row) {
+    private String concatKBK(BudgetItemExcelRow row) {
         StringBuilder sb = new StringBuilder();
         sb.append(LocalDateTime.now().getYear());
         sb.append("-");

@@ -2,7 +2,6 @@ package su.petrosoft.apk_ack_integration.mapper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import su.petrosoft.apk_ack_integration.model.CofinancingLevel;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
@@ -13,9 +12,8 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttri
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.value.LinkedValue;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
-import su.petrosoft.apk_ack_integration.model.excel.BaseUniBudgetExcelRow;
+import su.petrosoft.apk_ack_integration.model.excel.BudgetItemExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.CofinancingLevelExcelRow;
-import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedExcelRow;
 import su.petrosoft.apk_ack_integration.util.CropProductionUtil;
 
 import java.util.ArrayList;
@@ -56,7 +54,7 @@ public class SubsidyProgramMapper {
                 .build();
     }
 
-    public SubsidyProgram toFirstLevelSP(BaseUniBudgetExcelRow dto) {
+    public SubsidyProgram toFirstLevelSP(BudgetItemExcelRow dto) {
         return SubsidyProgram.builder()
                 .level(1L)
                 .code(dto.code())
@@ -64,7 +62,7 @@ public class SubsidyProgramMapper {
                 .build();
     }
 
-    public SubsidyProgram toSecondLevelSP(BaseUniBudgetExcelRow dto) {
+    public SubsidyProgram toSecondLevelSP(BudgetItemExcelRow dto) {
         return SubsidyProgram.builder()
                 .level(2L)
                 .title(dto.kcsrTitle())
@@ -72,7 +70,7 @@ public class SubsidyProgramMapper {
                 .build();
     }
 
-    public SubsidyProgram toThirdLevelSP(BaseUniBudgetExcelRow dto) {
+    public SubsidyProgram toThirdLevelSP(BudgetItemExcelRow dto) {
         return SubsidyProgram.builder()
                 .level(3L)
                 .title(dto.dopKrTitle())

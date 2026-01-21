@@ -21,8 +21,8 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
 import su.petrosoft.apk_ack_integration.model.enums.CodeType;
-import su.petrosoft.apk_ack_integration.model.excel.BaseUniBudgetExcelRow;
-import su.petrosoft.apk_ack_integration.model.excel.RosterKbkExcelRow;
+import su.petrosoft.apk_ack_integration.model.excel.BudgetItemExcelRow;
+import su.petrosoft.apk_ack_integration.model.excel.RosterKbkItemExcelRow;
 import su.petrosoft.apk_ack_integration.model.xml.CreateCashPlanLimitsXml.Line;
 import su.petrosoft.apk_ack_integration.model.xml.rpl.PlDirectionLine;
 import su.petrosoft.apk_ack_integration.model.xml.UpdateCashPlanLimitXml;
@@ -149,7 +149,7 @@ public class CashPlanLimitMapper {
     }
 
 
-    public CashPlanLimit toCpl(RosterKbkExcelRow cplExcel) {
+    public CashPlanLimit toCpl(RosterKbkItemExcelRow cplExcel) {
 
         return CashPlanLimit.builder()
                 .year((long) LocalDateTime.now().getYear())
@@ -198,7 +198,7 @@ public class CashPlanLimitMapper {
                 .build();
     }
 
-    public CashPlanLimit toCpl(BaseUniBudgetExcelRow rowDto) {
+    public CashPlanLimit toCpl(BudgetItemExcelRow rowDto) {
 
         return CashPlanLimit.builder()
                 .year((long) LocalDateTime.now().getYear())

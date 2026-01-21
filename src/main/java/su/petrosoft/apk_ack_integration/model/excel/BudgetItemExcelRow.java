@@ -1,11 +1,11 @@
 package su.petrosoft.apk_ack_integration.model.excel;
 
-public sealed interface BaseUniBudgetExcelRow
-    permits RosterKbkExcelRow, UniBudget2026ClarifiedExcelRow, UniBudget2026ExcelRow,
-    UniBudgetCodedExcelRow, UniBudgetExcelRow {
+public sealed interface BudgetItemExcelRow
+    permits RosterKbkItemExcelRow, UniBudget2026ClarifiedItemExcelRow, UniBudget2026ItemExcelRow,
+        UniBudgetCodedItemExcelRow, UniBudgetItemExcelRow {
 
     default String code() {
-        return "1";
+        return "1337";
     }
 
     String kfsr();

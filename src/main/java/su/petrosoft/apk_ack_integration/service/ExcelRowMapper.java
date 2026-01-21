@@ -3,19 +3,19 @@ package su.petrosoft.apk_ack_integration.service;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.springframework.stereotype.Component;
-import su.petrosoft.apk_ack_integration.model.excel.BaseUniBudgetExcelRow;
+import su.petrosoft.apk_ack_integration.model.excel.BudgetItemExcelRow;
 import su.petrosoft.apk_ack_integration.model.excel.CofinancingLevelExcelRow;
-import su.petrosoft.apk_ack_integration.model.excel.RosterKbkExcelRow;
-import su.petrosoft.apk_ack_integration.model.excel.UniBudget2026ClarifiedExcelRow;
-import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedExcelRow;
-import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRow;
+import su.petrosoft.apk_ack_integration.model.excel.RosterKbkItemExcelRow;
+import su.petrosoft.apk_ack_integration.model.excel.UniBudget2026ClarifiedItemExcelRow;
+import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedItemExcelRow;
+import su.petrosoft.apk_ack_integration.model.excel.UniBudgetItemExcelRow;
 
 @Slf4j
 @Component
 public class ExcelRowMapper {
 
-    public BaseUniBudgetExcelRow parseToUniBudget2026ClarifiedRow(Row row) {
-        return new UniBudget2026ClarifiedExcelRow(
+    public BudgetItemExcelRow parseToUniBudget2026ClarifiedRow(Row row) {
+        return new UniBudget2026ClarifiedItemExcelRow(
             row.getCell(0).getStringCellValue(),
             row.getCell(1).getStringCellValue(),
             row.getCell(2).getStringCellValue(),
@@ -61,8 +61,8 @@ public class ExcelRowMapper {
         );
     }
 
-    public BaseUniBudgetExcelRow parseToUniBudgetCodedRow(Row row) {
-        return new UniBudgetCodedExcelRow(
+    public BudgetItemExcelRow parseToUniBudgetCodedRow(Row row) {
+        return new UniBudgetCodedItemExcelRow(
                 row.getCell(0).getStringCellValue(),
                 row.getCell(1).getStringCellValue(),
                 row.getCell(2).getStringCellValue(),
@@ -107,8 +107,8 @@ public class ExcelRowMapper {
         );
     }
 
-    public BaseUniBudgetExcelRow parseToRosterKbkRow(Row row) {
-        return RosterKbkExcelRow.builder()
+    public BudgetItemExcelRow parseToRosterKbkRow(Row row) {
+        return RosterKbkItemExcelRow.builder()
                 .section(row.getCell(0).getStringCellValue())
                 .subsection(row.getCell(1).getStringCellValue())
                 .kcsr(row.getCell(2).getStringCellValue())
@@ -139,8 +139,8 @@ public class ExcelRowMapper {
                 .build();
     }
 
-    public BaseUniBudgetExcelRow parseToUniBudgetRow(Row row) {
-        return UniBudgetExcelRow.builder()
+    public BudgetItemExcelRow parseToUniBudgetRow(Row row) {
+        return UniBudgetItemExcelRow.builder()
                 .section(row.getCell(0).getStringCellValue())
                 .subsection(row.getCell(1).getStringCellValue())
                 .kcsr(row.getCell(2).getStringCellValue())

@@ -3,28 +3,17 @@ package su.petrosoft.apk_ack_integration.model.excel;
 import lombok.Builder;
 
 @Builder
-public record UniBudgetExcelRow(
+public record RosterKbkItemExcelRow(
         String section,
         String subsection,
-        String kfsrTitle,
         String kcsr,
-        String kcsrTitle,
         String dopKr,
-        String dopKrTitle,
         String kvr,
-        String kvrTitle,
         String kosgu,
-        String kosguTitle,
         String kvsr,
-        String kvsrTitle,
         String dopFk,
-        String dopFrTitle,
         String dopEk,
-        String dopEkTitle,
         String purpose,
-        String purposeTitle,
-        String kvfo,
-        String kvfoTitle,
 
         Double assignTotal,
         Double assignFederal,
@@ -48,7 +37,9 @@ public record UniBudgetExcelRow(
 
         Double financeFederal,
         Double financeRegional
-) implements BaseUniBudgetExcelRow {
+
+) implements BudgetItemExcelRow {
+
     @Override
     public String kfsr() {
         return section + subsection;
