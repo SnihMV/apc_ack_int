@@ -9,7 +9,7 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
-import su.petrosoft.apk_ack_integration.model.enums.CodeType;
+import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.model.enums.OwnershipForm;
 
 import java.time.LocalDate;
@@ -17,9 +17,9 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import su.petrosoft.apk_ack_integration.model.excel.BudgetItemExcelRow;
+import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.*;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.*;
 import static su.petrosoft.apk_ack_integration.model.enums.OwnershipForm.*;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.*;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
@@ -52,7 +52,7 @@ public class FinancingSourceMapper {
                 .build();
     }
 
-    public FinancingSource toEntity(BudgetItemExcelRow row) {
+    public FinancingSource toEntity(DescriptedBudgetItemData row) {
         return FinancingSource.builder()
                 .year((long) LocalDate.now().getYear())
                 .kvsr(row.kvsr())
@@ -69,7 +69,7 @@ public class FinancingSourceMapper {
                 .build();
     }
 
-    public CreateInstanceRequestDto toCreatingDto(FinancingSource fs, Map<CodeType, Map<Long, String>> codesMap) {
+    public CreateInstanceRequestDto toCreatingDto(FinancingSource fs, Map<Dictionary, Map<String, Long>> codesMap) {
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()
                         .templateId(TEMPLATE_ID)
@@ -93,7 +93,7 @@ public class FinancingSourceMapper {
         );
     }
 
-    private String defineOwnershipForm(BudgetItemExcelRow row) {
+    private String defineOwnershipForm(DescriptedBudgetItemData row) {
         return Arrays.stream(OwnershipForm.values())
                 .filter(form -> form.getKosgu().equals(row.kosgu()))
                 .findFirst()
@@ -101,7 +101,7 @@ public class FinancingSourceMapper {
                 .orElse(ALL.getName());
     }
 
-    private String concatKBK(BudgetItemExcelRow row) {
+    private String concatKBK(DescriptedBudgetItemData row) {
         StringBuilder sb = new StringBuilder();
         sb.append(LocalDateTime.now().getYear());
         sb.append("-");

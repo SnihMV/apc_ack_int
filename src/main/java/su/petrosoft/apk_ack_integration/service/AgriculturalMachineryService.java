@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
-import su.petrosoft.apk_ack_integration.client.TechPlicanteSoapClient;
+import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
+import su.petrosoft.apk_ack_integration.client.PlicanteSoapClient;
 import su.petrosoft.apk_ack_integration.mapper.AgriculturalMachineryParkMapper;
 import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryPark;
 import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryReport;
@@ -17,7 +17,7 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequest
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.enums.CodeType;
+import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -27,19 +27,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.DIS_BEN_GEN;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.IZD_AVT_PR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KOM_KOR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KOM_ZER;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.MAS_KART;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.MAS_SH;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.MAS_ZH;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.MAS_ZH_PT_KOR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.OTHER_TECH;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.PROD_COUNTRY;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.TECH_FISHING;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.TECH_STATE;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.TR_V_M;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DIS_BEN_GEN;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.IZD_AVT_PR;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KOM_KOR;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KOM_ZER;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.MAS_KART;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.MAS_SH;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.MAS_ZH;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.MAS_ZH_PT_KOR;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.OTHER_TECH;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.PROD_COUNTRY;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.TECH_FISHING;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.TECH_STATE;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.TR_V_M;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.buildRequestDtoToFindMachineryParkByRecipientId;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.JSON_FILE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.RECIPIENT_ID;
@@ -51,12 +51,12 @@ import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.*;
 @Service
 @RequiredArgsConstructor
 public class AgriculturalMachineryService {
-    private final ApkPlicanteRestClient plicanteRestClient;
+    private final PlicanteRestClient plicanteRestClient;
     private final ApkPlicanteService apkPlicanteService;
     //    private final AgriculturalMachineryReportMapper amrMapper;
     private final AgriculturalMachineryParkMapper ampMapper;
     private final ObjectMapper objectMapper;
-    private final TechPlicanteSoapClient techPlicanteSoapClient;
+    private final PlicanteSoapClient plicanteSoapClient;
 
     public void processReport(Long id) {
         AgriculturalMachineryReport report = getAgriculturalMachineryReport(id);
@@ -69,7 +69,7 @@ public class AgriculturalMachineryService {
                     .peek(park -> park.setRecipientId(report.getRecipientId()))
                     .forEach(park -> log.debug("Park [{}]", park));
 
-            Map<CodeType, Map<Long, String>> codesMap = apkPlicanteService.getCodesMap(
+            Map<Dictionary, Map<String, Long>> codesMap = apkPlicanteService.getCodesMap(
                     TR_V_M, KOM_ZER, KOM_KOR, MAS_SH, MAS_ZH, MAS_ZH_PT_KOR, DIS_BEN_GEN, MAS_KART, IZD_AVT_PR, TECH_FISHING, OTHER_TECH, PROD_COUNTRY, TECH_STATE);
             List<Long> savedIds = new ArrayList<>();
             for (AgriculturalMachineryPark park : agriculturalMachineryParks) {
@@ -133,7 +133,7 @@ public class AgriculturalMachineryService {
                 .toList();
         log.debug("For Recipient [{}] found [{}] Machinery Park Instances: {}", recipientId, parkIds.size(), parkIds);
 
-        techPlicanteSoapClient.deleteInstancesList(parkIds);
+        plicanteSoapClient.deleteInstancesList(parkIds);
 
         log.info("Machinery Park Instances [{}] deleted", parkIds);
     }

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateBudgetItemsResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateInstancesFromFileResponseDto;
-import su.petrosoft.apk_ack_integration.model.excel.BudgetItemExcelRow;
+import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 
 import java.util.Collections;
 import java.util.List;
@@ -20,7 +20,7 @@ public class ExtendedLimitService {
     private final BudgetItemService budgetItemService;
 
     public CreateInstancesFromFileResponseDto createLimits(MultipartFile file) {
-        List<BudgetItemExcelRow> dtoList = excelExtractor.getUniBudgetCodedRows(file);
+        List<DescriptedBudgetItemData> dtoList = excelExtractor.getUniBudgetCodedRows(file);
 
         CreateInstancesFromFileResponseDto responseDto = CreateInstancesFromFileResponseDto.builder()
                 .persistedIds(Collections.emptyList())
@@ -33,7 +33,7 @@ public class ExtendedLimitService {
     }
 
     public CreateBudgetItemsResponseDto createBudgetItem(MultipartFile file) {
-        List<BudgetItemExcelRow> uniBudgetRows = excelExtractor.getUniBudgetCodedRows(file);
+        List<DescriptedBudgetItemData> uniBudgetRows = excelExtractor.getUniBudgetCodedRows(file);
         if (!uniBudgetRows.isEmpty()) {
             budgetItemService.createBudgetItems(uniBudgetRows);
         }

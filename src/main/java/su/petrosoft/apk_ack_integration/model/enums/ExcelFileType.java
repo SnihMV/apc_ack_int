@@ -2,11 +2,11 @@ package su.petrosoft.apk_ack_integration.model.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import su.petrosoft.apk_ack_integration.model.excel.CofinancingLevelExcelRow;
-import su.petrosoft.apk_ack_integration.model.excel.RosterKbkItemExcelRow;
-import su.petrosoft.apk_ack_integration.model.excel.UniBudget2026ClarifiedItemExcelRow;
-import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedItemExcelRow;
-import su.petrosoft.apk_ack_integration.model.excel.UniBudgetItemExcelRow;
+import su.petrosoft.apk_ack_integration.model.data.excel.CofinancingLevelExcelRow;
+import su.petrosoft.apk_ack_integration.model.data.excel.RosterKbkItemExcelRow;
+import su.petrosoft.apk_ack_integration.model.data.excel.UniBudget2026ClarifiedItemExcelRow;
+import su.petrosoft.apk_ack_integration.model.data.excel.UniBudgetCodedItemExcelRow;
+import su.petrosoft.apk_ack_integration.model.data.excel.UniBudgetItemExcelRow;
 
 import java.util.List;
 

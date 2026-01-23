@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
+import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.mapper.CofinancingLevelMapper;
 import su.petrosoft.apk_ack_integration.mapper.CropProductionMainFormMapper;
@@ -23,7 +23,7 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequ
 import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.enums.CodeType;
+import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.model.enums.ReportType;
 
 import java.util.Arrays;
@@ -43,7 +43,7 @@ import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extract
 @RequiredArgsConstructor
 public class ApkPlicanteService {
 
-    private final ApkPlicanteRestClient apkRestClient;
+    private final PlicanteRestClient apkRestClient;
     private final CashPlanLimitMapper cplMapper;
     private final SubsidyProgramMapper spMapper;
     private final FinancingSourceMapper fsMapper;
@@ -55,7 +55,7 @@ public class ApkPlicanteService {
     public Set<CashPlanLimit> findCashPlanLimits(GetAttributesListRequestDto requestDto) {
         List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(requestDto);
         return dtoList.stream()
-                .map(cplMapper::toCpl)
+                .map(cplMapper::toEntity)
                 .collect(toSet());
     }
 
@@ -90,20 +90,20 @@ public class ApkPlicanteService {
             .toList();
     }
 
-    public CashPlanLimit createCashPlanLimit(CashPlanLimit cpl, Map<CodeType, Map<Long, String>> codesMap) {
+    public CashPlanLimit createCashPlanLimit(CashPlanLimit cpl, Map<Dictionary, Map<String, Long>> codesMap) {
         CreateInstanceRequestDto dto = cplMapper.toCreateDto(cpl, codesMap);
         InstanceDto instance = apkRestClient.createInstance(dto);
-        return cplMapper.toCpl(instance);
+        return cplMapper.toEntity(instance);
     }
 
-    public SubsidyProgram createSubsidyProgram(SubsidyProgram sp, Map<CodeType, Map<Long, String>> codesMap) {
+    public SubsidyProgram createSubsidyProgram(SubsidyProgram sp, Map<Dictionary, Map<String, Long>> codesMap) {
         CreateInstanceRequestDto dto = spMapper.toCreateDto(sp, codesMap);
         InstanceDto instance = apkRestClient.createInstance(dto);
         return spMapper.toEntity(instance);
     }
 
     @SneakyThrows
-    public FinancingSource createFinancingSource(FinancingSource financingSource, Map<CodeType, Map<Long, String>> codesMap) {
+    public FinancingSource createFinancingSource(FinancingSource financingSource, Map<Dictionary, Map<String, Long>> codesMap) {
         CreateInstanceRequestDto createDto = fsMapper.toCreatingDto(financingSource, codesMap);
         String ss = objectMapper.writeValueAsString(createDto);
         log.debug("Financing Source Creating JSON [{}]", ss);
@@ -114,7 +114,7 @@ public class ApkPlicanteService {
     }
 
     @SneakyThrows
-    public CofinancingLevel createCofinancingLevel(CofinancingLevel cofinancingLevel, Map<CodeType, Map<Long, String>> codesMap) {
+    public CofinancingLevel createCofinancingLevel(CofinancingLevel cofinancingLevel, Map<Dictionary, Map<String, Long>> codesMap) {
         CreateInstanceRequestDto creatingDto = cflMapper.toCreatingDto(cofinancingLevel, codesMap);
         String creatingJSON = objectMapper.writeValueAsString(creatingDto);
         log.debug("Cofinancing Level Creating JSON [{}]", creatingJSON);
@@ -127,7 +127,7 @@ public class ApkPlicanteService {
     public CashPlanLimit updateCashPlanLimit(CashPlanLimit updatedCpl) {
         UpdateInstanceRequestDto updateDto = cplMapper.toUpdateDto(updatedCpl);
         InstanceDto updatedInstance = apkRestClient.updateInstance(updateDto);
-        return cplMapper.toCpl(updatedInstance);
+        return cplMapper.toEntity(updatedInstance);
     }
 
     @SneakyThrows
@@ -152,15 +152,13 @@ public class ApkPlicanteService {
         return spMapper.toEntity(updatedSP);
     }
 
-    public Map<CodeType, Map<Long, String>> getCodesMap(CodeType... types) {
-        if (types == null || types.length == 0) {
-            types = CodeType.values();
-        }
+    public Map<Dictionary, Map<String, Long>> getCodesMap(Dictionary... types) {
+
         log.info("Receiving existed codes for types: {}", Arrays.stream(types).map(Enum::name).collect(joining(",")));
-        Map<CodeType, Map<Long, String>> codes = new EnumMap<>(CodeType.class);
-        for (CodeType codeType : types) {
-            codes.put(codeType, getCodesByType(codeType));
-            log.debug("{} code map:\n[{}]", codeType.name(), codes.get(codeType).toString());
+        Map<Dictionary, Map<String, Long>> codes = new EnumMap<>(Dictionary.class);
+        for (Dictionary dictionary : types) {
+            codes.put(dictionary, getCodesByType(dictionary));
+            log.debug("{} code map:\n[{}]", dictionary.name(), codes.get(dictionary).toString());
         }
         long count = codes.values().stream()
                 .flatMap(map -> map.entrySet().stream())
@@ -169,16 +167,17 @@ public class ApkPlicanteService {
         return codes;
     }
 
-    private Map<Long, String> getCodesByType(CodeType codeType) {
+    private Map<String, Long> getCodesByType(Dictionary dictionary) {
         List<InstanceDto> list = apkRestClient.getTableAttributesList(
                 GetAttributesListRequestDto.builder()
-                        .templateId(codeType.getTemplateId())
-                        .attributes(List.of(new RequestedAttribute(codeType.getValuedAttrId())))
+                        .templateId(dictionary.getTemplateId())
+                        .attributes(List.of(
+                                new RequestedAttribute(dictionary.getCodeAttrId())))
                         .build());
         return list.stream()
                 .collect(toMap(
-                        InstanceDto::id,
-                        dto -> extractData(dto.attributes(), codeType.getValuedAttrId())
-                ));
+                        dto -> extractData(dto.attributes(), dictionary.getCodeAttrId()),
+                        InstanceDto::id
+                        ));
     }
 }

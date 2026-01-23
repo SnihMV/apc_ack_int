@@ -10,13 +10,13 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttri
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.enums.CodeType;
+import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.*;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.*;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.BRAND_MODEL_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.COST_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.COUNT_ATTR;
@@ -25,7 +25,6 @@ import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUti
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.POWER_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.PROD_COUNTRY_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.PROD_YEAR_ATTR;
-import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.RECIPIENT_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.STATE_SUPPORT_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.TECH_STATE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.TEMPLATE_ID;
@@ -43,7 +42,7 @@ public class AgriculturalMachineryParkMapper {
                 .build();
     }
 
-    public CreateInstanceRequestDto toCreationDto(AgriculturalMachineryPark park, Map<CodeType, Map<Long, String>> codesMap) {
+    public CreateInstanceRequestDto toCreationDto(AgriculturalMachineryPark park, Map<Dictionary, Map<String, Long>> codesMap) {
         Map<String, Long> indicateMap = Map.of(
                 "Тракторы всех марок", 537L,
                 "Комбайны зерноуборочные", 538L,
@@ -75,7 +74,7 @@ public class AgriculturalMachineryParkMapper {
                         .build());
     }
 
-    private static CodeType getType(AgriculturalMachineryPark park) {
+    private static Dictionary getType(AgriculturalMachineryPark park) {
         return Arrays.stream(values())
                 .filter(type -> type.getName().equals(park.getIndicator()))
                 .findFirst()

@@ -3,16 +3,19 @@ package su.petrosoft.apk_ack_integration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.mapper.FinancingSourceMapper;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyProgramMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.FinancingSource;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
+import su.petrosoft.apk_ack_integration.model.data.BudgetItemData;
+import su.petrosoft.apk_ack_integration.model.data.CashPlanLimitData;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateBudgetItemsResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateInstancesFromFileResponseDto;
-import su.petrosoft.apk_ack_integration.model.enums.CodeType;
-import su.petrosoft.apk_ack_integration.model.excel.BudgetItemExcelRow;
+import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
+import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -23,20 +26,21 @@ import java.util.Set;
 
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.DOPEK;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.DOPFK;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KCSR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.DOPKR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KFSR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KOSGU;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KVR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KVSR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.OWNERSHIP_FORM;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.PURPOSE;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPEK;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPFK;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KCSR;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPKR;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KFSR;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KOSGU;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVR;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVSR;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.OWNERSHIP_FORM;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.PURPOSE;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CPL_TITLE;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getCplCodesOnlyByCurrentYearRequestDto;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.FS_TITLE;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.getAllFsByCurrentYearRequestDto;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.updateCodesMap;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.SP_TITLE;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.getAllSubsidyProgramsRequestDto;
 
@@ -52,21 +56,22 @@ public class BudgetItemService {
     private final FinancingSourceMapper fsMapper;
     private final SubsidyProgramService subsidyProgramService;
     private final CashPlanLimitService cashPlanLimitService;
+    private final PlicanteRestClient plicanteRestClient;
 
-    public CreateInstancesFromFileResponseDto createLimits(List<BudgetItemExcelRow> rows) {
+    public CreateInstancesFromFileResponseDto createLimits(List<CashPlanLimitData> rows) {
         if (rows.isEmpty()) {
             return CreateInstancesFromFileResponseDto.builder().build();
         }
-        List<BudgetItemExcelRow> uniqueRowsByCpl = getNotExistedCplRows(rows);
+        List<CashPlanLimitData> uniqueRowsByCpl = getNotExistedCplRows(rows);
         if (uniqueRowsByCpl.isEmpty()) {
             return CreateInstancesFromFileResponseDto.builder()
                     .incomingCount(rows.size())
                     .build();
         }
-        Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap(
+        Map<Dictionary, Map<String, Long>> codesMap = apkService.getCodesMap(
                 KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
         Set<CashPlanLimit> savedCplList = new LinkedHashSet<>();
-        for (BudgetItemExcelRow row : uniqueRowsByCpl) {
+        for (CashPlanLimitData row : uniqueRowsByCpl) {
             savedCplList.add(rowProcessor.saveCashPlanLimit(row, codesMap));
         }
         return CreateInstancesFromFileResponseDto.builder()
@@ -78,12 +83,12 @@ public class BudgetItemService {
                 .build();
     }
 
-    public Set<SubsidyProgram> createSubsidyProgramsTree(List<BudgetItemExcelRow> rowDtoList) {
+    public Set<SubsidyProgram> createSubsidyProgramsTree(List<DescriptedBudgetItemData> rowDtoList) {
 
         Set<SubsidyProgram> existingSubsidyPrograms = subsidyProgramService.getAllThirdLevelSpFromDb();
         log.info("Found [{}] valid Subsidy Programs in DB with level 3", existingSubsidyPrograms.size());
 
-        List<BudgetItemExcelRow> unknownSpRows = rowDtoList.stream()
+        List<DescriptedBudgetItemData> unknownSpRows = rowDtoList.stream()
                 .filter(row -> !existingSubsidyPrograms.contains(spMapper.toThirdLevelSP(row)))
                 .toList();
 
@@ -94,16 +99,18 @@ public class BudgetItemService {
         }
 
         log.info("Rows with unknown SP: [{}]", unknownSpRows.size());
-        Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap(KCSR, DOPKR);
+        Map<Dictionary, Map<String, Long>> codesMap = apkService.getCodesMap(KCSR, DOPKR);
+        updateCodesMap(codesMap, unknownSpRows, plicanteRestClient);
         unknownSpRows.forEach(dto -> rowProcessor.getOrCreateSubsidyProgram(dto, existingSubsidyPrograms, codesMap));
         return createdSP;
     }
 
-    public List<FinancingSource> createFinancingSources(List<BudgetItemExcelRow> rowList) {
+
+    public List<FinancingSource> createFinancingSources(List<DescriptedBudgetItemData> rowList) {
 
         Set<FinancingSource> allFinancingSourcesFromDb = apkService.findFinancingSources(getAllFsByCurrentYearRequestDto());
 
-        List<BudgetItemExcelRow> uniqueFinancingSourcesFromExcel = rowList.stream()
+        List<DescriptedBudgetItemData> uniqueFinancingSourcesFromExcel = rowList.stream()
                 .filter(row -> !allFinancingSourcesFromDb.contains(fsMapper.toEntity(row)))
                 .toList();
 
@@ -116,7 +123,7 @@ public class BudgetItemService {
         Set<CashPlanLimit> existingCashPlanLimits = cashPlanLimitService.getLimitsForCurrentYear();
         Set<SubsidyProgram> existingSubsidyPrograms = subsidyProgramService.getAllThirdLevelSpFromDb();
 
-        Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap(
+        Map<Dictionary, Map<String, Long>> codesMap = apkService.getCodesMap(
                 KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE, OWNERSHIP_FORM);
         List<FinancingSource> list = rowList.stream()
                 .map(dto -> rowProcessor.buildFinancingSource(dto, existingCashPlanLimits, existingSubsidyPrograms, codesMap))
@@ -128,14 +135,14 @@ public class BudgetItemService {
         return createdFS;
     }
 
-    public CreateBudgetItemsResponseDto createBudgetItems(List<BudgetItemExcelRow> rows) {
-        List<BudgetItemExcelRow> rowsToProcess = getNotExistedCplRows(rows);
+    public CreateBudgetItemsResponseDto createBudgetItems(List<? extends DescriptedBudgetItemData> rows) {
+        List<? extends DescriptedBudgetItemData> rowsToProcess = getNotExistedCplRows(rows);
         if (rowsToProcess.isEmpty()) {
             log.info("No one unique BudgetItems in excel found to be saved");
             return new CreateBudgetItemsResponseDto(emptyMap());
         }
         log.info("[{}] BudgetItems from excel left as unique to be processed", rowsToProcess.size());
-        Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap(
+        Map<Dictionary, Map<String, Long>> codesMap = apkService.getCodesMap(
                 KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
         Set<SubsidyProgram> existingSpList = apkService.findSubsidyPrograms(getAllSubsidyProgramsRequestDto());
         log.info("Found [{}] Subsidy Programs in DB", existingSpList.size());
@@ -145,7 +152,7 @@ public class BudgetItemService {
         Set<FinancingSource> savedFsList = new LinkedHashSet<>();
 
         log.info("Start processing BudgetItems to save containing objects");
-        for (BudgetItemExcelRow row : rowsToProcess) {
+        for (DescriptedBudgetItemData row : rowsToProcess) {
             CashPlanLimit savedCpl = rowProcessor.saveCashPlanLimit(row, codesMap);
             savedCplList.add(savedCpl);
             SubsidyProgram thirdLevelSp = rowProcessor.getOrCreateSubsidyProgram(row, existingSpList, codesMap);
@@ -156,13 +163,13 @@ public class BudgetItemService {
         return buildResponse(savedCplList, savedSpList, savedFsList);
     }
 
-    private List<BudgetItemExcelRow> getNotExistedCplRows(List<BudgetItemExcelRow> rows) {
-        Set<CashPlanLimit> currentYearExistingLimits = apkService.findCashPlanLimits(getCplCodesOnlyByCurrentYearRequestDto());
+    private <T extends CashPlanLimitData> List<T> getNotExistedCplRows(List<T> rows) {
+        Set<CashPlanLimit> currentYearExistingLimits = apkService.findCashPlanLimits(
+                getCplCodesOnlyByCurrentYearRequestDto());
         log.info("Found [{}] CashPlanLimits for [{}] year in DB", currentYearExistingLimits.size(), LocalDateTime.now().getYear());
-        List<BudgetItemExcelRow> uniqueCplRows = rows.stream()
-                .filter(row -> !currentYearExistingLimits.contains(cplMapper.toCpl(row)))
+        return rows.stream()
+                .filter(row -> !currentYearExistingLimits.contains(cplMapper.toEntity(row)))
                 .toList();
-        return uniqueCplRows;
     }
 
     private static CreateBudgetItemsResponseDto buildResponse(

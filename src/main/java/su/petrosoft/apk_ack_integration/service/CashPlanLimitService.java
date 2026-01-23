@@ -7,12 +7,13 @@ import org.springframework.web.multipart.MultipartFile;
 import su.petrosoft.apk_ack_integration.client.NiFiRestClient;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
+import su.petrosoft.apk_ack_integration.model.data.CashPlanLimitData;
 import su.petrosoft.apk_ack_integration.model.dto.response.AckGetUpdateMessageResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateInstancesFromFileResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.UpdateCashPlanLimitResponseDto;
-import su.petrosoft.apk_ack_integration.model.enums.CodeType;
-import su.petrosoft.apk_ack_integration.model.excel.BudgetItemExcelRow;
-import su.petrosoft.apk_ack_integration.model.xml.UpdateCashPlanLimitXml;
+import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
+import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
+import su.petrosoft.apk_ack_integration.model.data.xml.UpdateCashPlanLimitXml;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.*;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.*;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getCplCodesOnlyByCurrentYearRequestDto;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getCreationInstancesFromFileResponse;
 
@@ -41,7 +42,7 @@ public class CashPlanLimitService {
 
     public CreateInstancesFromFileResponseDto createFromRosterKBKExcel(MultipartFile file) {
 
-        List<BudgetItemExcelRow> dtoList = excelExtractor.getRosterKbkRows(file);
+        List<? extends CashPlanLimitData> dtoList = excelExtractor.getRosterKbkRows(file);
         log.debug("Extracted from excel file: [{}] CashPlanLimit rows", dtoList.size());
         List<CashPlanLimit> createdLimits = new ArrayList<>();
         if (!dtoList.isEmpty()) {
@@ -49,12 +50,12 @@ public class CashPlanLimitService {
             log.debug("Found in Plicante {} CashPlanLimits in total", existedLimits.size());
 
             List<CashPlanLimit> limitsFromExcel = dtoList.stream()
-                    .map(mapper::toCpl)
+                    .map(mapper::toEntity)
                     .collect(Collectors.toList());
 
             limitsFromExcel.removeAll(existedLimits);
             if (!limitsFromExcel.isEmpty()) {
-                Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap(
+                Map<Dictionary, Map<String, Long>> codesMap = apkService.getCodesMap(
                         KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
                 limitsFromExcel.stream()
                         .map(cpl -> apkService.createCashPlanLimit(cpl, codesMap))
@@ -66,7 +67,7 @@ public class CashPlanLimitService {
 
     public CreateInstancesFromFileResponseDto createFromUniBudgetExcel(MultipartFile file) {
 //        List<BaseUniBudgetExcelRow> dtoList = excelExtractor.getUniBudgetCodedRows(file);
-        List<BudgetItemExcelRow> dtoList = excelExtractor.getUniBudget2026ClarifiedRows(file);
+        List<DescriptedBudgetItemData> dtoList = excelExtractor.getUniBudget2026ClarifiedRows(file);
         Set<CashPlanLimit> existingCPL = getLimitsForCurrentYear();
         List<CashPlanLimit> fromExcelCPL = uniBudgetRowService.getLimitsFromExcel(dtoList);
         fromExcelCPL.removeAll(existingCPL);
@@ -74,7 +75,7 @@ public class CashPlanLimitService {
 
         List<CashPlanLimit> createdLimits = new ArrayList<>();
         if (!fromExcelCPL.isEmpty()) {
-            Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
+            Map<Dictionary, Map<String, Long>> codesMap = apkService.getCodesMap(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
 
             createdLimits = fromExcelCPL.stream()
                     .map(cpl -> apkService.createCashPlanLimit(cpl, codesMap))
@@ -94,7 +95,7 @@ public class CashPlanLimitService {
         }
         log.debug("Received request for Cash Plan Limit update: [{}]", updatingXml);
 
-        CashPlanLimit updatingCPL = mapper.toCpl(updatingXml);
+        CashPlanLimit updatingCPL = mapper.toEntity(updatingXml);
         log.debug("Mapped to CashPlanLimit: [{}]", updatingCPL);
 
         Set<CashPlanLimit> allCashPlanLimits = apkService.findCashPlanLimits(getCplCodesOnlyByCurrentYearRequestDto());
@@ -124,9 +125,9 @@ public class CashPlanLimitService {
 
     public UpdateCashPlanLimitResponseDto updateByExcel(MultipartFile file) {
 
-        List<BudgetItemExcelRow> uniBudgetExcelRows = excelExtractor.uniBudgetExcelRows(file);
+        List<DescriptedBudgetItemData> uniBudgetExcelRows = excelExtractor.uniBudgetExcelRows(file);
         Set<CashPlanLimit> limitsFromExcel = uniBudgetExcelRows.stream()
-                .map(mapper::toCpl)
+                .map(mapper::toEntity)
                 .collect(Collectors.toSet());
         Set<CashPlanLimit> existingCurrentYearLimits = getLimitsForCurrentYear();
 

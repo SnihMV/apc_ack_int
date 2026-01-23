@@ -1,7 +1,7 @@
 package su.petrosoft.apk_ack_integration.mapper;
 
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getCodeId;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.*;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.*;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.*;
 
 import java.math.BigDecimal;
@@ -13,6 +13,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
+import su.petrosoft.apk_ack_integration.model.data.CashPlanLimitData;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
@@ -20,18 +21,18 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DoubleAttri
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
-import su.petrosoft.apk_ack_integration.model.enums.CodeType;
-import su.petrosoft.apk_ack_integration.model.excel.BudgetItemExcelRow;
-import su.petrosoft.apk_ack_integration.model.excel.RosterKbkItemExcelRow;
-import su.petrosoft.apk_ack_integration.model.xml.CreateCashPlanLimitsXml.Line;
-import su.petrosoft.apk_ack_integration.model.xml.rpl.PlDirectionLine;
-import su.petrosoft.apk_ack_integration.model.xml.UpdateCashPlanLimitXml;
+import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
+import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
+import su.petrosoft.apk_ack_integration.model.data.excel.RosterKbkItemExcelRow;
+import su.petrosoft.apk_ack_integration.model.data.xml.CreateCashPlanLimitsXml.Line;
+import su.petrosoft.apk_ack_integration.model.data.xml.rpl.PlDirectionLine;
+import su.petrosoft.apk_ack_integration.model.data.xml.UpdateCashPlanLimitXml;
 
 @Component
 @RequiredArgsConstructor
 public class CashPlanLimitMapper {
 
-    public CashPlanLimit toCpl(Line line) {
+    public CashPlanLimit toEntity(Line line) {
 
         PlDirectionLine pl = getPlDirectionLine(line);
 
@@ -64,7 +65,7 @@ public class CashPlanLimitMapper {
                 .build();
     }
 
-    public CashPlanLimit toCpl(UpdateCashPlanLimitXml updateDto) {
+    public CashPlanLimit toEntity(UpdateCashPlanLimitXml updateDto) {
 
         PlDirectionLine pl = updateDto.plDirectionLineWrapper().plDirectionLine();
 
@@ -97,7 +98,7 @@ public class CashPlanLimitMapper {
                 .build();
     }
 
-    public CashPlanLimit toCpl(InstanceDto dto) {
+    public CashPlanLimit toEntity(InstanceDto dto) {
 
         List<Attribute<?>> attributes = dto.attributes();
 
@@ -148,106 +149,56 @@ public class CashPlanLimitMapper {
                 .build();
     }
 
-
-    public CashPlanLimit toCpl(RosterKbkItemExcelRow cplExcel) {
-
-        return CashPlanLimit.builder()
-                .year((long) LocalDateTime.now().getYear())
-                .kfsr(cplExcel.section() + cplExcel.subsection())
-                .kvsr(cplExcel.kvsr())
-                .kcsr(cplExcel.kcsr())
-                .kvr(cplExcel.kvr())
-                .kosgu(cplExcel.kosgu())
-                .dopEk(cplExcel.dopEk())
-                .dopKr(cplExcel.dopKr())
-                .purpose(cplExcel.purpose())
-                .dopFk(cplExcel.dopFk())
-                .totalLimit(BigDecimal.valueOf(cplExcel.assignTotal()))
-                .totalBalance(BigDecimal.valueOf(cplExcel.assignTotal()))
-                .federalBudget(BigDecimal.valueOf(cplExcel.assignFederal()))
-                .regionalBudget(BigDecimal.valueOf(cplExcel.assignRegional()))
-                .totalBalance(BigDecimal.valueOf(cplExcel.assignTotal()))
-                .janLimit(BigDecimal.valueOf(cplExcel.m01Amt()))
-                .febLimit(BigDecimal.valueOf(cplExcel.m02Amt()))
-                .marLimit(BigDecimal.valueOf(cplExcel.m03Amt()))
-                .aprLimit(BigDecimal.valueOf(cplExcel.m04Amt()))
-                .mayLimit(BigDecimal.valueOf(cplExcel.m05Amt()))
-                .junLimit(BigDecimal.valueOf(cplExcel.m06Amt()))
-                .julLimit(BigDecimal.valueOf(cplExcel.m07Amt()))
-                .augLimit(BigDecimal.valueOf(cplExcel.m08Amt()))
-                .sepLimit(BigDecimal.valueOf(cplExcel.m09Amt()))
-                .octLimit(BigDecimal.valueOf(cplExcel.m10Amt()))
-                .novLimit(BigDecimal.valueOf(cplExcel.m11Amt()))
-                .decLimit(BigDecimal.valueOf(cplExcel.m12Amt()))
-                .janBalance(BigDecimal.valueOf(cplExcel.m01Amt()))
-                .janBalance(BigDecimal.valueOf(cplExcel.m02Amt()))
-                .janBalance(BigDecimal.valueOf(cplExcel.m03Amt()))
-                .janBalance(BigDecimal.valueOf(cplExcel.m04Amt()))
-                .janBalance(BigDecimal.valueOf(cplExcel.m05Amt()))
-                .janBalance(BigDecimal.valueOf(cplExcel.m06Amt()))
-                .janBalance(BigDecimal.valueOf(cplExcel.m07Amt()))
-                .janBalance(BigDecimal.valueOf(cplExcel.m08Amt()))
-                .janBalance(BigDecimal.valueOf(cplExcel.m09Amt()))
-                .janBalance(BigDecimal.valueOf(cplExcel.m10Amt()))
-                .janBalance(BigDecimal.valueOf(cplExcel.m11Amt()))
-                .janBalance(BigDecimal.valueOf(cplExcel.m12Amt()))
-                .fstQuarterBalance(sumOf(BigDecimal.valueOf(cplExcel.m01Amt()), BigDecimal.valueOf(cplExcel.m02Amt()), BigDecimal.valueOf(cplExcel.m03Amt())))
-                .scdQuarterBalance(sumOf(BigDecimal.valueOf(cplExcel.m04Amt()), BigDecimal.valueOf(cplExcel.m05Amt()), BigDecimal.valueOf(cplExcel.m06Amt())))
-                .trdQuarterBalance(sumOf(BigDecimal.valueOf(cplExcel.m07Amt()), BigDecimal.valueOf(cplExcel.m08Amt()), BigDecimal.valueOf(cplExcel.m09Amt())))
-                .frtQuarterBalance(sumOf(BigDecimal.valueOf(cplExcel.m10Amt()), BigDecimal.valueOf(cplExcel.m11Amt()), BigDecimal.valueOf(cplExcel.m12Amt())))
-                .build();
-    }
-
-    public CashPlanLimit toCpl(BudgetItemExcelRow rowDto) {
+    public CashPlanLimit toEntity(CashPlanLimitData valueObject) {
 
         return CashPlanLimit.builder()
                 .year((long) LocalDateTime.now().getYear())
-                .kfsr(rowDto.kfsr())
-                .kvsr(rowDto.kvsr())
-                .kcsr(rowDto.kcsr())
-                .kvr(rowDto.kvr())
-                .kosgu(rowDto.kosgu())
-                .dopEk(rowDto.dopEk())
-                .dopKr(rowDto.dopKr())
-                .purpose(rowDto.purpose())
-                .dopFk(rowDto.dopFk())
-                .totalLimit(BigDecimal.valueOf(rowDto.assignTotal()))
-                .totalBalance(BigDecimal.valueOf(rowDto.assignTotal()))
-                .federalBudget(BigDecimal.valueOf(rowDto.assignFederal()))
-                .regionalBudget(BigDecimal.valueOf(rowDto.assignRegional()))
-                .totalBalance(BigDecimal.valueOf(rowDto.assignTotal()))
-                .janLimit(BigDecimal.valueOf(rowDto.m01Amt()))
-                .febLimit(BigDecimal.valueOf(rowDto.m02Amt()))
-                .marLimit(BigDecimal.valueOf(rowDto.m03Amt()))
-                .aprLimit(BigDecimal.valueOf(rowDto.m04Amt()))
-                .mayLimit(BigDecimal.valueOf(rowDto.m05Amt()))
-                .junLimit(BigDecimal.valueOf(rowDto.m06Amt()))
-                .julLimit(BigDecimal.valueOf(rowDto.m07Amt()))
-                .augLimit(BigDecimal.valueOf(rowDto.m08Amt()))
-                .sepLimit(BigDecimal.valueOf(rowDto.m09Amt()))
-                .octLimit(BigDecimal.valueOf(rowDto.m10Amt()))
-                .novLimit(BigDecimal.valueOf(rowDto.m11Amt()))
-                .decLimit(BigDecimal.valueOf(rowDto.m12Amt()))
-                .janBalance(BigDecimal.valueOf(rowDto.m01Amt()))
-                .febBalance(BigDecimal.valueOf(rowDto.m02Amt()))
-                .marBalance(BigDecimal.valueOf(rowDto.m03Amt()))
-                .aprBalance(BigDecimal.valueOf(rowDto.m04Amt()))
-                .mayBalance(BigDecimal.valueOf(rowDto.m05Amt()))
-                .junBalance(BigDecimal.valueOf(rowDto.m06Amt()))
-                .julBalance(BigDecimal.valueOf(rowDto.m07Amt()))
-                .augBalance(BigDecimal.valueOf(rowDto.m08Amt()))
-                .sepBalance(BigDecimal.valueOf(rowDto.m09Amt()))
-                .octBalance(BigDecimal.valueOf(rowDto.m10Amt()))
-                .novBalance(BigDecimal.valueOf(rowDto.m11Amt()))
-                .decBalance(BigDecimal.valueOf(rowDto.m12Amt()))
-                .fstQuarterBalance(sumOf(BigDecimal.valueOf(rowDto.m01Amt()), BigDecimal.valueOf(rowDto.m02Amt()), BigDecimal.valueOf(rowDto.m03Amt())))
-                .scdQuarterBalance(sumOf(BigDecimal.valueOf(rowDto.m04Amt()), BigDecimal.valueOf(rowDto.m05Amt()), BigDecimal.valueOf(rowDto.m06Amt())))
-                .trdQuarterBalance(sumOf(BigDecimal.valueOf(rowDto.m07Amt()), BigDecimal.valueOf(rowDto.m08Amt()), BigDecimal.valueOf(rowDto.m09Amt())))
-                .frtQuarterBalance(sumOf(BigDecimal.valueOf(rowDto.m10Amt()), BigDecimal.valueOf(rowDto.m11Amt()), BigDecimal.valueOf(rowDto.m12Amt())))
+                .kfsr(valueObject.kfsr())
+                .kvsr(valueObject.kvsr())
+                .kcsr(valueObject.kcsr())
+                .kvr(valueObject.kvr())
+                .kosgu(valueObject.kosgu())
+                .dopEk(valueObject.dopEk())
+                .dopKr(valueObject.dopKr())
+                .purpose(valueObject.purpose())
+                .dopFk(valueObject.dopFk())
+                .totalLimit(BigDecimal.valueOf(valueObject.assignTotal()))
+                .totalBalance(BigDecimal.valueOf(valueObject.assignTotal()))
+                .federalBudget(BigDecimal.valueOf(valueObject.assignFederal()))
+                .regionalBudget(BigDecimal.valueOf(valueObject.assignRegional()))
+                .totalBalance(BigDecimal.valueOf(valueObject.assignTotal()))
+                .janLimit(BigDecimal.valueOf(valueObject.janLimit()))
+                .febLimit(BigDecimal.valueOf(valueObject.febLimit()))
+                .marLimit(BigDecimal.valueOf(valueObject.marLimit()))
+                .aprLimit(BigDecimal.valueOf(valueObject.aprLimit()))
+                .mayLimit(BigDecimal.valueOf(valueObject.mayLimit()))
+                .junLimit(BigDecimal.valueOf(valueObject.junLimit()))
+                .julLimit(BigDecimal.valueOf(valueObject.julLimit()))
+                .augLimit(BigDecimal.valueOf(valueObject.augLimit()))
+                .sepLimit(BigDecimal.valueOf(valueObject.sepLimit()))
+                .octLimit(BigDecimal.valueOf(valueObject.octLimit()))
+                .novLimit(BigDecimal.valueOf(valueObject.novLimit()))
+                .decLimit(BigDecimal.valueOf(valueObject.decLimit()))
+                .janBalance(BigDecimal.valueOf(valueObject.janLimit()))
+                .febBalance(BigDecimal.valueOf(valueObject.febLimit()))
+                .marBalance(BigDecimal.valueOf(valueObject.marLimit()))
+                .aprBalance(BigDecimal.valueOf(valueObject.aprLimit()))
+                .mayBalance(BigDecimal.valueOf(valueObject.mayLimit()))
+                .junBalance(BigDecimal.valueOf(valueObject.junLimit()))
+                .julBalance(BigDecimal.valueOf(valueObject.julLimit()))
+                .augBalance(BigDecimal.valueOf(valueObject.augLimit()))
+                .sepBalance(BigDecimal.valueOf(valueObject.sepLimit()))
+                .octBalance(BigDecimal.valueOf(valueObject.octLimit()))
+                .novBalance(BigDecimal.valueOf(valueObject.novLimit()))
+                .decBalance(BigDecimal.valueOf(valueObject.decLimit()))
+                .fstQuarterBalance(sumOf(BigDecimal.valueOf(valueObject.janLimit()), BigDecimal.valueOf(valueObject.febLimit()), BigDecimal.valueOf(valueObject.marLimit())))
+                .scdQuarterBalance(sumOf(BigDecimal.valueOf(valueObject.aprLimit()), BigDecimal.valueOf(valueObject.mayLimit()), BigDecimal.valueOf(valueObject.junLimit())))
+                .trdQuarterBalance(sumOf(BigDecimal.valueOf(valueObject.julLimit()), BigDecimal.valueOf(valueObject.augLimit()), BigDecimal.valueOf(valueObject.sepLimit())))
+                .frtQuarterBalance(sumOf(BigDecimal.valueOf(valueObject.octLimit()), BigDecimal.valueOf(valueObject.novLimit()), BigDecimal.valueOf(valueObject.decLimit())))
                 .build();
     }
 
-    public CreateInstanceRequestDto toCreateDto(CashPlanLimit cpl, Map<CodeType, Map<Long, String>> codesMap) {
+    public CreateInstanceRequestDto toCreateDto(CashPlanLimit cpl, Map<Dictionary, Map<String, Long>> codesMap) {
         CreateInstanceRequestDto dto = new CreateInstanceRequestDto(
                 InstanceDto.builder()
                         .templateId(TEMPLATE_ID)
@@ -267,7 +218,7 @@ public class CashPlanLimitMapper {
         return dto;
     }
 
-    private List<Attribute<?>> buildAttributeListToCreate(CashPlanLimit cpl, Map<CodeType, Map<Long, String>> codesMap) {
+    private List<Attribute<?>> buildAttributeListToCreate(CashPlanLimit cpl, Map<Dictionary, Map<String, Long>> codesMap) {
         return List.of(
                 new LongAttribute(YEAR_ATTR, cpl.getYear()),
                 new DoubleAttribute(TOTAL_LIMIT_ATTR, cpl.getTotalLimit()),

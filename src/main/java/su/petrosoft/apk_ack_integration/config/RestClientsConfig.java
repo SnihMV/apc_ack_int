@@ -17,9 +17,10 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.web.client.RestClient;
 import su.petrosoft.apk_ack_integration.client.NiFiRestClient;
-import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
+import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
+import su.petrosoft.apk_ack_integration.client.RestLoggingInterceptor;
 import su.petrosoft.apk_ack_integration.client.SoapLoggingInterceptor;
-import su.petrosoft.apk_ack_integration.client.TechPlicanteSoapClient;
+import su.petrosoft.apk_ack_integration.client.PlicanteSoapClient;
 
 import java.util.List;
 
@@ -50,19 +51,20 @@ public class RestClientsConfig {
     }
 
     @Bean
-    public ApkPlicanteRestClient apkPlicanteRestClient(IntegrationProperties props) {
-        return new ApkPlicanteRestClient(
+    public PlicanteRestClient plicanteRestClient(IntegrationProperties props) {
+        return new PlicanteRestClient(
                 RestClient.builder()
                         .baseUrl(props.apk().baseUrl())
                         .requestInterceptor(new BasicAuthenticationInterceptor(
                                 props.apk().username(),
                                 props.apk().password()))
+                        .requestInterceptor(new RestLoggingInterceptor())
                         .build()
         );
     }
 
     @Bean
-    public TechPlicanteSoapClient techPlicanteSoapClient(
+    public PlicanteSoapClient plicanteSoapClient(
             IntegrationProperties props,
             XmlMapper xmlMapper
     ) {
@@ -70,7 +72,7 @@ public class RestClientsConfig {
 
         MappingJackson2XmlHttpMessageConverter xmlConverter = new MappingJackson2XmlHttpMessageConverter(xmlMapper);
 
-        return new TechPlicanteSoapClient(
+        return new PlicanteSoapClient(
                 RestClient.builder()
                         .requestFactory(
                                 new BufferingClientHttpRequestFactory(
@@ -82,7 +84,7 @@ public class RestClientsConfig {
                         .requestInterceptor(new BasicAuthenticationInterceptor(
                                 props.technolog().username(),
                                 props.technolog().password()))
-                        .requestInterceptor(new SoapLoggingInterceptor())
+                        .requestInterceptor(new SoapLoggingInterceptor(xmlMapper))
                         .build()
         );
     }

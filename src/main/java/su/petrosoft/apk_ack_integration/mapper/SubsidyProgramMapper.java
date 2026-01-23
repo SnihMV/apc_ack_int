@@ -11,17 +11,17 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribu
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.value.LinkedValue;
-import su.petrosoft.apk_ack_integration.model.enums.CodeType;
-import su.petrosoft.apk_ack_integration.model.excel.BudgetItemExcelRow;
-import su.petrosoft.apk_ack_integration.model.excel.CofinancingLevelExcelRow;
+import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
+import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
+import su.petrosoft.apk_ack_integration.model.data.excel.CofinancingLevelExcelRow;
 import su.petrosoft.apk_ack_integration.util.CropProductionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.DOPKR;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.KCSR;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPKR;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KCSR;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractAllData;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractShortForm;
@@ -54,7 +54,7 @@ public class SubsidyProgramMapper {
                 .build();
     }
 
-    public SubsidyProgram toFirstLevelSP(BudgetItemExcelRow dto) {
+    public SubsidyProgram toFirstLevelSP(DescriptedBudgetItemData dto) {
         return SubsidyProgram.builder()
                 .level(1L)
                 .code(dto.code())
@@ -62,7 +62,7 @@ public class SubsidyProgramMapper {
                 .build();
     }
 
-    public SubsidyProgram toSecondLevelSP(BudgetItemExcelRow dto) {
+    public SubsidyProgram toSecondLevelSP(DescriptedBudgetItemData dto) {
         return SubsidyProgram.builder()
                 .level(2L)
                 .title(dto.kcsrTitle())
@@ -70,7 +70,7 @@ public class SubsidyProgramMapper {
                 .build();
     }
 
-    public SubsidyProgram toThirdLevelSP(BudgetItemExcelRow dto) {
+    public SubsidyProgram toThirdLevelSP(DescriptedBudgetItemData dto) {
         return SubsidyProgram.builder()
                 .level(3L)
                 .title(dto.dopKrTitle())
@@ -79,7 +79,7 @@ public class SubsidyProgramMapper {
                 .build();
     }
 
-    public CreateInstanceRequestDto toCreateDto(SubsidyProgram sp, Map<CodeType, Map<Long, String>> codesMap) {
+    public CreateInstanceRequestDto toCreateDto(SubsidyProgram sp, Map<Dictionary, Map<String, Long>> codesMap) {
         List<Attribute<?>> attributes = new ArrayList<>(List.of(
                 new StringAttribute(NAME_ATTR, sp.getTitle()),
                 new StringAttribute(CODE_ATTR, sp.getCode()),
