@@ -61,7 +61,11 @@ public class PlicanteInstanceUtil {
         for (DictionaryExtractable row : dictionaryExtractables) {
             for (Dictionary dictionary : row.dictionaryCodes().keySet()) {
                 String code = row.dictionaryCodes().get(dictionary);
-                dictionaryCodesMap.get(dictionary).computeIfAbsent(code,
+                Map<String, Long> dictionaryMap = dictionaryCodesMap.get(dictionary);
+                if (dictionaryMap == null) {
+                    continue;
+                }
+                dictionaryMap.computeIfAbsent(code,
                         c -> {
                             String description = row.dictionaryDescriptions().get(dictionary);
                             Long createdId = restClient.createInstance(
