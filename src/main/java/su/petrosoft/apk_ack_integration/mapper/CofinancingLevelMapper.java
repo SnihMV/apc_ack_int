@@ -10,17 +10,17 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DoubleAttri
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.enums.CodeType;
+import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.model.enums.FinancingForm;
 import su.petrosoft.apk_ack_integration.model.enums.OwnershipForm;
-import su.petrosoft.apk_ack_integration.model.excel.CofinancingLevelExcelRow;
+import su.petrosoft.apk_ack_integration.model.data.excel.CofinancingLevelExcelRow;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.*;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.*;
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.COEFF_FB_ATTR;
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.COEFF_OB_ATTR;
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.FIN_FORM_ATTR;
@@ -63,7 +63,7 @@ public class CofinancingLevelMapper {
                 .build();
     }
 
-    public CreateInstanceRequestDto toCreatingDto(CofinancingLevel cl, Map<CodeType, Map<Long, String>> codesMap) {
+    public CreateInstanceRequestDto toCreatingDto(CofinancingLevel cl, Map<Dictionary, Map<String, Long>> codesMap) {
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()
                         .templateId(TEMPLATE_ID)

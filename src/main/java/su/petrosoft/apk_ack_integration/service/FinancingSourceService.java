@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedExcelRow;
+import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 
 import java.util.List;
 
@@ -16,7 +16,9 @@ public class FinancingSourceService {
     private final BudgetItemService budgetItemService;
 
     public void createFinancingSources(MultipartFile file) {
-        List<UniBudgetCodedExcelRow> dtoList = excelExtractor.getUniBudgetCodedRows(file);
+//        List<UniBudgetCodedExcelRow> dtoList = excelExtractor.getUniBudgetCodedRows(file);
+        List<DescriptedBudgetItemData> dtoList =
+            excelExtractor.getUniBudget2026ClarifiedRows(file);
 
         if (!dtoList.isEmpty()) {
             budgetItemService.createFinancingSources(dtoList);

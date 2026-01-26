@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import su.petrosoft.apk_ack_integration.client.NiFiRestClient;
-import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
+import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
 import su.petrosoft.apk_ack_integration.exception.InvalidXmlException;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyAmountMapper;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyProgramMapper;
@@ -18,8 +18,7 @@ import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
 import su.petrosoft.apk_ack_integration.model.dto.nifi.GetCompanyByInnResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.xml.CreatingSubsidiesAmountsXml;
-import su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil;
+import su.petrosoft.apk_ack_integration.model.data.xml.CreatingSubsidiesAmountsXml;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +26,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static su.petrosoft.apk_ack_integration.model.xml.CreatingSubsidiesAmountsXml.SubsidyAmountXml;
+import static su.petrosoft.apk_ack_integration.model.data.xml.CreatingSubsidiesAmountsXml.SubsidyAmountXml;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessage.NO_CONTENT;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.*;
@@ -39,7 +38,7 @@ import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.buildGe
 @RequiredArgsConstructor
 public class LoanAgreementService {
     private final XmlExtractor xmlExtractor;
-    private final ApkPlicanteRestClient plicanteRestClient;
+    private final PlicanteRestClient plicanteRestClient;
     private final ApkPlicanteService apkPlicanteService;
     private final NiFiRestClient niFiRestClient;
     private final SubsidyRecipientMapper srMapper;

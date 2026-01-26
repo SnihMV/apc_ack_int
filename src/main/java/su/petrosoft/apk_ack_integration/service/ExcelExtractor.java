@@ -11,11 +11,10 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import su.petrosoft.apk_ack_integration.exception.ExcelFileException;
+import su.petrosoft.apk_ack_integration.model.data.excel.RosterKbkItemExcelRow;
 import su.petrosoft.apk_ack_integration.model.enums.ExcelFileType;
-import su.petrosoft.apk_ack_integration.model.excel.CofinancingLevelExcelRow;
-import su.petrosoft.apk_ack_integration.model.excel.RosterKbkExcelRow;
-import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedExcelRow;
-import su.petrosoft.apk_ack_integration.model.excel.UniBudgetExcelRow;
+import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
+import su.petrosoft.apk_ack_integration.model.data.excel.CofinancingLevelExcelRow;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,6 +24,7 @@ import java.util.function.Function;
 import static su.petrosoft.apk_ack_integration.model.enums.ExcelFileType.COFINANCING_LEVEL;
 import static su.petrosoft.apk_ack_integration.model.enums.ExcelFileType.ROSTER_KBK;
 import static su.petrosoft.apk_ack_integration.model.enums.ExcelFileType.UNI_BUDGET;
+import static su.petrosoft.apk_ack_integration.model.enums.ExcelFileType.UNI_BUDGET_2026_CLARIFIED;
 import static su.petrosoft.apk_ack_integration.model.enums.ExcelFileType.UNI_BUDGET_CODED;
 
 @Slf4j
@@ -34,15 +34,19 @@ public class ExcelExtractor {
 
     private final ExcelRowMapper mapper;
 
-    public List<UniBudgetCodedExcelRow> getUniBudgetCodedRows(MultipartFile file) {
+    public List<DescriptedBudgetItemData> getUniBudget2026ClarifiedRows(MultipartFile file) {
+        return extractTableRows(file, UNI_BUDGET_2026_CLARIFIED, mapper::parseToUniBudget2026ClarifiedRow);
+    }
+
+    public List<DescriptedBudgetItemData> getUniBudgetCodedRows(MultipartFile file) {
         return extractTableRows(file, UNI_BUDGET_CODED, mapper::parseToUniBudgetCodedRow);
     }
 
-    public List<UniBudgetExcelRow> uniBudgetExcelRows(MultipartFile file) {
+    public List<DescriptedBudgetItemData> uniBudgetExcelRows(MultipartFile file) {
         return extractTableRows(file, UNI_BUDGET, mapper::parseToUniBudgetRow);
     }
 
-    public List<RosterKbkExcelRow> getRosterKbkRows(MultipartFile file) {
+    public List<RosterKbkItemExcelRow> getRosterKbkRows(MultipartFile file) {
         return extractTableRows(file, ROSTER_KBK, mapper::parseToRosterKbkRow);
     }
 

@@ -4,16 +4,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import su.petrosoft.apk_ack_integration.client.NiFiRestClient;
-import su.petrosoft.apk_ack_integration.client.ApkPlicanteRestClient;
+import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.AckGetUpdateMessageResponseDto;
-import su.petrosoft.apk_ack_integration.model.enums.CodeType;
-import su.petrosoft.apk_ack_integration.model.xml.CreateCashPlanLimitsXml;
-import su.petrosoft.apk_ack_integration.model.xml.UpdateCashPlanLimitXml;
+import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
+import su.petrosoft.apk_ack_integration.model.data.xml.CreateCashPlanLimitsXml;
+import su.petrosoft.apk_ack_integration.model.data.xml.UpdateCashPlanLimitXml;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -28,7 +28,7 @@ public class XmlDataProcessor {
 
     private final ApkPlicanteService apkService;
     private final NiFiRestClient ackClient;
-    private final ApkPlicanteRestClient apkClient;
+    private final PlicanteRestClient apkClient;
     private final CashPlanLimitMapper mapper;
     private final XmlExtractor xmlExtractor;
 
@@ -40,8 +40,8 @@ public class XmlDataProcessor {
         }
         log.debug("Received request for Cash Plan Limit upsert: {}", upsertingXml);
 
-        Map<CodeType, Map<Long, String>> codesMap = apkService.getCodesMap();
-        CashPlanLimit cplToUpdate = mapper.toCpl(upsertingXml);
+        Map<Dictionary, Map<String, Long>> codesMap = apkService.getCodesMap();
+        CashPlanLimit cplToUpdate = mapper.toEntity(upsertingXml);
 
         Set<CashPlanLimit> allCashPlanLimits = apkService.findCashPlanLimits(getCplCodesOnlyByCurrentYearRequestDto());
         log.debug("Exist [{}] CashPlanLimits for [{}] year in DB", allCashPlanLimits.size(), LocalDateTime.now().getYear());

@@ -1,10 +1,13 @@
 package su.petrosoft.apk_ack_integration.config;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.dataformat.xml.util.DefaultXmlPrettyPrinter;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,8 +27,8 @@ public class JacksonConfig {
     @Bean
     public XmlMapper xmlMapper() {
         XmlMapper xmlMapper = new XmlMapper();
-        xmlMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         xmlMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        xmlMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         xmlMapper.registerModule(new JavaTimeModule());
         return xmlMapper;
     }

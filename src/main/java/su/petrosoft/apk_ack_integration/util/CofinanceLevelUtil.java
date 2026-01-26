@@ -8,13 +8,13 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttri
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.GettingInstanceRepresentationRequestDto;
-import su.petrosoft.apk_ack_integration.model.enums.CodeType;
+import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
 import java.util.List;
 import java.util.Map;
 
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.FINANCING_FORM;
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.OWNERSHIP_FORM;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.FINANCING_FORM;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.OWNERSHIP_FORM;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getCodeId;
 
@@ -37,7 +37,7 @@ public class CofinanceLevelUtil {
                 .build();
     }
 
-    public static CreateInstanceRequestDto getCreatingRequestDto(CofinancingLevel cflToSave, Map<CodeType, Map<Long, String>> codesMap) {
+    public static CreateInstanceRequestDto getCreatingRequestDto(CofinancingLevel cflToSave, Map<Dictionary, Map<String, Long>> codesMap) {
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()
                         .templateId(TEMPLATE_ID)

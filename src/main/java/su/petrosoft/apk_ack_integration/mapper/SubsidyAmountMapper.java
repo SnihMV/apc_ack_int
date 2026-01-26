@@ -8,13 +8,11 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DoubleAttri
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.enums.CodeType;
-import su.petrosoft.apk_ack_integration.util.SubsidyAmountUtil;
 
 import java.util.List;
 import java.util.Map;
 
-import static su.petrosoft.apk_ack_integration.model.xml.CreatingSubsidiesAmountsXml.SubsidyAmountXml;
+import static su.petrosoft.apk_ack_integration.model.data.xml.CreatingSubsidiesAmountsXml.SubsidyAmountXml;
 import static su.petrosoft.apk_ack_integration.util.SubsidyAmountUtil.PROGRAM_ATTR;
 import static su.petrosoft.apk_ack_integration.util.SubsidyAmountUtil.RECIPIENT_ATTR;
 import static su.petrosoft.apk_ack_integration.util.SubsidyAmountUtil.SN_ATTR;

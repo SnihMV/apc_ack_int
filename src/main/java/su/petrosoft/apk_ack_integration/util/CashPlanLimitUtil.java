@@ -5,7 +5,7 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
-import su.petrosoft.apk_ack_integration.model.xml.rpl.PlDirectionLine;
+import su.petrosoft.apk_ack_integration.model.data.xml.rpl.PlDirectionLine;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
