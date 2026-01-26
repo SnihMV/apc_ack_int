@@ -3,25 +3,28 @@ package su.petrosoft.apk_ack_integration.mapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.FinancingSource;
+import su.petrosoft.apk_ack_integration.model.data.BudgetItemData;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
-import su.petrosoft.apk_ack_integration.model.enums.CodeType;
+import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.model.enums.OwnershipForm;
-import su.petrosoft.apk_ack_integration.model.excel.UniBudgetCodedExcelRow;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 
-import static su.petrosoft.apk_ack_integration.model.enums.CodeType.*;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.*;
 import static su.petrosoft.apk_ack_integration.model.enums.OwnershipForm.*;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.*;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractShortForm;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getCodeId;
 
 @Slf4j
@@ -33,28 +36,28 @@ public class FinancingSourceMapper {
         return FinancingSource.builder()
                 .id(dto.id())
                 .version(dto.version())
-                .year((Long) getAttrData(attributes, YEAR_ATTR))
-                .kvsr(getAttrShortForm(attributes, KVSR_ATTR))
-                .kfsr(getAttrShortForm(attributes, KFSR_ATTR))
-                .kcsr(getAttrShortForm(attributes, KCSR_ATTR))
-                .kvr(getAttrShortForm(attributes, KVR_ATTR))
-                .kosgu(getAttrShortForm(attributes, KOSGU_ATTR))
-                .dopFk(getAttrShortForm(attributes, DOPFK_ATTR))
-                .dopEk(getAttrShortForm(attributes, DOPEK_ATTR))
-                .dopKr(getAttrShortForm(attributes, DOPKR_ATTR))
-                .purpose(getAttrShortForm(attributes, PURPOSE_ATTR))
-                .ownershipForm(getAttrShortForm(attributes, OWNERSHIP_FORM_ATTR))
-                .subsidyProgramId((Long) getAttrData(attributes, SUBSIDY_PROGRAM_ATTR))
-                .cashPlanLimitId((Long) getAttrData(attributes, CASH_PLAN_LIMIT_ATTR))
-                .concatenatedKBK((String) getAttrData(attributes, CONCAT_KBK_ATTR))
+                .year(extractData(attributes, YEAR_ATTR))
+                .kvsr(extractShortForm(attributes, KVSR_ATTR))
+                .kfsr(extractShortForm(attributes, KFSR_ATTR))
+                .kcsr(extractShortForm(attributes, KCSR_ATTR))
+                .kvr(extractShortForm(attributes, KVR_ATTR))
+                .kosgu(extractShortForm(attributes, KOSGU_ATTR))
+                .dopFk(extractShortForm(attributes, DOPFK_ATTR))
+                .dopEk(extractShortForm(attributes, DOPEK_ATTR))
+                .dopKr(extractShortForm(attributes, DOPKR_ATTR))
+                .purpose(extractShortForm(attributes, PURPOSE_ATTR))
+                .ownershipForm(extractShortForm(attributes, OWNERSHIP_FORM_ATTR))
+                .subsidyProgramId(extractData(attributes, SUBSIDY_PROGRAM_ATTR))
+                .cashPlanLimitId(extractData(attributes, CASH_PLAN_LIMIT_ATTR))
+                .concatenatedKBK(extractData(attributes, CONCAT_KBK_ATTR))
                 .build();
     }
 
-    public FinancingSource toEntity(UniBudgetCodedExcelRow row) {
+    public FinancingSource toEntity(BudgetItemData row) {
         return FinancingSource.builder()
                 .year((long) LocalDate.now().getYear())
                 .kvsr(row.kvsr())
-                .kfsr(row.section() + row.subsection())
+                .kfsr(row.kfsr())
                 .kcsr(row.kcsr())
                 .kvr(row.kvr())
                 .kosgu(row.kosgu())
@@ -67,7 +70,7 @@ public class FinancingSourceMapper {
                 .build();
     }
 
-    public CreateInstanceRequestDto toCreatingDto(FinancingSource fs, Map<CodeType, Map<Long, String>> codesMap) {
+    public CreateInstanceRequestDto toCreatingDto(FinancingSource fs, Map<Dictionary, Map<String, Long>> codesMap) {
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()
                         .templateId(TEMPLATE_ID)
@@ -91,7 +94,7 @@ public class FinancingSourceMapper {
         );
     }
 
-    private String defineOwnershipForm(UniBudgetCodedExcelRow row) {
+    private String defineOwnershipForm(BudgetItemData row) {
         return Arrays.stream(OwnershipForm.values())
                 .filter(form -> form.getKosgu().equals(row.kosgu()))
                 .findFirst()
@@ -99,33 +102,16 @@ public class FinancingSourceMapper {
                 .orElse(ALL.getName());
     }
 
-    private String concatKBK(UniBudgetCodedExcelRow row) {
+    private String concatKBK(BudgetItemData row) {
         StringBuilder sb = new StringBuilder();
         sb.append(LocalDateTime.now().getYear());
         sb.append("-");
         sb.append(row.kvsr());
-        sb.append(row.section());
-        sb.append(row.subsection());
+        sb.append(row.kfsr());
         sb.append(row.kcsr());
         sb.append(row.kvr());
         sb.append("-");
         sb.append(row.dopKr());
         return sb.toString();
-    }
-
-    private Object getAttrData(List<Attribute<?>> attributes, Long attributeId) {
-        return attributes.stream()
-                .filter(a -> a.id().equals(attributeId))
-                .findFirst()
-                .map(Attribute::getData)
-                .orElse(null);
-    }
-
-    private String getAttrShortForm(List<Attribute<?>> attributes, Long attributeId) {
-        return attributes.stream()
-                .filter(a -> a.id().equals(attributeId))
-                .findFirst()
-                .map(Attribute::getShortForm)
-                .orElse(null);
     }
 }

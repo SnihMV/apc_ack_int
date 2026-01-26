@@ -21,6 +21,8 @@ public class SubsidyRecipient {
     private String ogrn;
     private LocalDate ogrnDate;
     private String kpp;
+    private Long machinePark;
+    private Long appType;
 
     @Override
     public boolean equals(Object o) {
@@ -32,5 +34,13 @@ public class SubsidyRecipient {
     @Override
     public int hashCode() {
         return Objects.hashCode(inn);
+    }
+
+    public boolean deepEquals(SubsidyRecipient that) {
+        return Objects.equals(fullTitle, that.fullTitle) &&
+                Objects.equals(shortTitle, that.shortTitle) &&
+                Objects.equals(ogrn, that.ogrn) &&
+                Objects.equals(ogrnDate, that.ogrnDate) &&
+                Objects.equals(kpp, that.kpp);
     }
 }
