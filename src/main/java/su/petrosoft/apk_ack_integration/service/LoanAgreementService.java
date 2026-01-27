@@ -15,7 +15,7 @@ import su.petrosoft.apk_ack_integration.mapper.SubsidyRecipientMapper;
 import su.petrosoft.apk_ack_integration.model.SubsidyAmount;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
-import su.petrosoft.apk_ack_integration.model.dto.nifi.GetCompanyByInnResponseDto;
+import su.petrosoft.apk_ack_integration.model.dto.nifi.GetDataFromEgrulByInnDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.data.xml.CreatingSubsidiesAmountsXml;
@@ -103,7 +103,7 @@ public class LoanAgreementService {
             Long recipientId = innToIdMap.get(inn);
             if (recipientId == null) {
                 log.info("Recipient with inn = [{}] not existed. Trying to find it in NiFi", inn);
-                GetCompanyByInnResponseDto dto = niFiRestClient.getCompanyByInn(inn);
+                GetDataFromEgrulByInnDto dto = niFiRestClient.getCompanyByInn(inn);
                 log.debug("=== FROM NiFi: [{}]", dto);
                 SubsidyRecipient recipient = srMapper.toEntity(dto);
                 recipient.setInn(inn);

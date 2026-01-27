@@ -12,7 +12,6 @@ import su.petrosoft.apk_ack_integration.service.ScriptService;
 public class ApkAckIntegrationApplication {
 
     public static void main(String[] args) {
-        ConfigurableApplicationContext ctx = SpringApplication.run(ApkAckIntegrationApplication.class, args);
-        ScriptService bean = ctx.getBean(ScriptService.class);
+        SpringApplication.run(ApkAckIntegrationApplication.class, args);
     }
 }

@@ -2,7 +2,7 @@ package su.petrosoft.apk_ack_integration.mapper;
 
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
-import su.petrosoft.apk_ack_integration.model.dto.nifi.GetCompanyByInnResponseDto;
+import su.petrosoft.apk_ack_integration.model.dto.nifi.GetDataFromEgrulByInnDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
@@ -10,8 +10,6 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DateAttribu
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil;
-import su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil;
-import su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil;
 
 import java.util.List;
 
@@ -37,7 +35,7 @@ public class SubsidyRecipientMapper {
 
     }
 
-    public SubsidyRecipient toEntity(GetCompanyByInnResponseDto dto) {
+    public SubsidyRecipient toEntity(GetDataFromEgrulByInnDto dto) {
         return SubsidyRecipient.builder()
                 .ogrn(dto.ogrn())
                 .ogrnDate(dto.ogrnDate())

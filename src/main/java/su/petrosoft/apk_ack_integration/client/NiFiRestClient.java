@@ -2,10 +2,9 @@ package su.petrosoft.apk_ack_integration.client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 import su.petrosoft.apk_ack_integration.config.IntegrationProperties;
-import su.petrosoft.apk_ack_integration.model.dto.nifi.GetCompanyByInnResponseDto;
+import su.petrosoft.apk_ack_integration.model.dto.nifi.GetDataFromEgrulByInnDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.AckGetUpdateMessageResponseDto;
 
 @Slf4j
@@ -22,7 +21,7 @@ public class NiFiRestClient {
                 .body(AckGetUpdateMessageResponseDto.class);
     }
 
-    public GetCompanyByInnResponseDto getCompanyByInn(String inn) {
+    public GetDataFromEgrulByInnDto getCompanyByInn(String inn) {
         try {
             return restClient
                     .get()
@@ -31,13 +30,13 @@ public class NiFiRestClient {
                             .queryParam("inn", inn)
                             .build())
                     .retrieve()
-                    .body(GetCompanyByInnResponseDto.class);
+                    .body(GetDataFromEgrulByInnDto.class);
         } catch (Exception e) {
             log.warn("Exception while getting company data by INN: [{}]. Error message: [{}]", inn, e.getMessage());
             if (e.getCause() != null) {
                 log.warn("Reason: [{}]", e.getCause().getMessage());
             }
-            return GetCompanyByInnResponseDto.builder().build();
+            return GetDataFromEgrulByInnDto.builder().build();
         }
 
     }
