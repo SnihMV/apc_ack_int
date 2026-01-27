@@ -13,9 +13,11 @@ import su.petrosoft.apk_ack_integration.model.data.CashPlanLimitData;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -39,21 +41,21 @@ public class UniBudgetRowService {
     }
 
     public SubsidyProgram getOrCreateSubsidyProgram(
-            DescriptedBudgetItemData dto,
+            DescriptedBudgetItemData row,
             Set<SubsidyProgram> existingSP,
             Map<Dictionary, Map<String, Long>> codesMap) {
 
-        SubsidyProgram fstLevelSp = buildFirstLevelSP(dto, existingSP, codesMap);
-        SubsidyProgram scdLevelSp = buildSecondLevelSP(dto, existingSP, codesMap, fstLevelSp);
-        SubsidyProgram trdLevelSp = buildThirdLevelSP(dto, existingSP, codesMap, scdLevelSp);
-        log.debug("Subsidy Program Map count: {}", existingSP.size());
-        return trdLevelSp;
+        SubsidyProgram fstLevelSp = buildFirstLevelSP(row, existingSP, codesMap);
+        SubsidyProgram scdLevelSp = buildSecondLevelSP(row, existingSP, codesMap, fstLevelSp);
+//        SubsidyProgram trdLevelSp = buildThirdLevelSP(row, existingSP, codesMap, scdLevelSp);
+        log.debug("Subsidy Programs count: {}", existingSP.size());
+        return scdLevelSp;
     }
 
     public FinancingSource buildFinancingSource(
             DescriptedBudgetItemData row,
             Set<CashPlanLimit> existingCashPlanLimits,
-            Set<SubsidyProgram> allValidThirdLvlSPFromDb,
+            Set<SubsidyProgram> allExistingSndLvlSP,
             Map<Dictionary, Map<String, Long>> codesMap) {
         FinancingSource financingSource = fsMapper.toEntity(row);
         existingCashPlanLimits.stream()
@@ -65,13 +67,13 @@ public class UniBudgetRowService {
                             CashPlanLimit savedCpl = saveCashPlanLimit(row, codesMap);
                             financingSource.setCashPlanLimitId(savedCpl.getId());
                         });
-        allValidThirdLvlSPFromDb.stream()
-                .filter(sp -> sp.equals(spMapper.toThirdLevelSP(row)))
+        allExistingSndLvlSP.stream()
+                .filter(sp -> sp.equals(spMapper.toSecondLevelSP(row)))
                 .findFirst()
                 .map(SubsidyProgram::getId)
                 .ifPresentOrElse(financingSource::setSubsidyProgramId,
                         () -> {
-                            SubsidyProgram sp = getOrCreateSubsidyProgram(row, allValidThirdLvlSPFromDb,
+                            SubsidyProgram sp = getOrCreateSubsidyProgram(row, allExistingSndLvlSP,
                                     codesMap);
                             financingSource.setSubsidyProgramId(sp.getId());
                         });
@@ -87,24 +89,24 @@ public class UniBudgetRowService {
     }
 
     private SubsidyProgram buildFirstLevelSP(
-            DescriptedBudgetItemData dto,
-            Set<SubsidyProgram> existingSP,
+            DescriptedBudgetItemData row,
+            Set<SubsidyProgram> existingSp,
             Map<Dictionary, Map<String, Long>> codesMap
     ) {
-        SubsidyProgram fstLvlSp = spMapper.toFirstLevelSP(dto);
-        Long id = obtainSubsidyProgramId(fstLvlSp, existingSP, codesMap);
+        SubsidyProgram fstLvlSp = spMapper.toFirstLevelSP(row);
+        Long id = obtainSubsidyProgramId(fstLvlSp, existingSp, codesMap);
         fstLvlSp.setId(id);
         log.debug("First level Subsidy Program from excel row: [{}]", fstLvlSp);
         return fstLvlSp;
     }
 
     private SubsidyProgram buildSecondLevelSP(
-            DescriptedBudgetItemData dto,
+            DescriptedBudgetItemData row,
             Set<SubsidyProgram> existingSP,
             Map<Dictionary, Map<String, Long>> codesMap,
             SubsidyProgram fstLevelSp) {
 
-        SubsidyProgram scdLvlSP = spMapper.toSecondLevelSP(dto);
+        SubsidyProgram scdLvlSP = spMapper.toSecondLevelSP(row);
         scdLvlSP.setParentId(fstLevelSp.getId());
         Long id = obtainSubsidyProgramId(scdLvlSP, existingSP, codesMap);
         scdLvlSP.setId(id);
@@ -112,27 +114,26 @@ public class UniBudgetRowService {
         return scdLvlSP;
     }
 
-    private SubsidyProgram buildThirdLevelSP(
-            DescriptedBudgetItemData dto,
-            Set<SubsidyProgram> existingSP,
-            Map<Dictionary, Map<String, Long>> codesMap,
-            SubsidyProgram scdLevelSp) {
-
-        SubsidyProgram trdLvlSP = spMapper.toThirdLevelSP(dto);
-        trdLvlSP.setParentId(scdLevelSp.getId());
-        Long id = obtainSubsidyProgramId(trdLvlSP, existingSP, codesMap);
-        trdLvlSP.setId(id);
-        log.debug("Third level Subsidy Program from excel row: [{}]", trdLvlSP);
-        return trdLvlSP;
-    }
+//    private SubsidyProgram buildThirdLevelSP(
+//            DescriptedBudgetItemData dto,
+//            Set<SubsidyProgram> existingSP,
+//            Map<Dictionary, Map<String, Long>> codesMap,
+//            SubsidyProgram scdLevelSp) {
+//
+//        SubsidyProgram trdLvlSP = spMapper.toThirdLevelSP(dto);
+//        trdLvlSP.setParentId(scdLevelSp.getId());
+//        Long id = obtainSubsidyProgramId(trdLvlSP, existingSP, codesMap);
+//        trdLvlSP.setId(id);
+//        log.debug("Third level Subsidy Program from excel row: [{}]", trdLvlSP);
+//        return trdLvlSP;
+//    }
 
     private Long obtainSubsidyProgramId(
             SubsidyProgram sp,
-            Set<SubsidyProgram> existingSP,
+            Set<SubsidyProgram> existingLevelSp,
             Map<Dictionary, Map<String, Long>> codesMap
     ) {
-
-        return existingSP.stream()
+        return existingLevelSp.stream()
                 .filter(existing -> existing.equals(sp))
                 .findFirst()
                 .map(SubsidyProgram::getId)
@@ -140,7 +141,7 @@ public class UniBudgetRowService {
                     log.debug("No such Subsidy Program among existing. Trying to save it");
                     SubsidyProgram saved = apkService.createSubsidyProgram(sp, codesMap);
                     log.debug("Subsidy Program successfully saved with id: [{}]", saved.getId());
-                    existingSP.add(saved);
+                    existingLevelSp.add(saved);
                     return saved.getId();
                 });
     }

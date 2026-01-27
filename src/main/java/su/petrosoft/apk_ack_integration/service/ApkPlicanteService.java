@@ -62,10 +62,10 @@ public class ApkPlicanteService {
     @SneakyThrows
     public Set<SubsidyProgram> findSubsidyPrograms(GetAttributesListRequestDto requestDto) {
         String ss = objectMapper.writeValueAsString(requestDto);
-        log.debug("SPro Creating JSON [{}]", ss);
+        log.debug("Subsidy_Program Getting Request JSON [{}]", ss);
         List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(requestDto);
         String s = objectMapper.writeValueAsString(dtoList);
-        log.debug("SPro Created JSON [{}]", s);
+        log.debug("Subsidy_Program Getting Response JSON [{}]", s);
         return dtoList.stream()
                 .map(spMapper::toEntity)
                 .collect(toSet());
@@ -106,10 +106,10 @@ public class ApkPlicanteService {
     public FinancingSource createFinancingSource(FinancingSource financingSource, Map<Dictionary, Map<String, Long>> codesMap) {
         CreateInstanceRequestDto createDto = fsMapper.toCreatingDto(financingSource, codesMap);
         String ss = objectMapper.writeValueAsString(createDto);
-        log.debug("Financing Source Creating JSON [{}]", ss);
+        log.debug("Financing_Source Creating Request body [{}]", ss);
         InstanceDto created = apkRestClient.createInstance(createDto);
         String s = objectMapper.writeValueAsString(created);
-        log.debug("Financing Source Created JSON [{}]", s);
+        log.debug("Financing_Source Creating Response body [{}]", s);
         return fsMapper.toEntity(created);
     }
 

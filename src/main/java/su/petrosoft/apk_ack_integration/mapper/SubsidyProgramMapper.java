@@ -45,7 +45,7 @@ public class SubsidyProgramMapper {
                 .id(dto.id())
                 .version(dto.version())
                 .title(extractData(attributes, NAME_ATTR))
-                .code(extractData(attributes, CODE_ATTR))
+//                .code(extractData(attributes, CODE_ATTR))
                 .level(extractData(attributes, LEVEL_ATTR))
                 .parentId(extractData(attributes, PARENT_ATTR))
                 .kcsr(extractShortForm(attributes, KCSR_ATTR))
@@ -54,25 +54,25 @@ public class SubsidyProgramMapper {
                 .build();
     }
 
+//    public SubsidyProgram toFirstLevelSP(DescriptedBudgetItemData dto) {
+//        return SubsidyProgram.builder()
+//                .level(1L)
+//                .code(dto.code())
+//                .title("Направление № " + dto.code())
+//                .build();
+//    }
+
     public SubsidyProgram toFirstLevelSP(DescriptedBudgetItemData dto) {
         return SubsidyProgram.builder()
                 .level(1L)
-                .code(dto.code())
-                .title("Направление № " + dto.code())
+                .title(dto.kcsrTitle())
+                .kcsr(dto.kcsr())
                 .build();
     }
 
     public SubsidyProgram toSecondLevelSP(DescriptedBudgetItemData dto) {
         return SubsidyProgram.builder()
                 .level(2L)
-                .title(dto.kcsrTitle())
-                .kcsr(dto.kcsr())
-                .build();
-    }
-
-    public SubsidyProgram toThirdLevelSP(DescriptedBudgetItemData dto) {
-        return SubsidyProgram.builder()
-                .level(3L)
                 .title(dto.dopKrTitle())
                 .kcsr(dto.kcsr())
                 .dopKr(dto.dopKr())
@@ -82,13 +82,11 @@ public class SubsidyProgramMapper {
     public CreateInstanceRequestDto toCreateDto(SubsidyProgram sp, Map<Dictionary, Map<String, Long>> codesMap) {
         List<Attribute<?>> attributes = new ArrayList<>(List.of(
                 new StringAttribute(NAME_ATTR, sp.getTitle()),
-                new StringAttribute(CODE_ATTR, sp.getCode()),
+//                new StringAttribute(CODE_ATTR, sp.getCode()),
                 new LongAttribute(LEVEL_ATTR, sp.getLevel()),
-                new LinkedAttribute(PARENT_ATTR, sp.getParentId())));
-        if (sp.getLevel() != 1) {
-            attributes.add(new LinkedAttribute(KCSR_ATTR, getCodeId(codesMap, KCSR, sp.getKcsr())));
-        }
-        if (sp.getLevel() == 3) {
+                new LinkedAttribute(PARENT_ATTR, sp.getParentId()),
+                new LinkedAttribute(KCSR_ATTR, getCodeId(codesMap, KCSR, sp.getKcsr()))));
+        if (sp.getLevel() == 2) {
             attributes.add(new LinkedAttribute(DOPKR_ATTR, getCodeId(codesMap, DOPKR, sp.getDopKr())));
         }
         return new CreateInstanceRequestDto(
@@ -101,7 +99,7 @@ public class SubsidyProgramMapper {
 
     public SubsidyProgram toEntity(CofinancingLevelExcelRow row) {
         return SubsidyProgram.builder()
-                .level(3L)
+                .level(2L)
                 .kcsr(row.kcsr())
                 .dopKr(row.dopKr())
                 .build();

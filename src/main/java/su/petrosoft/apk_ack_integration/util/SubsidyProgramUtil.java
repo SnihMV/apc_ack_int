@@ -34,17 +34,17 @@ public class SubsidyProgramUtil {
         if (lvl == null) {
             return false;
         }
+//        if (lvl == 1) {
+//            return sp.getCode() != null
+//                    && sp.getKcsr() == null
+//                    && sp.getDopKr() == null
+//                    && sp.getParentId() == null;
+//        }
         if (lvl == 1) {
-            return sp.getCode() != null
-                    && sp.getKcsr() == null
-                    && sp.getDopKr() == null
-                    && sp.getParentId() == null;
-        }
-        if (lvl == 2) {
             return sp.getKcsr() != null &&
                     sp.getDopKr() == null;
         }
-        if (lvl == 3) {
+        if (lvl == 2) {
             return sp.getKcsr() != null &&
                     sp.getDopKr() != null;
         }
@@ -55,6 +55,22 @@ public class SubsidyProgramUtil {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(DETAILED_FORM_VIEW)
+                .build();
+    }
+
+    public static GetAttributesListRequestDto getSecondLevelSpRequestDto() {
+        return GetAttributesListRequestDto.builder()
+                .templateId(TEMPLATE_ID)
+                .viewType(DETAILED_FORM_VIEW)
+                .attributes(List.of(
+                        new RequestedAttribute(NAME_ATTR),
+                        new RequestedAttribute(LEVEL_ATTR),
+                        new RequestedAttribute(PARENT_ATTR),
+                        new RequestedAttribute(KCSR_ATTR),
+                        new RequestedAttribute(DOPKR_ATTR)
+                ))
+                .filter(new Filter(List.of(
+                        new LongFilterAttribute(LEVEL_ATTR, 2))))
                 .build();
     }
 
