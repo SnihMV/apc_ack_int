@@ -1,17 +1,28 @@
 package su.petrosoft.apk_ack_integration.util;
 
+import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
+import su.petrosoft.apk_ack_integration.model.dto.nifi.GetDataFromEgrulByInnDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DateAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LinkedFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.StringFilterAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.value.Value;
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static su.petrosoft.apk_ack_integration.model.enums.SqlOperation.*;
 import static su.petrosoft.apk_ack_integration.model.enums.ViewType.*;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
 
 public class SubsidyRecipientUtil {
     public static final long TEMPLATE_ID = 3318;
@@ -65,5 +76,35 @@ return GetAttributesListRequestDto.builder()
                         new LinkedFilterAttribute(APP_TYPE_ATTR, appTypeId)
                 )))
                 .build();
+    }
+
+    public static UpdateInstanceRequestDto requestDtoForUpdateRecipientData(SubsidyRecipient recipient, GetDataFromEgrulByInnDto egrulData) {
+        return new UpdateInstanceRequestDto(
+                InstanceDto.builder()
+                        .id(recipient.getId())
+                        .version(recipient.getVersion())
+                        .attributes(defineUpdatedAttributes(recipient, egrulData))
+                        .build()
+        );
+    }
+
+    public static List<Attribute<?>> defineUpdatedAttributes(SubsidyRecipient recipient, GetDataFromEgrulByInnDto egrulData) {
+        List<Attribute<?>> attributes = new ArrayList<>();
+        if (!Objects.equals(recipient.getFullTitle(), egrulData.fullTitle())) {
+            attributes.add(new StringAttribute(FULL_TITLE_ATTR, egrulData.fullTitle()));
+        }
+        if (!Objects.equals(recipient.getShortTitle(), egrulData.shortTitle())) {
+            attributes.add(new StringAttribute(SHORT_TITLE_ATTR, egrulData.shortTitle()));
+        }
+        if (!Objects.equals(recipient.getOgrn(), egrulData.ogrn())) {
+            attributes.add(new StringAttribute(OGRN_ATTR, egrulData.ogrn()));
+        }
+        if (!Objects.equals(recipient.getOgrnDate(), egrulData.ogrnDate())) {
+            attributes.add(new DateAttribute(OGRN_DATE_ATTR, toEpochMilli(egrulData.ogrnDate())));
+        }
+        if (!Objects.equals(recipient.getKpp(), egrulData.kpp())) {
+            attributes.add(new StringAttribute(KPP_ATTR, egrulData.kpp()));
+        }
+        return attributes;
     }
 }

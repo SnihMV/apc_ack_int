@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Builder
-public record GetCompanyByInnResponseDto(
+public record GetDataFromEgrulByInnDto(
         @JsonProperty("ogrn")
         String ogrn,
 

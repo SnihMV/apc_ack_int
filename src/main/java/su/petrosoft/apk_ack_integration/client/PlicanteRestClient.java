@@ -69,7 +69,6 @@ public class PlicanteRestClient {
     }
 
     public InstanceDto updateInstance(UpdateInstanceRequestDto dto) {
-        log.debug("Updating instance [{}]", dto);
         try {
             return restClient
                     .post()
