@@ -141,6 +141,10 @@ public class ExcelExtractor {
         return true;
     }
 
+    public void budgetItemDictionaries(MultipartFile file) {
+
+    }
+
     private record TableBounds(
             int firstRowIndex,
             int lastRowIndex
