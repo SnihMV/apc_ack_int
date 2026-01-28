@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 import su.petrosoft.apk_ack_integration.model.data.excel.CofinancingLevelExcelRow;
 import su.petrosoft.apk_ack_integration.model.data.excel.RosterKbkItemExcelRow;
+import su.petrosoft.apk_ack_integration.model.data.excel.UniBudget20262801ItemExcelRow;
 import su.petrosoft.apk_ack_integration.model.data.excel.UniBudget2026ClarifiedItemExcelRow;
 import su.petrosoft.apk_ack_integration.model.data.excel.UniBudgetCodedItemExcelRow;
 import su.petrosoft.apk_ack_integration.model.data.excel.UniBudgetItemExcelRow;
@@ -188,6 +189,38 @@ public class ExcelRowMapper {
                 .kosgu(row.getCell(10).getStringCellValue())
                 .obCoeff(row.getCell(22).getNumericCellValue())
                 .fbCoeff(row.getCell(23).getNumericCellValue())
+                .build();
+    }
+
+    public DescriptedBudgetItemData parseToUniBudget20262801Row(Row row) {
+        return UniBudget20262801ItemExcelRow.builder()
+                .kvsr(row.getCell(0).getStringCellValue())
+                .kfsr(row.getCell(1).getStringCellValue())
+                .kcsr(row.getCell(2).getStringCellValue())
+                .kcsrTitle(row.getCell(3).getStringCellValue())
+                .dopKr(row.getCell(4).getStringCellValue())
+                .dopKrTitle(row.getCell(5).getStringCellValue())
+                .kvr(row.getCell(6).getStringCellValue())
+                .dopFk(row.getCell(7).getStringCellValue())
+                .dopEk(row.getCell(8).getStringCellValue())
+                .purpose(row.getCell(9).getStringCellValue())
+                .kvfo(row.getCell(10).getStringCellValue())
+                .kosgu(row.getCell(11).getStringCellValue())
+                .assignTotal(row.getCell(12).getNumericCellValue())
+                .assignFederal(row.getCell(13).getNumericCellValue())
+                .assignRegional(row.getCell(14).getNumericCellValue())
+                .janLimit(row.getCell(15).getNumericCellValue())
+                .febLimit(row.getCell(16).getNumericCellValue())
+                .marLimit(row.getCell(17).getNumericCellValue())
+                .aprLimit(row.getCell(18).getNumericCellValue())
+                .mayLimit(row.getCell(19).getNumericCellValue())
+                .junLimit(row.getCell(20).getNumericCellValue())
+                .julLimit(row.getCell(21).getNumericCellValue())
+                .augLimit(row.getCell(22).getNumericCellValue())
+                .sepLimit(row.getCell(23).getNumericCellValue())
+                .octLimit(row.getCell(24).getNumericCellValue())
+                .novLimit(row.getCell(25).getNumericCellValue())
+                .decLimit(row.getCell(26).getNumericCellValue())
                 .build();
     }
 }

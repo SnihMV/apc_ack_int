@@ -67,7 +67,8 @@ public class CashPlanLimitService {
 
     public CreateInstancesFromFileResponseDto createFromUniBudgetExcel(MultipartFile file) {
 //        List<BaseUniBudgetExcelRow> dtoList = excelExtractor.getUniBudgetCodedRows(file);
-        List<DescriptedBudgetItemData> dtoList = excelExtractor.getUniBudget2026ClarifiedRows(file);
+//        List<DescriptedBudgetItemData> dtoList = excelExtractor.getUniBudget2026ClarifiedRows(file);
+        List<DescriptedBudgetItemData> dtoList = excelExtractor.getUniBudget20262801Rows(file);
         Set<CashPlanLimit> existingCPL = getLimitsForCurrentYear();
         List<CashPlanLimit> fromExcelCPL = uniBudgetRowService.getLimitsFromExcel(dtoList);
         fromExcelCPL.removeAll(existingCPL);

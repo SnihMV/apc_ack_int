@@ -38,7 +38,8 @@ public class SubsidyProgramController {
                     content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
             @RequestParam("file") MultipartFile file) {
 //        List<BaseUniBudgetExcelRow> uniBudgetRows = excelExtractor.getUniBudgetCodedRows(file);
-        List<DescriptedBudgetItemData> uniBudgetRows = excelExtractor.getUniBudget2026ClarifiedRows(file);
+//        List<DescriptedBudgetItemData> uniBudgetRows = excelExtractor.getUniBudget2026ClarifiedRows(file);
+        List<DescriptedBudgetItemData> uniBudgetRows = excelExtractor.getUniBudget20262801Rows(file);
         service.createSubsidyProgramsTree(uniBudgetRows);
     }
 }

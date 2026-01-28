@@ -24,6 +24,7 @@ import java.util.function.Function;
 import static su.petrosoft.apk_ack_integration.model.enums.ExcelFileType.COFINANCING_LEVEL;
 import static su.petrosoft.apk_ack_integration.model.enums.ExcelFileType.ROSTER_KBK;
 import static su.petrosoft.apk_ack_integration.model.enums.ExcelFileType.UNI_BUDGET;
+import static su.petrosoft.apk_ack_integration.model.enums.ExcelFileType.UNI_BUDGET_20262801;
 import static su.petrosoft.apk_ack_integration.model.enums.ExcelFileType.UNI_BUDGET_2026_CLARIFIED;
 import static su.petrosoft.apk_ack_integration.model.enums.ExcelFileType.UNI_BUDGET_CODED;
 
@@ -52,6 +53,10 @@ public class ExcelExtractor {
 
     public List<CofinancingLevelExcelRow> getCofinancingLevelRows(MultipartFile file) {
         return extractTableRows(file, COFINANCING_LEVEL, mapper::toCofinancingLevelRow);
+    }
+
+    public List<DescriptedBudgetItemData> getUniBudget20262801Rows(MultipartFile file) {
+        return extractTableRows(file, UNI_BUDGET_20262801, mapper::parseToUniBudget20262801Row);
     }
 
     private <T> List<T> extractTableRows(MultipartFile excelFile, ExcelFileType type, Function<Row, T> rowMapper) {
