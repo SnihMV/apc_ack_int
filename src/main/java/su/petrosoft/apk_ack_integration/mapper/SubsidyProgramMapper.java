@@ -3,6 +3,7 @@ package su.petrosoft.apk_ack_integration.mapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
+import su.petrosoft.apk_ack_integration.model.data.CofinancingLevelData;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
@@ -13,7 +14,6 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.value.LinkedValue;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
-import su.petrosoft.apk_ack_integration.model.data.excel.CofinancingLevelExcelRow;
 import su.petrosoft.apk_ack_integration.util.CropProductionUtil;
 
 import java.util.ArrayList;
@@ -25,8 +25,7 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KCSR;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractAllData;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractShortForm;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getCodeId;
-import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.CODE_ATTR;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getDictionaryIdByCode;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.COFIN_LVL_ATTR;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.DOPKR_ATTR;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.KCSR_ATTR;
@@ -85,9 +84,9 @@ public class SubsidyProgramMapper {
 //                new StringAttribute(CODE_ATTR, sp.getCode()),
                 new LongAttribute(LEVEL_ATTR, sp.getLevel()),
                 new LinkedAttribute(PARENT_ATTR, sp.getParentId()),
-                new LinkedAttribute(KCSR_ATTR, getCodeId(codesMap, KCSR, sp.getKcsr()))));
+                new LinkedAttribute(KCSR_ATTR, getDictionaryIdByCode(codesMap, KCSR, sp.getKcsr()))));
         if (sp.getLevel() == 2) {
-            attributes.add(new LinkedAttribute(DOPKR_ATTR, getCodeId(codesMap, DOPKR, sp.getDopKr())));
+            attributes.add(new LinkedAttribute(DOPKR_ATTR, getDictionaryIdByCode(codesMap, DOPKR, sp.getDopKr())));
         }
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()
@@ -97,7 +96,7 @@ public class SubsidyProgramMapper {
         );
     }
 
-    public SubsidyProgram toEntity(CofinancingLevelExcelRow row) {
+    public SubsidyProgram toEntity(CofinancingLevelData row) {
         return SubsidyProgram.builder()
                 .level(2L)
                 .kcsr(row.kcsr())

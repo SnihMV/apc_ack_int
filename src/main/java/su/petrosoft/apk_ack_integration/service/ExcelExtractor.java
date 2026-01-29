@@ -11,6 +11,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import su.petrosoft.apk_ack_integration.exception.ExcelFileException;
+import su.petrosoft.apk_ack_integration.model.data.excel.CofinancingLevel2026ExcelRow;
 import su.petrosoft.apk_ack_integration.model.data.excel.RosterKbkItemExcelRow;
 import su.petrosoft.apk_ack_integration.model.enums.ExcelFileType;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import static su.petrosoft.apk_ack_integration.model.enums.ExcelFileType.COFINANCING_LEVEL;
+import static su.petrosoft.apk_ack_integration.model.enums.ExcelFileType.COFINANCING_LEVEL_2026;
 import static su.petrosoft.apk_ack_integration.model.enums.ExcelFileType.ROSTER_KBK;
 import static su.petrosoft.apk_ack_integration.model.enums.ExcelFileType.UNI_BUDGET;
 import static su.petrosoft.apk_ack_integration.model.enums.ExcelFileType.UNI_BUDGET_20262801;
@@ -51,12 +53,16 @@ public class ExcelExtractor {
         return extractTableRows(file, ROSTER_KBK, mapper::parseToRosterKbkRow);
     }
 
+    public List<DescriptedBudgetItemData> getUniBudget20262801Rows(MultipartFile file) {
+        return extractTableRows(file, UNI_BUDGET_20262801, mapper::parseToUniBudget20262801Row);
+    }
+
     public List<CofinancingLevelExcelRow> getCofinancingLevelRows(MultipartFile file) {
         return extractTableRows(file, COFINANCING_LEVEL, mapper::toCofinancingLevelRow);
     }
 
-    public List<DescriptedBudgetItemData> getUniBudget20262801Rows(MultipartFile file) {
-        return extractTableRows(file, UNI_BUDGET_20262801, mapper::parseToUniBudget20262801Row);
+    public List<CofinancingLevel2026ExcelRow> getCofinancingLevel2026Rows(MultipartFile file) {
+        return extractTableRows(file, COFINANCING_LEVEL_2026, mapper::toCofinancingLevel2026Row);
     }
 
     private <T> List<T> extractTableRows(MultipartFile excelFile, ExcelFileType type, Function<Row, T> rowMapper) {

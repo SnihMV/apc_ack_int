@@ -46,7 +46,7 @@ public class PlicanteInstanceUtil {
                         .attributes(List.of(
                                 new StringAttribute(type.getCodeAttrId(), code),
                                 new StringAttribute(type.getDescriptionAttrId(), description)))
-                .build());
+                        .build());
     }
 
     public static void updateCodesMap(
@@ -78,7 +78,7 @@ public class PlicanteInstanceUtil {
         }
     }
 
-    public static Long getCodeId(Map<Dictionary, Map<String, Long>> allCodes, Dictionary type, String code) {
+    public static Long getDictionaryIdByCode(Map<Dictionary, Map<String, Long>> allCodes, Dictionary type, String code) {
         if (code == null || code.isEmpty()) {
             return type.getDefaultValue();
         }
@@ -86,7 +86,15 @@ public class PlicanteInstanceUtil {
                 .filter(entry -> entry.getKey().equalsIgnoreCase(code))
                 .findFirst()
                 .map(Map.Entry::getValue)
-                .orElseThrow(()->new RuntimeException("Not found code [%s] for type [%s]".formatted(code, type)));
+                .orElseThrow(() -> new RuntimeException("Not found code [%s] for type [%s]".formatted(code, type)));
+    }
+
+    public static String getDictionaryCodeById(Map<Dictionary, Map<String, Long>> allCodes, Dictionary type, long id) {
+        return allCodes.get(type).entrySet().stream()
+                .filter(entry -> entry.getValue() == id)
+                .findFirst()
+                .map(Map.Entry::getKey)
+                .orElseThrow(() -> new RuntimeException("Not found code for dictionary [%s] with id [%d]".formatted(type, type)));
     }
 
     public static Long toEpochMilli(LocalDate day) {

@@ -91,7 +91,7 @@ public class SubsidyProgramUtil {
                 .build();
     }
 
-    public static GetAttributesListRequestDto buildGettingSubsidyProgramsForCreationCofinancingLevelsRequestDto() {
+    public static GetAttributesListRequestDto requestDtoToFindSubsidyProgramsForCreationCofinancingLevels() {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(DETAILED_FORM_VIEW)
@@ -101,7 +101,7 @@ public class SubsidyProgramUtil {
                         new RequestedAttribute(DOPKR_ATTR),
                         new RequestedAttribute(COFIN_LVL_ATTR)))
                 .filter(new Filter(List.of(
-                        new LongFilterAttribute(LEVEL_ATTR, 3))))
+                        new LongFilterAttribute(LEVEL_ATTR, 2))))
                 .build();
     }
 
