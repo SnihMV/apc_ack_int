@@ -3,6 +3,7 @@ package su.petrosoft.apk_ack_integration.mapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.CofinancingLevel;
+import su.petrosoft.apk_ack_integration.model.data.CofinancingLevelData;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DateAttribute;
@@ -13,7 +14,6 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.model.enums.FinancingForm;
 import su.petrosoft.apk_ack_integration.model.enums.OwnershipForm;
-import su.petrosoft.apk_ack_integration.model.data.excel.CofinancingLevelExcelRow;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -29,15 +29,15 @@ import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.START_DAT
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.TEMPLATE_ID;
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.YEAR_ATTR;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractShortForm;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getCodeId;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getDictionaryCodeById;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getDictionaryIdByCode;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.toEpochMilli;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.toLocalDate;
 
 @Slf4j
 @Component
 public class CofinancingLevelMapper {
-    public CofinancingLevel toEntity(CofinancingLevelExcelRow row) {
+    public CofinancingLevel toEntity(CofinancingLevelData row) {
         BigDecimal obCoeff = BigDecimal.valueOf(row.obCoeff());
         BigDecimal fbCoeff = BigDecimal.valueOf(row.fbCoeff());
         return CofinancingLevel.builder()
@@ -45,13 +45,17 @@ public class CofinancingLevelMapper {
                 .startDate(LocalDate.of(LocalDate.now().getYear(), 1, 1))
                 .obCoeff(obCoeff)
                 .fbCoeff(fbCoeff)
-                .financingForm(FinancingForm.define(obCoeff, fbCoeff).getName())
-                .ownershipForm(OwnershipForm.define(row.kosgu()).getName())
+                .financingForm(FinancingForm.define(obCoeff, fbCoeff))
+                .ownershipForm(OwnershipForm.defineByKosgu(row.kosgu()))
                 .build();
     }
 
-    public CofinancingLevel toEntity(InstanceDto created) {
+    public CofinancingLevel toEntity(InstanceDto created, Map<Dictionary, Map<String, Long>> codesMap) {
+
         List<Attribute<?>> attributes = created.attributes();
+        FinancingForm financingForm = FinancingForm.define(getDictionaryCodeById(codesMap, FINANCING_FORM, extractData(attributes, FIN_FORM_ATTR)));
+        OwnershipForm ownershipForm = OwnershipForm.defineByCode(getDictionaryCodeById(codesMap, OWNERSHIP_FORM, extractData(attributes, OWN_FORM_ATTR)));
+
         return CofinancingLevel.builder()
                 .id(created.id())
                 .version(created.version())
@@ -59,11 +63,31 @@ public class CofinancingLevelMapper {
                 .startDate(toLocalDate(extractData(attributes, START_DATE_ATTR)))
                 .obCoeff(extractData(attributes, COEFF_OB_ATTR))
                 .fbCoeff(extractData(attributes, COEFF_FB_ATTR))
-                .financingForm(extractShortForm(attributes, FIN_FORM_ATTR))
+                .financingForm(financingForm)
+                .ownershipForm(ownershipForm)
+                .build();
+    }
+
+    public CofinancingLevel toEntity(List<Attribute<?>> attributes, Map<Dictionary, Map<String, Long>> codesMap) {
+
+        FinancingForm financingForm = FinancingForm.define(getDictionaryCodeById(codesMap, FINANCING_FORM, extractData(attributes, FIN_FORM_ATTR)));
+        OwnershipForm ownershipForm = OwnershipForm.defineByCode(getDictionaryCodeById(codesMap, OWNERSHIP_FORM, extractData(attributes, OWN_FORM_ATTR)));
+
+        return CofinancingLevel.builder()
+                .year(extractData(attributes, YEAR_ATTR))
+                .startDate(toLocalDate(extractData(attributes, START_DATE_ATTR)))
+                .obCoeff(extractData(attributes, COEFF_OB_ATTR))
+                .fbCoeff(extractData(attributes, COEFF_FB_ATTR))
+                .financingForm(financingForm)
+                .ownershipForm(ownershipForm)
                 .build();
     }
 
     public CreateInstanceRequestDto toCreatingDto(CofinancingLevel cl, Map<Dictionary, Map<String, Long>> codesMap) {
+
+        Long ownFormId = getDictionaryIdByCode(codesMap, OWNERSHIP_FORM, cl.getOwnershipForm().getCode());
+        Long finFormId = getDictionaryIdByCode(codesMap, FINANCING_FORM, cl.getFinancingForm().getCode());
+
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()
                         .templateId(TEMPLATE_ID)
@@ -72,8 +96,8 @@ public class CofinancingLevelMapper {
                                 new DateAttribute(START_DATE_ATTR, toEpochMilli(cl.getStartDate())),
                                 new DoubleAttribute(COEFF_FB_ATTR, cl.getFbCoeff()),
                                 new DoubleAttribute(COEFF_OB_ATTR, cl.getObCoeff()),
-                                new LinkedAttribute(OWN_FORM_ATTR, getCodeId(codesMap, OWNERSHIP_FORM, cl.getOwnershipForm())),
-                                new LinkedAttribute(FIN_FORM_ATTR, getCodeId(codesMap, FINANCING_FORM, cl.getFinancingForm()))))
+                                new LinkedAttribute(OWN_FORM_ATTR, ownFormId),
+                                new LinkedAttribute(FIN_FORM_ATTR, finFormId)))
                         .build());
     }
 

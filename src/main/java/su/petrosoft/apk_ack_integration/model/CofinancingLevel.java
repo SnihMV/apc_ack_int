@@ -22,8 +22,8 @@ public class CofinancingLevel {
     private LocalDate startDate;
     private BigDecimal obCoeff;
     private BigDecimal fbCoeff;
-    private String financingForm;
-    private String ownershipForm;
+    private FinancingForm financingForm;
+    private OwnershipForm ownershipForm;
 
     @Override
     public boolean equals(Object o) {

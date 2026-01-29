@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
+import su.petrosoft.apk_ack_integration.model.data.excel.CofinancingLevel2026ExcelRow;
 import su.petrosoft.apk_ack_integration.model.data.excel.CofinancingLevelExcelRow;
 import su.petrosoft.apk_ack_integration.model.data.excel.RosterKbkItemExcelRow;
 import su.petrosoft.apk_ack_integration.model.data.excel.UniBudget20262801ItemExcelRow;
@@ -189,6 +190,16 @@ public class ExcelRowMapper {
                 .kosgu(row.getCell(10).getStringCellValue())
                 .obCoeff(row.getCell(22).getNumericCellValue())
                 .fbCoeff(row.getCell(23).getNumericCellValue())
+                .build();
+    }
+
+    public CofinancingLevel2026ExcelRow toCofinancingLevel2026Row(Row row) {
+        return CofinancingLevel2026ExcelRow.builder()
+                .kcsr(row.getCell(1).getStringCellValue())
+                .dopKr(row.getCell(2).getStringCellValue())
+                .kosgu(row.getCell(3).getStringCellValue())
+                .obCoeff(row.getCell(4).getNumericCellValue())
+                .fbCoeff(row.getCell(5).getNumericCellValue())
                 .build();
     }
 

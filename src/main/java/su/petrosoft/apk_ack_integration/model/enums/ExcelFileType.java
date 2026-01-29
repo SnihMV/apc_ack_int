@@ -37,6 +37,11 @@ public enum ExcelFileType {
             List.of("Код", "Раздел", "Подраздел", "Наименование КФСР", "КЦСР", "Наименование КЦСР", "Доп. КР"),
             "Итого",
             CofinancingLevelExcelRow.class
+    ),
+    COFINANCING_LEVEL_2026(
+            List.of("Направление", "КЦСР", "Доп. КР", "КОСГУ", "ФБ", "ОБ"),
+            "Итого",
+            CofinancingLevelExcelRow.class
     );
 
     private final List<String> columnNames;

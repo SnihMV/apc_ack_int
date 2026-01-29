@@ -78,7 +78,7 @@ import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalFe
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalLimit;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalRegional;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.sumOf;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getCodeId;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getDictionaryIdByCode;
 
 @Component
 @RequiredArgsConstructor
@@ -277,15 +277,15 @@ public class CashPlanLimitMapper {
                 new DoubleAttribute(TOTAL_BALANCE_ATTR, cpl.getTotalBalance()),
                 new DoubleAttribute(FEDERAL_BUDGET_ATTR, cpl.getFederalBudget()),
                 new DoubleAttribute(REGIONAL_BUDGET_ATTR, cpl.getRegionalBudget()),
-                new LinkedAttribute(KVSR_ATTR, getCodeId(codesMap, KVSR, cpl.getKvsr())),
-                new LinkedAttribute(KFSR_ATTR, getCodeId(codesMap, KFSR, cpl.getKfsr())),
-                new LinkedAttribute(KCSR_ATTR, getCodeId(codesMap, KCSR, cpl.getKcsr())),
-                new LinkedAttribute(KVR_ATTR, getCodeId(codesMap, KVR, cpl.getKvr())),
-                new LinkedAttribute(KOSGU_ATTR, getCodeId(codesMap, KOSGU, cpl.getKosgu())),
-                new LinkedAttribute(DOPFK_ATTR, getCodeId(codesMap, DOPFK, cpl.getDopFk())),
-                new LinkedAttribute(DOPEK_ATTR, getCodeId(codesMap, DOPEK, cpl.getDopEk())),
-                new LinkedAttribute(DOPKR_ATTR, getCodeId(codesMap, DOPKR, cpl.getDopKr())),
-                new LinkedAttribute(PURPOSE_ATTR, getCodeId(codesMap, PURPOSE, cpl.getPurpose())),
+                new LinkedAttribute(KVSR_ATTR, getDictionaryIdByCode(codesMap, KVSR, cpl.getKvsr())),
+                new LinkedAttribute(KFSR_ATTR, getDictionaryIdByCode(codesMap, KFSR, cpl.getKfsr())),
+                new LinkedAttribute(KCSR_ATTR, getDictionaryIdByCode(codesMap, KCSR, cpl.getKcsr())),
+                new LinkedAttribute(KVR_ATTR, getDictionaryIdByCode(codesMap, KVR, cpl.getKvr())),
+                new LinkedAttribute(KOSGU_ATTR, getDictionaryIdByCode(codesMap, KOSGU, cpl.getKosgu())),
+                new LinkedAttribute(DOPFK_ATTR, getDictionaryIdByCode(codesMap, DOPFK, cpl.getDopFk())),
+                new LinkedAttribute(DOPEK_ATTR, getDictionaryIdByCode(codesMap, DOPEK, cpl.getDopEk())),
+                new LinkedAttribute(DOPKR_ATTR, getDictionaryIdByCode(codesMap, DOPKR, cpl.getDopKr())),
+                new LinkedAttribute(PURPOSE_ATTR, getDictionaryIdByCode(codesMap, PURPOSE, cpl.getPurpose())),
                 new DoubleAttribute(JAN_LIMIT_ATTR, cpl.getJanLimit()),
                 new DoubleAttribute(FEB_LIMIT_ATTR, cpl.getFebLimit()),
                 new DoubleAttribute(MAR_LIMIT_ATTR, cpl.getMarLimit()),
