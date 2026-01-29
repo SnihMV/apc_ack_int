@@ -2,8 +2,8 @@ package su.petrosoft.apk_ack_integration.model.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import su.petrosoft.apk_ack_integration.exception.DictionaryException;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 
 @Getter
@@ -14,13 +14,20 @@ public enum OwnershipForm {
     IP("ИП", "246"),
     ALL("ВСЕ", "default");
 
-    private String name;
+    private String code;
     private String kosgu;
 
-    public static OwnershipForm define(String kosgu) {
+    public static OwnershipForm defineByKosgu(String kosgu) {
         return Arrays.stream(values())
                 .filter(form -> form.getKosgu().equalsIgnoreCase(kosgu))
                 .findFirst()
                 .orElse(ALL);
+    }
+
+    public static OwnershipForm defineByCode(String code) {
+        return Arrays.stream(values())
+                .filter(ff -> ff.getCode().equalsIgnoreCase(code))
+                .findFirst()
+                .orElseThrow(() -> new DictionaryException("Не найдена форма собственности с кодом [%s]".formatted(code)));
     }
 }

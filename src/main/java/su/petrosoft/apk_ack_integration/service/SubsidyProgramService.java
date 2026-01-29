@@ -27,7 +27,7 @@ public class SubsidyProgramService {
     private final SubsidyProgramMapper subsidyProgramMapper;
 
     public Set<SubsidyProgram> getAllSecondLevelSpFromDb() {
-        Set<SubsidyProgram> allSecondLevelSpFromDB = apkService.findSubsidyPrograms(getSecondLevelSpRequestDto());
+        List<SubsidyProgram> allSecondLevelSpFromDB = apkService.findSubsidyPrograms(getSecondLevelSpRequestDto());
         log.debug("Found [{}] Subsidy Programs in DB with level 2", allSecondLevelSpFromDB.size());
         Set<SubsidyProgram> allValidSecondLvlSPFromDb = allSecondLevelSpFromDB.stream()
                 .filter(SubsidyProgramUtil::validate)

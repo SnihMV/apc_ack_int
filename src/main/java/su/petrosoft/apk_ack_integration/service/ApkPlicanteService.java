@@ -60,7 +60,7 @@ public class ApkPlicanteService {
     }
 
     @SneakyThrows
-    public Set<SubsidyProgram> findSubsidyPrograms(GetAttributesListRequestDto requestDto) {
+    public List<SubsidyProgram> findSubsidyPrograms(GetAttributesListRequestDto requestDto) {
         String ss = objectMapper.writeValueAsString(requestDto);
         log.debug("Subsidy_Program Getting Request JSON [{}]", ss);
         List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(requestDto);
@@ -68,7 +68,7 @@ public class ApkPlicanteService {
         log.debug("Subsidy_Program Getting Response JSON [{}]", s);
         return dtoList.stream()
                 .map(spMapper::toEntity)
-                .collect(toSet());
+                .toList();
     }
 
     public Set<FinancingSource> findFinancingSources(GetAttributesListRequestDto requestDto) {
@@ -121,7 +121,7 @@ public class ApkPlicanteService {
         InstanceDto created = apkRestClient.createInstance(creatingDto);
         String createdJSON = objectMapper.writeValueAsString(created);
         log.debug("Cofinancing Level Created JSON [{}]", createdJSON);
-        return cflMapper.toEntity(created);
+        return cflMapper.toEntity(created, codesMap);
     }
 
     public CashPlanLimit updateCashPlanLimit(CashPlanLimit updatedCpl) {
