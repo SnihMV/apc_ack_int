@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -35,6 +36,8 @@ public class RestClientsConfig {
         customMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         customMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(customMapper);
+        log.info("Configuring NiFi REST client for URL: {}", props.niFi().baseUrl());
+
         return new NiFiRestClient(
                 props,
                 RestClient.builder()
@@ -51,14 +54,22 @@ public class RestClientsConfig {
     }
 
     @Bean
-    public PlicanteRestClient plicanteRestClient(IntegrationProperties props) {
+    public PlicanteRestClient plicanteRestClient(
+            IntegrationProperties props,
+            RestLoggingInterceptor loggingInterceptor) {
+        log.info("Configuring Plicante REST client for URL: {}", props.apk().baseUrl());
+
         return new PlicanteRestClient(
                 RestClient.builder()
+                        .requestFactory(
+                                new BufferingClientHttpRequestFactory(
+                                        new SimpleClientHttpRequestFactory()))
                         .baseUrl(props.apk().baseUrl())
+                        .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .requestInterceptor(new BasicAuthenticationInterceptor(
                                 props.apk().username(),
                                 props.apk().password()))
-                        .requestInterceptor(new RestLoggingInterceptor())
+                        .requestInterceptor(loggingInterceptor)
                         .build()
         );
     }
@@ -66,9 +77,10 @@ public class RestClientsConfig {
     @Bean
     public PlicanteSoapClient plicanteSoapClient(
             IntegrationProperties props,
+            SoapLoggingInterceptor loggingInterceptor,
             XmlMapper xmlMapper
     ) {
-        log.info("Configuring SOAP client for URL: {}", props.technolog().soapUrl());
+        log.info("Configuring Plicante SOAP client for URL: {}", props.technolog().soapUrl());
 
         MappingJackson2XmlHttpMessageConverter xmlConverter = new MappingJackson2XmlHttpMessageConverter(xmlMapper);
 
@@ -84,9 +96,8 @@ public class RestClientsConfig {
                         .requestInterceptor(new BasicAuthenticationInterceptor(
                                 props.technolog().username(),
                                 props.technolog().password()))
-                        .requestInterceptor(new SoapLoggingInterceptor(xmlMapper))
+                        .requestInterceptor(loggingInterceptor)
                         .build()
         );
     }
-
 }
