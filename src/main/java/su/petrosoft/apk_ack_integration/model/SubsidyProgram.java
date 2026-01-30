@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 import java.util.Objects;
@@ -11,10 +12,8 @@ import java.util.Objects;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class SubsidyProgram {
-    private Long id;
-    private Long version;
+@SuperBuilder
+public class SubsidyProgram extends PlicanteInstance{
     private Long parentId;
     private Long level;
     //    private String code;
@@ -44,3 +43,4 @@ public class SubsidyProgram {
         );
     }
 }
+

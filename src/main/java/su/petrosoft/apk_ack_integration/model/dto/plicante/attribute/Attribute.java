@@ -3,7 +3,6 @@ package su.petrosoft.apk_ack_integration.model.dto.plicante.attribute;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import su.petrosoft.apk_ack_integration.model.Pair;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.value.LinkedValue;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.value.Value;
 

@@ -1,19 +1,17 @@
 package su.petrosoft.apk_ack_integration.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class AgriculturalMachineryPark {
-    private Long id;
-    private Long version;
+@SuperBuilder
+public class AgriculturalMachineryPark extends PlicanteInstance {
     private Long recipientId;
     private String indicator;
     private String machineryAndEquip;

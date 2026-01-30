@@ -1,19 +1,17 @@
 package su.petrosoft.apk_ack_integration.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.util.Objects;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class FinancingSource {
-    private Long id;
-    private Long version;
+@SuperBuilder
+public class FinancingSource extends PlicanteInstance {
     private Long year;
     private String kvsr;
     private String kfsr;

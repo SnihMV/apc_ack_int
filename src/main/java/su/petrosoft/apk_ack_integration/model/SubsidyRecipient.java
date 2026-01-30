@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -11,10 +12,8 @@ import java.util.Objects;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class SubsidyRecipient {
-    private Long id;
-    private Long version;
+@SuperBuilder
+public class SubsidyRecipient extends PlicanteInstance {
     private String fullTitle;
     private String shortTitle;
     private String inn;

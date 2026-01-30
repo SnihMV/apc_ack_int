@@ -24,7 +24,7 @@ import static su.petrosoft.apk_ack_integration.model.enums.OwnershipForm.*;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.*;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractShortForm;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getDictionaryIdByCode;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictInstanceIdByCode;
 
 @Slf4j
 @Component
@@ -75,16 +75,16 @@ public class FinancingSourceMapper {
                         .templateId(TEMPLATE_ID)
                         .attributes(List.of(
                                 new LongAttribute(YEAR_ATTR, fs.getYear()),
-                                new LinkedAttribute(KVSR_ATTR, getDictionaryIdByCode(codesMap, KVSR, fs.getKvsr())),
-                                new LinkedAttribute(KFSR_ATTR, getDictionaryIdByCode(codesMap, KFSR, fs.getKfsr())),
-                                new LinkedAttribute(KCSR_ATTR, getDictionaryIdByCode(codesMap, KCSR, fs.getKcsr())),
-                                new LinkedAttribute(KVR_ATTR, getDictionaryIdByCode(codesMap, KVR, fs.getKvr())),
-                                new LinkedAttribute(KOSGU_ATTR, getDictionaryIdByCode(codesMap, KOSGU, fs.getKosgu())),
-                                new LinkedAttribute(DOPEK_ATTR, getDictionaryIdByCode(codesMap, DOPEK, fs.getDopEk())),
-                                new LinkedAttribute(DOPFK_ATTR, getDictionaryIdByCode(codesMap, DOPFK, fs.getDopFk())),
-                                new LinkedAttribute(DOPKR_ATTR, getDictionaryIdByCode(codesMap, DOPKR, fs.getDopKr())),
-                                new LinkedAttribute(PURPOSE_ATTR, getDictionaryIdByCode(codesMap, PURPOSE, fs.getPurpose())),
-                                new LinkedAttribute(OWNERSHIP_FORM_ATTR, getDictionaryIdByCode(codesMap, OWNERSHIP_FORM, fs.getOwnershipForm())),
+                                new LinkedAttribute(KVSR_ATTR, dictInstanceIdByCode(codesMap, KVSR, fs.getKvsr())),
+                                new LinkedAttribute(KFSR_ATTR, dictInstanceIdByCode(codesMap, KFSR, fs.getKfsr())),
+                                new LinkedAttribute(KCSR_ATTR, dictInstanceIdByCode(codesMap, KCSR, fs.getKcsr())),
+                                new LinkedAttribute(KVR_ATTR, dictInstanceIdByCode(codesMap, KVR, fs.getKvr())),
+                                new LinkedAttribute(KOSGU_ATTR, dictInstanceIdByCode(codesMap, KOSGU, fs.getKosgu())),
+                                new LinkedAttribute(DOPEK_ATTR, dictInstanceIdByCode(codesMap, DOPEK, fs.getDopEk())),
+                                new LinkedAttribute(DOPFK_ATTR, dictInstanceIdByCode(codesMap, DOPFK, fs.getDopFk())),
+                                new LinkedAttribute(DOPKR_ATTR, dictInstanceIdByCode(codesMap, DOPKR, fs.getDopKr())),
+                                new LinkedAttribute(PURPOSE_ATTR, dictInstanceIdByCode(codesMap, PURPOSE, fs.getPurpose())),
+                                new LinkedAttribute(OWNERSHIP_FORM_ATTR, dictInstanceIdByCode(codesMap, OWNERSHIP_FORM, fs.getOwnershipForm())),
                                 new LinkedAttribute(SUBSIDY_PROGRAM_ATTR, fs.getSubsidyProgramId()),
                                 new LinkedAttribute(CASH_PLAN_LIMIT_ATTR, fs.getCashPlanLimitId()),
                                 new StringAttribute(CONCAT_KBK_ATTR, fs.getConcatenatedKBK())
@@ -97,8 +97,8 @@ public class FinancingSourceMapper {
         return Arrays.stream(OwnershipForm.values())
                 .filter(form -> form.getKosgu().equals(row.kosgu()))
                 .findFirst()
-                .map(OwnershipForm::getName)
-                .orElse(ALL.getName());
+                .map(OwnershipForm::getCode)
+                .orElse(ALL.getCode());
     }
 
     private String concatKBK(BudgetItemData row) {

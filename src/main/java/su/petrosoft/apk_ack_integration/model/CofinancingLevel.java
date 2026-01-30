@@ -1,9 +1,9 @@
 package su.petrosoft.apk_ack_integration.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import su.petrosoft.apk_ack_integration.model.enums.FinancingForm;
 import su.petrosoft.apk_ack_integration.model.enums.OwnershipForm;
 
@@ -14,16 +14,14 @@ import java.util.Objects;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class CofinancingLevel {
-    private Long id;
-    private Long version;
+@SuperBuilder
+public class CofinancingLevel extends PlicanteInstance {
     private Long year;
     private LocalDate startDate;
     private BigDecimal obCoeff;
     private BigDecimal fbCoeff;
-    private String financingForm;
-    private String ownershipForm;
+    private FinancingForm financingForm;
+    private OwnershipForm ownershipForm;
 
     @Override
     public boolean equals(Object o) {
