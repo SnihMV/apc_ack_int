@@ -20,7 +20,7 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.OWNERSHIP_
 import static su.petrosoft.apk_ack_integration.model.enums.FinancingForm.*;
 import static su.petrosoft.apk_ack_integration.model.enums.OwnershipForm.*;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getDictionaryIdByCode;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictInstanceIdByCode;
 
 public class CofinanceLevelUtil {
     public static final long TEMPLATE_ID = 25588;
@@ -62,8 +62,8 @@ public class CofinanceLevelUtil {
                                 new DateAttribute(START_DATE_ATTR, toEpochMilli(cflToSave.getStartDate())),
                                 new DoubleAttribute(COEFF_OB_ATTR, cflToSave.getObCoeff()),
                                 new DoubleAttribute(COEFF_FB_ATTR, cflToSave.getFbCoeff()),
-                                new LinkedAttribute(FIN_FORM_ATTR, getDictionaryIdByCode(codesMap, FINANCING_FORM, cflToSave.getFinancingForm().getCode())),
-                                new LinkedAttribute(OWN_FORM_ATTR, getDictionaryIdByCode(codesMap, OWNERSHIP_FORM, cflToSave.getOwnershipForm().getCode()))))
+                                new LinkedAttribute(FIN_FORM_ATTR, dictInstanceIdByCode(codesMap, FINANCING_FORM, cflToSave.getFinancingForm().getCode())),
+                                new LinkedAttribute(OWN_FORM_ATTR, dictInstanceIdByCode(codesMap, OWNERSHIP_FORM, cflToSave.getOwnershipForm().getCode()))))
                         .build());
     }
 }

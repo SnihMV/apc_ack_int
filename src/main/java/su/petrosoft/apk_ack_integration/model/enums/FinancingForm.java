@@ -20,7 +20,7 @@ public enum FinancingForm {
     private String code;
     private BiPredicate<BigDecimal, BigDecimal> matcher;
 
-    public static FinancingForm define(BigDecimal obCoeff, BigDecimal fbCoeff) {
+    public static FinancingForm finFormByCoeffs(BigDecimal obCoeff, BigDecimal fbCoeff) {
 
         return Arrays.stream(values())
                 .filter(form -> form.matcher.test(obCoeff, fbCoeff))
@@ -28,7 +28,7 @@ public enum FinancingForm {
                 .orElse(OFB);
     }
 
-    public static FinancingForm define(String code) {
+    public static FinancingForm finFormByCode(String code) {
         return Arrays.stream(values())
                 .filter(ff -> ff.getCode().equalsIgnoreCase(code))
                 .findFirst()

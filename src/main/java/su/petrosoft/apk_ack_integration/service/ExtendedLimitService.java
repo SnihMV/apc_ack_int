@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateBudgetItemsResponseDto;
-import su.petrosoft.apk_ack_integration.model.dto.response.CreateInstancesFromFileResponseDto;
+import su.petrosoft.apk_ack_integration.model.dto.response.CreatingInstancesFromFileResponseDto;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 
 import java.util.Collections;
@@ -19,10 +19,10 @@ public class ExtendedLimitService {
     private final CashPlanLimitService cplService;
     private final BudgetItemService budgetItemService;
 
-    public CreateInstancesFromFileResponseDto createLimits(MultipartFile file) {
+    public CreatingInstancesFromFileResponseDto createLimits(MultipartFile file) {
         List<DescriptedBudgetItemData> dtoList = excelExtractor.getUniBudgetCodedRows(file);
 
-        CreateInstancesFromFileResponseDto responseDto = CreateInstancesFromFileResponseDto.builder()
+        CreatingInstancesFromFileResponseDto responseDto = CreatingInstancesFromFileResponseDto.builder()
                 .persistedIds(Collections.emptyList())
                 .build();
 

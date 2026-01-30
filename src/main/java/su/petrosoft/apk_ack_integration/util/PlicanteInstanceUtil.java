@@ -3,12 +3,12 @@ package su.petrosoft.apk_ack_integration.util;
 import lombok.extern.slf4j.Slf4j;
 import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
 import su.petrosoft.apk_ack_integration.model.data.DictionaryExtractable;
-import su.petrosoft.apk_ack_integration.model.Pair;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Pair;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.dto.response.CreateInstancesFromFileResponseDto;
+import su.petrosoft.apk_ack_integration.model.dto.response.CreatingInstancesFromFileResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
 import java.time.Instant;
@@ -26,15 +26,15 @@ public class PlicanteInstanceUtil {
 
     public static final ZoneId MOSCOW_ZONE = ZoneId.of("Europe/Moscow");
 
-    public static <T> CreateInstancesFromFileResponseDto getCreationInstancesFromFileResponse(
+    public static <T> CreatingInstancesFromFileResponseDto getCreationInstancesFromFileResponse(
             List<?> dtoList,
-            List<T> createdLimits,
+            List<T> createdInstances,
             Function<T, Long> function
     ) {
-        return new CreateInstancesFromFileResponseDto(
+        return new CreatingInstancesFromFileResponseDto(
                 dtoList.size(),
-                createdLimits.size(),
-                createdLimits.stream()
+                createdInstances.size(),
+                createdInstances.stream()
                         .map(function)
                         .toList());
     }
@@ -78,7 +78,7 @@ public class PlicanteInstanceUtil {
         }
     }
 
-    public static Long getDictionaryIdByCode(Map<Dictionary, Map<String, Long>> allCodes, Dictionary type, String code) {
+    public static Long dictInstanceIdByCode(Map<Dictionary, Map<String, Long>> allCodes, Dictionary type, String code) {
         if (code == null || code.isEmpty()) {
             return type.getDefaultValue();
         }

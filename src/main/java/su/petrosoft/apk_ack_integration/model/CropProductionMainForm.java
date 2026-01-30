@@ -1,19 +1,17 @@
 package su.petrosoft.apk_ack_integration.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class CropProductionMainForm {
-    private Long id;
-    private Long version;
+@SuperBuilder
+public class CropProductionMainForm extends PlicanteInstance{
     private Long date;
 
     private BigDecimal b1_l1_a1;

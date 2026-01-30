@@ -9,7 +9,7 @@ import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.data.CashPlanLimitData;
 import su.petrosoft.apk_ack_integration.model.dto.response.AckGetUpdateMessageResponseDto;
-import su.petrosoft.apk_ack_integration.model.dto.response.CreateInstancesFromFileResponseDto;
+import su.petrosoft.apk_ack_integration.model.dto.response.CreatingInstancesFromFileResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.UpdateCashPlanLimitResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
@@ -40,7 +40,7 @@ public class CashPlanLimitService {
     private final UniBudgetRowService uniBudgetRowService;
     private final ExcelRowMapper excelRowMapper;
 
-    public CreateInstancesFromFileResponseDto createFromRosterKBKExcel(MultipartFile file) {
+    public CreatingInstancesFromFileResponseDto createFromRosterKBKExcel(MultipartFile file) {
 
         List<? extends CashPlanLimitData> dtoList = excelExtractor.getRosterKbkRows(file);
         log.debug("Extracted from excel file: [{}] CashPlanLimit rows", dtoList.size());
@@ -65,7 +65,7 @@ public class CashPlanLimitService {
         return getCreationInstancesFromFileResponse(dtoList, createdLimits, CashPlanLimit::getId);
     }
 
-    public CreateInstancesFromFileResponseDto createFromUniBudgetExcel(MultipartFile file) {
+    public CreatingInstancesFromFileResponseDto createFromUniBudgetExcel(MultipartFile file) {
 //        List<BaseUniBudgetExcelRow> dtoList = excelExtractor.getUniBudgetCodedRows(file);
 //        List<DescriptedBudgetItemData> dtoList = excelExtractor.getUniBudget2026ClarifiedRows(file);
         List<DescriptedBudgetItemData> dtoList = excelExtractor.getUniBudget20262801Rows(file);

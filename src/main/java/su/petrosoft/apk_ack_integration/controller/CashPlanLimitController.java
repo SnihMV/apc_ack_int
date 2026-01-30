@@ -13,10 +13,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import su.petrosoft.apk_ack_integration.model.dto.response.CreateInstancesFromFileResponseDto;
+import su.petrosoft.apk_ack_integration.model.dto.response.CreatingInstancesFromFileResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.UpdateCashPlanLimitResponseDto;
 import su.petrosoft.apk_ack_integration.service.CashPlanLimitService;
-import su.petrosoft.apk_ack_integration.service.ExcelExtractor;
 
 @RestController
 @Slf4j
@@ -31,13 +30,13 @@ public class CashPlanLimitController {
                     "File should contain specific columns and format.")
     @PostMapping("excel")
     @ResponseStatus(HttpStatus.OK)
-    public CreateInstancesFromFileResponseDto createFromExcel(
+    public CreatingInstancesFromFileResponseDto createFromExcel(
             @Parameter(description = "Excel file with Cash Plan Limits data",
                     required = true,
                     content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
             @RequestParam("file") MultipartFile file) {
         log.debug("Received file [{}] to create CashPlanLimits", file.getOriginalFilename());
-        CreateInstancesFromFileResponseDto fromUniBudgetExcel = service.createFromUniBudgetExcel(file);
+        CreatingInstancesFromFileResponseDto fromUniBudgetExcel = service.createFromUniBudgetExcel(file);
         return fromUniBudgetExcel;
     }
 

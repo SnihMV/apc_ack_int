@@ -5,7 +5,7 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-public record CreateInstancesFromFileResponseDto(
+public record CreatingInstancesFromFileResponseDto(
         int incomingCount,
         int disjointCount,
         List<Long> persistedIds

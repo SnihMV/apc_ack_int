@@ -17,14 +17,14 @@ public enum OwnershipForm {
     private String code;
     private String kosgu;
 
-    public static OwnershipForm defineByKosgu(String kosgu) {
+    public static OwnershipForm ownFormByKosgu(String kosgu) {
         return Arrays.stream(values())
                 .filter(form -> form.getKosgu().equalsIgnoreCase(kosgu))
                 .findFirst()
                 .orElse(ALL);
     }
 
-    public static OwnershipForm defineByCode(String code) {
+    public static OwnershipForm ownFormByCode(String code) {
         return Arrays.stream(values())
                 .filter(ff -> ff.getCode().equalsIgnoreCase(code))
                 .findFirst()

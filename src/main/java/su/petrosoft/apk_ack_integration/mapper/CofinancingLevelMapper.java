@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.*;
+import static su.petrosoft.apk_ack_integration.model.enums.FinancingForm.*;
+import static su.petrosoft.apk_ack_integration.model.enums.OwnershipForm.*;
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.COEFF_FB_ATTR;
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.COEFF_OB_ATTR;
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.FIN_FORM_ATTR;
@@ -30,7 +32,7 @@ import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.TEMPLATE_
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.YEAR_ATTR;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getDictionaryCodeById;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getDictionaryIdByCode;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictInstanceIdByCode;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.toEpochMilli;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.toLocalDate;
 
@@ -45,16 +47,16 @@ public class CofinancingLevelMapper {
                 .startDate(LocalDate.of(LocalDate.now().getYear(), 1, 1))
                 .obCoeff(obCoeff)
                 .fbCoeff(fbCoeff)
-                .financingForm(FinancingForm.define(obCoeff, fbCoeff))
-                .ownershipForm(OwnershipForm.defineByKosgu(row.kosgu()))
+                .financingForm(finFormByCoeffs(obCoeff, fbCoeff))
+                .ownershipForm(ownFormByKosgu(row.kosgu()))
                 .build();
     }
 
     public CofinancingLevel toEntity(InstanceDto created, Map<Dictionary, Map<String, Long>> codesMap) {
 
         List<Attribute<?>> attributes = created.attributes();
-        FinancingForm financingForm = FinancingForm.define(getDictionaryCodeById(codesMap, FINANCING_FORM, extractData(attributes, FIN_FORM_ATTR)));
-        OwnershipForm ownershipForm = OwnershipForm.defineByCode(getDictionaryCodeById(codesMap, OWNERSHIP_FORM, extractData(attributes, OWN_FORM_ATTR)));
+        FinancingForm financingForm = finFormByCode(getDictionaryCodeById(codesMap, FINANCING_FORM, extractData(attributes, FIN_FORM_ATTR)));
+        OwnershipForm ownershipForm = ownFormByCode(getDictionaryCodeById(codesMap, OWNERSHIP_FORM, extractData(attributes, OWN_FORM_ATTR)));
 
         return CofinancingLevel.builder()
                 .id(created.id())
@@ -70,8 +72,8 @@ public class CofinancingLevelMapper {
 
     public CofinancingLevel toEntity(List<Attribute<?>> attributes, Map<Dictionary, Map<String, Long>> codesMap) {
 
-        FinancingForm financingForm = FinancingForm.define(getDictionaryCodeById(codesMap, FINANCING_FORM, extractData(attributes, FIN_FORM_ATTR)));
-        OwnershipForm ownershipForm = OwnershipForm.defineByCode(getDictionaryCodeById(codesMap, OWNERSHIP_FORM, extractData(attributes, OWN_FORM_ATTR)));
+        FinancingForm financingForm = finFormByCode(getDictionaryCodeById(codesMap, FINANCING_FORM, extractData(attributes, FIN_FORM_ATTR)));
+        OwnershipForm ownershipForm = ownFormByCode(getDictionaryCodeById(codesMap, OWNERSHIP_FORM, extractData(attributes, OWN_FORM_ATTR)));
 
         return CofinancingLevel.builder()
                 .year(extractData(attributes, YEAR_ATTR))
@@ -85,8 +87,8 @@ public class CofinancingLevelMapper {
 
     public CreateInstanceRequestDto toCreatingDto(CofinancingLevel cl, Map<Dictionary, Map<String, Long>> codesMap) {
 
-        Long ownFormId = getDictionaryIdByCode(codesMap, OWNERSHIP_FORM, cl.getOwnershipForm().getCode());
-        Long finFormId = getDictionaryIdByCode(codesMap, FINANCING_FORM, cl.getFinancingForm().getCode());
+        Long ownFormId = dictInstanceIdByCode(codesMap, OWNERSHIP_FORM, cl.getOwnershipForm().getCode());
+        Long finFormId = dictInstanceIdByCode(codesMap, FINANCING_FORM, cl.getFinancingForm().getCode());
 
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()

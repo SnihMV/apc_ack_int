@@ -25,7 +25,7 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KCSR;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractAllData;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractShortForm;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getDictionaryIdByCode;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictInstanceIdByCode;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.COFIN_LVL_ATTR;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.DOPKR_ATTR;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.KCSR_ATTR;
@@ -84,9 +84,9 @@ public class SubsidyProgramMapper {
 //                new StringAttribute(CODE_ATTR, sp.getCode()),
                 new LongAttribute(LEVEL_ATTR, sp.getLevel()),
                 new LinkedAttribute(PARENT_ATTR, sp.getParentId()),
-                new LinkedAttribute(KCSR_ATTR, getDictionaryIdByCode(codesMap, KCSR, sp.getKcsr()))));
+                new LinkedAttribute(KCSR_ATTR, dictInstanceIdByCode(codesMap, KCSR, sp.getKcsr()))));
         if (sp.getLevel() == 2) {
-            attributes.add(new LinkedAttribute(DOPKR_ATTR, getDictionaryIdByCode(codesMap, DOPKR, sp.getDopKr())));
+            attributes.add(new LinkedAttribute(DOPKR_ATTR, dictInstanceIdByCode(codesMap, DOPKR, sp.getDopKr())));
         }
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()

@@ -1,17 +1,15 @@
 package su.petrosoft.apk_ack_integration.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class AgriculturalMachineryReport {
-    private Long id;
-    private Long version;
+@SuperBuilder
+public class AgriculturalMachineryReport extends PlicanteInstance {
     private Long recipientId;
     private String codedReport;
 }

@@ -7,15 +7,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import su.petrosoft.apk_ack_integration.model.enums.ReportType;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class OperationalReport {
-    private Long id;
-    private Long version;
+@SuperBuilder
+public class OperationalReport extends PlicanteInstance {
     private ReportType reportType;
     private Long reportDate;
     private Map<String, BigDecimal> reportValues;

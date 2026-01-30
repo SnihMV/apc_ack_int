@@ -1,9 +1,9 @@
 package su.petrosoft.apk_ack_integration.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -11,10 +11,8 @@ import java.util.Objects;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class CashPlanLimit {
-    private Long id;
-    private Long version;
+@SuperBuilder
+public class CashPlanLimit extends PlicanteInstance {
     private Long year;
     private String kfsr;
     private String kcsr;
