@@ -26,6 +26,7 @@ public class UniBudgetExcelRow {
 
     private final static Set<String> REQUIRED_COLUMN_NAMES = new HashSet<>();
 
+
     static {
         REQUIRED_COLUMN_NAMES.addAll(
             DICTIONARIES.stream()
@@ -34,13 +35,14 @@ public class UniBudgetExcelRow {
     }
 
 
-    private static final Set<String> REQUIRED_COLUMN_NAMES = Set.of(
+}
+
+
+/*
         "КВСР", "КФСР", "КЦСР", "Доп. КР", "КВР", "Доп. ФК", "Доп. ЭК", "Код цели", "КВФО", "КОСГУ",
         "Ассигнования 2026 год", "Ассигнования Фед 2026 год", "Ассигнования Рег 2026 год",
         "КП - расходы Январь", "КП - расходы Февраль", "КП - расходы Март", "КП - расходы Апрель",
         "КП - расходы Май", "КП - расходы Июнь", "КП - расходы Июль", "КП - расходы Август",
         "КП - расходы Сентябрь", "КП - расходы Октябрь", "КП - расходы Ноябрь",
         "КП - расходы Декабрь"
-    );
-
-}
+*/
