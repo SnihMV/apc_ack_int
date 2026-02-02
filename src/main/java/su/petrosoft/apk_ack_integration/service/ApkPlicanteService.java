@@ -2,7 +2,6 @@ package su.petrosoft.apk_ack_integration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
@@ -59,13 +58,8 @@ public class ApkPlicanteService {
                 .collect(toSet());
     }
 
-    @SneakyThrows
     public List<SubsidyProgram> findSubsidyPrograms(GetAttributesListRequestDto requestDto) {
-        String ss = objectMapper.writeValueAsString(requestDto);
-        log.debug("Subsidy_Program Getting Request JSON [{}]", ss);
         List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(requestDto);
-        String s = objectMapper.writeValueAsString(dtoList);
-        log.debug("Subsidy_Program Getting Response JSON [{}]", s);
         return dtoList.stream()
                 .map(spMapper::toEntity)
                 .toList();
@@ -79,15 +73,12 @@ public class ApkPlicanteService {
                 .collect(toSet());
     }
 
-    @SneakyThrows
     public List<OperationalReport> getOperationalReports(ReportType reportType, long date) {
         GetAttributesListRequestDto createDto = buildGettingOperationalReportsRequestDto(reportType, date);
-        String requestJson = objectMapper.writeValueAsString(createDto);
-        log.debug("Operational Reports Getting JSON [{}]", requestJson);
         List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(createDto);
         return dtoList.stream()
-            .map(orMapper::toEntity)
-            .toList();
+                .map(orMapper::toEntity)
+                .toList();
     }
 
     public CashPlanLimit createCashPlanLimit(CashPlanLimit cpl, Map<Dictionary, Map<String, Long>> codesMap) {
@@ -102,25 +93,15 @@ public class ApkPlicanteService {
         return spMapper.toEntity(instance);
     }
 
-    @SneakyThrows
     public FinancingSource createFinancingSource(FinancingSource financingSource, Map<Dictionary, Map<String, Long>> codesMap) {
         CreateInstanceRequestDto createDto = fsMapper.toCreatingDto(financingSource, codesMap);
-        String ss = objectMapper.writeValueAsString(createDto);
-        log.debug("Financing_Source Creating Request body [{}]", ss);
         InstanceDto created = apkRestClient.createInstance(createDto);
-        String s = objectMapper.writeValueAsString(created);
-        log.debug("Financing_Source Creating Response body [{}]", s);
         return fsMapper.toEntity(created);
     }
 
-    @SneakyThrows
     public CofinancingLevel createCofinancingLevel(CofinancingLevel cofinancingLevel, Map<Dictionary, Map<String, Long>> codesMap) {
         CreateInstanceRequestDto creatingDto = cflMapper.toCreatingDto(cofinancingLevel, codesMap);
-        String creatingJSON = objectMapper.writeValueAsString(creatingDto);
-        log.debug("Cofinancing Level Creating JSON [{}]", creatingJSON);
         InstanceDto created = apkRestClient.createInstance(creatingDto);
-        String createdJSON = objectMapper.writeValueAsString(created);
-        log.debug("Cofinancing Level Created JSON [{}]", createdJSON);
         return cflMapper.toEntity(created, codesMap);
     }
 
@@ -130,55 +111,53 @@ public class ApkPlicanteService {
         return cplMapper.toEntity(updatedInstance);
     }
 
-    @SneakyThrows
     public CropProductionMainForm updateCropProductionMainForm(CropProductionMainForm mainForm) {
         UpdateInstanceRequestDto dto = cpmfMapper.toUpdateDto(mainForm);
-        String updatingJson = objectMapper.writeValueAsString(dto);
-        log.debug("Crop Production Main Form updating JSON: [{}]", updatingJson);
-
         InstanceDto instanceDto = apkRestClient.updateInstance(dto);
         return cpmfMapper.toEntity(instanceDto);
     }
 
-    @SneakyThrows
     public SubsidyProgram updateSubsidyProgram(SubsidyProgram subsidyProgram) {
         UpdateInstanceRequestDto dto = spMapper.toUpdatingDto(subsidyProgram);
-        String updatingJson = objectMapper.writeValueAsString(dto);
-        log.debug("Subsidy Program updating JSON: [{}]", updatingJson);
-
         InstanceDto updatedSP = apkRestClient.updateInstance(dto);
-        String updatedJson = objectMapper.writeValueAsString(dto);
-        log.debug("Subsidy Program updated JSON: [{}]", updatedJson);
         return spMapper.toEntity(updatedSP);
     }
 
-    public Map<Dictionary, Map<String, Long>> getCodesMap(Dictionary... types) {
-
-        log.info("Receiving existed codes for types: {}", Arrays.stream(types).map(Enum::name).collect(joining(",")));
+    public Map<Dictionary, Map<String, Long>> getDictionariesCodesMap(Dictionary... dictionaries) {
+        log.info("Receiving existing codes for types: {}...",
+                Arrays.stream(dictionaries).map(Enum::name).collect(joining(",")));
         Map<Dictionary, Map<String, Long>> codes = new EnumMap<>(Dictionary.class);
-        for (Dictionary dictionary : types) {
-            codes.put(dictionary, getCodesByType(dictionary));
-            log.debug("{} code map:\n[{}]", dictionary.name(), codes.get(dictionary).toString());
+        for (Dictionary dictionary : dictionaries) {
+            Map<String, Long> codesMap = dictionaryCodesMap(dictionary);
+            codes.put(dictionary, codesMap);
+            log.debug("Received {} codes map:\n[{}]", dictionary.name(), codesMap);
         }
         long count = codes.values().stream()
-                .flatMap(map -> map.entrySet().stream())
-                .count();
-        log.info("Extracted {} codes", count);
+                .mapToLong(Map::size)
+                .sum();
+        log.info("Received [{}] codes for all requested dictionaries", count);
         return codes;
     }
 
-    private Map<String, Long> getCodesByType(Dictionary dictionary) {
-        List<InstanceDto> list = apkRestClient.getTableAttributesList(
-                GetAttributesListRequestDto.builder()
-                        .templateId(dictionary.getTemplateId())
-                        .attributes(List.of(
-                                new RequestedAttribute(dictionary.getCodeAttrId())))
-                        .build());
+    private Map<String, Long> dictionaryCodesMap(Dictionary dictionary) {
+        List<InstanceDto> list = apkRestClient.getTableAttributesList(gettingAllDictionaryCodesRequestDto(dictionary));
+        return buildDictionaryCodesMap(dictionary, list);
+    }
+
+    private static GetAttributesListRequestDto gettingAllDictionaryCodesRequestDto(Dictionary dictionary) {
+        return GetAttributesListRequestDto.builder()
+                .templateId(dictionary.getTemplateId())
+                .attributes(List.of(
+                        new RequestedAttribute(dictionary.getCodeAttrId())))
+                .build();
+    }
+
+    private static Map<String, Long> buildDictionaryCodesMap(Dictionary dictionary, List<InstanceDto> list) {
         return list.stream()
                 .collect(toMap(
                         dto -> extractData(dto.attributes(), dictionary.getCodeAttrId()),
                         InstanceDto::id,
                         (k1, k2) -> k1
-                        ));
+                ));
     }
 }

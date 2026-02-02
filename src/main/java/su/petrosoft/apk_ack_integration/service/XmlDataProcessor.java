@@ -40,7 +40,7 @@ public class XmlDataProcessor {
         }
         log.debug("Received request for Cash Plan Limit upsert: {}", upsertingXml);
 
-        Map<Dictionary, Map<String, Long>> codesMap = apkService.getCodesMap();
+        Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap();
         CashPlanLimit cplToUpdate = mapper.toEntity(upsertingXml);
 
         Set<CashPlanLimit> allCashPlanLimits = apkService.findCashPlanLimits(getCplCodesOnlyByCurrentYearRequestDto());

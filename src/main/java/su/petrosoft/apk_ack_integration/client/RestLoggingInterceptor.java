@@ -39,15 +39,13 @@ public class RestLoggingInterceptor implements ClientHttpRequestInterceptor {
 
     private void logRequest(String requestId, HttpRequest request, byte[] body) {
         String json = body.length > 0 ? prettyPrint(new String(body, StandardCharsets.UTF_8)) : "{}";
-        log.debug("[REST-{}] >>> {} {}", requestId, request.getMethod(), request.getURI());
-        log.debug("[REST-{}] >>> Request body:\n{}", requestId, json);
+        log.debug("[REST-{}] >>> {} {} Request body:\n{}", requestId, request.getMethod(), request.getURI(), json);
     }
 
     private void logResponse(String requestId, ClientHttpResponse response, long duration) throws IOException {
         byte[] body = response.getBody().readAllBytes();
         String json = body.length > 0 ? prettyPrint(new String(body, StandardCharsets.UTF_8)) : "{}";
-        log.debug("[REST-{}] <<< {} ({} ms)", requestId, response.getStatusCode(), duration);
-        log.debug("[REST-{}] <<< Response body:\n{}", requestId, json);
+        log.debug("[REST-{}] <<< {} ({} ms) Response body:\n{}", requestId, response.getStatusCode(), duration, json);
     }
 
     private String prettyPrint(String stringBody) {

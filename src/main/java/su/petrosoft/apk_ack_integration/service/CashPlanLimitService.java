@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.*;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getCplCodesOnlyByCurrentYearRequestDto;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getCreationInstancesFromFileResponse;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.creatingInstancesFromFileResponseDto;
 
 @Service
 @Slf4j
@@ -55,14 +55,14 @@ public class CashPlanLimitService {
 
             limitsFromExcel.removeAll(existedLimits);
             if (!limitsFromExcel.isEmpty()) {
-                Map<Dictionary, Map<String, Long>> codesMap = apkService.getCodesMap(
+                Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
                         KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
                 limitsFromExcel.stream()
                         .map(cpl -> apkService.createCashPlanLimit(cpl, codesMap))
                         .forEach(createdLimits::add);
             }
         }
-        return getCreationInstancesFromFileResponse(dtoList, createdLimits, CashPlanLimit::getId);
+        return creatingInstancesFromFileResponseDto(dtoList, createdLimits, CashPlanLimit::getId);
     }
 
     public CreatingInstancesFromFileResponseDto createFromUniBudgetExcel(MultipartFile file) {
@@ -76,13 +76,13 @@ public class CashPlanLimitService {
 
         List<CashPlanLimit> createdLimits = new ArrayList<>();
         if (!fromExcelCPL.isEmpty()) {
-            Map<Dictionary, Map<String, Long>> codesMap = apkService.getCodesMap(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
+            Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
 
             createdLimits = fromExcelCPL.stream()
                     .map(cpl -> apkService.createCashPlanLimit(cpl, codesMap))
                     .toList();
         }
-        return getCreationInstancesFromFileResponse(dtoList, createdLimits, CashPlanLimit::getId);
+        return creatingInstancesFromFileResponseDto(dtoList, createdLimits, CashPlanLimit::getId);
     }
 
     public UpdateCashPlanLimitResponseDto updateByXml() {
