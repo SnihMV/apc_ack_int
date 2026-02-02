@@ -1,5 +1,6 @@
 package su.petrosoft.apk_ack_integration.model.data;
 
+import java.util.AbstractMap.SimpleEntry;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
 import java.util.Map;
@@ -30,37 +31,22 @@ public interface DescriptedBudgetItemData extends BudgetItemData, DictionaryExtr
 
     String dopKrTitle();
 
-    String purposeTitle();
-
     String dopFkTitle();
 
-    @Override
-    default Map<Dictionary, String> dictionaryCodes() {
-        return Map.of(
-                KCSR, kcsr(),
-                KFSR, kfsr(),
-                KVSR, kvsr(),
-                KVR, kvr(),
-                KOSGU, kosgu(),
-                DOPEK, dopEk(),
-                DOPKR, dopKr(),
-                DOPFK, dopFk(),
-                PURPOSE, purpose()
-        );
-    }
+    String purposeTitle();
 
     @Override
-    default Map<Dictionary, String> dictionaryDescriptions() {
+    default Map<Dictionary, SimpleEntry<String, String>> getDictionaries() {
         return Map.of(
-                KCSR, kcsrTitle(),
-                KFSR, kfsrTitle(),
-                KVSR, kvsrTitle(),
-                KVR, kvrTitle(),
-                KOSGU, kosguTitle(),
-                DOPEK, dopEkTitle(),
-                DOPKR, dopKrTitle(),
-                DOPFK, dopFkTitle(),
-                PURPOSE, purposeTitle()
+            KVR, new SimpleEntry<>(kvr(), kvrTitle()),
+            KFSR, new SimpleEntry<>(kfsr(), kfsrTitle()),
+            KVSR, new SimpleEntry<>(kvsr(), kvsrTitle()),
+            KCSR, new SimpleEntry<>(kcsr(), kcsrTitle()),
+            KOSGU, new SimpleEntry<>(kosgu(), kosguTitle()),
+            DOPEK, new SimpleEntry<>(dopEk(), dopEkTitle()),
+            DOPKR, new SimpleEntry<>(dopKr(), dopKrTitle()),
+            DOPFK, new SimpleEntry<>(dopFk(), dopFkTitle()),
+            PURPOSE, new SimpleEntry<>(purpose(), purposeTitle())
         );
     }
 }

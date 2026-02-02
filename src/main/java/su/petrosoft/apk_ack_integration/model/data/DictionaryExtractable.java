@@ -1,12 +1,11 @@
 package su.petrosoft.apk_ack_integration.model.data;
 
-import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
-
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Map;
+import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
 public interface DictionaryExtractable {
 
-    Map<Dictionary, String> dictionaryCodes();
+    Map<Dictionary, SimpleEntry<String, String>> getDictionaries();
 
-    Map<Dictionary, String> dictionaryDescriptions();
 }
