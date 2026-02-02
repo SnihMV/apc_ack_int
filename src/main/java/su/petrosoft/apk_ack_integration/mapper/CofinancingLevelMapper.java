@@ -31,8 +31,8 @@ import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.START_DAT
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.TEMPLATE_ID;
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.YEAR_ATTR;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.getDictionaryCodeById;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictInstanceIdByCode;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryCodeById;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.toEpochMilli;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.toLocalDate;
 
@@ -55,8 +55,8 @@ public class CofinancingLevelMapper {
     public CofinancingLevel toEntity(InstanceDto created, Map<Dictionary, Map<String, Long>> codesMap) {
 
         List<Attribute<?>> attributes = created.attributes();
-        FinancingForm financingForm = finFormByCode(getDictionaryCodeById(codesMap, FINANCING_FORM, extractData(attributes, FIN_FORM_ATTR)));
-        OwnershipForm ownershipForm = ownFormByCode(getDictionaryCodeById(codesMap, OWNERSHIP_FORM, extractData(attributes, OWN_FORM_ATTR)));
+        FinancingForm financingForm = finFormByCode(dictionaryCodeById(codesMap, FINANCING_FORM, extractData(attributes, FIN_FORM_ATTR)));
+        OwnershipForm ownershipForm = ownFormByCode(dictionaryCodeById(codesMap, OWNERSHIP_FORM, extractData(attributes, OWN_FORM_ATTR)));
 
         return CofinancingLevel.builder()
                 .id(created.id())
@@ -72,8 +72,8 @@ public class CofinancingLevelMapper {
 
     public CofinancingLevel toEntity(List<Attribute<?>> attributes, Map<Dictionary, Map<String, Long>> codesMap) {
 
-        FinancingForm financingForm = finFormByCode(getDictionaryCodeById(codesMap, FINANCING_FORM, extractData(attributes, FIN_FORM_ATTR)));
-        OwnershipForm ownershipForm = ownFormByCode(getDictionaryCodeById(codesMap, OWNERSHIP_FORM, extractData(attributes, OWN_FORM_ATTR)));
+        FinancingForm financingForm = finFormByCode(dictionaryCodeById(codesMap, FINANCING_FORM, extractData(attributes, FIN_FORM_ATTR)));
+        OwnershipForm ownershipForm = ownFormByCode(dictionaryCodeById(codesMap, OWNERSHIP_FORM, extractData(attributes, OWN_FORM_ATTR)));
 
         return CofinancingLevel.builder()
                 .year(extractData(attributes, YEAR_ATTR))
@@ -87,8 +87,8 @@ public class CofinancingLevelMapper {
 
     public CreateInstanceRequestDto toCreatingDto(CofinancingLevel cl, Map<Dictionary, Map<String, Long>> codesMap) {
 
-        Long ownFormId = dictInstanceIdByCode(codesMap, OWNERSHIP_FORM, cl.getOwnershipForm().getCode());
-        Long finFormId = dictInstanceIdByCode(codesMap, FINANCING_FORM, cl.getFinancingForm().getCode());
+        Long ownFormId = dictionaryIdByCode(codesMap, OWNERSHIP_FORM, cl.getOwnershipForm().getCode());
+        Long finFormId = dictionaryIdByCode(codesMap, FINANCING_FORM, cl.getFinancingForm().getCode());
 
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()

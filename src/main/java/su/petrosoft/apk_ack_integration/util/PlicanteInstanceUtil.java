@@ -26,7 +26,7 @@ public class PlicanteInstanceUtil {
 
     public static final ZoneId MOSCOW_ZONE = ZoneId.of("Europe/Moscow");
 
-    public static <T> CreatingInstancesFromFileResponseDto getCreationInstancesFromFileResponse(
+    public static <T> CreatingInstancesFromFileResponseDto creatingInstancesFromFileResponseDto(
             List<?> dtoList,
             List<T> createdInstances,
             Function<T, Long> function
@@ -39,7 +39,7 @@ public class PlicanteInstanceUtil {
                         .toList());
     }
 
-    public static CreateInstanceRequestDto requestDtoToSaveDictionaryInstance(Dictionary type, String code, String description) {
+    public static CreateInstanceRequestDto creatingDictionaryInstanceRequestDto(Dictionary type, String code, String description) {
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()
                         .templateId(type.getTemplateId())
@@ -69,7 +69,7 @@ public class PlicanteInstanceUtil {
                         c -> {
                             String description = row.dictionaryDescriptions().get(dictionary);
                             Long createdId = restClient.createInstance(
-                                            requestDtoToSaveDictionaryInstance(dictionary, code, description))
+                                            creatingDictionaryInstanceRequestDto(dictionary, code, description))
                                     .id();
                             log.info("Added new {} instance. Code: [{}] id: [{}]", dictionary, code, createdId);
                             return createdId;
@@ -78,7 +78,7 @@ public class PlicanteInstanceUtil {
         }
     }
 
-    public static Long dictInstanceIdByCode(Map<Dictionary, Map<String, Long>> allCodes, Dictionary type, String code) {
+    public static Long dictionaryIdByCode(Map<Dictionary, Map<String, Long>> allCodes, Dictionary type, String code) {
         if (code == null || code.isEmpty()) {
             return type.getDefaultValue();
         }
@@ -89,7 +89,7 @@ public class PlicanteInstanceUtil {
                 .orElseThrow(() -> new RuntimeException("Not found code [%s] for type [%s]".formatted(code, type)));
     }
 
-    public static String getDictionaryCodeById(Map<Dictionary, Map<String, Long>> allCodes, Dictionary type, long id) {
+    public static String dictionaryCodeById(Map<Dictionary, Map<String, Long>> allCodes, Dictionary type, long id) {
         return allCodes.get(type).entrySet().stream()
                 .filter(entry -> entry.getValue() == id)
                 .findFirst()

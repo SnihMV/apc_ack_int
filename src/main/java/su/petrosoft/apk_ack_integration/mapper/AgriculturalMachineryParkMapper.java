@@ -28,7 +28,7 @@ import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUti
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.STATE_SUPPORT_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.TECH_STATE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.TEMPLATE_ID;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictInstanceIdByCode;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
 
 
 @Slf4j
@@ -61,15 +61,15 @@ public class AgriculturalMachineryParkMapper {
                         .attributes(List.of(
 //                                new LinkedAttribute(RECIPIENT_ATTR, park.getRecipientId()),
                                 new LinkedAttribute(INDICATOR_ATTR, indicateMap.get(park.getIndicator())),
-                                new LinkedAttribute(MACH_EQUIP_ATTR, dictInstanceIdByCode(codesMap, getType(park), park.getMachineryAndEquip())),
+                                new LinkedAttribute(MACH_EQUIP_ATTR, dictionaryIdByCode(codesMap, getType(park), park.getMachineryAndEquip())),
                                 new StringAttribute(BRAND_MODEL_ATTR, park.getBrandModel()),
                                 new LongAttribute(COUNT_ATTR, park.getCount()),
                                 new DoubleAttribute(POWER_ATTR, park.getPower()),
                                 new DoubleAttribute(COST_ATTR, park.getCost()),
-                                new LinkedAttribute(PROD_COUNTRY_ATTR, dictInstanceIdByCode(codesMap, PROD_COUNTRY, park.getProductionCountry())),
+                                new LinkedAttribute(PROD_COUNTRY_ATTR, dictionaryIdByCode(codesMap, PROD_COUNTRY, park.getProductionCountry())),
                                 new LongAttribute(PROD_YEAR_ATTR, park.getProductionYear()),
                                 new BooleanAttribute(STATE_SUPPORT_ATTR, park.getStateSupport()),
-                                new LinkedAttribute(TECH_STATE_ATTR, dictInstanceIdByCode(codesMap, TECH_STATE, park.getTechState()))
+                                new LinkedAttribute(TECH_STATE_ATTR, dictionaryIdByCode(codesMap, TECH_STATE, park.getTechState()))
                         ))
                         .build());
     }

@@ -66,7 +66,7 @@ public class BudgetItemService {
                     .incomingCount(rows.size())
                     .build();
         }
-        Map<Dictionary, Map<String, Long>> codesMap = apkService.getCodesMap(
+        Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
                 KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
         Set<CashPlanLimit> savedCplList = new LinkedHashSet<>();
         for (CashPlanLimitData row : uniqueRowsByCpl) {
@@ -99,7 +99,7 @@ public class BudgetItemService {
         log.info("Rows with unknown SP: [{}]", unknownSpRows.size());
 
         Set<SubsidyProgram> allSpFromDb = subsidyProgramService.getAllSpFromDb();
-        Map<Dictionary, Map<String, Long>> codesMap = apkService.getCodesMap(KCSR, DOPKR);
+        Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(KCSR, DOPKR);
         updateCodesMap(codesMap, unknownSpRows, plicanteRestClient);
         unknownSpRows.forEach(row -> rowProcessor.getOrCreateSubsidyProgram(row, allSpFromDb, codesMap));
         return createdSP;
@@ -123,7 +123,7 @@ public class BudgetItemService {
         Set<CashPlanLimit> existingCashPlanLimits = cashPlanLimitService.getLimitsForCurrentYear();
         Set<SubsidyProgram> existingSubsidyPrograms = subsidyProgramService.getAllSpFromDb();
 
-        Map<Dictionary, Map<String, Long>> codesMap = apkService.getCodesMap(
+        Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
                 KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE, OWNERSHIP_FORM);
         updateCodesMap(codesMap, notExistingFsRows, plicanteRestClient);
 
@@ -144,7 +144,7 @@ public class BudgetItemService {
             return new CreateBudgetItemsResponseDto(emptyMap());
         }
         log.info("[{}] BudgetItems from excel left as unique to be processed", rowsToProcess.size());
-        Map<Dictionary, Map<String, Long>> codesMap = apkService.getCodesMap(
+        Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
                 KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
         Set<SubsidyProgram> existingSpList = subsidyProgramService.getAllSpFromDb();
         log.info("Found [{}] Subsidy Programs in DB", existingSpList.size());

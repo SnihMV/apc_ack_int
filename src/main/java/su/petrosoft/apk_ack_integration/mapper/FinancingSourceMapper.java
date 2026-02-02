@@ -24,7 +24,7 @@ import static su.petrosoft.apk_ack_integration.model.enums.OwnershipForm.*;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.*;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractShortForm;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictInstanceIdByCode;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
 
 @Slf4j
 @Component
@@ -75,16 +75,16 @@ public class FinancingSourceMapper {
                         .templateId(TEMPLATE_ID)
                         .attributes(List.of(
                                 new LongAttribute(YEAR_ATTR, fs.getYear()),
-                                new LinkedAttribute(KVSR_ATTR, dictInstanceIdByCode(codesMap, KVSR, fs.getKvsr())),
-                                new LinkedAttribute(KFSR_ATTR, dictInstanceIdByCode(codesMap, KFSR, fs.getKfsr())),
-                                new LinkedAttribute(KCSR_ATTR, dictInstanceIdByCode(codesMap, KCSR, fs.getKcsr())),
-                                new LinkedAttribute(KVR_ATTR, dictInstanceIdByCode(codesMap, KVR, fs.getKvr())),
-                                new LinkedAttribute(KOSGU_ATTR, dictInstanceIdByCode(codesMap, KOSGU, fs.getKosgu())),
-                                new LinkedAttribute(DOPEK_ATTR, dictInstanceIdByCode(codesMap, DOPEK, fs.getDopEk())),
-                                new LinkedAttribute(DOPFK_ATTR, dictInstanceIdByCode(codesMap, DOPFK, fs.getDopFk())),
-                                new LinkedAttribute(DOPKR_ATTR, dictInstanceIdByCode(codesMap, DOPKR, fs.getDopKr())),
-                                new LinkedAttribute(PURPOSE_ATTR, dictInstanceIdByCode(codesMap, PURPOSE, fs.getPurpose())),
-                                new LinkedAttribute(OWNERSHIP_FORM_ATTR, dictInstanceIdByCode(codesMap, OWNERSHIP_FORM, fs.getOwnershipForm())),
+                                new LinkedAttribute(KVSR_ATTR, dictionaryIdByCode(codesMap, KVSR, fs.getKvsr())),
+                                new LinkedAttribute(KFSR_ATTR, dictionaryIdByCode(codesMap, KFSR, fs.getKfsr())),
+                                new LinkedAttribute(KCSR_ATTR, dictionaryIdByCode(codesMap, KCSR, fs.getKcsr())),
+                                new LinkedAttribute(KVR_ATTR, dictionaryIdByCode(codesMap, KVR, fs.getKvr())),
+                                new LinkedAttribute(KOSGU_ATTR, dictionaryIdByCode(codesMap, KOSGU, fs.getKosgu())),
+                                new LinkedAttribute(DOPEK_ATTR, dictionaryIdByCode(codesMap, DOPEK, fs.getDopEk())),
+                                new LinkedAttribute(DOPFK_ATTR, dictionaryIdByCode(codesMap, DOPFK, fs.getDopFk())),
+                                new LinkedAttribute(DOPKR_ATTR, dictionaryIdByCode(codesMap, DOPKR, fs.getDopKr())),
+                                new LinkedAttribute(PURPOSE_ATTR, dictionaryIdByCode(codesMap, PURPOSE, fs.getPurpose())),
+                                new LinkedAttribute(OWNERSHIP_FORM_ATTR, dictionaryIdByCode(codesMap, OWNERSHIP_FORM, fs.getOwnershipForm())),
                                 new LinkedAttribute(SUBSIDY_PROGRAM_ATTR, fs.getSubsidyProgramId()),
                                 new LinkedAttribute(CASH_PLAN_LIMIT_ATTR, fs.getCashPlanLimitId()),
                                 new StringAttribute(CONCAT_KBK_ATTR, fs.getConcatenatedKBK())
