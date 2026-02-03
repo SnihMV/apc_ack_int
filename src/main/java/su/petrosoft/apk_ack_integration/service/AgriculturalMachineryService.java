@@ -22,9 +22,11 @@ import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DIS_BEN_GEN;
@@ -162,9 +164,8 @@ public class AgriculturalMachineryService {
 
         // Инициализируем списки для каждого объекта (максимум 11 полей на объект)
         // Из JSON видно, что z идет от 1 до 11
-        Iterator<Map.Entry<String, JsonNode>> fields = dataNode.fields();
-        while (fields.hasNext()) {
-            Map.Entry<String, JsonNode> entry = fields.next();
+        Set<Map.Entry<String, JsonNode>> fields = dataNode.properties();
+        for(Map.Entry<String, JsonNode> entry :fields) {
             String fieldName = entry.getKey();
 
             if (fieldName.startsWith("value_1_")) {
@@ -178,7 +179,7 @@ public class AgriculturalMachineryService {
                         // Инициализируем список для объекта, если его еще нет
                         List<String> objectFields = result.computeIfAbsent(
                                 objectNumber,
-                                k -> new ArrayList<>(11)
+                                k -> new ArrayList<>(Collections.nCopies(10, null))
                         );
 
                         // Сохраняем значение по индексу z
@@ -218,16 +219,16 @@ public class AgriculturalMachineryService {
      */
     private AgriculturalMachineryPark createPark(List<String> fields) {
         return AgriculturalMachineryPark.builder()
-                .indicator(getField(fields, 1))
-                .machineryAndEquip(getField(fields, 2))
-                .brandModel(getField(fields, 3))
-                .count(parseLong(getField(fields, 4)))
-                .power(parseBigDecimal(getField(fields, 5)))
-                .cost(parseBigDecimal(getField(fields, 6)))
-                .productionCountry(getField(fields, 7))
-                .productionYear(parseLong(getField(fields, 8)))
-                .stateSupport(parseBoolean(getField(fields, 9)))
-                .techState(getField(fields, 10))
+                .indicator(getField(fields, 0))
+                .machineryAndEquip(getField(fields, 1))
+                .brandModel(getField(fields, 2))
+                .count(parseLong(getField(fields, 3)))
+                .power(parseBigDecimal(getField(fields, 4)))
+                .cost(parseBigDecimal(getField(fields, 5)))
+                .productionCountry(getField(fields, 6))
+                .productionYear(parseLong(getField(fields, 7)))
+                .stateSupport(parseBoolean(getField(fields, 8)))
+                .techState(getField(fields, 9))
                 .build();
     }
 

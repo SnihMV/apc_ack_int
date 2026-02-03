@@ -25,6 +25,7 @@ import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUti
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.POWER_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.PROD_COUNTRY_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.PROD_YEAR_ATTR;
+import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.RECIPIENT_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.STATE_SUPPORT_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.TECH_STATE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.TEMPLATE_ID;
@@ -59,7 +60,7 @@ public class AgriculturalMachineryParkMapper {
                 InstanceDto.builder()
                         .templateId(TEMPLATE_ID)
                         .attributes(List.of(
-//                                new LinkedAttribute(RECIPIENT_ATTR, park.getRecipientId()),
+                                new LinkedAttribute(RECIPIENT_ATTR, park.getRecipientId()),
                                 new LinkedAttribute(INDICATOR_ATTR, indicateMap.get(park.getIndicator())),
                                 new LinkedAttribute(MACH_EQUIP_ATTR, dictionaryIdByCode(codesMap, getType(park), park.getMachineryAndEquip())),
                                 new StringAttribute(BRAND_MODEL_ATTR, park.getBrandModel()),
@@ -76,8 +77,8 @@ public class AgriculturalMachineryParkMapper {
 
     private static Dictionary getType(AgriculturalMachineryPark park) {
         return Arrays.stream(values())
-                .filter(type -> type.getName().equals(park.getIndicator()))
+                .filter(type -> type.getName().equalsIgnoreCase(park.getIndicator()))
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(()-> new RuntimeException("No value present %s".formatted(park.getIndicator())));
     }
 }
