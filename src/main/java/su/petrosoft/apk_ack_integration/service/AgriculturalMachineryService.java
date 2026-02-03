@@ -179,7 +179,7 @@ public class AgriculturalMachineryService {
                         // Инициализируем список для объекта, если его еще нет
                         List<String> objectFields = result.computeIfAbsent(
                                 objectNumber,
-                                k -> new ArrayList<>(Collections.nCopies(10, null))
+                                k -> new ArrayList<>(Collections.nCopies(11, null))
                         );
 
                         // Сохраняем значение по индексу z
