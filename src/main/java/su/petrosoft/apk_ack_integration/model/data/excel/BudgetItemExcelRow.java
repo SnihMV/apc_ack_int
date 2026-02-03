@@ -5,6 +5,7 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.*;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import su.petrosoft.apk_ack_integration.model.data.DictionaryContainingValueObject;
@@ -16,6 +17,7 @@ public class BudgetItemExcelRow extends DictionaryContainingValueObject {
         KVSR, KFSR, KCSR, DOPKR, DOPEK, DOPFK, KVR, KOSGU, PURPOSE
     );
 
+
     private final static Set<String> REQUIRED_COLUMN_NAMES = new HashSet<>();
 
     static {
@@ -24,7 +26,7 @@ public class BudgetItemExcelRow extends DictionaryContainingValueObject {
                 .map(Dictionary::getName)
                 .collect(Collectors.toSet()));
         REQUIRED_COLUMN_NAMES.addAll(
-            Arrays.stream(BudgetItemRequiredFields.values())
+            Arrays.stream(BudgetItemNonDictionaryColumns.values())
                 .map(field -> field.getColumnName(LocalDate.now().getYear()))
                 .collect(Collectors.toSet())
         );

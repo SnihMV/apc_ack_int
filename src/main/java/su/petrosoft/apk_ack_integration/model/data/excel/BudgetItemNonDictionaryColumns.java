@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public enum BudgetItemRequiredFields {
+public enum BudgetItemNonDictionaryColumns {
     ASSIGN_TOT("Ассигнования {year} год"),
     ASSIGN_FED("Ассигнования Фед {year} год"),
     ASSIGN_REG("Ассигнования Рег {year} год"),

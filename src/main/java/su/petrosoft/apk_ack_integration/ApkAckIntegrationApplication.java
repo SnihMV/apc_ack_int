@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import su.petrosoft.apk_ack_integration.config.IntegrationProperties;
+import su.petrosoft.apk_ack_integration.model.data.excel.BudgetItemRow;
 import su.petrosoft.apk_ack_integration.service.ScriptService;
 
 @SpringBootApplication

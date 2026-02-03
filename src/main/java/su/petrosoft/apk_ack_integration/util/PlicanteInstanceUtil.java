@@ -59,15 +59,15 @@ public class PlicanteInstanceUtil {
         }
 
         for (DictionaryExtractable row : dictionaryExtractables) {
-            for (Dictionary dictionary : row.dictionaryCodes().keySet()) {
-                String code = row.dictionaryCodes().get(dictionary);
+            for (Dictionary dictionary : row.getDictionaries().keySet()) {
+                String code = row.getDictionaries().get(dictionary).getKey();
                 Map<String, Long> dictionaryMap = dictionaryCodesMap.get(dictionary);
                 if (dictionaryMap == null) {
                     continue;
                 }
                 dictionaryMap.computeIfAbsent(code,
                         c -> {
-                            String description = row.dictionaryDescriptions().get(dictionary);
+                            String description = row.getDictionaries().get(dictionary).getValue();
                             Long createdId = restClient.createInstance(
                                             creatingDictionaryInstanceRequestDto(dictionary, code, description))
                                     .id();
