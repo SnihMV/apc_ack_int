@@ -28,7 +28,7 @@ public class SubsidyProgram extends PlicanteInstance{
         SubsidyProgram that = (SubsidyProgram) o;
         return
 //                Objects.equals(code, that.code) &&
-                Objects.equals(level, that.level) &&
+//                Objects.equals(level, that.level) &&
                         Objects.equals(kcsr, that.kcsr) &&
                         Objects.equals(dopKr, that.dopKr);
     }
@@ -37,7 +37,7 @@ public class SubsidyProgram extends PlicanteInstance{
     public int hashCode() {
         return Objects.hash(
 //                code,
-                level,
+//                level,
                 kcsr,
                 dopKr
         );

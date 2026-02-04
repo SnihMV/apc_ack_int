@@ -13,11 +13,9 @@ import su.petrosoft.apk_ack_integration.model.data.CashPlanLimitData;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -62,10 +60,10 @@ public class UniBudgetRowService {
                 .filter(cpl -> cpl.equals(cplMapper.toEntity(row)))
                 .findFirst()
                 .map(CashPlanLimit::getId)
-                .ifPresentOrElse(financingSource::setCashPlanLimitId,
+                .ifPresentOrElse(id->financingSource.getCashPlanLimitIds().add(id),
                         () -> {
                             CashPlanLimit savedCpl = saveCashPlanLimit(row, codesMap);
-                            financingSource.setCashPlanLimitId(savedCpl.getId());
+                            financingSource.getCashPlanLimitIds().add(savedCpl.getId());
                         });
         allExistingSndLvlSP.stream()
                 .filter(sp -> sp.equals(spMapper.toSecondLevelSP(row)))
@@ -152,7 +150,7 @@ public class UniBudgetRowService {
             SubsidyProgram trdLevelSp,
             Map<Dictionary, Map<String, Long>> codesMap) {
         FinancingSource financingSource = fsMapper.toEntity(row);
-        financingSource.setCashPlanLimitId(savedCpl.getId());
+        financingSource.getCashPlanLimitIds().add(savedCpl.getId());
         financingSource.setSubsidyProgramId(trdLevelSp.getId());
         return apkService.createFinancingSource(financingSource, codesMap);
     }

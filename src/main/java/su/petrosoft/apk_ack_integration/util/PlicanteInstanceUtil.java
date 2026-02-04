@@ -1,5 +1,6 @@
 package su.petrosoft.apk_ack_integration.util;
 
+import java.util.Map.Entry;
 import lombok.extern.slf4j.Slf4j;
 import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
 import su.petrosoft.apk_ack_integration.model.data.DictionaryExtractable;
@@ -27,74 +28,93 @@ public class PlicanteInstanceUtil {
     public static final ZoneId MOSCOW_ZONE = ZoneId.of("Europe/Moscow");
 
     public static <T> CreatingInstancesFromFileResponseDto creatingInstancesFromFileResponseDto(
-            List<?> dtoList,
-            List<T> createdInstances,
-            Function<T, Long> function
+        List<?> dtoList,
+        List<T> createdInstances,
+        Function<T, Long> function
     ) {
         return new CreatingInstancesFromFileResponseDto(
-                dtoList.size(),
-                createdInstances.size(),
-                createdInstances.stream()
-                        .map(function)
-                        .toList());
+            dtoList.size(),
+            createdInstances.size(),
+            createdInstances.stream()
+                .map(function)
+                .toList());
     }
 
-    public static CreateInstanceRequestDto creatingDictionaryInstanceRequestDto(Dictionary type, String code, String description) {
+    public static CreateInstanceRequestDto creatingDictionaryInstanceRequestDto(Dictionary type,
+        String code, String description) {
         return new CreateInstanceRequestDto(
-                InstanceDto.builder()
-                        .templateId(type.getTemplateId())
-                        .attributes(List.of(
-                                new StringAttribute(type.getCodeAttrId(), code),
-                                new StringAttribute(type.getDescriptionAttrId(), description)))
-                        .build());
+            InstanceDto.builder()
+                .templateId(type.getTemplateId())
+                .attributes(List.of(
+                    new StringAttribute(type.getCodeAttrId(), code),
+                    new StringAttribute(type.getDescriptionAttrId(), description)))
+                .build());
     }
 
     public static void updateCodesMap(
-            Map<Dictionary, Map<String, Long>> dictionaryCodesMap,
-            List<? extends DictionaryExtractable> dictionaryExtractables,
-            PlicanteRestClient restClient
+        Map<Dictionary, Map<Long, Entry<String, String>>> dictionariesMap,
+        List<? extends DictionaryExtractable> dictionaryExtractables,
+        PlicanteRestClient restClient
     ) {
         if (dictionaryExtractables == null || dictionaryExtractables.isEmpty()) {
             return;
         }
 
         for (DictionaryExtractable row : dictionaryExtractables) {
-            for (Dictionary dictionary : row.dictionaryCodes().keySet()) {
-                String code = row.dictionaryCodes().get(dictionary);
-                Map<String, Long> dictionaryMap = dictionaryCodesMap.get(dictionary);
-                if (dictionaryMap == null) {
+            for (Dictionary dictionary : row.dictionaryData().keySet()) {
+                String code = row.dictionaryData().get(dictionary).getKey();
+                Map<Long, Entry<String, String>> dictionaryEntries = dictionariesMap.get(dictionary);
+                if (dictionaryEntries == null) {
                     continue;
                 }
-                dictionaryMap.computeIfAbsent(code,
-                        c -> {
-                            String description = row.dictionaryDescriptions().get(dictionary);
-                            Long createdId = restClient.createInstance(
-                                            creatingDictionaryInstanceRequestDto(dictionary, code, description))
-                                    .id();
-                            log.info("Added new {} instance. Code: [{}] id: [{}]", dictionary, code, createdId);
-                            return createdId;
-                        });
+                extracted(restClient, row, dictionary, dictionaryEntries, code);
+
             }
         }
     }
 
-    public static Long dictionaryIdByCode(Map<Dictionary, Map<String, Long>> allCodes, Dictionary type, String code) {
+    private static void extracted(
+        PlicanteRestClient restClient,
+        DictionaryExtractable row,
+        Dictionary dictionary,
+        Map<Long, Entry<String, String>> dictionaryEntries,
+        String code
+    ) {
+        for (Entry<Long, Entry<String, String>> entry : dictionaryEntries.entrySet()) {
+            if (entry.getValue().getKey().equalsIgnoreCase(code)) {
+                continue;
+            }
+                log.info("Creating new [{}] dictionary instance ...", dictionary);
+                String description = row.dictionaryData().get(dictionary).getValue();
+                Long createdId = restClient.createInstance(
+                        creatingDictionaryInstanceRequestDto(dictionary, code, description))
+                    .id();
+                log.info("Added new [{}] dictionary instance. Code: [{}], Description: [{}], id: [{}]",
+                    dictionary, code, description, createdId);
+        }
+    }
+
+    public static Long dictionaryIdByCode(Map<Dictionary, Map<String, Long>> allCodes,
+        Dictionary type, String code) {
         if (code == null || code.isEmpty()) {
             return type.getDefaultValue();
         }
         return allCodes.get(type).entrySet().stream()
-                .filter(entry -> entry.getKey().equalsIgnoreCase(code))
-                .findFirst()
-                .map(Map.Entry::getValue)
-                .orElseThrow(() -> new RuntimeException("Not found code [%s] for type [%s]".formatted(code, type)));
+            .filter(entry -> entry.getKey().equalsIgnoreCase(code))
+            .findFirst()
+            .map(Map.Entry::getValue)
+            .orElseThrow(() -> new RuntimeException(
+                "Not found code [%s] for type [%s]".formatted(code, type)));
     }
 
-    public static String dictionaryCodeById(Map<Dictionary, Map<String, Long>> allCodes, Dictionary type, long id) {
+    public static String dictionaryCodeById(Map<Dictionary, Map<String, Long>> allCodes,
+        Dictionary type, long id) {
         return allCodes.get(type).entrySet().stream()
-                .filter(entry -> entry.getValue() == id)
-                .findFirst()
-                .map(Map.Entry::getKey)
-                .orElseThrow(() -> new RuntimeException("Not found code for dictionary [%s] with id [%d]".formatted(type, id)));
+            .filter(entry -> entry.getValue() == id)
+            .findFirst()
+            .map(Map.Entry::getKey)
+            .orElseThrow(() -> new RuntimeException(
+                "Not found code for dictionary [%s] with id [%d]".formatted(type, id)));
     }
 
     public static Long toEpochMilli(LocalDate day) {
@@ -102,8 +122,8 @@ public class PlicanteInstanceUtil {
             return null;
         }
         return day.atStartOfDay(MOSCOW_ZONE)
-                .toInstant()
-                .toEpochMilli();
+            .toInstant()
+            .toEpochMilli();
     }
 
     public static LocalDate toLocalDate(Long epochMilli) {
@@ -111,52 +131,54 @@ public class PlicanteInstanceUtil {
             return null;
         }
         return Instant.ofEpochMilli(epochMilli)
-                .atZone(MOSCOW_ZONE)
-                .toLocalDate();
+            .atZone(MOSCOW_ZONE)
+            .toLocalDate();
     }
 
     @SuppressWarnings("unchecked")
     public static <T> T extractData(List<Attribute<?>> attributes, long attributeId) {
         return findAttribute(attributes, attributeId)
-                .map(attr -> (T) attr.getData())
-                .orElse(null);
+            .map(attr -> (T) attr.getData())
+            .orElse(null);
     }
 
     public static String extractShortForm(List<Attribute<?>> attributes, Long attributeId) {
         return findAttribute(attributes, attributeId)
-                .map(Attribute::getShortForm)
-                .orElse(null);
+            .map(Attribute::getShortForm)
+            .orElse(null);
     }
 
     @SuppressWarnings("unchecked")
     public static <T> List<T> extractAllData(List<Attribute<?>> attributes, long attributeId) {
         return findAttribute(attributes, attributeId)
-                .map(attr -> (List<T>) attr.getAllData())
-                .orElse(new ArrayList<>());
+            .map(attr -> (List<T>) attr.getAllData())
+            .orElse(new ArrayList<>());
     }
 
-    public static List<String> extractAllShortForms(List<Attribute<?>> attributes, long attributeId) {
+    public static List<String> extractAllShortForms(List<Attribute<?>> attributes,
+        long attributeId) {
         return findAttribute(attributes, attributeId)
-                .map(Attribute::getAllShortForms)
-                .orElse(Collections.emptyList());
+            .map(Attribute::getAllShortForms)
+            .orElse(Collections.emptyList());
     }
 
     public static Pair extractPair(List<Attribute<?>> attributes, long attributeId) {
         return findAttribute(attributes, attributeId)
-                .map(Attribute::getPair)
-                .orElse(null);
+            .map(Attribute::getPair)
+            .orElse(null);
     }
 
     public static List<Pair> extractAllPairs(List<Attribute<?>> attributes, long attributeId) {
         return findAttribute(attributes, attributeId)
-                .map(Attribute::getAllPairs)
-                .orElse(Collections.emptyList());
+            .map(Attribute::getAllPairs)
+            .orElse(Collections.emptyList());
     }
 
-    private static Optional<Attribute<?>> findAttribute(List<Attribute<?>> attributes, long attributeId) {
+    private static Optional<Attribute<?>> findAttribute(List<Attribute<?>> attributes,
+        long attributeId) {
         return attributes.stream()
-                .filter(a -> a.id().equals(attributeId))
-                .findFirst();
+            .filter(a -> a.id().equals(attributeId))
+            .findFirst();
     }
 
 }

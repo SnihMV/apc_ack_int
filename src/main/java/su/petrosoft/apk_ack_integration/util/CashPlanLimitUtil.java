@@ -1,9 +1,12 @@
 package su.petrosoft.apk_ack_integration.util;
 
+import static su.petrosoft.apk_ack_integration.model.enums.SqlOperation.*;
+
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
+import su.petrosoft.apk_ack_integration.model.enums.SqlOperation;
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 import su.petrosoft.apk_ack_integration.model.data.xml.rpl.PlDirectionLine;
 
@@ -18,6 +21,7 @@ public class CashPlanLimitUtil {
     public static final long TEMPLATE_ID = 9460;
     public static final String CPL_TITLE = "Лимиты кассового плана";
 
+    public static final long ID_ATTR = 1586;
     public static final long YEAR_ATTR = 3303;
     public static final long KVSR_ATTR = 1733;
     public static final long KFSR_ATTR = 1734;
@@ -28,6 +32,9 @@ public class CashPlanLimitUtil {
     public static final long DOPEK_ATTR = 1739;
     public static final long DOPKR_ATTR = 1740;
     public static final long PURPOSE_ATTR = 1751;
+    public static final long RECIPIENT_NAME = 4426;
+    public static final long RECIPIENT_INN = 4427;
+    public static final long RECIPIENT_KPP = 4428;
     public static final long TOTAL_LIMIT_ATTR = 1609;
     public static final long TOTAL_BALANCE_ATTR = 1611;
     public static final long FEDERAL_BUDGET_ATTR = 1828;
@@ -63,23 +70,43 @@ public class CashPlanLimitUtil {
 
     public static GetAttributesListRequestDto getCplCodesOnlyByCurrentYearRequestDto() {
         return GetAttributesListRequestDto.builder()
-                .templateId(TEMPLATE_ID)
-                .viewType(ViewType.DETAILED_FORM_VIEW)
-                .attributes(List.of(
-                        new RequestedAttribute(YEAR_ATTR),
-                        new RequestedAttribute(KVSR_ATTR),
-                        new RequestedAttribute(KFSR_ATTR),
-                        new RequestedAttribute(KCSR_ATTR),
-                        new RequestedAttribute(KVR_ATTR),
-                        new RequestedAttribute(KOSGU_ATTR),
-                        new RequestedAttribute(DOPFK_ATTR),
-                        new RequestedAttribute(DOPEK_ATTR),
-                        new RequestedAttribute(DOPKR_ATTR),
-                        new RequestedAttribute(PURPOSE_ATTR)
-                ))
-                .filter(new Filter(List.of(
-                        new LongFilterAttribute(YEAR_ATTR, LocalDate.now().getYear()))))
-                .build();
+            .templateId(TEMPLATE_ID)
+            .viewType(ViewType.DETAILED_FORM_VIEW)
+            .attributes(List.of(
+                new RequestedAttribute(YEAR_ATTR),
+                new RequestedAttribute(KVSR_ATTR),
+                new RequestedAttribute(KFSR_ATTR),
+                new RequestedAttribute(KCSR_ATTR),
+                new RequestedAttribute(KVR_ATTR),
+                new RequestedAttribute(KOSGU_ATTR),
+                new RequestedAttribute(DOPFK_ATTR),
+                new RequestedAttribute(DOPEK_ATTR),
+                new RequestedAttribute(DOPKR_ATTR),
+                new RequestedAttribute(PURPOSE_ATTR)
+            ))
+            .filter(new Filter(List.of(
+                new LongFilterAttribute(YEAR_ATTR, LocalDate.now().getYear()))))
+            .build();
+    }
+
+    public static GetAttributesListRequestDto requestDtoToFindCashPlanLimitsByIds(List<Long> ids) {
+        return GetAttributesListRequestDto.builder()
+            .templateId(TEMPLATE_ID)
+            .viewType(ViewType.DETAILED_FORM_VIEW)
+            .attributes(List.of(
+                new RequestedAttribute(YEAR_ATTR),
+                new RequestedAttribute(KVSR_ATTR),
+                new RequestedAttribute(KFSR_ATTR),
+                new RequestedAttribute(KCSR_ATTR),
+                new RequestedAttribute(KVR_ATTR),
+                new RequestedAttribute(KOSGU_ATTR),
+                new RequestedAttribute(DOPFK_ATTR),
+                new RequestedAttribute(DOPEK_ATTR),
+                new RequestedAttribute(DOPKR_ATTR),
+                new RequestedAttribute(PURPOSE_ATTR)
+            ))
+            .filter(new Filter(List.of(new LongFilterAttribute(ID_ATTR, List.of(IN), ids))))
+            .build();
     }
 
     public static BigDecimal getTotalLimit(PlDirectionLine line) {
@@ -96,7 +123,7 @@ public class CashPlanLimitUtil {
 
     public static BigDecimal sumOf(BigDecimal... items) {
         return Stream.of(items)
-                .filter(Objects::nonNull)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+            .filter(Objects::nonNull)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

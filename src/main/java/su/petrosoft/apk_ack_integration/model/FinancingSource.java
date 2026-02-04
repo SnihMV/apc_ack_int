@@ -1,5 +1,6 @@
 package su.petrosoft.apk_ack_integration.model;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,8 +25,17 @@ public class FinancingSource extends PlicanteInstance {
     private String purpose;
     private String ownershipForm;
     private Long subsidyProgramId;
-    private Long cashPlanLimitId;
+    private List<Long> cashPlanLimitIds;
     private String concatenatedKBK;
+
+    public SubsidyProgram extractSubsidyProgram() {
+        return SubsidyProgram.builder()
+            .id(subsidyProgramId)
+            .level(2L)
+            .kcsr(kcsr)
+            .dopKr(dopKr)
+            .build();
+    }
 
     @Override
     public boolean equals(Object o) {

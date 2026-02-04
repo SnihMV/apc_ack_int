@@ -1,6 +1,7 @@
 package su.petrosoft.apk_ack_integration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Map.Entry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -65,11 +66,10 @@ public class ApkPlicanteService {
                 .toList();
     }
 
-    public Set<FinancingSource> findFinancingSources(GetAttributesListRequestDto requestDto) {
+    public Set<FinancingSource> findFinancingSources(GetAttributesListRequestDto requestDto, Map<Dictionary, Map<String, Long>> codesMap) {
         List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(requestDto);
-        log.info("Received [{}] Financing Sources in DB", dtoList.size());
         return dtoList.stream()
-                .map(fsMapper::toEntity)
+                .map(dto->fsMapper.toEntity(dto, codesMap))
                 .collect(toSet());
     }
 
@@ -96,7 +96,7 @@ public class ApkPlicanteService {
     public FinancingSource createFinancingSource(FinancingSource financingSource, Map<Dictionary, Map<String, Long>> codesMap) {
         CreateInstanceRequestDto createDto = fsMapper.toCreatingDto(financingSource, codesMap);
         InstanceDto created = apkRestClient.createInstance(createDto);
-        return fsMapper.toEntity(created);
+        return fsMapper.toEntity(created, codesMap);
     }
 
     public CofinancingLevel createCofinancingLevel(CofinancingLevel cofinancingLevel, Map<Dictionary, Map<String, Long>> codesMap) {
@@ -123,12 +123,12 @@ public class ApkPlicanteService {
         return spMapper.toEntity(updatedSP);
     }
 
-    public Map<Dictionary, Map<String, Long>> getDictionariesCodesMap(Dictionary... dictionaries) {
+    public Map<Dictionary, Map<Long, Entry<String, String>>> getDictionariesCodesMap(Dictionary... dictionaries) {
         log.info("Receiving existing codes for types: {}...",
                 Arrays.stream(dictionaries).map(Enum::name).collect(joining(",")));
-        Map<Dictionary, Map<String, Long>> codes = new EnumMap<>(Dictionary.class);
+        Map<Dictionary, Map<Long, Entry<String, String>>> codes = new EnumMap<>(Dictionary.class);
         for (Dictionary dictionary : dictionaries) {
-            Map<String, Long> codesMap = dictionaryCodesMap(dictionary);
+            Map<Long, Entry<String, String>> codesMap = dictionaryCodesMap(dictionary);
             codes.put(dictionary, codesMap);
             log.debug("Received {} codes map:\n[{}]", dictionary.name(), codesMap);
         }
@@ -139,7 +139,7 @@ public class ApkPlicanteService {
         return codes;
     }
 
-    private Map<String, Long> dictionaryCodesMap(Dictionary dictionary) {
+    private Map<Long, Entry<String, String>> dictionaryCodesMap(Dictionary dictionary) {
         List<InstanceDto> list = apkRestClient.getTableAttributesList(gettingAllDictionaryCodesRequestDto(dictionary));
         return buildDictionaryCodesMap(dictionary, list);
     }
@@ -148,16 +148,19 @@ public class ApkPlicanteService {
         return GetAttributesListRequestDto.builder()
                 .templateId(dictionary.getTemplateId())
                 .attributes(List.of(
-                        new RequestedAttribute(dictionary.getCodeAttrId())))
+                        new RequestedAttribute(dictionary.getCodeAttrId()),
+                        new RequestedAttribute(dictionary.getDescriptionAttrId())
+                ))
                 .build();
     }
 
-    private static Map<String, Long> buildDictionaryCodesMap(Dictionary dictionary, List<InstanceDto> list) {
+    private static Map<Long, Entry<String, String>> buildDictionaryCodesMap(Dictionary dictionary, List<InstanceDto> list) {
         return list.stream()
                 .collect(toMap(
-                        dto -> extractData(dto.attributes(), dictionary.getCodeAttrId()),
-                        InstanceDto::id,
-                        (k1, k2) -> k1
-                ));
+                    InstanceDto::id,
+                    dto -> Map.entry(
+                        extractData(dto.attributes(), dictionary.getCodeAttrId()),
+                        extractData(dto.attributes(), dictionary.getDescriptionAttrId())
+                )));
     }
 }
