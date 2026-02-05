@@ -43,7 +43,7 @@ public class AgriculturalMachineryParkMapper {
                 .build();
     }
 
-    public CreateInstanceRequestDto toCreationDto(AgriculturalMachineryPark park, Map<Dictionary, Map<String, Long>> codesMap) {
+    public CreateInstanceRequestDto toCreationDto(AgriculturalMachineryPark park, Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
         Map<String, Long> indicateMap = Map.of(
                 "Тракторы всех марок", 537L,
                 "Комбайны зерноуборочные", 538L,

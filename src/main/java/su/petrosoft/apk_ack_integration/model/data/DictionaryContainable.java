@@ -5,8 +5,8 @@ import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
 import java.util.Map;
 
-public interface DictionaryExtractable {
+public interface DictionaryContainable {
 
-    Map<Dictionary, Entry<String, String>> dictionaryData();
+    Map<Dictionary, Entry<String, String>> dictionariesData();
 
 }

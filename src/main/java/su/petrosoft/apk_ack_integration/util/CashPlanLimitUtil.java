@@ -1,20 +1,21 @@
 package su.petrosoft.apk_ack_integration.util;
 
-import static su.petrosoft.apk_ack_integration.model.enums.SqlOperation.*;
-
+import su.petrosoft.apk_ack_integration.model.data.xml.rpl.PlDirectionLine;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
-import su.petrosoft.apk_ack_integration.model.enums.SqlOperation;
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
-import su.petrosoft.apk_ack_integration.model.data.xml.rpl.PlDirectionLine;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
+
+import static su.petrosoft.apk_ack_integration.model.enums.SqlOperation.IN;
 
 public class CashPlanLimitUtil {
 
@@ -89,7 +90,7 @@ public class CashPlanLimitUtil {
             .build();
     }
 
-    public static GetAttributesListRequestDto requestDtoToFindCashPlanLimitsByIds(List<Long> ids) {
+    public static GetAttributesListRequestDto requestDtoToFindCashPlanLimitsByIds(Collection<Long> ids) {
         return GetAttributesListRequestDto.builder()
             .templateId(TEMPLATE_ID)
             .viewType(ViewType.DETAILED_FORM_VIEW)
@@ -103,7 +104,9 @@ public class CashPlanLimitUtil {
                 new RequestedAttribute(DOPFK_ATTR),
                 new RequestedAttribute(DOPEK_ATTR),
                 new RequestedAttribute(DOPKR_ATTR),
-                new RequestedAttribute(PURPOSE_ATTR)
+                new RequestedAttribute(PURPOSE_ATTR),
+                new RequestedAttribute(RECIPIENT_INN)
+
             ))
             .filter(new Filter(List.of(new LongFilterAttribute(ID_ATTR, List.of(IN), ids))))
             .build();

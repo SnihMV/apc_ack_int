@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -20,7 +21,7 @@ public class SubsidyProgram extends PlicanteInstance{
     private String kcsr;
     private String dopKr;
     private String title;
-    private List<Long> cofinancingLevelIds;
+    private Collection<Long> cofinancingLevelIds;
 
     @Override
     public boolean equals(Object o) {

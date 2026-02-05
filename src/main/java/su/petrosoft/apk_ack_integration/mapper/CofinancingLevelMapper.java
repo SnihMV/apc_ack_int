@@ -52,7 +52,7 @@ public class CofinancingLevelMapper {
                 .build();
     }
 
-    public CofinancingLevel toEntity(InstanceDto created, Map<Dictionary, Map<String, Long>> codesMap) {
+    public CofinancingLevel toEntity(InstanceDto created, Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
 
         List<Attribute<?>> attributes = created.attributes();
         FinancingForm financingForm = finFormByCode(dictionaryCodeById(codesMap, FINANCING_FORM, extractData(attributes, FIN_FORM_ATTR)));
@@ -70,7 +70,7 @@ public class CofinancingLevelMapper {
                 .build();
     }
 
-    public CofinancingLevel toEntity(List<Attribute<?>> attributes, Map<Dictionary, Map<String, Long>> codesMap) {
+    public CofinancingLevel toEntity(List<Attribute<?>> attributes, Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
 
         FinancingForm financingForm = finFormByCode(dictionaryCodeById(codesMap, FINANCING_FORM, extractData(attributes, FIN_FORM_ATTR)));
         OwnershipForm ownershipForm = ownFormByCode(dictionaryCodeById(codesMap, OWNERSHIP_FORM, extractData(attributes, OWN_FORM_ATTR)));
@@ -85,7 +85,7 @@ public class CofinancingLevelMapper {
                 .build();
     }
 
-    public CreateInstanceRequestDto toCreatingDto(CofinancingLevel cl, Map<Dictionary, Map<String, Long>> codesMap) {
+    public CreateInstanceRequestDto toCreatingDto(CofinancingLevel cl, Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
 
         Long ownFormId = dictionaryIdByCode(codesMap, OWNERSHIP_FORM, cl.getOwnershipForm().getCode());
         Long finFormId = dictionaryIdByCode(codesMap, FINANCING_FORM, cl.getFinancingForm().getCode());

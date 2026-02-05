@@ -46,7 +46,9 @@ public class CashPlanLimitService {
         log.debug("Extracted from excel file: [{}] CashPlanLimit rows", dtoList.size());
         List<CashPlanLimit> createdLimits = new ArrayList<>();
         if (!dtoList.isEmpty()) {
-            Set<CashPlanLimit> existedLimits = apkService.findCashPlanLimits(getCplCodesOnlyByCurrentYearRequestDto());
+            Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap = apkService.getDictionariesCodesMap(
+                    KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
+            Set<CashPlanLimit> existedLimits = apkService.findCashPlanLimits(getCplCodesOnlyByCurrentYearRequestDto(), codesMap);
             log.debug("Found in Plicante {} CashPlanLimits in total", existedLimits.size());
 
             List<CashPlanLimit> limitsFromExcel = dtoList.stream()
@@ -55,8 +57,7 @@ public class CashPlanLimitService {
 
             limitsFromExcel.removeAll(existedLimits);
             if (!limitsFromExcel.isEmpty()) {
-                Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
-                        KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
+
                 limitsFromExcel.stream()
                         .map(cpl -> apkService.createCashPlanLimit(cpl, codesMap))
                         .forEach(createdLimits::add);
@@ -76,7 +77,7 @@ public class CashPlanLimitService {
 
         List<CashPlanLimit> createdLimits = new ArrayList<>();
         if (!fromExcelCPL.isEmpty()) {
-            Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
+            Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap = apkService.getDictionariesCodesMap(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
 
             createdLimits = fromExcelCPL.stream()
                     .map(cpl -> apkService.createCashPlanLimit(cpl, codesMap))
@@ -98,8 +99,10 @@ public class CashPlanLimitService {
 
         CashPlanLimit updatingCPL = mapper.toEntity(updatingXml);
         log.debug("Mapped to CashPlanLimit: [{}]", updatingCPL);
+        Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap = apkService.getDictionariesCodesMap(
+                KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
 
-        Set<CashPlanLimit> allCashPlanLimits = apkService.findCashPlanLimits(getCplCodesOnlyByCurrentYearRequestDto());
+        Set<CashPlanLimit> allCashPlanLimits = apkService.findCashPlanLimits(getCplCodesOnlyByCurrentYearRequestDto(),codesMap);
         log.debug("Exist [{}] CashPlanLimits for [{}] year in DB", allCashPlanLimits.size(), LocalDateTime.now().getYear());
 
         CashPlanLimit cplToUpdate = allCashPlanLimits.stream()
@@ -112,14 +115,16 @@ public class CashPlanLimitService {
         log.debug("Trying to update CashPlanLimit [{}]", cplToUpdate.getId());
         updatingCPL.setId(cplToUpdate.getId());
         updatingCPL.setVersion(cplToUpdate.getVersion());
-        CashPlanLimit updatedCpl = apkService.updateCashPlanLimit(updatingCPL);
+        CashPlanLimit updatedCpl = apkService.updateCashPlanLimit(updatingCPL, codesMap);
         log.info("CashPlanLimit [{}] updated", updatedCpl.getId());
         response.updatedIds().add(updatedCpl.getId());
         return response;
     }
 
     public Set<CashPlanLimit> getLimitsForCurrentYear() {
-        Set<CashPlanLimit> allSplByCurrentYear = apkService.findCashPlanLimits(getCplCodesOnlyByCurrentYearRequestDto());
+        Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap = apkService.getDictionariesCodesMap(
+                KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
+        Set<CashPlanLimit> allSplByCurrentYear = apkService.findCashPlanLimits(getCplCodesOnlyByCurrentYearRequestDto(), codesMap);
         log.info("Found [{}] Cash Plan Limits for [{}] year in DB", allSplByCurrentYear.size(), LocalDateTime.now().getYear());
         return allSplByCurrentYear;
     }
@@ -137,12 +142,14 @@ public class CashPlanLimitService {
         ArrayList<Long> updatedCplIds = new ArrayList<>();
         if (!intersection.isEmpty()) {
             log.info("[{}] CashPlanLimits found to be updated", intersection.size());
+            Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap = apkService.getDictionariesCodesMap(
+                    KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
             for (CashPlanLimit excelCpl : intersection) {
                 for (CashPlanLimit existingCpl : existingCurrentYearLimits) {
                     if (existingCpl.equals(excelCpl)) {
                         excelCpl.setId(existingCpl.getId());
                         excelCpl.setVersion(existingCpl.getVersion());
-                        CashPlanLimit updatedCpl = apkService.updateCashPlanLimit(excelCpl);
+                        CashPlanLimit updatedCpl = apkService.updateCashPlanLimit(excelCpl, codesMap);
                         updatedCplIds.add(updatedCpl.getId());
                     }
                 }

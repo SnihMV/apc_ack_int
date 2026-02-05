@@ -71,7 +71,7 @@ public class AgriculturalMachineryService {
                     .peek(park -> park.setRecipientId(report.getRecipientId()))
                     .forEach(park -> log.debug("Park [{}]", park));
 
-            Map<Dictionary, Map<String, Long>> codesMap = apkPlicanteService.getDictionariesCodesMap(
+            Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap = apkPlicanteService.getDictionariesCodesMap(
                     TR_V_M, KOM_ZER, KOM_KOR, MAS_SH, MAS_ZH, MAS_ZH_PT_KOR, DIS_BEN_GEN, MAS_KART, IZD_AVT_PR, TECH_FISHING, OTHER_TECH, PROD_COUNTRY, TECH_STATE);
             List<Long> savedIds = new ArrayList<>();
             for (AgriculturalMachineryPark park : agriculturalMachineryParks) {
