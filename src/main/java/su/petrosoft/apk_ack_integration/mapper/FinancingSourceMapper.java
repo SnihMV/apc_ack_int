@@ -125,13 +125,14 @@ public class FinancingSourceMapper {
                         .id(fs.getId())
                         .templateId(TEMPLATE_ID)
                         .version(fs.getVersion())
-                        .attributes(buildAttributeListToUpdateByCplList(fs))
+                        .attributes(buildAttributeListToUpdateByCplListAndSp(fs))
                         .build());
     }
 
-    private static List<Attribute<?>> buildAttributeListToUpdateByCplList(FinancingSource fs) {
+    private static List<Attribute<?>> buildAttributeListToUpdateByCplListAndSp(FinancingSource fs) {
         return List.of(
-                new LinkedAttribute(CASH_PLAN_LIMITS_ATTR, fs.getCashPlanLimitIds())
+                new LinkedAttribute(CASH_PLAN_LIMITS_ATTR, fs.getCashPlanLimitIds()),
+                new LinkedAttribute(SUBSIDY_PROGRAM_ATTR, fs.getSubsidyProgramId())
         );
     }
 

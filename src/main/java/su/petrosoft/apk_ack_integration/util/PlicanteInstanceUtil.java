@@ -4,6 +4,9 @@ import java.util.Collection;
 import java.util.Map.Entry;
 
 import lombok.extern.slf4j.Slf4j;
+import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Pair;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
@@ -40,8 +43,8 @@ public class PlicanteInstanceUtil {
                         .toList());
     }
 
-    public static CreateInstanceRequestDto creatingDictionaryInstanceRequestDto(Dictionary type,
-                                                                                String code, String description) {
+    public static CreateInstanceRequestDto creatingDictionaryInstanceRequestDto(
+            Dictionary type, String code, String description) {
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()
                         .templateId(type.getTemplateId())
@@ -50,6 +53,17 @@ public class PlicanteInstanceUtil {
                                 new StringAttribute(type.getDescriptionAttrId(), description)))
                         .build());
     }
+
+//    public static UpdateInstanceRequestDto requestDtoForUpdatingDictionaryDescription(Dictionary dictionary, long id, String description) {
+//        return new UpdateInstanceRequestDto(
+//                InstanceDto.builder()
+//                        .id(id)
+//                        .templateId(dictionary.getTemplateId())
+//                        .version(updatedSP.getVersion())
+//                        .attributes(List.of(
+//                                new LinkedAttribute(COFIN_LVL_ATTR, updatedSP.getCofinancingLevelIds())))
+//                        .build());
+//    }
 
     public static Long dictionaryIdByCode(Map<Dictionary, Map<Long, Entry<String, String>>> allCodes, Dictionary dictionary, String code) {
         return allCodes.get(dictionary).entrySet().stream()

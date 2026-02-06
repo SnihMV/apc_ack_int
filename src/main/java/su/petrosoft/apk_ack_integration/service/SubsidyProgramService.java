@@ -28,7 +28,7 @@ public class SubsidyProgramService {
     private final SubsidyProgramMapper spMapper;
 
     public Set<SubsidyProgram> getAllSecondLevelSpFromDb(Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
-        List<SubsidyProgram> allSecondLevelSpFromDB = apkService.findSubsidyPrograms(
+        Set<SubsidyProgram> allSecondLevelSpFromDB = apkService.findSubsidyPrograms(
                 requestDtoToFindSecondLevelSubsidyPrograms(), codesMap);
         log.debug("Found [{}] Subsidy Programs in DB with level 2", allSecondLevelSpFromDB.size());
         Set<SubsidyProgram> allValidSecondLvlSPFromDb = allSecondLevelSpFromDB.stream()

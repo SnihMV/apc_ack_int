@@ -66,14 +66,14 @@ public class ApkPlicanteService {
                 .collect(toSet());
     }
 
-    public List<SubsidyProgram> findSubsidyPrograms(
+    public Set<SubsidyProgram> findSubsidyPrograms(
             GetAttributesListRequestDto requestDto,
             Map<Dictionary, Map<Long, Entry<String, String>>> codesMap
             ) {
         List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(requestDto);
         return dtoList.stream()
                 .map(dto -> spMapper.toEntity(dto, codesMap))
-                .toList();
+                .collect(toSet());
     }
 
     public Set<FinancingSource> findFinancingSources(GetAttributesListRequestDto requestDto, Map<Dictionary, Map<Long, Entry<String, String>>> codesMap) {

@@ -33,12 +33,6 @@ public record LinkedAttribute(
 
     @Override
     @JsonIgnore
-    public LinkedValue getFirstValue() {
-        return Attribute.super.getFirstValue();
-    }
-
-    @Override
-    @JsonIgnore
     public Long getData() {
         LinkedValue firstValue = getFirstValue();
         return firstValue != null ? firstValue.data() : null;

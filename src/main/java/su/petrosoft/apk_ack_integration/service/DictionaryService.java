@@ -6,10 +6,7 @@ import org.springframework.stereotype.Service;
 import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
 import su.petrosoft.apk_ack_integration.model.data.DictionaryContainable;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
-import su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -53,7 +50,7 @@ public class DictionaryService {
     ) {
         for (Dictionary updatingDictionary : updatableDictionaries) {
             Map<Long, Map.Entry<String, String>> existingValues = existingDictionariesMap.get(updatingDictionary);
-            Optional<Long> createdId = createNewIfPresent(updatingDictionary, containable, existingValues.values());
+            Optional<Long> createdId = createNewIfPresent(updatingDictionary, containable, existingValues);
             createdId.ifPresent(id -> createdDictionaries.computeIfAbsent(updatingDictionary, k -> new HashSet<>()).add(id));
         }
     }
@@ -61,15 +58,31 @@ public class DictionaryService {
     private Optional<Long> createNewIfPresent(
             Dictionary dictionary,
             DictionaryContainable containable,
-            Collection<Map.Entry<String, String>> existingValues
+            Map<Long, Map.Entry<String, String>> existingValues
     ) {
         String code = containable.dictionariesData().get(dictionary).getKey();
         String description = containable.dictionariesData().get(dictionary).getValue();
-        return existingValues.stream()
-                .anyMatch(entry -> code.equalsIgnoreCase(entry.getKey()))
+//        for (Map.Entry<Long, Map.Entry<String, String>> entry : existingValues.entrySet()) {
+//            if (entry.getValue().getKey().equalsIgnoreCase(code)) {
+//                if (entry.getValue().getValue().equalsIgnoreCase(description) || description.isBlank()) {
+//                    continue;
+//                }
+//                updateDictionaryDescription(entry.getKey(), description);
+//            }
+//        }
+        return existingValues.entrySet().stream()
+                .anyMatch(entry -> code.equalsIgnoreCase(entry.getValue().getKey()))
                 ? Optional.empty()
                 : Optional.of(createNewDictionaryInstance(dictionary, code, description));
     }
+
+//    private long updateDictionaryDescription(
+//            Dictionary dictionary,
+//            Long key,
+//            String description) {
+//        restClient.getTableAttributesList()
+//restClient.updateInstance()
+//    }
 
     private long createNewDictionaryInstance(
             Dictionary dictionary,

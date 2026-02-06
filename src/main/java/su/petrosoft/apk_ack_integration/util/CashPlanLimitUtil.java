@@ -71,45 +71,46 @@ public class CashPlanLimitUtil {
 
     public static GetAttributesListRequestDto getCplCodesOnlyByCurrentYearRequestDto() {
         return GetAttributesListRequestDto.builder()
-            .templateId(TEMPLATE_ID)
-            .viewType(ViewType.DETAILED_FORM_VIEW)
-            .attributes(List.of(
-                new RequestedAttribute(YEAR_ATTR),
-                new RequestedAttribute(KVSR_ATTR),
-                new RequestedAttribute(KFSR_ATTR),
-                new RequestedAttribute(KCSR_ATTR),
-                new RequestedAttribute(KVR_ATTR),
-                new RequestedAttribute(KOSGU_ATTR),
-                new RequestedAttribute(DOPFK_ATTR),
-                new RequestedAttribute(DOPEK_ATTR),
-                new RequestedAttribute(DOPKR_ATTR),
-                new RequestedAttribute(PURPOSE_ATTR)
-            ))
-            .filter(new Filter(List.of(
-                new LongFilterAttribute(YEAR_ATTR, LocalDate.now().getYear()))))
-            .build();
+                .templateId(TEMPLATE_ID)
+                .viewType(ViewType.DETAILED_FORM_VIEW)
+                .attributes(List.of(
+                        new RequestedAttribute(YEAR_ATTR),
+                        new RequestedAttribute(KVSR_ATTR),
+                        new RequestedAttribute(KFSR_ATTR),
+                        new RequestedAttribute(KCSR_ATTR),
+                        new RequestedAttribute(KVR_ATTR),
+                        new RequestedAttribute(KOSGU_ATTR),
+                        new RequestedAttribute(DOPFK_ATTR),
+                        new RequestedAttribute(DOPEK_ATTR),
+                        new RequestedAttribute(DOPKR_ATTR),
+                        new RequestedAttribute(PURPOSE_ATTR),
+                        new RequestedAttribute(RECIPIENT_INN)
+                ))
+                .filter(new Filter(List.of(
+                        new LongFilterAttribute(YEAR_ATTR, LocalDate.now().getYear()))))
+                .build();
     }
 
     public static GetAttributesListRequestDto requestDtoToFindCashPlanLimitsByIds(Collection<Long> ids) {
         return GetAttributesListRequestDto.builder()
-            .templateId(TEMPLATE_ID)
-            .viewType(ViewType.DETAILED_FORM_VIEW)
-            .attributes(List.of(
-                new RequestedAttribute(YEAR_ATTR),
-                new RequestedAttribute(KVSR_ATTR),
-                new RequestedAttribute(KFSR_ATTR),
-                new RequestedAttribute(KCSR_ATTR),
-                new RequestedAttribute(KVR_ATTR),
-                new RequestedAttribute(KOSGU_ATTR),
-                new RequestedAttribute(DOPFK_ATTR),
-                new RequestedAttribute(DOPEK_ATTR),
-                new RequestedAttribute(DOPKR_ATTR),
-                new RequestedAttribute(PURPOSE_ATTR),
-                new RequestedAttribute(RECIPIENT_INN)
+                .templateId(TEMPLATE_ID)
+                .viewType(ViewType.DETAILED_FORM_VIEW)
+                .attributes(List.of(
+                        new RequestedAttribute(YEAR_ATTR),
+                        new RequestedAttribute(KVSR_ATTR),
+                        new RequestedAttribute(KFSR_ATTR),
+                        new RequestedAttribute(KCSR_ATTR),
+                        new RequestedAttribute(KVR_ATTR),
+                        new RequestedAttribute(KOSGU_ATTR),
+                        new RequestedAttribute(DOPFK_ATTR),
+                        new RequestedAttribute(DOPEK_ATTR),
+                        new RequestedAttribute(DOPKR_ATTR),
+                        new RequestedAttribute(PURPOSE_ATTR),
+                        new RequestedAttribute(RECIPIENT_INN)
 
-            ))
-            .filter(new Filter(List.of(new LongFilterAttribute(ID_ATTR, List.of(IN), ids))))
-            .build();
+                ))
+                .filter(new Filter(List.of(new LongFilterAttribute(ID_ATTR, List.of(IN), ids))))
+                .build();
     }
 
     public static BigDecimal getTotalLimit(PlDirectionLine line) {
@@ -126,7 +127,7 @@ public class CashPlanLimitUtil {
 
     public static BigDecimal sumOf(BigDecimal... items) {
         return Stream.of(items)
-            .filter(Objects::nonNull)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

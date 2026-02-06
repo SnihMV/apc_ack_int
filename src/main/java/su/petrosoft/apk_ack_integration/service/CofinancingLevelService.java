@@ -63,7 +63,7 @@ public class CofinancingLevelService {
         Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap = plicanteService.getDictionariesCodesMap(OWNERSHIP_FORM,
                 FINANCING_FORM);
         log.info("Getting Existing Subsidy_Programs ...");
-        List<SubsidyProgram> existingSpList = plicanteService.findSubsidyPrograms(
+        Set<SubsidyProgram> existingSpList = plicanteService.findSubsidyPrograms(
                 requestDtoToFindSubsidyProgramsForCreationCofinancingLevels(), codesMap);
         log.info("Existing Subsidy_Programs count: [{}]", existingSpList.size());
 
