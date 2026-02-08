@@ -60,8 +60,9 @@ public class CofinancingLevelService {
                         spMapper::toEntity,
                         mapping(cflMapper::toEntity, toSet())));
         log.info("Found [{}] Subsidy_Programs in Excel file", excelEntitiesMap.size());
-        Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap = plicanteService.getDictionariesCodesMap(OWNERSHIP_FORM,
-                FINANCING_FORM);
+        Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap = plicanteService.getDictionariesCodesMap(
+            Set.of(OWNERSHIP_FORM,
+                FINANCING_FORM));
         log.info("Getting Existing Subsidy_Programs ...");
         Set<SubsidyProgram> existingSpList = plicanteService.findSubsidyPrograms(
                 requestDtoToFindSubsidyProgramsForCreationCofinancingLevels(), codesMap);

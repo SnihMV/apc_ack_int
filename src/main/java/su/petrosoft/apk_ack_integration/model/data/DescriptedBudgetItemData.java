@@ -15,7 +15,7 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVSR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.PURPOSE;
 
-public interface DescriptedBudgetItemData extends BudgetItemData, DictionaryContainable {
+public interface DescriptedBudgetItemData extends BudgetItemData, DictionaryContaining {
 
     String kfsrTitle();
 

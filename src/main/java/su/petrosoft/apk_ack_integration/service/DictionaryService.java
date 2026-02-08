@@ -1,10 +1,11 @@
 package su.petrosoft.apk_ack_integration.service;
 
+import java.util.Map.Entry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
-import su.petrosoft.apk_ack_integration.model.data.DictionaryContainable;
+import su.petrosoft.apk_ack_integration.model.data.DictionaryContaining;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
 import java.util.HashMap;
@@ -22,18 +23,24 @@ import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
 public class DictionaryService {
 
     private final PlicanteRestClient restClient;
+    private final ApkPlicanteService apkPlicanteService;
 
     public Map<Dictionary, Set<Long>> updateCodesMap(
             Map<Dictionary, Map<Long, Map.Entry<String, String>>> existingDictionariesMap,
-            List<? extends DictionaryContainable> dictionaryContainers
+            List<? extends DictionaryContaining> rows
     ) {
+        if (rows != null && !rows.isEmpty()) {
+            Set<Dictionary> dictionaries = rows.get(0).dictionariesData().keySet();
+            Map<Dictionary, Map<Long, Entry<String, String>>> dictionariesCodesMap = apkPlicanteService.getDictionariesCodesMap(
+                dictionaries);
+        }
         log.info("Find new dictionaries data ...");
         Map<Dictionary, Set<Long>> createdDictionaries = new HashMap<>();
-        if (dictionaryContainers != null && !dictionaryContainers.isEmpty()) {
+        if (rows != null && !rows.isEmpty()) {
             Set<Dictionary> updatableDictionaries = new HashSet<>(existingDictionariesMap.keySet());
-            updatableDictionaries.retainAll(dictionaryContainers.get(0).dictionariesData().keySet());
+            updatableDictionaries.retainAll(rows.get(0).dictionariesData().keySet());
             if (!updatableDictionaries.isEmpty()) {
-                for (DictionaryContainable containable : dictionaryContainers) {
+                for (DictionaryContaining containable : rows) {
                     updateDictionariesByContainableObject(containable, updatableDictionaries, existingDictionariesMap, createdDictionaries);
                 }
             }
@@ -43,7 +50,7 @@ public class DictionaryService {
     }
 
     private void updateDictionariesByContainableObject(
-            DictionaryContainable containable,
+            DictionaryContaining containable,
             Set<Dictionary> updatableDictionaries,
             Map<Dictionary, Map<Long, Map.Entry<String, String>>> existingDictionariesMap,
             Map<Dictionary, Set<Long>> createdDictionaries
@@ -57,7 +64,7 @@ public class DictionaryService {
 
     private Optional<Long> createNewIfPresent(
             Dictionary dictionary,
-            DictionaryContainable containable,
+            DictionaryContaining containable,
             Map<Long, Map.Entry<String, String>> existingValues
     ) {
         String code = containable.dictionariesData().get(dictionary).getKey();

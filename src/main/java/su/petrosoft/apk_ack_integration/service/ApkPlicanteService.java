@@ -24,6 +24,7 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequest
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.model.enums.ReportType;
@@ -123,35 +124,35 @@ public class ApkPlicanteService {
         return cflMapper.toEntity(created, codesMap);
     }
 
-    public CashPlanLimit updateCashPlanLimit(CashPlanLimit updatedCpl, Map<Dictionary, Map<Long, Entry<String, String>>> codesMap) {
+    public long updateCashPlanLimit(CashPlanLimit updatedCpl, Map<Dictionary, Map<Long, Entry<String, String>>> codesMap) {
         UpdateInstanceRequestDto updateDto = cplMapper.toUpdateDto(updatedCpl);
-        InstanceDto updatedInstance = apkRestClient.updateInstance(updateDto);
-        return cplMapper.toEntity(updatedInstance, codesMap);
+        UpdateInstanceResponseDto updatedInstance = apkRestClient.updateInstance(updateDto);
+        return updatedInstance.id();
     }
 
-    public FinancingSource updateFinancingSource(FinancingSource updatedFs, Map<Dictionary, Map<Long, Entry<String, String>>> codesMap) {
+    public long updateFinancingSource(FinancingSource updatedFs, Map<Dictionary, Map<Long, Entry<String, String>>> codesMap) {
         log.info("Updating Financing_Source [{}] ...", updatedFs.getId());
-        UpdateInstanceRequestDto updatingDto = fsMapper.toUpdateDto(updatedFs);
-        InstanceDto updatedInstance = apkRestClient.updateInstance(updatingDto);
-        log.info("Financing_Source [{}] updated", updatingDto.instance().id());
-        return fsMapper.toEntity(updatedInstance, codesMap);
+        UpdateInstanceRequestDto requestDto = fsMapper.toUpdateDto(updatedFs);
+        UpdateInstanceResponseDto responseDto = apkRestClient.updateInstance(requestDto);
+        log.info("Financing_Source [{}] updated", responseDto.id());
+        return responseDto.id();
     }
 
-    public CropProductionMainForm updateCropProductionMainForm(CropProductionMainForm mainForm) {
-        UpdateInstanceRequestDto dto = cpmfMapper.toUpdateDto(mainForm);
-        InstanceDto instanceDto = apkRestClient.updateInstance(dto);
-        return cpmfMapper.toEntity(instanceDto);
+    public UpdateInstanceResponseDto updateCropProductionMainForm(CropProductionMainForm mainForm) {
+        UpdateInstanceRequestDto requestDto = cpmfMapper.toUpdateDto(mainForm);
+        UpdateInstanceResponseDto responseDto = apkRestClient.updateInstance(requestDto);
+        return responseDto;
     }
 
-    public SubsidyProgram updateSubsidyProgram(SubsidyProgram subsidyProgram, Map<Dictionary, Map<Long, Entry<String, String>>> codesMap) {
+    public UpdateInstanceResponseDto updateSubsidyProgram(SubsidyProgram subsidyProgram, Map<Dictionary, Map<Long, Entry<String, String>>> codesMap) {
         UpdateInstanceRequestDto dto = spMapper.toUpdatingDto(subsidyProgram);
-        InstanceDto updatedSP = apkRestClient.updateInstance(dto);
-        return spMapper.toEntity(updatedSP, codesMap);
+        UpdateInstanceResponseDto responseDto = apkRestClient.updateInstance(dto);
+        return responseDto;
     }
 
-    public Map<Dictionary, Map<Long, Entry<String, String>>> getDictionariesCodesMap(Dictionary... dictionaries) {
+    public Map<Dictionary, Map<Long, Entry<String, String>>> getDictionariesCodesMap(Set<Dictionary> dictionaries) {
         log.info("Receiving existing codes for types: {}...",
-                Arrays.stream(dictionaries).map(Enum::name).collect(joining(",")));
+                dictionaries.stream().map(Enum::name).collect(joining(",")));
         Map<Dictionary, Map<Long, Entry<String, String>>> codes = new EnumMap<>(Dictionary.class);
         for (Dictionary dictionary : dictionaries) {
             Map<Long, Entry<String, String>> codesMap = dictionaryCodesMap(dictionary);

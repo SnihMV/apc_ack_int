@@ -25,4 +25,4 @@ integration:
 
 logging:
   level:
-    su.petrosoft.apk_ack_integration: INFO
+    su.petrosoft.apk_ack_integration: DEBUG

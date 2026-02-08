@@ -32,7 +32,9 @@ public class FinancingSourceUtil {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(ViewType.DETAILED_FORM_VIEW)
-                .filter(new Filter(List.of(new LongFilterAttribute(YEAR_ATTR, LocalDateTime.now().getYear()))))
+                .filter(new Filter(List.of(
+                    new LongFilterAttribute(YEAR_ATTR, LocalDateTime.now().getYear())
+                )))
                 .build();
     }
 }

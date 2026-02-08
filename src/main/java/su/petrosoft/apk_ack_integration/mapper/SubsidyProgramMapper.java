@@ -40,17 +40,18 @@ public class SubsidyProgramMapper {
 
     public SubsidyProgram toEntity(InstanceDto dto, Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
         List<Attribute<?>> attributes = dto.attributes();
+        long level = extractData(attributes, LEVEL_ATTR);
         return SubsidyProgram.builder()
-                .id(dto.id())
-                .version(dto.version())
-                .title(extractData(attributes, NAME_ATTR))
+            .id(dto.id())
+            .version(dto.version())
+            .title(extractData(attributes, NAME_ATTR))
 //                .code(extractData(attributes, CODE_ATTR))
-                .level(extractData(attributes, LEVEL_ATTR))
-                .parentId(extractData(attributes, PARENT_ATTR))
-                .kcsr(dictionaryCodeById(codesMap, KCSR, extractData(attributes, KCSR_ATTR)))
-                .dopKr(dictionaryCodeById(codesMap, DOPKR, extractData(attributes, DOPKR_ATTR)))
-                .cofinancingLevelIds(extractAllData(attributes, COFIN_LVL_ATTR))
-                .build();
+            .level(level)
+            .parentId(extractData(attributes, PARENT_ATTR))
+            .kcsr(dictionaryCodeById(codesMap, KCSR, extractData(attributes, KCSR_ATTR)))
+            .dopKr(level == 2 ? dictionaryCodeById(codesMap, DOPKR, extractData(attributes, DOPKR_ATTR)) : null)
+            .cofinancingLevelIds(extractAllData(attributes, COFIN_LVL_ATTR))
+            .build();
     }
 
 //    public SubsidyProgram toFirstLevelSP(DescriptedBudgetItemData dto) {

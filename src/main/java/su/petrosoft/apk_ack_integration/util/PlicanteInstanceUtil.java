@@ -73,10 +73,7 @@ public class PlicanteInstanceUtil {
                 .orElseThrow(() -> new RuntimeException("Not found code [%s] for dictionary [%s]".formatted(code, dictionary)));
     }
 
-    public static String dictionaryCodeById(Map<Dictionary, Map<Long, Entry<String, String>>> allCodes, Dictionary dictionary, Long id) {
-        if (id == null) {
-            return null;
-        }
+    public static String dictionaryCodeById(Map<Dictionary, Map<Long, Entry<String, String>>> allCodes, Dictionary dictionary, long id) {
         return allCodes.get(dictionary).entrySet().stream()
                 .filter(entry -> entry.getKey().equals(id))
                 .findFirst()

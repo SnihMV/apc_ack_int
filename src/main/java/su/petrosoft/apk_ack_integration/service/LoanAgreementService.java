@@ -1,6 +1,7 @@
 package su.petrosoft.apk_ack_integration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -76,7 +77,8 @@ public class LoanAgreementService {
             log.warn("Third level subsidy programs not found");
             return;
         }
-        Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap = apkPlicanteService.getDictionariesCodesMap(KCSR, DOPKR);
+        Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap = apkPlicanteService.getDictionariesCodesMap(
+            Set.of(KCSR, DOPKR));
         Map<SubsidyProgram, Long> spMap = foundSpInstances.stream()
                 .map(dto->spMapper.toEntity(dto,codesMap))
                 .collect(Collectors.toMap(

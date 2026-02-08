@@ -14,6 +14,7 @@ import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
@@ -72,7 +73,9 @@ public class AgriculturalMachineryService {
                     .forEach(park -> log.debug("Park [{}]", park));
 
             Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap = apkPlicanteService.getDictionariesCodesMap(
-                    TR_V_M, KOM_ZER, KOM_KOR, MAS_SH, MAS_ZH, MAS_ZH_PT_KOR, DIS_BEN_GEN, MAS_KART, IZD_AVT_PR, TECH_FISHING, OTHER_TECH, PROD_COUNTRY, TECH_STATE);
+                Set.of(
+                    TR_V_M, KOM_ZER, KOM_KOR, MAS_SH, MAS_ZH, MAS_ZH_PT_KOR, DIS_BEN_GEN, MAS_KART,
+                    IZD_AVT_PR, TECH_FISHING, OTHER_TECH, PROD_COUNTRY, TECH_STATE));
             List<Long> savedIds = new ArrayList<>();
             for (AgriculturalMachineryPark park : agriculturalMachineryParks) {
                 CreateInstanceRequestDto creationDto = ampMapper.toCreationDto(park, codesMap);
@@ -102,9 +105,8 @@ public class AgriculturalMachineryService {
                                     new LinkedAttribute(MACHINE_PARK_ATTR, savedIds)))
                             .build());
             String s1 = objectMapper.writeValueAsString(updatingDto);
-            log.debug("===Updating JSON {}", s1);
-            InstanceDto updated = plicanteRestClient.updateInstance(updatingDto);
-            log.debug("Updated Recipient: [{}]", updated);
+            UpdateInstanceResponseDto updated = plicanteRestClient.updateInstance(updatingDto);
+            log.debug("Recipient [{}] updated", updated.id());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
