@@ -7,15 +7,16 @@ import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyProgramMapper;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
+import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toSet;
-import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.getAllSubsidyProgramsRequestDto;
-import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.getSecondLevelSpRequestDto;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToFindAllSubsidyPrograms;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToFindSecondLevelSubsidyPrograms;
 
 @Service
 @Slf4j
@@ -24,10 +25,11 @@ public class SubsidyProgramService {
 
     private final ApkPlicanteService apkService;
     private final PlicanteRestClient plicanteRestClient;
-    private final SubsidyProgramMapper subsidyProgramMapper;
+    private final SubsidyProgramMapper spMapper;
 
-    public Set<SubsidyProgram> getAllSecondLevelSpFromDb() {
-        List<SubsidyProgram> allSecondLevelSpFromDB = apkService.findSubsidyPrograms(getSecondLevelSpRequestDto());
+    public Set<SubsidyProgram> getAllSecondLevelSpFromDb(Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
+        Set<SubsidyProgram> allSecondLevelSpFromDB = apkService.findSubsidyPrograms(
+                requestDtoToFindSecondLevelSubsidyPrograms(), codesMap);
         log.debug("Found [{}] Subsidy Programs in DB with level 2", allSecondLevelSpFromDB.size());
         Set<SubsidyProgram> allValidSecondLvlSPFromDb = allSecondLevelSpFromDB.stream()
                 .filter(SubsidyProgramUtil::validate)
@@ -46,14 +48,14 @@ public class SubsidyProgramService {
 //        return allValidThirdLvlSPFromDb;
 //    }
 
-    public Set<SubsidyProgram> getAllSpFromDb() {
-        List<InstanceDto> dtoList = plicanteRestClient.getTableAttributesList(getAllSubsidyProgramsRequestDto());
-        log.debug("Found [{}] Subsidy Programs in DB overall", dtoList.size());
-        Set<SubsidyProgram> resultSet = dtoList.stream()
-                .map(subsidyProgramMapper::toEntity)
-                .filter(SubsidyProgramUtil::validate)
-                .collect(Collectors.toSet());
-        log.info("Found [{}] valid Subsidy Programs in DB overall", resultSet.size());
-        return resultSet;
+    public Set<SubsidyProgram> getAllSubsidyProgram(Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
+        log.info("Getting all Subsidy_Programs ...");
+        List<InstanceDto> dtoList = plicanteRestClient.getTableAttributesList(
+                requestDtoToFindAllSubsidyPrograms());
+        Set<SubsidyProgram> subsidyPrograms = dtoList.stream()
+                .map(dto -> spMapper.toEntity(dto, codesMap))
+                .collect(toSet());
+        log.info("Found Subsidy_Programs count: [{}]", subsidyPrograms.size());
+        return subsidyPrograms;
     }
 }

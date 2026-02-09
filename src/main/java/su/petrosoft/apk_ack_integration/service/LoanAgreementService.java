@@ -1,6 +1,7 @@
 package su.petrosoft.apk_ack_integration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import su.petrosoft.apk_ack_integration.model.dto.nifi.GetDataFromEgrulByInnDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.data.xml.CreatingSubsidiesAmountsXml;
+import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +29,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static su.petrosoft.apk_ack_integration.model.data.xml.CreatingSubsidiesAmountsXml.SubsidyAmountXml;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.*;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessage.NO_CONTENT;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.*;
@@ -74,9 +77,10 @@ public class LoanAgreementService {
             log.warn("Third level subsidy programs not found");
             return;
         }
-
+        Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap = apkPlicanteService.getDictionariesCodesMap(
+            Set.of(KCSR, DOPKR));
         Map<SubsidyProgram, Long> spMap = foundSpInstances.stream()
-                .map(spMapper::toEntity)
+                .map(dto->spMapper.toEntity(dto,codesMap))
                 .collect(Collectors.toMap(
                         Function.identity(),
                         SubsidyProgram::getId));

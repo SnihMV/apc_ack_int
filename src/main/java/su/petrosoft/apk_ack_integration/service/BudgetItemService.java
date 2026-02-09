@@ -1,5 +1,9 @@
 package su.petrosoft.apk_ack_integration.service;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map.Entry;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -39,8 +43,9 @@ import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CPL_TITLE;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getCplCodesOnlyByCurrentYearRequestDto;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.FS_TITLE;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.getAllFsByCurrentYearRequestDto;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.updateCodesMap;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.SP_TITLE;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToFindAllSubsidyPrograms;
 
 @Slf4j
 @Component
@@ -48,6 +53,7 @@ import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.SP_TITLE;
 public class BudgetItemService {
 
     private final ApkPlicanteService apkService;
+    private final DictionaryService dictionaryService;
     private final UniBudgetRowService rowProcessor;
     private final CashPlanLimitMapper cplMapper;
     private final SubsidyProgramMapper spMapper;
@@ -60,14 +66,16 @@ public class BudgetItemService {
         if (rows.isEmpty()) {
             return CreatingInstancesFromFileResponseDto.builder().build();
         }
-        List<CashPlanLimitData> uniqueRowsByCpl = getNotExistedCplRows(rows);
+        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap = apkService.getDictionariesCodesMap(
+            Set.of(
+                KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
+        List<CashPlanLimitData> uniqueRowsByCpl = getNotExistedCplRows(rows, codesMap);
         if (uniqueRowsByCpl.isEmpty()) {
             return CreatingInstancesFromFileResponseDto.builder()
                     .incomingCount(rows.size())
                     .build();
         }
-        Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
-                KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
+
         Set<CashPlanLimit> savedCplList = new LinkedHashSet<>();
         for (CashPlanLimitData row : uniqueRowsByCpl) {
             savedCplList.add(rowProcessor.saveCashPlanLimit(row, codesMap));
@@ -81,10 +89,14 @@ public class BudgetItemService {
                 .build();
     }
 
-    public Set<SubsidyProgram> createSubsidyProgramsTree(List<DescriptedBudgetItemData> rowDtoList) {
+    public Set<SubsidyProgram> createSubsidyProgramsTree(
+            List<DescriptedBudgetItemData> rowDtoList) {
 
-        Set<SubsidyProgram> existingSndLvlSubsidyPrograms = subsidyProgramService.getAllSecondLevelSpFromDb();
-        log.info("Found [{}] Subsidy Programs in DB with level 2", existingSndLvlSubsidyPrograms.size());
+        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap = apkService.getDictionariesCodesMap(
+            Set.of(KCSR, DOPKR));
+        Set<SubsidyProgram> existingSndLvlSubsidyPrograms = subsidyProgramService.getAllSecondLevelSpFromDb(codesMap);
+        log.info("Found [{}] Subsidy Programs in DB with level 2",
+                existingSndLvlSubsidyPrograms.size());
 
         List<DescriptedBudgetItemData> unknownSpRows = rowDtoList.stream()
                 .filter(row -> !existingSndLvlSubsidyPrograms.contains(spMapper.toSecondLevelSP(row)))
@@ -98,55 +110,230 @@ public class BudgetItemService {
         }
         log.info("Rows with unknown SP: [{}]", unknownSpRows.size());
 
-        Set<SubsidyProgram> allSpFromDb = subsidyProgramService.getAllSpFromDb();
-        Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(KCSR, DOPKR);
-        updateCodesMap(codesMap, unknownSpRows, plicanteRestClient);
-        unknownSpRows.forEach(row -> rowProcessor.getOrCreateSubsidyProgram(row, allSpFromDb, codesMap));
+        dictionaryService.updateCodesMap(codesMap, unknownSpRows);
+        Set<SubsidyProgram> allSpFromDb = subsidyProgramService.getAllSubsidyProgram(codesMap);
+        unknownSpRows.forEach(
+                row -> rowProcessor.getOrCreateSubsidyProgram(row, allSpFromDb, codesMap));
         return createdSP;
     }
 
-
-    public List<FinancingSource> createFinancingSources(List<DescriptedBudgetItemData> rowList) {
-
-        Set<FinancingSource> existingFS = apkService.findFinancingSources(getAllFsByCurrentYearRequestDto());
-
-        List<DescriptedBudgetItemData> notExistingFsRows = rowList.stream()
-                .filter(row -> !existingFS.contains(fsMapper.toEntity(row)))
-                .toList();
-
-        if (notExistingFsRows.isEmpty()) {
-            log.info("All received Financing Sources already exist in DB");
-            return emptyList();
+    public Map<String, Set<Long>> createFinancingSources(List<DescriptedBudgetItemData> rows) {
+        Map<String, Set<Long>> createdEntities = new HashMap<>();
+        if (rows == null || rows.isEmpty()) {
+            return createdEntities;
         }
-        log.info("Received [{}] new Financing Sources", notExistingFsRows.size());
+        Map<FinancingSource, Set<CashPlanLimit>> excelEntitiesMap = rows.stream()
+                .collect(groupingBy(
+                        fsMapper::toEntity,
+                        mapping(cplMapper::toEntity, toSet())));
+        log.info("Found [{}] Financing_Sources in Excel file", excelEntitiesMap.size());
 
-        Set<CashPlanLimit> existingCashPlanLimits = cashPlanLimitService.getLimitsForCurrentYear();
-        Set<SubsidyProgram> existingSubsidyPrograms = subsidyProgramService.getAllSpFromDb();
+        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap = apkService.getDictionariesCodesMap(
+            Set.of(
+                KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE, OWNERSHIP_FORM));
+        Set<FinancingSource> existingFS = apkService.findFinancingSources(getAllFsByCurrentYearRequestDto(), codesMap);
 
-        Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
-                KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE, OWNERSHIP_FORM);
-        updateCodesMap(codesMap, notExistingFsRows, plicanteRestClient);
+        Map<Dictionary, Set<Long>> createdDictionaries = dictionaryService.updateCodesMap(codesMap, rows);
+        createdDictionaries.forEach((key, value) -> createdEntities.put(key.name(), value));
 
-        List<FinancingSource> list = notExistingFsRows.stream()
-                .map(row -> rowProcessor.buildFinancingSource(row, existingCashPlanLimits, existingSubsidyPrograms, codesMap))
-                .toList();
-        log.info("[{}] Financing Sources ready to save", list.size());
-        List<FinancingSource> createdFS = list.stream()
-                .map(fs -> apkService.createFinancingSource(fs, codesMap))
-                .toList();
-        return createdFS;
+        HashSet<FinancingSource> finSourcesToUpdate = new HashSet<>(existingFS);
+        finSourcesToUpdate.retainAll(excelEntitiesMap.keySet());
+        log.info("Count of Existing Financing_Sources found in file: [{}]", finSourcesToUpdate.size());
+
+        HashMap<FinancingSource, Set<CashPlanLimit>> entitiesToCreate = new HashMap<>(excelEntitiesMap);
+        entitiesToCreate.keySet().removeAll(existingFS);
+        log.info("Count of New Financing_Sources found in file: [{}]", entitiesToCreate.size());
+
+        Set<SubsidyProgram> existingSPs;
+        Set<CashPlanLimit> existingCPLs;
+        if (!finSourcesToUpdate.isEmpty() || !entitiesToCreate.isEmpty()) {
+            existingSPs = apkService.findSubsidyPrograms(requestDtoToFindAllSubsidyPrograms(), codesMap);
+            existingCPLs = apkService.findCashPlanLimits(getCplCodesOnlyByCurrentYearRequestDto(), codesMap);
+
+            Set<Long> updateFsIds = updateFinancingSources(finSourcesToUpdate, excelEntitiesMap, existingSPs, existingCPLs, codesMap, createdEntities);
+            if (!updateFsIds.isEmpty()) {
+                createdEntities.put("Обновленные источники финансирования", updateFsIds);
+            }
+            createNewFinancingSources(entitiesToCreate, existingSPs, existingCPLs, codesMap, createdEntities);
+        }
+
+        return createdEntities;
     }
 
-    public CreateBudgetItemsResponseDto createBudgetItems(List<? extends DescriptedBudgetItemData> rows) {
-        List<? extends DescriptedBudgetItemData> rowsToProcess = getNotExistedCplRows(rows);
+    private void createNewFinancingSources(
+            HashMap<FinancingSource, Set<CashPlanLimit>> entitiesToCreate,
+            Set<SubsidyProgram> existingSP,
+            Set<CashPlanLimit> existingCPLs,
+            Map<Dictionary, Map<Long, Entry<String, String>>> codesMap,
+            Map<String, Set<Long>> createdEntities
+    ) {
+        if (!entitiesToCreate.isEmpty()) {
+            for (Entry<FinancingSource, Set<CashPlanLimit>> entry : entitiesToCreate.entrySet()) {
+                FinancingSource financingSource = entry.getKey();
+                Long createdSpId = obtainSubsidyProgramId(financingSource, existingSP, codesMap, createdEntities);
+                Set<Long> createdCplIds = obtainCashPlanLimitIds(entry.getValue(), existingCPLs, codesMap, createdEntities);
+                financingSource.setSubsidyProgramId(createdSpId);
+                financingSource.setCashPlanLimitIds(createdCplIds);
+                FinancingSource createdFs = apkService.createFinancingSource(financingSource, codesMap);
+                createdEntities.computeIfAbsent(FS_TITLE, k -> new HashSet<>()).add(createdFs.getId());
+            }
+        }
+    }
+
+    private Set<Long> obtainCashPlanLimitIds(
+            Set<CashPlanLimit> associatedCPLs,
+            Set<CashPlanLimit> existingCPLs,
+            Map<Dictionary, Map<Long, Entry<String, String>>> codesMap,
+            Map<String, Set<Long>> createdEntities
+    ) {
+        Set<Long> result = new HashSet<>();
+        Set<CashPlanLimit> obtained = existingCPLs.stream()
+                .filter(associatedCPLs::contains)
+                .collect(toSet());
+
+        associatedCPLs.removeAll(obtained);
+        associatedCPLs.forEach(cpl -> obtained.add(
+                apkService.createCashPlanLimit(cpl, codesMap)
+        ));
+
+        return obtained.stream()
+                .map(CashPlanLimit::getId)
+                .collect(toSet());
+
+    }
+
+    private Long obtainSubsidyProgramId(
+            FinancingSource buildedFinancingSource,
+            Set<SubsidyProgram> existingSubsidyPrograms,
+            Map<Dictionary, Map<Long, Entry<String, String>>> codesMap,
+            Map<String, Set<Long>> createdEntities
+    ) {
+        SubsidyProgram scdLevelProgramDummy = SubsidyProgram.builder()
+                .level(2L)
+                .kcsr(buildedFinancingSource.getKcsr())
+                .dopKr(buildedFinancingSource.getDopKr())
+                .title(dictionaryCodeDescription(codesMap, DOPKR, buildedFinancingSource.getDopKr()))
+                .build();
+
+        Long createdSpId = existingSubsidyPrograms.stream()
+                .filter(scdLevelProgramDummy::equals)
+                .findFirst()
+                .map(SubsidyProgram::getParentId)
+                .orElseGet(() -> completeSubsidyProgramsBranch(
+                        scdLevelProgramDummy, existingSubsidyPrograms, codesMap, createdEntities)
+                );
+        return createdSpId;
+    }
+
+    private long completeSubsidyProgramsBranch(
+            SubsidyProgram scdLevelSubsidyProgram,
+            Set<SubsidyProgram> existingSubsidyPrograms,
+            Map<Dictionary, Map<Long, Entry<String, String>>> codesMap,
+            Map<String, Set<Long>> createdEntities
+    ) {
+        SubsidyProgram fstLevelProgramDummy = SubsidyProgram.builder()
+                .level(1L)
+                .kcsr(scdLevelSubsidyProgram.getKcsr())
+                .title(dictionaryCodeDescription(codesMap, KCSR, scdLevelSubsidyProgram.getKcsr()))
+                .build();
+        Long parentId = existingSubsidyPrograms.stream()
+                .filter(fstLevelProgramDummy::equals)
+                .findFirst()
+                .map(SubsidyProgram::getId)
+                .orElseGet(() -> createSubsidyProgram(
+                        fstLevelProgramDummy, existingSubsidyPrograms, codesMap, createdEntities)
+                );
+        scdLevelSubsidyProgram.setParentId(parentId);
+        return createSubsidyProgram(scdLevelSubsidyProgram, existingSubsidyPrograms, codesMap, createdEntities);
+    }
+
+    private Long createSubsidyProgram(
+            SubsidyProgram fstLevelProgramDummy,
+            Set<SubsidyProgram> existingSubsidyPrograms,
+            Map<Dictionary, Map<Long, Entry<String, String>>> codesMap,
+            Map<String, Set<Long>> createdEntities
+    ) {
+        SubsidyProgram createdSp = apkService.createSubsidyProgram(fstLevelProgramDummy, codesMap);
+        existingSubsidyPrograms.add(createdSp);
+        createdEntities.computeIfAbsent(SP_TITLE, k -> new HashSet<>()).add(createdSp.getId());
+        return createdSp.getId();
+    }
+
+    private Set<Long> updateFinancingSources(
+            HashSet<FinancingSource> updatedFsList,
+            Map<FinancingSource, Set<CashPlanLimit>> excelEntitiesMap,
+            Set<SubsidyProgram> existingSP,
+            Set<CashPlanLimit> existingCPLs,
+            Map<Dictionary, Map<Long, Entry<String, String>>> codesMap,
+            Map<String, Set<Long>> createdEntities
+    ) {
+        Set<Long> updatedFsIds = new HashSet<>();
+        for (FinancingSource updatedFs : updatedFsList) {
+            Long id = updatedFs.getId();
+            boolean needUpdate = false;
+            log.info("Analyzing Financing_Source [{}] to update ...", id);
+
+            if (updatedFs.getSubsidyProgramId() == null) {
+                Long createdSpId = obtainSubsidyProgramId(updatedFs, existingSP, codesMap, createdEntities);
+                updatedFs.setSubsidyProgramId(createdSpId);
+                needUpdate = true;
+            }
+
+            Set<CashPlanLimit> updatedFsExistingCplList = existingCPLs.stream()
+                    .filter(cpl -> updatedFs.getCashPlanLimitIds().contains(cpl.getId()))
+                    .collect(toSet());
+            log.info("Existing Cash_Plan_Limits count: [{}]", updatedFsExistingCplList.size());
+
+            Set<CashPlanLimit> updatedFsExcelCplList = excelEntitiesMap.get(updatedFs);
+            log.info("From excel Cash_Plan_Limits count: [{}]", updatedFsExcelCplList.size());
+
+            updatedFsExcelCplList.removeAll(updatedFsExistingCplList);
+            if (!updatedFsExcelCplList.isEmpty()) {
+                Set<Long> savedCplIds = createNewCpls(updatedFsExcelCplList, codesMap, createdEntities);
+                updatedFs.getCashPlanLimitIds().addAll(savedCplIds);
+                needUpdate = true;
+            }
+            if (needUpdate) {
+                apkService.updateFinancingSource(updatedFs, codesMap);
+                updatedFsIds.add(id);
+            } else {
+                log.info("Financing_Source [{}] is up to date", id);
+            }
+        }
+        return updatedFsIds;
+    }
+
+    private Set<Long> createNewCpls(
+            Set<CashPlanLimit> excelCplList,
+            Map<Dictionary, Map<Long, Entry<String, String>>> codesMap,
+            Map<String, Set<Long>> createdEntities
+    ) {
+        Set<Long> savedCplIds = new HashSet<>();
+        for (CashPlanLimit cpl : excelCplList) {
+            CashPlanLimit createdCpl = apkService.createCashPlanLimit(cpl, codesMap);
+            savedCplIds.add(createdCpl.getId());
+        }
+        if (!savedCplIds.isEmpty()) {
+            createdEntities.computeIfAbsent(CPL_TITLE, k -> new HashSet<>()).addAll(savedCplIds);
+        }
+        return savedCplIds;
+    }
+
+
+    public CreateBudgetItemsResponseDto createBudgetItems(
+            List<? extends DescriptedBudgetItemData> rows) {
+        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap = apkService.getDictionariesCodesMap(
+            Set.of(
+                KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
+        List<? extends DescriptedBudgetItemData> rowsToProcess = getNotExistedCplRows(rows, codesMap);
         if (rowsToProcess.isEmpty()) {
             log.info("No one unique BudgetItems in excel found to be saved");
             return new CreateBudgetItemsResponseDto(emptyMap());
         }
-        log.info("[{}] BudgetItems from excel left as unique to be processed", rowsToProcess.size());
-        Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
-                KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE);
-        Set<SubsidyProgram> existingSpList = subsidyProgramService.getAllSpFromDb();
+        log.info("[{}] BudgetItems from excel left as unique to be processed",
+                rowsToProcess.size());
+
+        Set<SubsidyProgram> existingSpList = subsidyProgramService.getAllSubsidyProgram(codesMap);
         log.info("Found [{}] Subsidy Programs in DB", existingSpList.size());
 
         Set<CashPlanLimit> savedCplList = new LinkedHashSet<>();
@@ -157,18 +344,21 @@ public class BudgetItemService {
         for (DescriptedBudgetItemData row : rowsToProcess) {
             CashPlanLimit savedCpl = rowProcessor.saveCashPlanLimit(row, codesMap);
             savedCplList.add(savedCpl);
-            SubsidyProgram thirdLevelSp = rowProcessor.getOrCreateSubsidyProgram(row, existingSpList, codesMap);
+            SubsidyProgram thirdLevelSp = rowProcessor.getOrCreateSubsidyProgram(row,
+                    existingSpList, codesMap);
             savedSpList.add(thirdLevelSp);
-            FinancingSource savedFs = rowProcessor.saveFinancingSource(row, savedCpl, thirdLevelSp, codesMap);
+            FinancingSource savedFs = rowProcessor.saveFinancingSource(row, savedCpl, thirdLevelSp,
+                    codesMap);
             savedFsList.add(savedFs);
         }
         return buildResponse(savedCplList, savedSpList, savedFsList);
     }
 
-    private <T extends CashPlanLimitData> List<T> getNotExistedCplRows(List<T> rows) {
+    private <T extends CashPlanLimitData> List<T> getNotExistedCplRows(List<T> rows, Map<Dictionary, Map<Long, Entry<String, String>>> codesMap) {
         Set<CashPlanLimit> currentYearExistingLimits = apkService.findCashPlanLimits(
-                getCplCodesOnlyByCurrentYearRequestDto());
-        log.info("Found [{}] CashPlanLimits for [{}] year in DB", currentYearExistingLimits.size(), LocalDateTime.now().getYear());
+                getCplCodesOnlyByCurrentYearRequestDto(), codesMap);
+        log.info("Found [{}] CashPlanLimits for [{}] year in DB", currentYearExistingLimits.size(),
+                LocalDateTime.now().getYear());
         return rows.stream()
                 .filter(row -> !currentYearExistingLimits.contains(cplMapper.toEntity(row)))
                 .toList();

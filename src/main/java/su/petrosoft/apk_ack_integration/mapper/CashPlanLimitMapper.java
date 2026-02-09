@@ -13,6 +13,7 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DoubleAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
@@ -67,6 +68,9 @@ import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.QUARTER_1_
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.QUARTER_2_BAL_ATTR;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.QUARTER_3_BAL_ATTR;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.QUARTER_4_BAL_ATTR;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.RECIPIENT_INN;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.RECIPIENT_KPP;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.RECIPIENT_NAME;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.REGIONAL_BUDGET_ATTR;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.SEP_BALANCE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.SEP_LIMIT_ATTR;
@@ -78,7 +82,9 @@ import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalFe
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalLimit;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getTotalRegional;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.sumOf;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryCodeById;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
 
 @Component
 @RequiredArgsConstructor
@@ -150,54 +156,57 @@ public class CashPlanLimitMapper {
                 .build();
     }
 
-    public CashPlanLimit toEntity(InstanceDto dto) {
+    public CashPlanLimit toEntity(InstanceDto dto, Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
 
         List<Attribute<?>> attributes = dto.attributes();
 
         return CashPlanLimit.builder()
                 .id(dto.id())
                 .version(dto.version())
-                .year((Long) getAttrData(attributes, YEAR_ATTR))
-                .kvsr(getAttrShortForm(attributes, KVSR_ATTR))
-                .kfsr(getAttrShortForm(attributes, KFSR_ATTR))
-                .kcsr(getAttrShortForm(attributes, KCSR_ATTR))
-                .kvr(getAttrShortForm(attributes, KVR_ATTR))
-                .kosgu(getAttrShortForm(attributes, KOSGU_ATTR))
-                .dopEk(getAttrShortForm(attributes, DOPEK_ATTR))
-                .dopKr(getAttrShortForm(attributes, DOPKR_ATTR))
-                .purpose(getAttrShortForm(attributes, PURPOSE_ATTR))
-                .dopFk(getAttrShortForm(attributes, DOPFK_ATTR))
-                .totalLimit(getBigDecimalValue(getAttrData(attributes, TOTAL_LIMIT_ATTR)))
-                .federalBudget(getBigDecimalValue(getAttrData(attributes, FEDERAL_BUDGET_ATTR)))
-                .regionalBudget(getBigDecimalValue(getAttrData(attributes, REGIONAL_BUDGET_ATTR)))
-                .janLimit(getBigDecimalValue(getAttrData(attributes, JAN_LIMIT_ATTR)))
-                .febLimit(getBigDecimalValue(getAttrData(attributes, FEB_LIMIT_ATTR)))
-                .marLimit(getBigDecimalValue(getAttrData(attributes, MAR_LIMIT_ATTR)))
-                .aprLimit(getBigDecimalValue(getAttrData(attributes, APR_LIMIT_ATTR)))
-                .mayLimit(getBigDecimalValue(getAttrData(attributes, MAY_LIMIT_ATTR)))
-                .junLimit(getBigDecimalValue(getAttrData(attributes, JUN_LIMIT_ATTR)))
-                .julLimit(getBigDecimalValue(getAttrData(attributes, JUL_LIMIT_ATTR)))
-                .augLimit(getBigDecimalValue(getAttrData(attributes, AUG_LIMIT_ATTR)))
-                .sepLimit(getBigDecimalValue(getAttrData(attributes, SEP_LIMIT_ATTR)))
-                .octLimit(getBigDecimalValue(getAttrData(attributes, OCT_LIMIT_ATTR)))
-                .novLimit(getBigDecimalValue(getAttrData(attributes, NOV_LIMIT_ATTR)))
-                .decLimit(getBigDecimalValue(getAttrData(attributes, DEC_LIMIT_ATTR)))
-                .janBalance(getBigDecimalValue(getAttrData(attributes, JAN_BALANCE_ATTR)))
-                .febBalance(getBigDecimalValue(getAttrData(attributes, FEB_BALANCE_ATTR)))
-                .marBalance(getBigDecimalValue(getAttrData(attributes, MAR_BALANCE_ATTR)))
-                .aprBalance(getBigDecimalValue(getAttrData(attributes, APR_BALANCE_ATTR)))
-                .mayBalance(getBigDecimalValue(getAttrData(attributes, MAY_BALANCE_ATTR)))
-                .junBalance(getBigDecimalValue(getAttrData(attributes, JUN_BALANCE_ATTR)))
-                .julBalance(getBigDecimalValue(getAttrData(attributes, JUL_BALANCE_ATTR)))
-                .augBalance(getBigDecimalValue(getAttrData(attributes, AUG_BALANCE_ATTR)))
-                .sepBalance(getBigDecimalValue(getAttrData(attributes, SEP_BALANCE_ATTR)))
-                .octBalance(getBigDecimalValue(getAttrData(attributes, OCT_BALANCE_ATTR)))
-                .novBalance(getBigDecimalValue(getAttrData(attributes, NOV_BALANCE_ATTR)))
-                .decBalance(getBigDecimalValue(getAttrData(attributes, DEC_BALANCE_ATTR)))
-                .fstQuarterBalance(getBigDecimalValue(getAttrData(attributes, QUARTER_1_BAL_ATTR)))
-                .scdQuarterBalance(getBigDecimalValue(getAttrData(attributes, QUARTER_2_BAL_ATTR)))
-                .trdQuarterBalance(getBigDecimalValue(getAttrData(attributes, QUARTER_3_BAL_ATTR)))
-                .frtQuarterBalance(getBigDecimalValue(getAttrData(attributes, QUARTER_4_BAL_ATTR)))
+                .year(extractData(attributes, YEAR_ATTR))
+                .kvsr(dictionaryCodeById(codesMap, KVSR, extractData(attributes, KVSR_ATTR)))
+                .kfsr(dictionaryCodeById(codesMap, KFSR, extractData(attributes, KFSR_ATTR)))
+                .kcsr(dictionaryCodeById(codesMap, KCSR, extractData(attributes, KCSR_ATTR)))
+                .kvr(dictionaryCodeById(codesMap, KVR, extractData(attributes, KVR_ATTR)))
+                .kosgu(dictionaryCodeById(codesMap, KOSGU, extractData(attributes, KOSGU_ATTR)))
+                .dopFk(dictionaryCodeById(codesMap, DOPFK, extractData(attributes, DOPFK_ATTR)))
+                .dopEk(dictionaryCodeById(codesMap, DOPEK, extractData(attributes, DOPEK_ATTR)))
+                .dopKr(dictionaryCodeById(codesMap, DOPKR, extractData(attributes, DOPKR_ATTR)))
+                .purpose(dictionaryCodeById(codesMap, PURPOSE, extractData(attributes, PURPOSE_ATTR)))
+                .recipientName(extractData(attributes, RECIPIENT_NAME))
+                .recipientInn(extractData(attributes, RECIPIENT_INN))
+                .recipientKpp(extractData(attributes, RECIPIENT_KPP))
+                .totalLimit(getBigDecimalValue(extractData(attributes, TOTAL_LIMIT_ATTR)))
+                .federalBudget(getBigDecimalValue(extractData(attributes, FEDERAL_BUDGET_ATTR)))
+                .regionalBudget(extractData(attributes, REGIONAL_BUDGET_ATTR))
+                .janLimit(extractData(attributes, JAN_LIMIT_ATTR))
+                .febLimit(extractData(attributes, FEB_LIMIT_ATTR))
+                .marLimit(extractData(attributes, MAR_LIMIT_ATTR))
+                .aprLimit(extractData(attributes, APR_LIMIT_ATTR))
+                .mayLimit(extractData(attributes, MAY_LIMIT_ATTR))
+                .junLimit(extractData(attributes, JUN_LIMIT_ATTR))
+                .julLimit(extractData(attributes, JUL_LIMIT_ATTR))
+                .augLimit(extractData(attributes, AUG_LIMIT_ATTR))
+                .sepLimit(extractData(attributes, SEP_LIMIT_ATTR))
+                .octLimit(extractData(attributes, OCT_LIMIT_ATTR))
+                .novLimit(extractData(attributes, NOV_LIMIT_ATTR))
+                .decLimit(extractData(attributes, DEC_LIMIT_ATTR))
+                .janBalance(extractData(attributes, JAN_BALANCE_ATTR))
+                .febBalance(extractData(attributes, FEB_BALANCE_ATTR))
+                .marBalance(extractData(attributes, MAR_BALANCE_ATTR))
+                .aprBalance(extractData(attributes, APR_BALANCE_ATTR))
+                .mayBalance(extractData(attributes, MAY_BALANCE_ATTR))
+                .junBalance(extractData(attributes, JUN_BALANCE_ATTR))
+                .julBalance(extractData(attributes, JUL_BALANCE_ATTR))
+                .augBalance(extractData(attributes, AUG_BALANCE_ATTR))
+                .sepBalance(extractData(attributes, SEP_BALANCE_ATTR))
+                .octBalance(extractData(attributes, OCT_BALANCE_ATTR))
+                .novBalance(extractData(attributes, NOV_BALANCE_ATTR))
+                .decBalance(extractData(attributes, DEC_BALANCE_ATTR))
+                .fstQuarterBalance(extractData(attributes, QUARTER_1_BAL_ATTR))
+                .scdQuarterBalance(extractData(attributes, QUARTER_2_BAL_ATTR))
+                .trdQuarterBalance(extractData(attributes, QUARTER_3_BAL_ATTR))
+                .frtQuarterBalance(extractData(attributes, QUARTER_4_BAL_ATTR))
                 .build();
     }
 
@@ -214,6 +223,9 @@ public class CashPlanLimitMapper {
                 .dopKr(valueObject.dopKr())
                 .purpose(valueObject.purpose())
                 .dopFk(valueObject.dopFk())
+                .recipientName(valueObject.recipientName())
+                .recipientInn(valueObject.recipientInn())
+                .recipientKpp(valueObject.recipientKpp())
                 .totalLimit(BigDecimal.valueOf(valueObject.assignTotal()))
                 .totalBalance(BigDecimal.valueOf(valueObject.assignTotal()))
                 .federalBudget(BigDecimal.valueOf(valueObject.assignFederal()))
@@ -243,14 +255,23 @@ public class CashPlanLimitMapper {
                 .octBalance(BigDecimal.valueOf(valueObject.octLimit()))
                 .novBalance(BigDecimal.valueOf(valueObject.novLimit()))
                 .decBalance(BigDecimal.valueOf(valueObject.decLimit()))
-                .fstQuarterBalance(sumOf(BigDecimal.valueOf(valueObject.janLimit()), BigDecimal.valueOf(valueObject.febLimit()), BigDecimal.valueOf(valueObject.marLimit())))
-                .scdQuarterBalance(sumOf(BigDecimal.valueOf(valueObject.aprLimit()), BigDecimal.valueOf(valueObject.mayLimit()), BigDecimal.valueOf(valueObject.junLimit())))
-                .trdQuarterBalance(sumOf(BigDecimal.valueOf(valueObject.julLimit()), BigDecimal.valueOf(valueObject.augLimit()), BigDecimal.valueOf(valueObject.sepLimit())))
-                .frtQuarterBalance(sumOf(BigDecimal.valueOf(valueObject.octLimit()), BigDecimal.valueOf(valueObject.novLimit()), BigDecimal.valueOf(valueObject.decLimit())))
+                .fstQuarterBalance(sumOf(BigDecimal.valueOf(valueObject.janLimit()),
+                        BigDecimal.valueOf(valueObject.febLimit()),
+                        BigDecimal.valueOf(valueObject.marLimit())))
+                .scdQuarterBalance(sumOf(BigDecimal.valueOf(valueObject.aprLimit()),
+                        BigDecimal.valueOf(valueObject.mayLimit()),
+                        BigDecimal.valueOf(valueObject.junLimit())))
+                .trdQuarterBalance(sumOf(BigDecimal.valueOf(valueObject.julLimit()),
+                        BigDecimal.valueOf(valueObject.augLimit()),
+                        BigDecimal.valueOf(valueObject.sepLimit())))
+                .frtQuarterBalance(sumOf(BigDecimal.valueOf(valueObject.octLimit()),
+                        BigDecimal.valueOf(valueObject.novLimit()),
+                        BigDecimal.valueOf(valueObject.decLimit())))
                 .build();
     }
 
-    public CreateInstanceRequestDto toCreateDto(CashPlanLimit cpl, Map<Dictionary, Map<String, Long>> codesMap) {
+    public CreateInstanceRequestDto toCreateDto(CashPlanLimit cpl,
+                                                Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
         CreateInstanceRequestDto dto = new CreateInstanceRequestDto(
                 InstanceDto.builder()
                         .templateId(TEMPLATE_ID)
@@ -270,7 +291,8 @@ public class CashPlanLimitMapper {
         return dto;
     }
 
-    private List<Attribute<?>> buildAttributeListToCreate(CashPlanLimit cpl, Map<Dictionary, Map<String, Long>> codesMap) {
+    private List<Attribute<?>> buildAttributeListToCreate(CashPlanLimit cpl,
+                                                          Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
         return List.of(
                 new LongAttribute(YEAR_ATTR, cpl.getYear()),
                 new DoubleAttribute(TOTAL_LIMIT_ATTR, cpl.getTotalLimit()),
@@ -286,6 +308,9 @@ public class CashPlanLimitMapper {
                 new LinkedAttribute(DOPEK_ATTR, dictionaryIdByCode(codesMap, DOPEK, cpl.getDopEk())),
                 new LinkedAttribute(DOPKR_ATTR, dictionaryIdByCode(codesMap, DOPKR, cpl.getDopKr())),
                 new LinkedAttribute(PURPOSE_ATTR, dictionaryIdByCode(codesMap, PURPOSE, cpl.getPurpose())),
+                new StringAttribute(RECIPIENT_NAME, cpl.getRecipientName()),
+                new StringAttribute(RECIPIENT_INN, cpl.getRecipientInn()),
+                new StringAttribute(RECIPIENT_KPP, cpl.getRecipientKpp()),
                 new DoubleAttribute(JAN_LIMIT_ATTR, cpl.getJanLimit()),
                 new DoubleAttribute(FEB_LIMIT_ATTR, cpl.getFebLimit()),
                 new DoubleAttribute(MAR_LIMIT_ATTR, cpl.getMarLimit()),
@@ -355,20 +380,26 @@ public class CashPlanLimitMapper {
     }
 
     private BigDecimal getBigDecimalValue(Object data) {
-        if (data == null) return null;
-        if (data instanceof BigDecimal bd) return bd;
-        if (data instanceof Number num) return BigDecimal.valueOf(num.doubleValue());
+        if (data == null) {
+            return null;
+        }
+        if (data instanceof BigDecimal bd) {
+            return bd;
+        }
+        if (data instanceof Number num) {
+            return BigDecimal.valueOf(num.doubleValue());
+        }
 
         return null;
     }
-
-    private Object getAttrData(List<Attribute<?>> attributes, long attributeId) {
-        return attributes.stream()
-                .filter(a -> a.id().equals(attributeId))
-                .findFirst()
-                .map(Attribute::getData)
-                .orElse(null);
-    }
+//
+//    private Object getAttrData(List<Attribute<?>> attributes, long attributeId) {
+//        return attributes.stream()
+//                .filter(a -> a.id().equals(attributeId))
+//                .findFirst()
+//                .map(Attribute::getData)
+//                .orElse(null);
+//    }
 
     private String getAttrShortForm(List<Attribute<?>> attributes, Long attributeId) {
         return attributes.stream()
