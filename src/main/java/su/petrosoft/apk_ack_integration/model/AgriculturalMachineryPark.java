@@ -13,9 +13,11 @@ import java.math.BigDecimal;
 @SuperBuilder
 public class AgriculturalMachineryPark extends PlicanteInstance {
     private Long recipientId;
+    private String district;
     private String indicator;
     private String machineryAndEquip;
     private String brandModel;
+    private String serialNumber;
     private Long count;
     private BigDecimal power;
     private BigDecimal cost;
