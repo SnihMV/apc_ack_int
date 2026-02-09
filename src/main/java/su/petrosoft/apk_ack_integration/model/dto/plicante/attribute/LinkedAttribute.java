@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.value.LinkedValue;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -26,14 +27,8 @@ public record LinkedAttribute(
         this(id, null, "LINKED", List.of(new LinkedValue(data)));
     }
 
-    public LinkedAttribute(long id, List<Long> values) {
+    public LinkedAttribute(long id, Collection<Long> values) {
         this(id, null, "LINKED", values.stream().map(LinkedValue::new).toList());
-    }
-
-    @Override
-    @JsonIgnore
-    public LinkedValue getFirstValue() {
-        return Attribute.super.getFirstValue();
     }
 
     @Override

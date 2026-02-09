@@ -51,14 +51,14 @@ public class SubsidyProgramUtil {
         return false;
     }
 
-    public static GetAttributesListRequestDto getAllSubsidyProgramsRequestDto() {
+    public static GetAttributesListRequestDto requestDtoToFindAllSubsidyPrograms() {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(DETAILED_FORM_VIEW)
                 .build();
     }
 
-    public static GetAttributesListRequestDto getSecondLevelSpRequestDto() {
+    public static GetAttributesListRequestDto requestDtoToFindSecondLevelSubsidyPrograms() {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(DETAILED_FORM_VIEW)

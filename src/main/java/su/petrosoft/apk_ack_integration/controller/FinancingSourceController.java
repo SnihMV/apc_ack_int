@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import su.petrosoft.apk_ack_integration.service.FinancingSourceService;
 
+import java.util.Map;
+import java.util.Set;
+
 @RestController
 @RequestMapping("api/v1/financingSources")
 @RequiredArgsConstructor
@@ -25,11 +28,11 @@ public class FinancingSourceController {
                     "File should contain specific columns and format.")
     @PostMapping("excel")
     @ResponseStatus(HttpStatus.OK)
-    public void createFinancingSources(
+    public Map<String, Set<Long>> createFinancingSources(
             @Parameter(description = "Excel file with financing sources data",
                     required = true,
                     content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
             @RequestParam("file") MultipartFile file) {
-        service.createFinancingSources(file);
+        return service.createFinancingSources(file);
     }
 }

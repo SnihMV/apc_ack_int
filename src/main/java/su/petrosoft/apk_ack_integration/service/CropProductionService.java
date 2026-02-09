@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import su.petrosoft.apk_ack_integration.model.CropProductionMainForm;
 import su.petrosoft.apk_ack_integration.model.OperationalReport;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.FillingMainFormRequestDto;
 import su.petrosoft.apk_ack_integration.util.CropProductionUtil;
 
@@ -50,7 +51,7 @@ public class CropProductionService {
             CropProductionUtil.fillHarvestingFields(mainForm, harvestingReports);
         }
 
-        CropProductionMainForm cropProductionMainForm = plicanteService.updateCropProductionMainForm(mainForm);
-        log.debug("Updated Main Form: [{}]", cropProductionMainForm);
+        UpdateInstanceResponseDto updated = plicanteService.updateCropProductionMainForm(mainForm);
+        log.debug("Updated Main Form: [{}]", updated.id());
     }
 }

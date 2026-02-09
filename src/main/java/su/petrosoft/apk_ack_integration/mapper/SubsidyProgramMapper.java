@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.data.CofinancingLevelData;
+import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
@@ -13,7 +14,6 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttri
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.value.LinkedValue;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
-import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 import su.petrosoft.apk_ack_integration.util.CropProductionUtil;
 
 import java.util.ArrayList;
@@ -22,10 +22,10 @@ import java.util.Map;
 
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPKR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KCSR;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryCodeById;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractAllData;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractShortForm;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.COFIN_LVL_ATTR;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.DOPKR_ATTR;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.KCSR_ATTR;
@@ -38,19 +38,20 @@ import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.TEMPLATE_
 @Component
 public class SubsidyProgramMapper {
 
-    public SubsidyProgram toEntity(InstanceDto dto) {
+    public SubsidyProgram toEntity(InstanceDto dto, Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
         List<Attribute<?>> attributes = dto.attributes();
+        long level = extractData(attributes, LEVEL_ATTR);
         return SubsidyProgram.builder()
-                .id(dto.id())
-                .version(dto.version())
-                .title(extractData(attributes, NAME_ATTR))
+            .id(dto.id())
+            .version(dto.version())
+            .title(extractData(attributes, NAME_ATTR))
 //                .code(extractData(attributes, CODE_ATTR))
-                .level(extractData(attributes, LEVEL_ATTR))
-                .parentId(extractData(attributes, PARENT_ATTR))
-                .kcsr(extractShortForm(attributes, KCSR_ATTR))
-                .dopKr(extractShortForm(attributes, DOPKR_ATTR))
-                .cofinancingLevelIds(extractAllData(attributes, COFIN_LVL_ATTR))
-                .build();
+            .level(level)
+            .parentId(extractData(attributes, PARENT_ATTR))
+            .kcsr(dictionaryCodeById(codesMap, KCSR, extractData(attributes, KCSR_ATTR)))
+            .dopKr(level == 2 ? dictionaryCodeById(codesMap, DOPKR, extractData(attributes, DOPKR_ATTR)) : null)
+            .cofinancingLevelIds(extractAllData(attributes, COFIN_LVL_ATTR))
+            .build();
     }
 
 //    public SubsidyProgram toFirstLevelSP(DescriptedBudgetItemData dto) {
@@ -78,7 +79,7 @@ public class SubsidyProgramMapper {
                 .build();
     }
 
-    public CreateInstanceRequestDto toCreateDto(SubsidyProgram sp, Map<Dictionary, Map<String, Long>> codesMap) {
+    public CreateInstanceRequestDto toCreateDto(SubsidyProgram sp, Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
         List<Attribute<?>> attributes = new ArrayList<>(List.of(
                 new StringAttribute(NAME_ATTR, sp.getTitle()),
 //                new StringAttribute(CODE_ATTR, sp.getCode()),

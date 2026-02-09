@@ -25,14 +25,16 @@ public class FinancingSourceUtil {
     public static final long PURPOSE_ATTR = 3457;
     public static final long OWNERSHIP_FORM_ATTR = 3394;
     public static final long SUBSIDY_PROGRAM_ATTR = 3461;
-    public static final long CASH_PLAN_LIMIT_ATTR = 3835;
+    public static final long CASH_PLAN_LIMITS_ATTR = 4429;
     public static final long CONCAT_KBK_ATTR = 3842;
 
     public static GetAttributesListRequestDto getAllFsByCurrentYearRequestDto() {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(ViewType.DETAILED_FORM_VIEW)
-                .filter(new Filter(List.of(new LongFilterAttribute(YEAR_ATTR, LocalDateTime.now().getYear()))))
+                .filter(new Filter(List.of(
+                    new LongFilterAttribute(YEAR_ATTR, LocalDateTime.now().getYear())
+                )))
                 .build();
     }
 }

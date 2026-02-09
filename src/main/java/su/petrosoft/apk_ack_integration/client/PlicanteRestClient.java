@@ -10,6 +10,7 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.ChangeGroupStatusRequ
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.GettingInstanceRepresentationRequestDto;
@@ -68,7 +69,7 @@ public class PlicanteRestClient {
                 .toBodilessEntity();
     }
 
-    public InstanceDto updateInstance(UpdateInstanceRequestDto dto) {
+    public UpdateInstanceResponseDto updateInstance(UpdateInstanceRequestDto dto) {
         try {
             return restClient
                     .post()
@@ -76,7 +77,7 @@ public class PlicanteRestClient {
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(dto)
                     .retrieve()
-                    .body(InstanceDto.class);
+                    .body(UpdateInstanceResponseDto.class);
         } catch (Exception e) {
             log.error("Could not update instance [{}]. Error message: [{}]", dto.instance().id(), e.getMessage());
             throw new RuntimeException(e);

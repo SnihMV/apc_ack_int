@@ -12,6 +12,7 @@ import su.petrosoft.apk_ack_integration.mapper.SubsidyRecipientMapper;
 import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
 import su.petrosoft.apk_ack_integration.model.dto.nifi.GetDataFromEgrulByInnDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
@@ -53,17 +54,16 @@ public class ScriptService {
             if (updateInstanceRequestDto.instance().attributes().isEmpty()) {
                 continue;
             }
-            log.debug("Update Request body: {}", objectMapper.writeValueAsString(updateInstanceRequestDto));
-            InstanceDto updated = apkRestClient.updateInstance(updateInstanceRequestDto);
-            log.debug("Update response body: {}", objectMapper.writeValueAsString(updated));
+            UpdateInstanceResponseDto responseDto = apkRestClient.updateInstance(updateInstanceRequestDto);
+            log.info("Recipient [{}] updated", responseDto.id());
             System.out.println(egrulData);
         }
     }
 
 
 
-    public void deleteInstancesByRange(long from, long to) {
-        List<Long> list = LongStream.range(from, to + 1).boxed().toList();
+    public void deleteInstancesByRange(long fromInclusive, long toInclusive) {
+        List<Long> list = LongStream.range(fromInclusive, toInclusive + 1).boxed().toList();
         System.out.println(list);
         plicanteSoapClient.deleteInstancesList(list);
     }
