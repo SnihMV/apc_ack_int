@@ -28,7 +28,9 @@ import java.util.Set;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toSet;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPKR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.FINANCING_FORM;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KCSR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.OWNERSHIP_FORM;
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.creatingRequestDto;
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.getCofinLevelRepresentationRequestDto;
@@ -61,8 +63,7 @@ public class CofinancingLevelService {
                         mapping(cflMapper::toEntity, toSet())));
         log.info("Found [{}] Subsidy_Programs in Excel file", excelEntitiesMap.size());
         Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap = plicanteService.getDictionariesCodesMap(
-            Set.of(OWNERSHIP_FORM,
-                FINANCING_FORM));
+            Set.of(KCSR, DOPKR, OWNERSHIP_FORM, FINANCING_FORM));
         log.info("Getting Existing Subsidy_Programs ...");
         Set<SubsidyProgram> existingSpList = plicanteService.findSubsidyPrograms(
                 requestDtoToFindSubsidyProgramsForCreationCofinancingLevels(), codesMap);
