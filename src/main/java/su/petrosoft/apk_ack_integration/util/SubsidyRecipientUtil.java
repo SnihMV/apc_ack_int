@@ -24,6 +24,7 @@ import static su.petrosoft.apk_ack_integration.model.enums.ViewType.*;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
 
 public class SubsidyRecipientUtil {
+
     public static final long TEMPLATE_ID = 3318;
     public static final String TEMPLATE_TITLE = "Журнал учета получателей государственной поддержки";
     public static final long ID_ATTR = 531;
@@ -39,56 +40,64 @@ public class SubsidyRecipientUtil {
 
     public static GetAttributesListRequestDto requestDtoToFindRecipientById(long id) {
         return GetAttributesListRequestDto.builder()
-                .templateId(TEMPLATE_ID)
-                .attributes(List.of(
-                        new RequestedAttribute(MACHINE_PARK_ATTR)))
-                .filter(new Filter(List.of(
-                        new LongFilterAttribute(ID_ATTR, id))))
-                .build();
+            .templateId(TEMPLATE_ID)
+            .viewType(DETAILED_FORM_VIEW)
+            .attributes(List.of(
+                new RequestedAttribute(MACHINE_PARK_ATTR),
+                new RequestedAttribute(DISTRICT_ATTR)
+            ))
+            .filter(new Filter(List.of(
+                new LongFilterAttribute(ID_ATTR, id))))
+            .build();
     }
 
-    public static GetAttributesListRequestDto buildGettingRecipientsByInnsRequestDto(List<String> innListFromXml) {
-return GetAttributesListRequestDto.builder()
-        .templateId(TEMPLATE_ID)
-        .viewType(DETAILED_FORM_VIEW)
-        .attributes(List.of(
-                new RequestedAttribute(INN_ATTR)
-        ))
-        .filter(new Filter(List.of(
-                new StringFilterAttribute(INN_ATTR, List.of(IN), innListFromXml.toArray(String[]::new))
-        )))
-        .build();
-    }
-
-    public static GetAttributesListRequestDto requestDtoToFindRecipientsByAppTypeForUpdate(long appTypeId) {
+    public static GetAttributesListRequestDto buildGettingRecipientsByInnsRequestDto(
+        List<String> innListFromXml) {
         return GetAttributesListRequestDto.builder()
-                .templateId(TEMPLATE_ID)
-                .viewType(ViewType.DETAILED_FORM_VIEW)
-                .attributes(List.of(
-                        new RequestedAttribute(INN_ATTR),
-                        new RequestedAttribute(FULL_TITLE_ATTR),
-                        new RequestedAttribute(SHORT_TITLE_ATTR),
-                        new RequestedAttribute(OGRN_ATTR),
-                        new RequestedAttribute(OGRN_DATE_ATTR),
-                        new RequestedAttribute(KPP_ATTR)
-                ))
-                .filter(new Filter(List.of(
-                        new LinkedFilterAttribute(APP_TYPE_ATTR, appTypeId)
-                )))
-                .build();
+            .templateId(TEMPLATE_ID)
+            .viewType(DETAILED_FORM_VIEW)
+            .attributes(List.of(
+                new RequestedAttribute(INN_ATTR)
+            ))
+            .filter(new Filter(List.of(
+                new StringFilterAttribute(INN_ATTR, List.of(IN),
+                    innListFromXml.toArray(String[]::new))
+            )))
+            .build();
     }
 
-    public static UpdateInstanceRequestDto requestDtoForUpdateRecipientData(SubsidyRecipient recipient, GetDataFromEgrulByInnDto egrulData) {
+    public static GetAttributesListRequestDto requestDtoToFindRecipientsByAppTypeForUpdate(
+        long appTypeId) {
+        return GetAttributesListRequestDto.builder()
+            .templateId(TEMPLATE_ID)
+            .viewType(ViewType.DETAILED_FORM_VIEW)
+            .attributes(List.of(
+                new RequestedAttribute(INN_ATTR),
+                new RequestedAttribute(FULL_TITLE_ATTR),
+                new RequestedAttribute(SHORT_TITLE_ATTR),
+                new RequestedAttribute(OGRN_ATTR),
+                new RequestedAttribute(OGRN_DATE_ATTR),
+                new RequestedAttribute(KPP_ATTR)
+            ))
+            .filter(new Filter(List.of(
+                new LinkedFilterAttribute(APP_TYPE_ATTR, appTypeId)
+            )))
+            .build();
+    }
+
+    public static UpdateInstanceRequestDto requestDtoForUpdateRecipientData(
+        SubsidyRecipient recipient, GetDataFromEgrulByInnDto egrulData) {
         return new UpdateInstanceRequestDto(
-                InstanceDto.builder()
-                        .id(recipient.getId())
-                        .version(recipient.getVersion())
-                        .attributes(defineUpdatedAttributes(recipient, egrulData))
-                        .build()
+            InstanceDto.builder()
+                .id(recipient.getId())
+                .version(recipient.getVersion())
+                .attributes(defineUpdatedAttributes(recipient, egrulData))
+                .build()
         );
     }
 
-    public static List<Attribute<?>> defineUpdatedAttributes(SubsidyRecipient recipient, GetDataFromEgrulByInnDto egrulData) {
+    public static List<Attribute<?>> defineUpdatedAttributes(SubsidyRecipient recipient,
+        GetDataFromEgrulByInnDto egrulData) {
         List<Attribute<?>> attributes = new ArrayList<>();
         if (!Objects.equals(recipient.getFullTitle(), egrulData.fullTitle())) {
             attributes.add(new StringAttribute(FULL_TITLE_ATTR, egrulData.fullTitle()));

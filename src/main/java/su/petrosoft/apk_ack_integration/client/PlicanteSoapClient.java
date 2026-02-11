@@ -1,5 +1,6 @@
 package su.petrosoft.apk_ack_integration.client;
 
+import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.client.RestClient;
@@ -21,7 +22,7 @@ public class PlicanteSoapClient {
                 .toBodilessEntity();
     }
 
-    public void deleteInstancesList(List<Long> ids) {
+    public void deleteInstancesList(Collection<Long> ids) {
         log.info("Sending request to delete instances with IDs: {}", ids);
         restClient.post()
                 .body(new DeleteInstancesListSoapRequestDto(ids))
