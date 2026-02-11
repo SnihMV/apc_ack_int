@@ -33,6 +33,7 @@ public class SubsidyRecipientUtil {
     public static final long KPP_ATTR = 546;
     public static final long OGRN_ATTR = 550;
     public static final long OGRN_DATE_ATTR = 554;
+    public static final long DISTRICT_ATTR = 1265;
     public static final long APP_TYPE_ATTR = 3420;
     public static final long MACHINE_PARK_ATTR = 4321;
 

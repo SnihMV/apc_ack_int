@@ -1,7 +1,6 @@
 package su.petrosoft.apk_ack_integration.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -22,6 +21,7 @@ public class SubsidyRecipient extends PlicanteInstance {
     private String kpp;
     private Long machinePark;
     private Long appType;
+    private Long districtId;
 
     @Override
     public boolean equals(Object o) {

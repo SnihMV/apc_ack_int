@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
 import su.petrosoft.apk_ack_integration.client.PlicanteSoapClient;
+import su.petrosoft.apk_ack_integration.exception.JsonFileException;
 import su.petrosoft.apk_ack_integration.mapper.AgriculturalMachineryParkMapper;
 import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryPark;
 import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryReport;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DISTRICT;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DIS_BEN_GEN;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.IZD_AVT_PR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KOM_KOR;
@@ -68,13 +70,13 @@ public class AgriculturalMachineryService {
             List<AgriculturalMachineryPark> agriculturalMachineryParks = parseJsonAndCreateMachineryParks(rawReport, recipientId);
 
             Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap = apkPlicanteService.getDictionariesCodesMap(
-                    Set.of(TR_V_M, KOM_ZER, KOM_KOR, MAS_SH, MAS_ZH, MAS_ZH_PT_KOR, DIS_BEN_GEN,
+                    Set.of(DISTRICT, TR_V_M, KOM_ZER, KOM_KOR, MAS_SH, MAS_ZH, MAS_ZH_PT_KOR, DIS_BEN_GEN,
                             MAS_KART, IZD_AVT_PR, TECH_FISHING, OTHER_TECH, PROD_COUNTRY, TECH_STATE));
             List<Long> savedIds = new ArrayList<>();
             for (AgriculturalMachineryPark park : agriculturalMachineryParks) {
                 CreateInstanceRequestDto creationDto = ampMapper.toCreationDto(park, codesMap);
                 InstanceDto instance = plicanteRestClient.createInstance(creationDto);
-                log.debug("Park [{}] been created", instance.id());
+                log.debug("Park [{}] created", instance.id());
                 savedIds.add(instance.id());
             }
 
@@ -131,24 +133,9 @@ public class AgriculturalMachineryService {
     }
 
     private List<AgriculturalMachineryPark> parseJsonAndCreateMachineryParks(byte[] rawReport, Long recipientId) throws Exception {
-        String districtName = parseDistrictField(rawReport);
         Map<Integer, List<String>> groupedData = parseValueFields(rawReport);
-        log.debug("=== {}", groupedData);
-
-        List<AgriculturalMachineryPark> machineryParks = createObjectsFromMap(groupedData);
-        machineryParks.forEach(mp -> {
-            mp.setRecipientId(recipientId);
-            mp.setDistrict(districtName);
-        });
-        return machineryParks;
-    }
-
-    private String parseDistrictField(byte[] rawReport) throws Exception {
-        JsonNode root = objectMapper.readTree(rawReport);
-        JsonNode districtName = root.path("districtName");
-        return root.optional("districtName")
-                .map(JsonNode::asText)
-                .orElseThrow(() -> new RuntimeException("Could not find \"districtName\" in JSON file"));
+        log.debug("Extracted value-fields from JSON: \n{}", groupedData);
+        return createMachineryParks(recipientId, groupedData);
     }
 
     /**
@@ -159,61 +146,52 @@ public class AgriculturalMachineryService {
         JsonNode dataNode = root.path("data");
 
         if (dataNode.isMissingNode()) {
-            throw new IllegalArgumentException("Поле 'data' не найдено в JSON");
+            throw new JsonFileException("Cannot parse JSON file. Field [data] is absent");
         }
 
-        // Создаем Map, где ключ - номер объекта (y), значение - список полей
         Map<Integer, List<String>> result = new TreeMap<>();
 
-        // Инициализируем списки для каждого объекта (максимум 11 полей на объект)
         Set<Map.Entry<String, JsonNode>> fields = dataNode.properties();
         for (Map.Entry<String, JsonNode> entry : fields) {
             String fieldName = entry.getKey();
 
-            if (fieldName.equals("districtName")) {
-
-            }
             if (fieldName.startsWith("value_1_")) {
                 String[] parts = fieldName.split("_");
                 if (parts.length == 4) {
                     try {
-                        int objectNumber = Integer.parseInt(parts[2]); // y
-                        int fieldIndex = Integer.parseInt(parts[3]);  // z
+                        int objectNumber = Integer.parseInt(parts[2]);
+                        int fieldIndex = Integer.parseInt(parts[3]);
                         String fieldValue = entry.getValue().asText("");
 
-                        // Инициализируем список для объекта, если его еще нет
                         List<String> objectFields = result.computeIfAbsent(
                                 objectNumber,
-                                k -> new ArrayList<>(Collections.nCopies(11, null))
+                                k -> new ArrayList<>(Collections.nCopies(12, null))
                         );
-
-                        // Сохраняем значение по индексу z
                         objectFields.set(fieldIndex - 1, fieldValue);
 
-                    } catch (NumberFormatException e) {
-                        // Игнорируем некорректные поля
+                    } catch (NumberFormatException ignore) {
+                        throw new JsonFileException("Cannot parse JSON file. Some kind of problem with [%s] field"
+                                .formatted(fieldName));
                     }
                 }
             }
         }
-
         return result;
     }
 
     /**
      * Шаг 2: Создаем объекты из сгруппированных данных
      */
-    private List<AgriculturalMachineryPark> createObjectsFromMap(Map<Integer, List<String>> groupedData) {
+    private List<AgriculturalMachineryPark> createMachineryParks(Long recipientId, Map<Integer, List<String>> groupedData) {
         List<AgriculturalMachineryPark> result = new ArrayList<>();
 
         for (Map.Entry<Integer, List<String>> entry : groupedData.entrySet()) {
             List<String> fields = entry.getValue();
-
             if (fields == null || fields.isEmpty()) {
                 continue;
             }
 
-            AgriculturalMachineryPark machineryPark = createPark(fields);
+            AgriculturalMachineryPark machineryPark = createParkFromFieldsMap(fields);
             result.add(machineryPark);
         }
         return result;
@@ -222,18 +200,19 @@ public class AgriculturalMachineryService {
     /**
      * Создаем один объект из списка полей
      */
-    private AgriculturalMachineryPark createPark(List<String> fields) {
+    private AgriculturalMachineryPark createParkFromFieldsMap(List<String> fields) {
         return AgriculturalMachineryPark.builder()
                 .indicator(getField(fields, 0))
                 .machineryAndEquip(getField(fields, 1))
                 .brandModel(getField(fields, 2))
-                .count(parseLong(getField(fields, 3)))
-                .power(parseBigDecimal(getField(fields, 4)))
-                .cost(parseBigDecimal(getField(fields, 5)))
-                .productionCountry(getField(fields, 6))
-                .productionYear(parseLong(getField(fields, 7)))
-                .stateSupport(parseBoolean(getField(fields, 8)))
-                .techState(getField(fields, 9))
+                .serialNumber(getField(fields, 3))
+                .count(parseLong(getField(fields, 4)))
+                .power(parseBigDecimal(getField(fields, 5)))
+                .cost(parseBigDecimal(getField(fields, 6)))
+                .productionCountry(getField(fields, 7))
+                .productionYear(parseLong(getField(fields, 8)))
+                .stateSupport(parseBoolean(getField(fields, 9)))
+                .techState(getField(fields, 10))
                 .build();
     }
 
