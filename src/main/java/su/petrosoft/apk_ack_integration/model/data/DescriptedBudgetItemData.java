@@ -1,5 +1,6 @@
 package su.petrosoft.apk_ack_integration.model.data;
 
+import java.util.Map.Entry;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
 import java.util.Map;
@@ -14,7 +15,7 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVSR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.PURPOSE;
 
-public interface DescriptedBudgetItemData extends BudgetItemData, DictionaryExtractable {
+public interface DescriptedBudgetItemData extends BudgetItemData, DictionaryContaining {
 
     String kfsrTitle();
 
@@ -35,32 +36,17 @@ public interface DescriptedBudgetItemData extends BudgetItemData, DictionaryExtr
     String dopFkTitle();
 
     @Override
-    default Map<Dictionary, String> dictionaryCodes() {
+    default Map<Dictionary, Entry<String, String>> dictionariesData() {
         return Map.of(
-                KCSR, kcsr(),
-                KFSR, kfsr(),
-                KVSR, kvsr(),
-                KVR, kvr(),
-                KOSGU, kosgu(),
-                DOPEK, dopEk(),
-                DOPKR, dopKr(),
-                DOPFK, dopFk(),
-                PURPOSE, purpose()
-        );
-    }
-
-    @Override
-    default Map<Dictionary, String> dictionaryDescriptions() {
-        return Map.of(
-                KCSR, kcsrTitle(),
-                KFSR, kfsrTitle(),
-                KVSR, kvsrTitle(),
-                KVR, kvrTitle(),
-                KOSGU, kosguTitle(),
-                DOPEK, dopEkTitle(),
-                DOPKR, dopKrTitle(),
-                DOPFK, dopFkTitle(),
-                PURPOSE, purposeTitle()
+            KFSR, Map.entry(kfsr(), kfsrTitle()),
+            KVSR, Map.entry(kvsr(), kvsrTitle()),
+            KCSR, Map.entry(kcsr(), kcsrTitle()),
+            KVR, Map.entry(kvr(), kvrTitle()),
+            KOSGU, Map.entry(kosgu(), kosguTitle()),
+            DOPEK, Map.entry(dopEk(), dopEkTitle()),
+            DOPKR, Map.entry(dopKr(), dopKrTitle()),
+            DOPFK, Map.entry(dopFk(), dopFkTitle()),
+            PURPOSE, Map.entry(purpose(), purposeTitle())
         );
     }
 }

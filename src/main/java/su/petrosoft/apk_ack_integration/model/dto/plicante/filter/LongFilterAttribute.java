@@ -6,6 +6,7 @@ import su.petrosoft.apk_ack_integration.model.enums.SqlOperation;
 import su.petrosoft.apk_ack_integration.model.enums.ValueType;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import static su.petrosoft.apk_ack_integration.model.enums.ValueType.LONG;
@@ -19,7 +20,7 @@ public record LongFilterAttribute(
     public LongFilterAttribute(long id, long data) {
         this(id, LONG, new Condition<>(List.of(SqlOperation.EQUALS), List.of(new LongValue(data))));
     }
-    public LongFilterAttribute(long id, List<SqlOperation> operations, long... data) {
-        this(id, LONG, new Condition<>(operations, Arrays.stream(data).mapToObj(LongValue::new).toList()));
+    public LongFilterAttribute(long id, List<SqlOperation> operations, Collection<Long> data) {
+        this(id, LONG, new Condition<>(operations, data.stream().map(LongValue::new).toList()));
     }
 }

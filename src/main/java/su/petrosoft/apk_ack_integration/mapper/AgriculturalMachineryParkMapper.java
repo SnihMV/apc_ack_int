@@ -20,15 +20,18 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.*;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.BRAND_MODEL_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.COST_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.COUNT_ATTR;
+import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.DISTRICT_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.INDICATOR_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.MACH_EQUIP_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.POWER_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.PROD_COUNTRY_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.PROD_YEAR_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.RECIPIENT_ATTR;
+import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.SERIAL_NUMBER_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.STATE_SUPPORT_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.TECH_STATE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.TEMPLATE_ID;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryCodeById;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
 
 
@@ -43,7 +46,7 @@ public class AgriculturalMachineryParkMapper {
                 .build();
     }
 
-    public CreateInstanceRequestDto toCreationDto(AgriculturalMachineryPark park, Map<Dictionary, Map<String, Long>> codesMap) {
+    public CreateInstanceRequestDto toCreationDto(AgriculturalMachineryPark park, Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
         Map<String, Long> indicateMap = Map.of(
                 "Тракторы всех марок", 537L,
                 "Комбайны зерноуборочные", 538L,
@@ -61,9 +64,11 @@ public class AgriculturalMachineryParkMapper {
                         .templateId(TEMPLATE_ID)
                         .attributes(List.of(
                                 new LinkedAttribute(RECIPIENT_ATTR, park.getRecipientId()),
+                                new LinkedAttribute(DISTRICT_ATTR, dictionaryIdByCode(codesMap, DISTRICT, park.getDistrict())),
                                 new LinkedAttribute(INDICATOR_ATTR, indicateMap.get(park.getIndicator())),
                                 new LinkedAttribute(MACH_EQUIP_ATTR, dictionaryIdByCode(codesMap, getType(park), park.getMachineryAndEquip())),
                                 new StringAttribute(BRAND_MODEL_ATTR, park.getBrandModel()),
+                                new StringAttribute(SERIAL_NUMBER_ATTR, park.getSerialNumber()),
                                 new LongAttribute(COUNT_ATTR, park.getCount()),
                                 new DoubleAttribute(POWER_ATTR, park.getPower()),
                                 new DoubleAttribute(COST_ATTR, park.getCost()),
@@ -79,6 +84,6 @@ public class AgriculturalMachineryParkMapper {
         return Arrays.stream(values())
                 .filter(type -> type.getName().equalsIgnoreCase(park.getIndicator()))
                 .findFirst()
-                .orElseThrow(()-> new RuntimeException("No value present %s".formatted(park.getIndicator())));
+                .orElseThrow(()-> new RuntimeException("Could not find Machinery/Equipment's type: [%s]".formatted(park.getIndicator())));
     }
 }

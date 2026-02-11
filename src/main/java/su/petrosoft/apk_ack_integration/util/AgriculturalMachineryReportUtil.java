@@ -10,7 +10,7 @@ public class AgriculturalMachineryReportUtil {
     public static final long RECIPIENT_ID = 957;
     public static final long JSON_FILE_ATTR = 3066;
 
-    public static GettingInstanceRepresentationRequestDto buildRequestDtoForReportProcessing(Long id) {
+    public static GettingInstanceRepresentationRequestDto requestDtoForReportProcessing(Long id) {
         return GettingInstanceRepresentationRequestDto.builder()
                 .instance(InstanceDto.builder()
                         .id(id)

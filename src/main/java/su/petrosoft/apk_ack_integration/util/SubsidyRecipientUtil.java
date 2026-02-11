@@ -13,7 +13,6 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LinkedFilterAt
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.StringFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.value.Value;
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ public class SubsidyRecipientUtil {
     public static final long APP_TYPE_ATTR = 3420;
     public static final long MACHINE_PARK_ATTR = 4321;
 
-    public static GetAttributesListRequestDto buildRequestDtoToFindRecipientById(long id) {
+    public static GetAttributesListRequestDto requestDtoToFindRecipientById(long id) {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .attributes(List.of(

@@ -5,7 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.util.Collection;
 import java.util.Objects;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -24,7 +26,7 @@ public class FinancingSource extends PlicanteInstance {
     private String purpose;
     private String ownershipForm;
     private Long subsidyProgramId;
-    private Long cashPlanLimitId;
+    private Collection<Long> cashPlanLimitIds;
     private String concatenatedKBK;
 
     @Override
