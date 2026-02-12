@@ -84,7 +84,8 @@ public class CashPlanLimitUtil {
                         new RequestedAttribute(DOPEK_ATTR),
                         new RequestedAttribute(DOPKR_ATTR),
                         new RequestedAttribute(PURPOSE_ATTR),
-                        new RequestedAttribute(RECIPIENT_INN)
+                        new RequestedAttribute(RECIPIENT_INN),
+                        new RequestedAttribute(RECIPIENT_KPP)
                 ))
                 .filter(new Filter(List.of(
                         new LongFilterAttribute(YEAR_ATTR, LocalDate.now().getYear())
@@ -107,8 +108,8 @@ public class CashPlanLimitUtil {
                         new RequestedAttribute(DOPEK_ATTR),
                         new RequestedAttribute(DOPKR_ATTR),
                         new RequestedAttribute(PURPOSE_ATTR),
-                        new RequestedAttribute(RECIPIENT_INN)
-
+                        new RequestedAttribute(RECIPIENT_INN),
+                        new RequestedAttribute(RECIPIENT_KPP)
                 ))
                 .filter(new Filter(List.of(
                         new LongFilterAttribute(ID_ATTR, List.of(IN), ids)
