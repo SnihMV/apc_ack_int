@@ -67,8 +67,8 @@ public class BudgetItemService {
             return CreatingInstancesFromFileResponseDto.builder().build();
         }
         Map<Dictionary, Map<Long, Entry<String, String>>> codesMap = apkService.getDictionariesCodesMap(
-            Set.of(
-                KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
+                Set.of(
+                        KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
         List<CashPlanLimitData> uniqueRowsByCpl = getNotExistedCplRows(rows, codesMap);
         if (uniqueRowsByCpl.isEmpty()) {
             return CreatingInstancesFromFileResponseDto.builder()
@@ -93,7 +93,7 @@ public class BudgetItemService {
             List<DescriptedBudgetItemData> rowDtoList) {
 
         Map<Dictionary, Map<Long, Entry<String, String>>> codesMap = apkService.getDictionariesCodesMap(
-            Set.of(KCSR, DOPKR));
+                Set.of(KCSR, DOPKR));
         Set<SubsidyProgram> existingSndLvlSubsidyPrograms = subsidyProgramService.getAllSecondLevelSpFromDb(codesMap);
         log.info("Found [{}] Subsidy Programs in DB with level 2",
                 existingSndLvlSubsidyPrograms.size());
@@ -129,8 +129,8 @@ public class BudgetItemService {
         log.info("Found [{}] Financing_Sources in Excel file", excelEntitiesMap.size());
 
         Map<Dictionary, Map<Long, Entry<String, String>>> codesMap = apkService.getDictionariesCodesMap(
-            Set.of(
-                KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE, OWNERSHIP_FORM));
+                Set.of(
+                        KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE, OWNERSHIP_FORM));
         Set<FinancingSource> existingFS = apkService.findFinancingSources(getAllFsByCurrentYearRequestDto(), codesMap);
 
         Map<Dictionary, Set<Long>> createdDictionaries = dictionaryService.updateCodesMap(codesMap, rows);
@@ -192,9 +192,12 @@ public class BudgetItemService {
                 .collect(toSet());
 
         associatedCPLs.removeAll(obtained);
-        associatedCPLs.forEach(cpl -> obtained.add(
-                apkService.createCashPlanLimit(cpl, codesMap)
-        ));
+        associatedCPLs.forEach(cpl -> {
+                    CashPlanLimit createdCpl = apkService.createCashPlanLimit(cpl, codesMap);
+                    obtained.add(createdCpl);
+                    createdEntities.computeIfAbsent(CPL_TITLE, k -> new HashSet<>()).add(createdCpl.getId());
+                }
+        );
 
         return obtained.stream()
                 .map(CashPlanLimit::getId)
@@ -323,8 +326,8 @@ public class BudgetItemService {
     public CreateBudgetItemsResponseDto createBudgetItems(
             List<? extends DescriptedBudgetItemData> rows) {
         Map<Dictionary, Map<Long, Entry<String, String>>> codesMap = apkService.getDictionariesCodesMap(
-            Set.of(
-                KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
+                Set.of(
+                        KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
         List<? extends DescriptedBudgetItemData> rowsToProcess = getNotExistedCplRows(rows, codesMap);
         if (rowsToProcess.isEmpty()) {
             log.info("No one unique BudgetItems in excel found to be saved");
