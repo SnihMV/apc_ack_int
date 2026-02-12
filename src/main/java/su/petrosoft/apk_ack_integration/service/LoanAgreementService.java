@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 import static su.petrosoft.apk_ack_integration.model.data.xml.CreatingSubsidiesAmountsXml.SubsidyAmountXml;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.*;
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessage.NO_CONTENT;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.NO_CONTENT;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.*;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.INN_ATTR;

@@ -30,6 +30,6 @@ public class BudgetItemController {
         if (uniBudgetRows.isEmpty()) {
             return new CreateBudgetItemsResponseDto(Collections.emptyMap());
         }
-        return service.createBudgetItems(uniBudgetRows);
+        return service.createNewBudgetItems(uniBudgetRows);
     }
 }

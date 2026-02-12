@@ -80,7 +80,7 @@ public class DictionaryService {
         return existingValues.entrySet().stream()
                 .anyMatch(entry -> code.equalsIgnoreCase(entry.getValue().getKey()))
                 ? Optional.empty()
-                : Optional.of(createNewDictionaryInstance(dictionary, code, description));
+                : Optional.of(createNewDictionaryInstance(dictionary, code, description, existingValues));
     }
 
 //    private long updateDictionaryDescription(
@@ -94,10 +94,11 @@ public class DictionaryService {
     private long createNewDictionaryInstance(
             Dictionary dictionary,
             String code,
-            String description
-    ) {
+            String description,
+            Map<Long, Entry<String, String>> existingValues) {
         log.info("Creating new [{}] dictionary instance ...", dictionary);
         long id = restClient.createInstance(creatingDictionaryInstanceRequestDto(dictionary, code, description)).id();
+        existingValues.put(id, Map.entry(code, description));
         log.info("Added new [{}] dictionary instance. Code: [{}], Description: [{}], id: [{}]",
                 dictionary, code, description, id);
         return id;

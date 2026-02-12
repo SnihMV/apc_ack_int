@@ -88,11 +88,11 @@ public class CashPlanLimit extends PlicanteInstance {
                && Objects.equals(kosgu, that.kosgu) && Objects.equals(kvsr, that.kvsr)
                && Objects.equals(dopFk, that.dopFk) && Objects.equals(dopEk, that.dopEk)
                && Objects.equals(dopKr, that.dopKr) && Objects.equals(purpose, that.purpose)
-               && Objects.equals(recipientInn, that.recipientInn);
+               && Objects.equals(recipientInn, that.recipientInn) && Objects.equals(recipientKpp, that.recipientKpp);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(year, kfsr, kcsr, kvr, kosgu, kvsr, dopFk, dopEk, dopKr, purpose, recipientInn);
+        return Objects.hash(year, kfsr, kcsr, kvr, kosgu, kvsr, dopFk, dopEk, dopKr, purpose, recipientInn, recipientKpp);
     }
 }
