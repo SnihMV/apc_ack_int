@@ -35,7 +35,7 @@ public class ExtendedLimitService {
     public CreateBudgetItemsResponseDto createBudgetItem(MultipartFile file) {
         List<DescriptedBudgetItemData> uniBudgetRows = excelExtractor.getUniBudgetCodedRows(file);
         if (!uniBudgetRows.isEmpty()) {
-            budgetItemService.createBudgetItems(uniBudgetRows);
+            budgetItemService.createNewBudgetItems(uniBudgetRows);
         }
         return new CreateBudgetItemsResponseDto(Collections.emptyMap());
     }

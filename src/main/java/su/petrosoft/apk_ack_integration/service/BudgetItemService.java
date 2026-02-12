@@ -117,7 +117,7 @@ public class BudgetItemService {
         return createdSP;
     }
 
-    public Map<String, Set<Long>> createFinancingSources(List<DescriptedBudgetItemData> rows) {
+    public Map<String, Set<Long>> createBudgetItems(List<DescriptedBudgetItemData> rows) {
         Map<String, Set<Long>> createdEntities = new HashMap<>();
         if (rows == null || rows.isEmpty()) {
             return createdEntities;
@@ -150,11 +150,12 @@ public class BudgetItemService {
             existingSPs = apkService.findSubsidyPrograms(requestDtoToFindAllSubsidyPrograms(), codesMap);
             existingCPLs = apkService.findCashPlanLimits(getCplCodesOnlyByCurrentYearRequestDto(), codesMap);
 
+            createNewFinancingSources(entitiesToCreate, existingSPs, existingCPLs, codesMap, createdEntities);
+
             Set<Long> updateFsIds = updateFinancingSources(finSourcesToUpdate, excelEntitiesMap, existingSPs, existingCPLs, codesMap, createdEntities);
             if (!updateFsIds.isEmpty()) {
                 createdEntities.put("Обновленные источники финансирования", updateFsIds);
             }
-            createNewFinancingSources(entitiesToCreate, existingSPs, existingCPLs, codesMap, createdEntities);
         }
 
         return createdEntities;
@@ -323,7 +324,7 @@ public class BudgetItemService {
     }
 
 
-    public CreateBudgetItemsResponseDto createBudgetItems(
+    public CreateBudgetItemsResponseDto createNewBudgetItems(
             List<? extends DescriptedBudgetItemData> rows) {
         Map<Dictionary, Map<Long, Entry<String, String>>> codesMap = apkService.getDictionariesCodesMap(
                 Set.of(

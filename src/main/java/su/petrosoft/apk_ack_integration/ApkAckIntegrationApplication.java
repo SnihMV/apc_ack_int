@@ -12,6 +12,6 @@ import su.petrosoft.apk_ack_integration.service.ScriptService;
 public class ApkAckIntegrationApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ApkAckIntegrationApplication.class, args);
+        ConfigurableApplicationContext ctx = SpringApplication.run(ApkAckIntegrationApplication.class, args);
     }
 }
