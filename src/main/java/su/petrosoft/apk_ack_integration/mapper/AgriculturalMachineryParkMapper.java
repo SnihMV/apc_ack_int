@@ -31,7 +31,6 @@ import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUti
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.STATE_SUPPORT_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.TECH_STATE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.TEMPLATE_ID;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryCodeById;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
 
 
@@ -64,7 +63,7 @@ public class AgriculturalMachineryParkMapper {
                         .templateId(TEMPLATE_ID)
                         .attributes(List.of(
                                 new LinkedAttribute(RECIPIENT_ATTR, park.getRecipientId()),
-                                new LinkedAttribute(DISTRICT_ATTR, dictionaryIdByCode(codesMap, DISTRICT, park.getDistrict())),
+                                new LinkedAttribute(DISTRICT_ATTR, park.getDistrictId()),
                                 new LinkedAttribute(INDICATOR_ATTR, indicateMap.get(park.getIndicator())),
                                 new LinkedAttribute(MACH_EQUIP_ATTR, dictionaryIdByCode(codesMap, getType(park), park.getMachineryAndEquip())),
                                 new StringAttribute(BRAND_MODEL_ATTR, park.getBrandModel()),

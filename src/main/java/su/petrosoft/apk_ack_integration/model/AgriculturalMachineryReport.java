@@ -11,5 +11,5 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class AgriculturalMachineryReport extends PlicanteInstance {
     private Long recipientId;
-    private String codedReport;
+    private String jsonReport;
 }

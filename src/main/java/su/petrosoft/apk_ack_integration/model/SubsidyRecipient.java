@@ -1,13 +1,12 @@
 package su.petrosoft.apk_ack_integration.model;
 
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-
-import java.time.LocalDate;
-import java.util.Objects;
 
 @Data
 @NoArgsConstructor
@@ -20,8 +19,9 @@ public class SubsidyRecipient extends PlicanteInstance {
     private String ogrn;
     private LocalDate ogrnDate;
     private String kpp;
-    private Long machinePark;
+    private Collection<Long> machineParkIds;
     private Long appType;
+    private Long districtId;
 
     @Override
     public boolean equals(Object o) {
