@@ -1,6 +1,5 @@
 package su.petrosoft.apk_ack_integration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +61,7 @@ public class CofinancingLevelService {
                         spMapper::toEntity,
                         mapping(cflMapper::toEntity, toSet())));
         log.info("Found [{}] Subsidy_Programs in Excel file", excelEntitiesMap.size());
-        Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap = plicanteService.getDictionariesCodesMap(
+        Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap = plicanteService.getDictionariesNamedCodesMap(
             Set.of(KCSR, DOPKR, OWNERSHIP_FORM, FINANCING_FORM));
         log.info("Getting Existing Subsidy_Programs ...");
         Set<SubsidyProgram> existingSpList = plicanteService.findSubsidyPrograms(

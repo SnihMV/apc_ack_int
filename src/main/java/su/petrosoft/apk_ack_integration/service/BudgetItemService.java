@@ -17,6 +17,7 @@ import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.data.CashPlanLimitData;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateBudgetItemsResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreatingInstancesFromFileResponseDto;
+import su.petrosoft.apk_ack_integration.model.dto.response.UpsertBudgetItemsResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 
@@ -40,7 +41,8 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVSR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.OWNERSHIP_FORM;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.PURPOSE;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CPL_TITLE;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getCplCodesOnlyByCurrentYearRequestDto;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGettingCplEqualsFieldsByCurrentYear;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGettingCplEqualsFieldsByIds;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.FS_TITLE;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.getAllFsByCurrentYearRequestDto;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
@@ -66,7 +68,7 @@ public class BudgetItemService {
         if (rows.isEmpty()) {
             return CreatingInstancesFromFileResponseDto.builder().build();
         }
-        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap = apkService.getDictionariesCodesMap(
+        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap = apkService.getDictionariesNamedCodesMap(
                 Set.of(
                         KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
         List<CashPlanLimitData> uniqueRowsByCpl = getNotExistedCplRows(rows, codesMap);
@@ -92,7 +94,7 @@ public class BudgetItemService {
     public Set<SubsidyProgram> createSubsidyProgramsTree(
             List<DescriptedBudgetItemData> rowDtoList) {
 
-        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap = apkService.getDictionariesCodesMap(
+        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap = apkService.getDictionariesNamedCodesMap(
                 Set.of(KCSR, DOPKR));
         Set<SubsidyProgram> existingSndLvlSubsidyPrograms = subsidyProgramService.getAllSecondLevelSpFromDb(codesMap);
         log.info("Found [{}] Subsidy Programs in DB with level 2",
@@ -117,6 +119,13 @@ public class BudgetItemService {
         return createdSP;
     }
 
+    public UpsertBudgetItemsResponseDto upsertBudgetItems(List<DescriptedBudgetItemData> rows) {
+        Map<Dictionary, Map<Long, String>> codesMap = apkService.getDictionariesCodesMap(
+            Set.of(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE, OWNERSHIP_FORM));
+        apkService.findCashPlanLimits(requestDtoToGettingCplEqualsFieldsByCurrentYear(), codesMap);
+        return null;
+    }
+
     public Map<String, Set<Long>> createBudgetItems(List<DescriptedBudgetItemData> rows) {
         Map<String, Set<Long>> createdEntities = new HashMap<>();
         if (rows == null || rows.isEmpty()) {
@@ -128,7 +137,7 @@ public class BudgetItemService {
                         mapping(cplMapper::toEntity, toSet())));
         log.info("Found [{}] Financing_Sources in Excel file", excelEntitiesMap.size());
 
-        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap = apkService.getDictionariesCodesMap(
+        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap = apkService.getDictionariesNamedCodesMap(
                 Set.of(
                         KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE, OWNERSHIP_FORM));
         Set<FinancingSource> existingFS = apkService.findFinancingSources(getAllFsByCurrentYearRequestDto(), codesMap);
@@ -148,7 +157,8 @@ public class BudgetItemService {
         Set<CashPlanLimit> existingCPLs;
         if (!finSourcesToUpdate.isEmpty() || !entitiesToCreate.isEmpty()) {
             existingSPs = apkService.findSubsidyPrograms(requestDtoToFindAllSubsidyPrograms(), codesMap);
-            existingCPLs = apkService.findCashPlanLimits(getCplCodesOnlyByCurrentYearRequestDto(), codesMap);
+            existingCPLs = apkService.findCashPlanLimits(
+                requestDtoToGettingCplEqualsFieldsByCurrentYear(), codesMap);
 
             createNewFinancingSources(entitiesToCreate, existingSPs, existingCPLs, codesMap, createdEntities);
 
@@ -326,7 +336,7 @@ public class BudgetItemService {
 
     public CreateBudgetItemsResponseDto createNewBudgetItems(
             List<? extends DescriptedBudgetItemData> rows) {
-        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap = apkService.getDictionariesCodesMap(
+        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap = apkService.getDictionariesNamedCodesMap(
                 Set.of(
                         KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
         List<? extends DescriptedBudgetItemData> rowsToProcess = getNotExistedCplRows(rows, codesMap);
@@ -360,7 +370,7 @@ public class BudgetItemService {
 
     private <T extends CashPlanLimitData> List<T> getNotExistedCplRows(List<T> rows, Map<Dictionary, Map<Long, Entry<String, String>>> codesMap) {
         Set<CashPlanLimit> currentYearExistingLimits = apkService.findCashPlanLimits(
-                getCplCodesOnlyByCurrentYearRequestDto(), codesMap);
+                requestDtoToGettingCplEqualsFieldsByCurrentYear(), codesMap);
         log.info("Found [{}] CashPlanLimits for [{}] year in DB", currentYearExistingLimits.size(),
                 LocalDateTime.now().getYear());
         return rows.stream()

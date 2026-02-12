@@ -1,6 +1,5 @@
 package su.petrosoft.apk_ack_integration.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
@@ -100,7 +99,7 @@ public class AgriculturalMachineryService {
 
     private List<Long> saveMachineryParks(List<AgriculturalMachineryPark> parksFromReport) {
 
-        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap = apkPlicanteService.getDictionariesCodesMap(
+        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap = apkPlicanteService.getDictionariesNamedCodesMap(
             Set.of(DISTRICT, TR_V_M, KOM_ZER, KOM_KOR, MAS_SH, MAS_ZH, MAS_ZH_PT_KOR, DIS_BEN_GEN,
                 MAS_KART, IZD_AVT_PR, TECH_FISHING, OTHER_TECH, PROD_COUNTRY, TECH_STATE));
 

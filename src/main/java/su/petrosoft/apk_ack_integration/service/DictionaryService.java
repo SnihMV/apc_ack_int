@@ -31,7 +31,7 @@ public class DictionaryService {
     ) {
         if (rows != null && !rows.isEmpty()) {
             Set<Dictionary> dictionaries = rows.get(0).dictionariesData().keySet();
-            Map<Dictionary, Map<Long, Entry<String, String>>> dictionariesCodesMap = apkPlicanteService.getDictionariesCodesMap(
+            Map<Dictionary, Map<Long, Entry<String, String>>> dictionariesCodesMap = apkPlicanteService.getDictionariesNamedCodesMap(
                 dictionaries);
         }
         log.info("Find new dictionaries data ...");

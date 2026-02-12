@@ -156,7 +156,7 @@ public class CashPlanLimitMapper {
                 .build();
     }
 
-    public CashPlanLimit toEntity(InstanceDto dto, Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
+    public CashPlanLimit toEntity(InstanceDto dto, Map<Dictionary, Map<Long, String>> codesMap) {
 
         List<Attribute<?>> attributes = dto.attributes();
 

@@ -12,7 +12,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import static su.petrosoft.apk_ack_integration.model.enums.SqlOperation.IN;
@@ -69,7 +68,7 @@ public class CashPlanLimitUtil {
     public static final long QUARTER_3_BAL_ATTR = 1626;
     public static final long QUARTER_4_BAL_ATTR = 1631;
 
-    public static GetAttributesListRequestDto getCplCodesOnlyByCurrentYearRequestDto() {
+    public static GetAttributesListRequestDto requestDtoToGettingCplEqualsFieldsByCurrentYear() {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(ViewType.DETAILED_FORM_VIEW)
@@ -93,7 +92,7 @@ public class CashPlanLimitUtil {
                 .build();
     }
 
-    public static GetAttributesListRequestDto requestDtoToFindCashPlanLimitsByIds(Collection<Long> ids) {
+    public static GetAttributesListRequestDto requestDtoToGettingCplEqualsFieldsByIds(Collection<Long> ids) {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(ViewType.DETAILED_FORM_VIEW)
