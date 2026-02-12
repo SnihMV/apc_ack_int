@@ -11,8 +11,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessage.FILE_IS_EMPTY;
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessage.INVALID_XML_FORMAT;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.FILE_IS_EMPTY;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.INVALID_XML_FORMAT;
 
 @Service
 @RequiredArgsConstructor

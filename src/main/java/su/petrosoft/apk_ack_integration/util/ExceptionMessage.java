@@ -1,7 +1,14 @@
 package su.petrosoft.apk_ack_integration.util;
 
-public class ExceptionMessage {
-    public static final String FILE_IS_EMPTY = "File [%s] is empty";
-    public static final String INVALID_XML_FORMAT = "Can not parse xml by the reason: [%s]";
-    public static final String NO_CONTENT = "File [%s] has no effective content";
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public enum ExceptionMessage {
+    RECIPIENT_BY_ID_NOT_FOUND("Получатель государственной поддержки с id = %d не найден"),
+    FAILED_TO_READ_JSON_FILE("Не удалось прочитать json файл. Причина: %s");
+
+    private final String message;
+
 }

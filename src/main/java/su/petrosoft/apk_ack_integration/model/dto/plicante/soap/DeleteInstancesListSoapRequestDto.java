@@ -4,6 +4,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
+import java.util.Collection;
 import java.util.List;
 
 @JacksonXmlRootElement(localName = "soapenv:Envelope")
@@ -21,7 +22,7 @@ public class DeleteInstancesListSoapRequestDto {
     @JacksonXmlProperty(localName = "soapenv:Body")
     private final Body body;
 
-    public DeleteInstancesListSoapRequestDto(List<Long> instanceIds) {
+    public DeleteInstancesListSoapRequestDto(Collection<Long> instanceIds) {
         this.body = new Body(new DeleteInstances(instanceIds));
     }
 
@@ -38,9 +39,9 @@ public class DeleteInstancesListSoapRequestDto {
     private record DeleteInstances(
             @JacksonXmlElementWrapper(useWrapping = false)
             @JacksonXmlProperty(localName = "instancesIds")
-            List<Long> instancesIds
+            Collection<Long> instancesIds
     ) {
-        private DeleteInstances(List<Long> instancesIds) {
+        private DeleteInstances(Collection<Long> instancesIds) {
             this.instancesIds = instancesIds;
         }
     }

@@ -87,7 +87,8 @@ public class CashPlanLimitUtil {
                         new RequestedAttribute(RECIPIENT_INN)
                 ))
                 .filter(new Filter(List.of(
-                        new LongFilterAttribute(YEAR_ATTR, LocalDate.now().getYear()))))
+                        new LongFilterAttribute(YEAR_ATTR, LocalDate.now().getYear())
+                )))
                 .build();
     }
 
@@ -109,7 +110,9 @@ public class CashPlanLimitUtil {
                         new RequestedAttribute(RECIPIENT_INN)
 
                 ))
-                .filter(new Filter(List.of(new LongFilterAttribute(ID_ATTR, List.of(IN), ids))))
+                .filter(new Filter(List.of(
+                        new LongFilterAttribute(ID_ATTR, List.of(IN), ids)
+                )))
                 .build();
     }
 
