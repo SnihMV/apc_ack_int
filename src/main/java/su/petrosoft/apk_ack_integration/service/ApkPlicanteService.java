@@ -68,7 +68,7 @@ public class ApkPlicanteService {
 
     public Set<SubsidyProgram> findSubsidyPrograms(
         GetAttributesListRequestDto requestDto,
-        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap
+        Map<Dictionary, Map<Long, String>> codesMap
     ) {
         List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(requestDto);
         return dtoList.stream()
@@ -77,7 +77,7 @@ public class ApkPlicanteService {
     }
 
     public Set<FinancingSource> findFinancingSources(GetAttributesListRequestDto requestDto,
-        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap) {
+                                                     Map<Dictionary, Map<Long, String>> codesMap) {
         log.info("Getting Existing Financing_Sources ...");
         List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(requestDto);
         log.info("Found Financing_Sources count: [{}]", dtoList.size());
@@ -95,8 +95,7 @@ public class ApkPlicanteService {
             .toList();
     }
 
-    public CashPlanLimit createCashPlanLimit(CashPlanLimit cpl,
-        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap) {
+    public CashPlanLimit createCashPlanLimit(CashPlanLimit cpl, Map<Dictionary, Map<Long, String>> codesMap) {
         CreateInstanceRequestDto dto = cplMapper.toCreateDto(cpl, codesMap);
         log.info("Creating new Cash_Plan_Limit ...");
         InstanceDto instance = apkRestClient.createInstance(dto);
@@ -104,8 +103,7 @@ public class ApkPlicanteService {
         return cplMapper.toEntity(instance, codesMap);
     }
 
-    public SubsidyProgram createSubsidyProgram(SubsidyProgram sp,
-        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap) {
+    public SubsidyProgram createSubsidyProgram(SubsidyProgram sp, Map<Dictionary, Map<Long, String>> codesMap) {
         CreateInstanceRequestDto dto = spMapper.toCreateDto(sp, codesMap);
         log.info("Creating [{}] level Subsidy_Program ...", sp.getLevel());
         InstanceDto instance = apkRestClient.createInstance(dto);
@@ -113,8 +111,7 @@ public class ApkPlicanteService {
         return spMapper.toEntity(instance, codesMap);
     }
 
-    public FinancingSource createFinancingSource(FinancingSource financingSource,
-        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap) {
+    public FinancingSource createFinancingSource(FinancingSource financingSource, Map<Dictionary, Map<Long, String>> codesMap) {
         CreateInstanceRequestDto createDto = fsMapper.toCreatingDto(financingSource, codesMap);
         log.info("Creating new Financing_Source ...");
         InstanceDto instance = apkRestClient.createInstance(createDto);
@@ -122,22 +119,19 @@ public class ApkPlicanteService {
         return fsMapper.toEntity(instance, codesMap);
     }
 
-    public CofinancingLevel createCofinancingLevel(CofinancingLevel cofinancingLevel,
-        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap) {
+    public CofinancingLevel createCofinancingLevel(CofinancingLevel cofinancingLevel, Map<Dictionary, Map<Long, String>> codesMap) {
         CreateInstanceRequestDto creatingDto = cflMapper.toCreatingDto(cofinancingLevel, codesMap);
         InstanceDto created = apkRestClient.createInstance(creatingDto);
         return cflMapper.toEntity(created, codesMap);
     }
 
-    public long updateCashPlanLimit(CashPlanLimit updatedCpl,
-        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap) {
+    public long updateCashPlanLimit(CashPlanLimit updatedCpl, Map<Dictionary, Map<Long, String>> codesMap) {
         UpdateInstanceRequestDto updateDto = cplMapper.toUpdateDto(updatedCpl);
         UpdateInstanceResponseDto updatedInstance = apkRestClient.updateInstance(updateDto);
         return updatedInstance.id();
     }
 
-    public long updateFinancingSource(FinancingSource updatedFs,
-        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap) {
+    public long updateFinancingSource(FinancingSource updatedFs) {
         log.info("Updating Financing_Source [{}] ...", updatedFs.getId());
         UpdateInstanceRequestDto requestDto = fsMapper.toUpdateDto(updatedFs);
         UpdateInstanceResponseDto responseDto = apkRestClient.updateInstance(requestDto);

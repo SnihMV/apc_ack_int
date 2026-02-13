@@ -55,7 +55,7 @@ import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extract
 @Component
 public class FinancingSourceMapper {
 
-    public FinancingSource toEntity(InstanceDto dto, Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
+    public FinancingSource toEntity(InstanceDto dto, Map<Dictionary, Map<Long, String>> codesMap) {
         List<Attribute<?>> attributes = dto.attributes();
         return FinancingSource.builder()
                 .id(dto.id())
@@ -94,8 +94,7 @@ public class FinancingSourceMapper {
                 .build();
     }
 
-    public CreateInstanceRequestDto toCreatingDto(FinancingSource fs,
-                                                  Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
+    public CreateInstanceRequestDto toCreatingDto(FinancingSource fs, Map<Dictionary, Map<Long, String>> codesMap) {
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()
                         .templateId(TEMPLATE_ID)

@@ -1,10 +1,12 @@
 package su.petrosoft.apk_ack_integration.service;
 
 import java.util.Map.Entry;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
+import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 import su.petrosoft.apk_ack_integration.model.data.DictionaryContaining;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
@@ -15,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.util.stream.Collectors.toSet;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
 
 @Slf4j
@@ -25,6 +28,29 @@ public class DictionaryService {
     private final PlicanteRestClient restClient;
     private final ApkPlicanteService apkPlicanteService;
 
+    public Map<Dictionary, Set<Long>> addNewDictionaryCodes(
+            Map<Dictionary, Map<Long, String>> existingDictionariesMap,
+            List<DescriptedBudgetItemData> rows
+    ) {
+        Set<Dictionary> extractableDictionaries = rows.get(0).dictionariesData().keySet();
+        fillMapWithExtraDictionaries(existingDictionariesMap, extractableDictionaries);
+
+        log.info("Find new dictionaries data ...");
+        Map<Dictionary, Set<Long>> createdDictionaries = new HashMap<>();
+        for (DescriptedBudgetItemData row : rows) {
+
+        }
+
+        return null;
+    }
+
+    private void fillMapWithExtraDictionaries(Map<Dictionary, Map<Long, String>> codesMap, Set<Dictionary> extractableDictionaries) {
+        Set<Dictionary> additionalDictionaries = extractableDictionaries.stream()
+                .filter(d -> !codesMap.containsKey(d))
+                .collect(toSet());
+        codesMap.putAll(apkPlicanteService.getDictionariesCodesMap(additionalDictionaries));
+    }
+
     public Map<Dictionary, Set<Long>> updateCodesMap(
             Map<Dictionary, Map<Long, Map.Entry<String, String>>> existingDictionariesMap,
             List<? extends DictionaryContaining> rows
@@ -32,7 +58,7 @@ public class DictionaryService {
         if (rows != null && !rows.isEmpty()) {
             Set<Dictionary> dictionaries = rows.get(0).dictionariesData().keySet();
             Map<Dictionary, Map<Long, Entry<String, String>>> dictionariesCodesMap = apkPlicanteService.getDictionariesNamedCodesMap(
-                dictionaries);
+                    dictionaries);
         }
         log.info("Find new dictionaries data ...");
         Map<Dictionary, Set<Long>> createdDictionaries = new HashMap<>();

@@ -53,7 +53,7 @@ public class CofinanceLevelUtil {
                 .build();
     }
 
-    public static CreateInstanceRequestDto creatingRequestDto(CofinancingLevel cflToSave, Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
+    public static CreateInstanceRequestDto creatingRequestDto(CofinancingLevel cflToSave, Map<Dictionary, Map<Long, String>> codesMap) {
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()
                         .templateId(TEMPLATE_ID)

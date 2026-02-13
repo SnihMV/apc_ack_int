@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Map.Entry;
 
 import lombok.extern.slf4j.Slf4j;
+import su.petrosoft.apk_ack_integration.exception.DictionaryException;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
@@ -24,6 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessage.DICTIONARY_CODE_NOT_FOUND;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessage.DICTIONARY_DESCRIPTION_NOT_FOUND;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessage.DICTIONARY_ID_NOT_FOUND;
 
 @Slf4j
 public class PlicanteInstanceUtil {
@@ -65,12 +70,12 @@ public class PlicanteInstanceUtil {
 //                        .build());
 //    }
 
-    public static Long dictionaryIdByCode(Map<Dictionary, Map<Long, Entry<String, String>>> allCodes, Dictionary dictionary, String code) {
+    public static Long dictionaryIdByCode(Map<Dictionary, Map<Long, String>> allCodes, Dictionary dictionary, String code) {
         return allCodes.get(dictionary).entrySet().stream()
-                .filter(entry -> entry.getValue().getKey().equalsIgnoreCase(code))
+                .filter(entry -> entry.getValue().equalsIgnoreCase(code))
                 .findFirst()
                 .map(Map.Entry::getKey)
-                .orElseThrow(() -> new RuntimeException("Not found code [%s] for dictionary [%s]".formatted(code, dictionary)));
+                .orElseThrow(() -> new DictionaryException(DICTIONARY_CODE_NOT_FOUND.getMessage().formatted(code, dictionary)));
     }
 
     public static String dictionaryCodeById(Map<Dictionary, Map<Long, String>> allCodes, Dictionary dictionary, long id) {
@@ -78,7 +83,7 @@ public class PlicanteInstanceUtil {
                 .filter(entry -> entry.getKey().equals(id))
                 .findFirst()
                 .map(Entry::getValue)
-                .orElseThrow(() -> new RuntimeException("Not found dictionary [%s] instance with id [%d]".formatted(dictionary, id)));
+                .orElseThrow(() -> new DictionaryException(DICTIONARY_ID_NOT_FOUND.getMessage().formatted(dictionary, id)));
     }
 
     public static String dictionaryCodeDescription(Map<Dictionary, Map<Long, Entry<String, String>>> allCodes, Dictionary dictionary, String code) {
@@ -86,7 +91,7 @@ public class PlicanteInstanceUtil {
                 .filter(entry -> entry.getValue().getKey().equalsIgnoreCase(code))
                 .findFirst()
                 .map(entry -> entry.getValue().getValue())
-                .orElseThrow(() -> new RuntimeException("Not found dictionary [%s] instance with code [%s]".formatted(dictionary, code)));
+                .orElseThrow(() -> new DictionaryException(DICTIONARY_DESCRIPTION_NOT_FOUND.getMessage().formatted(code, dictionary)));
     }
 
     public static Long toEpochMilli(LocalDate day) {

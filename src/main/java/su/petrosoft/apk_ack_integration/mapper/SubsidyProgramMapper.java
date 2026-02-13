@@ -38,7 +38,7 @@ import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.TEMPLATE_
 @Component
 public class SubsidyProgramMapper {
 
-    public SubsidyProgram toEntity(InstanceDto dto, Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
+    public SubsidyProgram toEntity(InstanceDto dto, Map<Dictionary, Map<Long, String>> codesMap) {
         List<Attribute<?>> attributes = dto.attributes();
         long level = extractData(attributes, LEVEL_ATTR);
         return SubsidyProgram.builder()
@@ -79,7 +79,7 @@ public class SubsidyProgramMapper {
                 .build();
     }
 
-    public CreateInstanceRequestDto toCreateDto(SubsidyProgram sp, Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
+    public CreateInstanceRequestDto toCreateDto(SubsidyProgram sp, Map<Dictionary, Map<Long, String>> codesMap) {
         List<Attribute<?>> attributes = new ArrayList<>(List.of(
                 new StringAttribute(NAME_ATTR, sp.getTitle()),
 //                new StringAttribute(CODE_ATTR, sp.getCode()),
