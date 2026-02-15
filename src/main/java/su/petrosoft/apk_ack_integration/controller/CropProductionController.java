@@ -2,6 +2,7 @@ package su.petrosoft.apk_ack_integration.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -14,9 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import su.petrosoft.apk_ack_integration.model.dto.request.FillingMainFormRequestDto;
 import su.petrosoft.apk_ack_integration.service.CropProductionService;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("api/v1/cropProduction")
@@ -45,7 +43,7 @@ public class CropProductionController {
 
         byte[] fileContent = service.createExcelSummaryReport(from, to);
 
-        String fileName = "Сводный отчет по растениеводству " + LocalDateTime.now() + ".xlsx";
+        String fileName = "Crop production summary report " + LocalDate.now() + ".xlsx";
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")

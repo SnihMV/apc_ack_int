@@ -6,7 +6,8 @@ import su.petrosoft.apk_ack_integration.model.enums.ValueType;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public sealed interface FilterAttribute<T>
         permits LongFilterAttribute, StringFilterAttribute, DoubleFilterAttribute,
-        LinkedFilterAttribute, BlobFileFilterAttribute, DateFilterAttribute, BooleanFilterAttribute {
+        LinkedFilterAttribute, BlobFileFilterAttribute, DateFilterAttribute,
+    BooleanFilterAttribute, StatusFilterAttribute {
 
     Long id();
 
