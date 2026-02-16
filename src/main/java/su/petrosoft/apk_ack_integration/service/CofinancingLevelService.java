@@ -1,6 +1,5 @@
 package su.petrosoft.apk_ack_integration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +61,7 @@ public class CofinancingLevelService {
                         spMapper::toEntity,
                         mapping(cflMapper::toEntity, toSet())));
         log.info("Found [{}] Subsidy_Programs in Excel file", excelEntitiesMap.size());
-        Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap = plicanteService.getDictionariesCodesMap(
+        Map<Dictionary, Map<Long, String>> codesMap = plicanteService.getDictionariesCodesMap(
             Set.of(KCSR, DOPKR, OWNERSHIP_FORM, FINANCING_FORM));
         log.info("Getting Existing Subsidy_Programs ...");
         Set<SubsidyProgram> existingSpList = plicanteService.findSubsidyPrograms(
@@ -77,8 +76,6 @@ public class CofinancingLevelService {
             HashSet<SubsidyProgram> unAffectedSps = new HashSet<>(existingSpList);
             unAffectedSps.removeAll(excelEntitiesMap.keySet());
 
-
-
             updatedByFile = updateSubsidyProgramsByCofinLevelsFromFile(affectedSps, excelEntitiesMap, codesMap);
             updatedByDefault = updateSubsidyProgramsByDefaultCofinLevel(unAffectedSps, codesMap);
         } else {
@@ -87,7 +84,7 @@ public class CofinancingLevelService {
         return new CreateCofinancingLevelsFromExcelResponseDto(updatedByFile, updatedByDefault);
     }
 
-    private Map<Long, Set<Long>> updateSubsidyProgramsByDefaultCofinLevel(HashSet<SubsidyProgram> unAffectedSps, Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
+    private Map<Long, Set<Long>> updateSubsidyProgramsByDefaultCofinLevel(HashSet<SubsidyProgram> unAffectedSps, Map<Dictionary, Map<Long, String>> codesMap) {
         Map<Long, Set<Long>> result = new HashMap<>();
         Set<SubsidyProgram> emptySubsidyPrograms = unAffectedSps.stream()
                 .filter(sp -> sp.getCofinancingLevelIds().isEmpty())
@@ -116,7 +113,7 @@ public class CofinancingLevelService {
     private Map<Long, Set<Long>> updateSubsidyProgramsByCofinLevelsFromFile(
             HashSet<SubsidyProgram> affectedSps,
             Map<SubsidyProgram, Set<CofinancingLevel>> excelEntitiesMap,
-            Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap
+            Map<Dictionary, Map<Long, String>> codesMap
     ) {
         if (!affectedSps.isEmpty()) {
             log.info("Updating Subsidy_Programs by Cofinancing_Levels from file ...");

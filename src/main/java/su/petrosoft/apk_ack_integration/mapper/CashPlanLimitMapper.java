@@ -156,7 +156,7 @@ public class CashPlanLimitMapper {
                 .build();
     }
 
-    public CashPlanLimit toEntity(InstanceDto dto, Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
+    public CashPlanLimit toEntity(InstanceDto dto, Map<Dictionary, Map<Long, String>> codesMap) {
 
         List<Attribute<?>> attributes = dto.attributes();
 
@@ -270,8 +270,7 @@ public class CashPlanLimitMapper {
                 .build();
     }
 
-    public CreateInstanceRequestDto toCreateDto(CashPlanLimit cpl,
-                                                Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
+    public CreateInstanceRequestDto toCreateDto(CashPlanLimit cpl, Map<Dictionary, Map<Long, String>> codesMap) {
         CreateInstanceRequestDto dto = new CreateInstanceRequestDto(
                 InstanceDto.builder()
                         .templateId(TEMPLATE_ID)
@@ -291,8 +290,7 @@ public class CashPlanLimitMapper {
         return dto;
     }
 
-    private List<Attribute<?>> buildAttributeListToCreate(CashPlanLimit cpl,
-                                                          Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap) {
+    private List<Attribute<?>> buildAttributeListToCreate(CashPlanLimit cpl, Map<Dictionary, Map<Long, String>> codesMap) {
         return List.of(
                 new LongAttribute(YEAR_ATTR, cpl.getYear()),
                 new DoubleAttribute(TOTAL_LIMIT_ATTR, cpl.getTotalLimit()),

@@ -29,7 +29,7 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KOSGU;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVSR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.PURPOSE;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getCplCodesOnlyByCurrentYearRequestDto;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGettingCplEqualsFieldsByCurrentYear;
 
 @Service
 @Slf4j
@@ -51,14 +51,12 @@ public class XmlDataProcessor {
         }
         log.debug("Received request for Cash Plan Limit upsert: {}", upsertingXml);
 
-        Map<Dictionary, Map<Long, Map.Entry<String, String>>> codesMap = apkService.getDictionariesCodesMap(
-            Set.of(
-                KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE
-            ));
+        Map<Dictionary, Map<Long, String>> codesMap = apkService.getDictionariesCodesMap(
+            Set.of(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
         CashPlanLimit cplToUpdate = mapper.toEntity(upsertingXml);
 
         Set<CashPlanLimit> allCashPlanLimits = apkService.findCashPlanLimits(
-            getCplCodesOnlyByCurrentYearRequestDto(), codesMap);
+            requestDtoToGettingCplEqualsFieldsByCurrentYear(), codesMap);
         log.debug("Exist [{}] CashPlanLimits for [{}] year in DB", allCashPlanLimits.size(),
             LocalDateTime.now().getYear());
 
