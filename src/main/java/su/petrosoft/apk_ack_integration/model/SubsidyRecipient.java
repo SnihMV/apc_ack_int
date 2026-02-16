@@ -19,9 +19,9 @@ public class SubsidyRecipient extends PlicanteInstance {
     private String ogrn;
     private LocalDate ogrnDate;
     private String kpp;
+    private Long districtId;
     private Collection<Long> machineParkIds;
     private Long appType;
-    private Long districtId;
 
     @Override
     public boolean equals(Object o) {

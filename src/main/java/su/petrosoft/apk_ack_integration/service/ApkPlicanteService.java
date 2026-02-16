@@ -20,6 +20,7 @@ import su.petrosoft.apk_ack_integration.model.CropProductionMainForm;
 import su.petrosoft.apk_ack_integration.model.FinancingSource;
 import su.petrosoft.apk_ack_integration.model.OperationalReport;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
+import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
@@ -27,9 +28,7 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequest
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
-import su.petrosoft.apk_ack_integration.model.enums.ReportType;
 
-import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +37,6 @@ import java.util.Set;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
-import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.buildGettingOperationalReportsRequestDto;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
 
 @Service
@@ -59,7 +57,7 @@ public class ApkPlicanteService {
             GetAttributesListRequestDto requestDto,
             Map<Dictionary, Map<Long, Entry<String, String>>> codesMap
     ) {
-        log.info("Getting Existing Cash_Plan_Limits ...");
+        log.info("Getting Cash_Plan_Limits ...");
         List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(requestDto);
         log.info("Found Cash_Plan_Limits count: [{}]", dtoList.size());
         return dtoList.stream()
@@ -78,7 +76,7 @@ public class ApkPlicanteService {
     }
 
     public Set<FinancingSource> findFinancingSources(GetAttributesListRequestDto requestDto, Map<Dictionary, Map<Long, Entry<String, String>>> codesMap) {
-        log.info("Getting Existing Financing_Sources ...");
+        log.info("Getting Financing_Sources ...");
         List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(requestDto);
         log.info("Found Financing_Sources count: [{}]", dtoList.size());
         return dtoList.stream()
@@ -86,9 +84,10 @@ public class ApkPlicanteService {
                 .collect(toSet());
     }
 
-    public List<OperationalReport> getOperationalReports(ReportType reportType, long date) {
-        GetAttributesListRequestDto createDto = buildGettingOperationalReportsRequestDto(reportType, date);
-        List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(createDto);
+    public List<OperationalReport> getOperationalReports(GetAttributesListRequestDto requestDto) {
+        log.info("Getting Operational_Reports ...");
+        List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(requestDto);
+        log.info("Found Operational_Reports count: [{}]", dtoList.size());
         return dtoList.stream()
                 .map(orMapper::toEntity)
                 .toList();

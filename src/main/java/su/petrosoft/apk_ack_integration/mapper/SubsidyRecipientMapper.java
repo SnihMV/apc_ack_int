@@ -1,5 +1,21 @@
 package su.petrosoft.apk_ack_integration.mapper;
 
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractAllData;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.toEpochMilli;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.toLocalDate;
+import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.APP_TYPE_ATTR;
+import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.DISTRICT_ATTR;
+import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.FULL_TITLE_ATTR;
+import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.INN_ATTR;
+import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.KPP_ATTR;
+import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.MACHINE_PARK_ATTR;
+import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.OGRN_ATTR;
+import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.OGRN_DATE_ATTR;
+import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.SHORT_TITLE_ATTR;
+import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.TEMPLATE_ID;
+
+import java.util.List;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
 import su.petrosoft.apk_ack_integration.model.dto.nifi.GetDataFromEgrulByInnDto;
@@ -11,27 +27,23 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttri
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil;
 
-import java.util.List;
-
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
-import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.*;
-import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.TEMPLATE_ID;
-
 @Component
 public class SubsidyRecipientMapper {
     public SubsidyRecipient toEntity(InstanceDto dto) {
         List<Attribute<?>> attributes = dto.attributes();
         return SubsidyRecipient.builder()
-                .id(dto.id())
-                .version(dto.version())
-                .fullTitle(extractData(attributes, FULL_TITLE_ATTR))
-                .shortTitle(extractData(attributes, SHORT_TITLE_ATTR))
-                .inn(extractData(attributes, INN_ATTR))
-                .kpp(extractData(attributes, KPP_ATTR))
-                .ogrn(extractData(attributes, OGRN_ATTR))
-                .ogrnDate(toLocalDate(extractData(attributes, OGRN_DATE_ATTR)))
-                .build();
+            .id(dto.id())
+            .version(dto.version())
+            .fullTitle(extractData(attributes, FULL_TITLE_ATTR))
+            .shortTitle(extractData(attributes, SHORT_TITLE_ATTR))
+            .inn(extractData(attributes, INN_ATTR))
+            .kpp(extractData(attributes, KPP_ATTR))
+            .ogrn(extractData(attributes, OGRN_ATTR))
+            .ogrnDate(toLocalDate(extractData(attributes, OGRN_DATE_ATTR)))
+            .appType(extractData(attributes, APP_TYPE_ATTR))
+            .machineParkIds(extractAllData(attributes, MACHINE_PARK_ATTR))
+            .districtId(extractData(attributes, DISTRICT_ATTR))
+            .build();
 
     }
 
