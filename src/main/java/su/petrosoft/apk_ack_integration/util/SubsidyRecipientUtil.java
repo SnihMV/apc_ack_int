@@ -1,5 +1,12 @@
 package su.petrosoft.apk_ack_integration.util;
 
+import static su.petrosoft.apk_ack_integration.model.enums.SqlOperation.IN;
+import static su.petrosoft.apk_ack_integration.model.enums.ViewType.DETAILED_FORM_VIEW;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.toEpochMilli;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
 import su.petrosoft.apk_ack_integration.model.dto.nifi.GetDataFromEgrulByInnDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
@@ -13,15 +20,8 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LinkedFilterAt
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.StringFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
+import su.petrosoft.apk_ack_integration.model.dto.request.GettingInstanceRepresentationRequestDto;
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import static su.petrosoft.apk_ack_integration.model.enums.SqlOperation.*;
-import static su.petrosoft.apk_ack_integration.model.enums.ViewType.*;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
 
 public class SubsidyRecipientUtil {
 
@@ -50,6 +50,22 @@ public class SubsidyRecipientUtil {
                 new LongFilterAttribute(ID_ATTR, id))))
             .build();
     }
+
+    public static GetAttributesListRequestDto requestDtoToFindRecipientNameAndDistrictById(long id) {
+        return GetAttributesListRequestDto.builder()
+            .templateId(TEMPLATE_ID)
+            .viewType(DETAILED_FORM_VIEW)
+            .attributes(List.of(
+                new RequestedAttribute(SHORT_TITLE_ATTR),
+                new RequestedAttribute(INN_ATTR),
+                new RequestedAttribute(DISTRICT_ATTR)
+            ))
+            .filter(new Filter(List.of(
+                new LongFilterAttribute(ID_ATTR, id))))
+            .build();
+    }
+
+
 
     public static GetAttributesListRequestDto buildGettingRecipientsByInnsRequestDto(
         List<String> innListFromXml) {
@@ -82,6 +98,14 @@ public class SubsidyRecipientUtil {
             .filter(new Filter(List.of(
                 new LinkedFilterAttribute(APP_TYPE_ATTR, appTypeId)
             )))
+            .build();
+    }
+
+    public static GettingInstanceRepresentationRequestDto requestDtoForGettingRecipientRepresentationById(Long id) {
+        return GettingInstanceRepresentationRequestDto.builder()
+            .instance(InstanceDto.builder()
+                .id(id)
+                .build())
             .build();
     }
 

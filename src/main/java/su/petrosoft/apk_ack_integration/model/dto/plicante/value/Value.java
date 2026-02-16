@@ -5,8 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public sealed interface Value<T>
         permits StringValue, DoubleValue, LongValue,
-        BooleanValue, LinkedValue, BlobFileValue {
+        BooleanValue, LinkedValue, BlobFileValue, StatusValue {
 
     T data();
-
 }
