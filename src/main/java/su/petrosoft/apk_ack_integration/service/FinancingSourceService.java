@@ -23,9 +23,9 @@ public class FinancingSourceService {
 //        List<DescriptedBudgetItemData> dtoList = excelExtractor.getUniBudget20262801Rows(file);
         List<DescriptedBudgetItemData> dtoList = excelExtractor.getUniBudget2026ClarifiedRows(file);
 
-//            return budgetItemService.createBudgetItems(dtoList);
-        UpsertBudgetItemsResponseDto upsertBudgetItemsResponseDto = budgetItemService.upsertBudgetItems(dtoList);
-        return null;
+            return budgetItemService.createBudgetItems(dtoList);
+//        UpsertBudgetItemsResponseDto upsertBudgetItemsResponseDto = budgetItemService.upsertBudgetItems(dtoList);
+//        return null;
     }
 }
 

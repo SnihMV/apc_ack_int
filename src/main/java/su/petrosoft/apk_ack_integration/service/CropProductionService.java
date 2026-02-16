@@ -110,8 +110,7 @@ public class CropProductionService {
             return null;
         }
 
-        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap =
-            plicanteService.getDictionariesCodesMap(Set.of(DISTRICT));
+        Map<Dictionary, Map<Long, String>> codesMap = plicanteService.getDictionariesCodesMap(Set.of(DISTRICT));
 
         Map<Long, OperationalReport> recipientIdToLastReportMap = operationalReports.stream()
             .collect(toMap(
@@ -139,7 +138,7 @@ public class CropProductionService {
         );
 
         return excelReportFiller.fillReport(
-            getClass().getResourceAsStream(TEMPLATE_PATH), result, headerData);
+            getClass().getResourceAsStream(TEMPLATE_PATH), result, headerData, true);
     }
 
     private SubsidyRecipient getRecipientInfoById(Long id) {

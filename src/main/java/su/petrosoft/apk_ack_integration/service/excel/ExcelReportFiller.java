@@ -6,12 +6,15 @@ import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.MARKER
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
@@ -41,18 +44,19 @@ public class ExcelReportFiller {
      * @return готовый Excel файл в виде байтов
      */
     public byte[] fillReport(InputStream templateStream,
-        List<DistrictData> districts,
-        Map<String, Object> headerData) {
+                             List<DistrictData> districts,
+                             Map<String, Object> headerData,
+                             boolean isDetailed) {
         try (Workbook workbook = new XSSFWorkbook(templateStream)) {
             Sheet sheet = workbook.getSheetAt(0);
 
             TemplateStructure structure = analyzeTemplate(sheet);
 
-            removeMarkerRows(sheet, structure);
+//            removeMarkerRows(sheet, structure);
 
             fillHeader(sheet, structure.markers.get(HEADER_KEY), headerData);
 
-            fillData(sheet, structure, districts);
+            fillData(sheet, structure, districts, isDetailed);
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             workbook.write(baos);
@@ -79,8 +83,8 @@ public class ExcelReportFiller {
 
                     if (value.startsWith(MARKER_PREFIX)) {
                         structure.addMarker(new MarkerInfo(
-                            value.substring(MARKER_PREFIX.length()), row.getRowNum(),
-                            cell.getColumnIndex(), cell.getCellStyle()
+                                value.substring(MARKER_PREFIX.length()), row.getRowNum(),
+                                cell.getColumnIndex(), cell.getCellStyle()
                         ));
                     }
                 }
@@ -88,7 +92,7 @@ public class ExcelReportFiller {
         }
         if (structure.firstDataRow == -1) {
             throw new ExcelTemplateException(
-                MARKER_NOT_FOUND.formatted(MARKER_PREFIX, DISTRICT_KEY));
+                    MARKER_NOT_FOUND.formatted(MARKER_PREFIX, DISTRICT_KEY));
         }
         return structure;
     }
@@ -96,20 +100,10 @@ public class ExcelReportFiller {
     /**
      * Заполняет шапку отчета
      */
-    private void fillHeader(Sheet sheet, List<MarkerInfo> headerMarkers,
-        Map<String, Object> headerData) {
+    private void fillHeader(Sheet sheet, List<MarkerInfo> headerMarkers, Map<String, Object> headerData) {
         for (MarkerInfo marker : headerMarkers) {
             Row row = sheet.getRow(marker.row);
-            if (row == null) {
-                row = sheet.createRow(marker.row);
-            }
-
             Cell cell = row.getCell(marker.col);
-            if (cell == null) {
-                cell = row.createCell(marker.col);
-            }
-
-            cell.setCellStyle(marker.style);
 
             String key = marker.key;
             Object value = headerData.get(key);
@@ -121,25 +115,39 @@ public class ExcelReportFiller {
     /**
      * Заполняет данные (районы и производители)
      */
-    private void fillData(Sheet sheet, TemplateStructure structure,
-        List<DistrictData> districts) {
-
+    private void fillData(Sheet sheet,
+                          TemplateStructure structure,
+                          List<DistrictData> districts,
+                          boolean isDetailed) {
         int currentRow = structure.firstDataRow;
+
+        DistrictData totalData = new DistrictData("ИТОГО", Collections.emptyList());
 
         for (DistrictData district : districts) {
 
             district.calculateDistrictTotal();
 
+            addToTotal(totalData, district);
+
             Row districtRow = getOrCreateRow(sheet, currentRow);
             fillDistrictRow(districtRow, structure.markers.get(DISTRICT_KEY), district);
             currentRow++;
 
-            for (ProducerData producer : district.getProducers()) {
-                Row producerRow = getOrCreateRow(sheet, currentRow);
-                fillProducerRow(producerRow, structure.markers.get(PRODUCER_KEY), producer);
-                currentRow++;
+            if (isDetailed) {
+                for (ProducerData producer : district.getProducers()) {
+                    Row producerRow = getOrCreateRow(sheet, currentRow);
+                    fillProducerRow(producerRow, structure.markers.get(PRODUCER_KEY), producer);
+                    currentRow++;
+                }
             }
+        }
+        Row totalRow = sheet.createRow(currentRow);
+        fillDistrictRow(totalRow, structure.markers.get(DISTRICT_KEY), totalData);
+    }
 
+    private void addToTotal(DistrictData total, DistrictData district) {
+        for (Map.Entry<String, BigDecimal> entry : district.getSums().entrySet()) {
+            total.getSums().merge(entry.getKey(), entry.getValue(), BigDecimal::add);
         }
     }
 
@@ -147,7 +155,7 @@ public class ExcelReportFiller {
      * Заполняет строку района
      */
     private void fillDistrictRow(Row row, List<MarkerInfo> districtMarkers,
-        DistrictData district) {
+                                 DistrictData district) {
         for (MarkerInfo marker : districtMarkers) {
             Cell cell = row.getCell(marker.col);
             if (cell == null) {
@@ -179,7 +187,7 @@ public class ExcelReportFiller {
      * Заполняет строку производителя
      */
     private void fillProducerRow(Row row, List<MarkerInfo> producerMarkers,
-        ProducerData producer) {
+                                 ProducerData producer) {
         for (MarkerInfo marker : producerMarkers) {
             Cell cell = row.getCell(marker.col);
             if (cell == null) {
