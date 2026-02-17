@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -15,12 +16,10 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class DistrictData {
-
-    private static final Comparator<ProducerData> PRODUCER_CMP = comparing(ProducerData::getName);
+public class DistrictData implements Comparable<DistrictData> {
 
     private final String name;
-    private final Set<ProducerData> producers = new TreeSet<>(PRODUCER_CMP);
+    private final List<ProducerData> producers;
     private final Map<String, BigDecimal> sums = new HashMap<>();
 
     public void addProducer(ProducerData producerData) {
@@ -50,5 +49,10 @@ public class DistrictData {
 
         return numerator.multiply(BigDecimal.valueOf(100))
             .divide(denominator, 2, RoundingMode.HALF_UP);
+    }
+
+    @Override
+    public int compareTo(DistrictData that) {
+        return this.name.compareTo(that.name);
     }
 }

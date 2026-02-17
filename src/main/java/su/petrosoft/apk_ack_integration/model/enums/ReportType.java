@@ -9,9 +9,7 @@ import lombok.RequiredArgsConstructor;
 public enum ReportType {
     FORM_1("Форма 1", 630),
     FORM_2("Форма 2", 631),
-    FORM_3("Форма 3", 632),
-    FORM_4("Форма 4", 633),
-    FORM_5("Форма 5", 634);
+    FORM_3("Форма 3", 632);
 
     private final String title;
     private final long id;

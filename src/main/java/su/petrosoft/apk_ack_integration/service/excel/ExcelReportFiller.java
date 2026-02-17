@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -44,7 +45,7 @@ public class ExcelReportFiller {
      * @return готовый Excel файл в виде байтов
      */
     public byte[] fillReport(InputStream templateStream,
-                             List<DistrictData> districts,
+                             Collection<DistrictData> districts,
                              Map<String, Object> headerData,
                              boolean isDetailed) {
         try (Workbook workbook = new XSSFWorkbook(templateStream)) {
@@ -81,17 +82,21 @@ public class ExcelReportFiller {
 
                     if (value.startsWith(MARKER_PREFIX)) {
                         structure.addMarker(new MarkerInfo(
-                                value.substring(MARKER_PREFIX.length()), row.getRowNum(),
-                                cell.getColumnIndex(), cell.getCellStyle()
-                        ));
+                                value.substring(MARKER_PREFIX.length()), row.getRowNum(), cell.getColumnIndex()));
                     }
                 }
             }
         }
-        if (structure.firstDataRow == -1) {
+        if (structure.districtMarkerRowNum == -1) {
             throw new ExcelTemplateException(
                     MARKER_NOT_FOUND.formatted(MARKER_PREFIX, DISTRICT_KEY));
         }
+        if (structure.producerMarkerRowNum == -1) {
+            throw new ExcelTemplateException(
+                    MARKER_NOT_FOUND.formatted(MARKER_PREFIX, PRODUCER_KEY));
+        }
+        structure.districtStyles = extractStylesFromRow(sheet.getRow(structure.districtMarkerRowNum));
+        structure.producerStyles = extractStylesFromRow(sheet.getRow(structure.producerMarkerRowNum));
         return structure;
     }
 
@@ -115,9 +120,13 @@ public class ExcelReportFiller {
      */
     private void fillData(Sheet sheet,
                           TemplateStructure structure,
-                          List<DistrictData> districts,
+                          Collection<DistrictData> districts,
                           boolean isDetailed) {
-        int currentRow = structure.firstDataRow;
+
+        int currentRow = structure.districtMarkerRowNum;
+
+        sheet.removeRow(sheet.getRow(structure.producerMarkerRowNum));
+        sheet.removeRow(sheet.getRow(structure.districtMarkerRowNum));
 
         DistrictData totalData = new DistrictData("ИТОГО", Collections.emptyList());
 
@@ -128,19 +137,51 @@ public class ExcelReportFiller {
             addToTotal(totalData, district);
 
             Row districtRow = getOrCreateRow(sheet, currentRow);
+            applyStyles(districtRow, structure.districtStyles);
             fillDistrictRow(districtRow, structure.markers.get(DISTRICT_KEY), district);
             currentRow++;
 
             if (isDetailed) {
                 for (ProducerData producer : district.getProducers()) {
                     Row producerRow = getOrCreateRow(sheet, currentRow);
+                    applyStyles(producerRow, structure.producerStyles);
                     fillProducerRow(producerRow, structure.markers.get(PRODUCER_KEY), producer);
                     currentRow++;
                 }
             }
         }
         Row totalRow = sheet.createRow(currentRow);
+        applyStyles(totalRow, structure.districtStyles);
         fillDistrictRow(totalRow, structure.markers.get(DISTRICT_KEY), totalData);
+    }
+
+    /**
+     * Извлекает стили всех ячеек из строки
+     */
+    private Map<Integer, CellStyle> extractStylesFromRow(Row row) {
+        Map<Integer, CellStyle> styles = new HashMap<>();
+        if (row == null) return styles;
+
+        for (Cell cell : row) {
+            styles.put(cell.getColumnIndex(), cell.getCellStyle());
+        }
+        return styles;
+    }
+
+    /**
+     * Применяет стили к строке
+     */
+    private void applyStyles(Row row, Map<Integer, CellStyle> styles) {
+        for (Map.Entry<Integer, CellStyle> entry : styles.entrySet()) {
+            int col = entry.getKey();
+            CellStyle style = entry.getValue();
+
+            Cell cell = row.getCell(col);
+            if (cell == null) {
+                cell = row.createCell(col);
+            }
+            cell.setCellStyle(style);
+        }
     }
 
     private void addToTotal(DistrictData total, DistrictData district) {
@@ -156,11 +197,6 @@ public class ExcelReportFiller {
                                  DistrictData district) {
         for (MarkerInfo marker : districtMarkers) {
             Cell cell = row.getCell(marker.col);
-            if (cell == null) {
-                cell = row.createCell(marker.col);
-            }
-            cell.setCellStyle(marker.style);
-
             String key = marker.key;
 
             if (key.equals("name")) {
@@ -188,10 +224,6 @@ public class ExcelReportFiller {
                                  ProducerData producer) {
         for (MarkerInfo marker : producerMarkers) {
             Cell cell = row.getCell(marker.col);
-            if (cell == null) {
-                cell = row.createCell(marker.col);
-            }
-            cell.setCellStyle(marker.style);
 
             String key = marker.key;
 
@@ -203,18 +235,6 @@ public class ExcelReportFiller {
                 cell.setCellValue(producer.getValue(key).doubleValue());
             }
         }
-    }
-
-    /**
-     * Удаляет строки с маркерами
-     */
-    private void removeMarkerRows(Sheet sheet, TemplateStructure structure) {
-        int distMarkersRowNum = structure.markers.get(DISTRICT_KEY).get(0).row;
-        int prodMarkersRowNum = structure.markers.get(PRODUCER_KEY).get(0).row;
-        Row distRow = sheet.getRow(distMarkersRowNum);
-        Row prodRow = sheet.getRow(prodMarkersRowNum);
-        sheet.removeRow(prodRow);
-        sheet.removeRow(distRow);
     }
 
     /**
@@ -255,14 +275,12 @@ public class ExcelReportFiller {
         private String key;
         private int row;
         private int col;
-        private CellStyle style;
 
-        public MarkerInfo(String key, int row, int col, CellStyle style) {
+        public MarkerInfo(String key, int row, int col) {
             this.type = key.split("_")[0];
             this.key = key.substring(type.length() + 1);
             this.row = row;
             this.col = col;
-            this.style = style;
         }
     }
 
@@ -271,12 +289,19 @@ public class ExcelReportFiller {
      */
     private static class TemplateStructure {
 
+        private int districtMarkerRowNum = -1;
+        private int producerMarkerRowNum = -1;
+        private Map<Integer, CellStyle> districtStyles;
+        private Map<Integer, CellStyle> producerStyles;
         private final Map<String, List<MarkerInfo>> markers = new HashMap<>();
-        private int firstDataRow = -1;
+
 
         public void addMarker(MarkerInfo marker) {
-            if (DISTRICT_KEY.equalsIgnoreCase(marker.type) && firstDataRow == -1) {
-                firstDataRow = marker.row;
+            if (districtMarkerRowNum == -1 && DISTRICT_KEY.equalsIgnoreCase(marker.type)) {
+                districtMarkerRowNum = marker.row;
+            }
+            if (producerMarkerRowNum == -1 && PRODUCER_KEY.equalsIgnoreCase(marker.type)) {
+                producerMarkerRowNum = marker.row;
             }
             markers.computeIfAbsent(marker.type, k -> new ArrayList<>()).add(marker);
         }
