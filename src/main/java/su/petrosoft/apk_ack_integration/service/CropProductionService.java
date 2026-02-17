@@ -2,6 +2,7 @@ package su.petrosoft.apk_ack_integration.service;
 
 import static java.util.Comparator.comparingLong;
 import static java.util.function.BinaryOperator.maxBy;
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DISTRICT;
 import static su.petrosoft.apk_ack_integration.model.enums.ReportType.FORM_1;
@@ -10,6 +11,7 @@ import static su.petrosoft.apk_ack_integration.model.enums.ReportType.FORM_3;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessage.RECIPIENT_BY_ID_NOT_FOUND;
 import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.requestDtoForGettingOperationalReportsByTypeAndDate;
 import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.requestDtoForGettingOperationalReportsByTypeAndStatusAndDateInterval;
+import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.requestDtoForGettingOperationalReportsByTypesAndStatusAndDateInterval;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryCodeById;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.toEpochMilli;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.requestDtoToFindRecipientNameAndDistrictById;
@@ -22,6 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,6 +40,7 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRespons
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.FillingMainFormRequestDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
+import su.petrosoft.apk_ack_integration.model.enums.ReportType;
 import su.petrosoft.apk_ack_integration.service.excel.ExcelReportFiller;
 import su.petrosoft.apk_ack_integration.util.CropProductionUtil;
 
@@ -105,6 +109,21 @@ public class CropProductionService {
         List<OperationalReport> operationalReports = plicanteService.getOperationalReports(
             requestDtoForGettingOperationalReportsByTypeAndStatusAndDateInterval(FORM_1, since,
                 until));
+
+        List<OperationalReport> or = plicanteService.getOperationalReports(
+            requestDtoForGettingOperationalReportsByTypesAndStatusAndDateInterval(since, until,
+                5858, List.of(FORM_1.getId(), FORM_2.getId(), FORM_3.getId())));
+
+        Map<Long, Map<ReportType, OperationalReport>> collect = or.stream()
+            .collect(groupingBy(
+                OperationalReport::getRecipientId,
+                toMap(
+                    OperationalReport::getReportType,
+                    Function.identity(),
+                    maxBy(comparingLong(OperationalReport::getReportDate))
+                )));
+
+
 
         if (operationalReports == null || operationalReports.isEmpty()) {
             return null;

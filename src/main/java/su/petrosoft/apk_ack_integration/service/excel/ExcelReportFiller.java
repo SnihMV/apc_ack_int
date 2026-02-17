@@ -52,8 +52,6 @@ public class ExcelReportFiller {
 
             TemplateStructure structure = analyzeTemplate(sheet);
 
-//            removeMarkerRows(sheet, structure);
-
             fillHeader(sheet, structure.markers.get(HEADER_KEY), headerData);
 
             fillData(sheet, structure, districts, isDetailed);

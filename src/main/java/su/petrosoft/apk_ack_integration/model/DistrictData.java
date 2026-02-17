@@ -1,11 +1,15 @@
 package su.petrosoft.apk_ack_integration.model;
 
+import static java.util.Comparator.*;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -13,15 +17,14 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DistrictData {
 
+    private static final Comparator<ProducerData> PRODUCER_CMP = comparing(ProducerData::getName);
+
     private final String name;
-    private final List<ProducerData> producers;
+    private final Set<ProducerData> producers = new TreeSet<>(PRODUCER_CMP);
     private final Map<String, BigDecimal> sums = new HashMap<>();
 
     public void addProducer(ProducerData producerData) {
         producers.add(producerData);
-        for (Entry<String, BigDecimal> entry : producerData.getValues().entrySet()) {
-            sums.merge(entry.getKey(), entry.getValue(), BigDecimal::add);
-        }
     }
 
     public BigDecimal getSum(String key) {

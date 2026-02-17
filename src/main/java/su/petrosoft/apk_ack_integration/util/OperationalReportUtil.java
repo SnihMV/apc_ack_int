@@ -1,5 +1,7 @@
 package su.petrosoft.apk_ack_integration.util;
 
+import java.util.Collection;
+import java.util.List;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.DateFilterAttribute;
@@ -9,8 +11,6 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.StatusFilterAt
 import su.petrosoft.apk_ack_integration.model.enums.ReportType;
 import su.petrosoft.apk_ack_integration.model.enums.SqlOperation;
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
-
-import java.util.List;
 
 public class OperationalReportUtil {
 
@@ -57,6 +57,26 @@ public class OperationalReportUtil {
             .filter(new Filter(List.of(
                 new LinkedFilterAttribute(REPORT_TYPE_ATTR, reportType.getId()),
                 new StatusFilterAttribute(STATUS_ATTR, 5858),
+                new DateFilterAttribute(REPORT_DATE_ATTR, List.of(SqlOperation.BETWEEN), from, to)
+            )))
+            .build();
+    }
+
+    public static GetAttributesListRequestDto requestDtoForGettingOperationalReportsByTypesAndStatusAndDateInterval(
+        long from, long to, long statusId, Collection<Long> reportTypes) {
+        return GetAttributesListRequestDto.builder()
+            .templateId(TEMPLATE_ID)
+            .viewType(ViewType.DETAILED_FORM_VIEW)
+            .getBinaries(true)
+            .attributes(List.of(
+                new RequestedAttribute(RECIPIENT_ATTR),
+                new RequestedAttribute(REPORT_TYPE_ATTR),
+                new RequestedAttribute(REPORT_DATE_ATTR),
+                new RequestedAttribute(FILE_JSON_ATTR)
+            ))
+            .filter(new Filter(List.of(
+                new LinkedFilterAttribute(REPORT_TYPE_ATTR, List.of(SqlOperation.IN), reportTypes),
+                new StatusFilterAttribute(STATUS_ATTR, statusId),
                 new DateFilterAttribute(REPORT_DATE_ATTR, List.of(SqlOperation.BETWEEN), from, to)
             )))
             .build();
