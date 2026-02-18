@@ -1,5 +1,12 @@
 package su.petrosoft.apk_ack_integration.service;
 
+import static java.util.stream.Collectors.toSet;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToFindAllSubsidyPrograms;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToFindSecondLevelSubsidyPrograms;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -9,14 +16,6 @@ import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static java.util.stream.Collectors.toSet;
-import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToFindAllSubsidyPrograms;
-import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToFindSecondLevelSubsidyPrograms;
 
 @Service
 @Slf4j
@@ -53,7 +52,7 @@ public class SubsidyProgramService {
         List<InstanceDto> dtoList = plicanteRestClient.getTableAttributesList(
                 requestDtoToFindAllSubsidyPrograms());
         Set<SubsidyProgram> subsidyPrograms = dtoList.stream()
-                .map(dto -> spMapper.toEntity(dto, codesMap))
+                .map(dto -> spMapper.toEntity(dto))
                 .collect(toSet());
         log.info("Found Subsidy_Programs count: [{}]", subsidyPrograms.size());
         return subsidyPrograms;

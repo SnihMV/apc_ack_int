@@ -1,6 +1,15 @@
 package su.petrosoft.apk_ack_integration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
+
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,17 +34,6 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRespons
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
-
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -48,17 +46,15 @@ public class ApkPlicanteService {
     private final CropProductionMainFormMapper cpmfMapper;
     private final OperationalReportMapper orMapper;
     private final CofinancingLevelMapper cflMapper;
-    private final ObjectMapper objectMapper;
 
     public Set<CashPlanLimit> findCashPlanLimits(
-        GetAttributesListRequestDto requestDto,
-        Map<Dictionary, Map<Long, String>> codesMap
+        GetAttributesListRequestDto requestDto
     ) {
         log.info("Getting Existing Cash_Plan_Limits ...");
         List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(requestDto);
         log.info("Found Cash_Plan_Limits count: [{}]", dtoList.size());
         return dtoList.stream()
-            .map(dto -> cplMapper.toEntity(dto, codesMap))
+            .map(cplMapper::toEntity)
             .collect(toSet());
     }
 
@@ -68,17 +64,16 @@ public class ApkPlicanteService {
     ) {
         List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(requestDto);
         return dtoList.stream()
-            .map(dto -> spMapper.toEntity(dto, codesMap))
+            .map(dto -> spMapper.toEntity(dto))
             .collect(toSet());
     }
 
-    public Set<FinancingSource> findFinancingSources(GetAttributesListRequestDto requestDto,
-                                                     Map<Dictionary, Map<Long, String>> codesMap) {
+    public Set<FinancingSource> findFinancingSources(GetAttributesListRequestDto requestDto) {
         log.info("Getting Existing Financing_Sources ...");
         List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(requestDto);
         log.info("Found Financing_Sources count: [{}]", dtoList.size());
         return dtoList.stream()
-            .map(dto -> fsMapper.toEntity(dto, codesMap))
+            .map(fsMapper::toEntity)
             .collect(toSet());
     }
 
@@ -91,20 +86,20 @@ public class ApkPlicanteService {
                 .toList();
     }
 
-    public CashPlanLimit createCashPlanLimit(CashPlanLimit cpl, Map<Dictionary, Map<Long, String>> codesMap) {
-        CreateInstanceRequestDto dto = cplMapper.toCreateDto(cpl, codesMap);
+    public CashPlanLimit createCashPlanLimit(CashPlanLimit cpl) {
+        CreateInstanceRequestDto dto = cplMapper.toCreateDto(cpl);
         log.info("Creating new Cash_Plan_Limit ...");
         InstanceDto instance = apkRestClient.createInstance(dto);
         log.info("Cash_Plan_Limit created with id [{}]", instance.id());
-        return cplMapper.toEntity(instance, codesMap);
+        return cplMapper.toEntity(instance);
     }
 
     public SubsidyProgram createSubsidyProgram(SubsidyProgram sp, Map<Dictionary, Map<Long, String>> codesMap) {
-        CreateInstanceRequestDto dto = spMapper.toCreateDto(sp, codesMap);
+        CreateInstanceRequestDto dto = spMapper.toCreateDto(sp);
         log.info("Creating [{}] level Subsidy_Program ...", sp.getLevel());
         InstanceDto instance = apkRestClient.createInstance(dto);
         log.info("Created [{}] level Subsidy_Program with id [{}]", sp.getLevel(), instance.id());
-        return spMapper.toEntity(instance, codesMap);
+        return spMapper.toEntity(instance);
     }
 
     public FinancingSource createFinancingSource(FinancingSource financingSource, Map<Dictionary, Map<Long, String>> codesMap) {
@@ -112,7 +107,7 @@ public class ApkPlicanteService {
         log.info("Creating new Financing_Source ...");
         InstanceDto instance = apkRestClient.createInstance(createDto);
         log.info("Financing_Source created with id [{}]", instance.id());
-        return fsMapper.toEntity(instance, codesMap);
+        return fsMapper.toEntity(instance);
     }
 
     public CofinancingLevel createCofinancingLevel(CofinancingLevel cofinancingLevel, Map<Dictionary, Map<Long, String>> codesMap) {
@@ -121,7 +116,7 @@ public class ApkPlicanteService {
         return cflMapper.toEntity(created, codesMap);
     }
 
-    public long updateCashPlanLimit(CashPlanLimit updatedCpl, Map<Dictionary, Map<Long, String>> codesMap) {
+    public long updateCashPlanLimit(CashPlanLimit updatedCpl) {
         UpdateInstanceRequestDto updateDto = cplMapper.toUpdateDto(updatedCpl);
         UpdateInstanceResponseDto updatedInstance = apkRestClient.updateInstance(updateDto);
         return updatedInstance.id();
@@ -156,7 +151,7 @@ public class ApkPlicanteService {
         for (Dictionary dictionary : dictionaries) {
             Map<Long, String> codesMap = dictionaryCodes(dictionary);
             dictionaryCodesMap.put(dictionary, codesMap);
-            log.debug("Received {} codes map:\n[{}]", dictionary.name(), codesMap);
+            log.debug("Received {} codes map", dictionary.name());
         }
         long count = dictionaryCodesMap.values().stream()
             .mapToLong(Map::size)

@@ -1,13 +1,11 @@
 package su.petrosoft.apk_ack_integration.model;
 
+import java.util.Collection;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -15,16 +13,16 @@ import java.util.Set;
 @SuperBuilder
 public class FinancingSource extends PlicanteInstance {
     private Long year;
-    private String kvsr;
-    private String kfsr;
-    private String kcsr;
-    private String kvr;
-    private String kosgu;
-    private String dopFk;
-    private String dopEk;
-    private String dopKr;
-    private String purpose;
-    private String ownershipForm;
+    private Long kvsr;
+    private Long kfsr;
+    private Long kcsr;
+    private Long kvr;
+    private Long kosgu;
+    private Long dopFk;
+    private Long dopEk;
+    private Long dopKr;
+    private Long purpose;
+    private Long ownershipForm;
     private Long subsidyProgramId;
     private Collection<Long> cashPlanLimitIds;
     private String concatenatedKBK;

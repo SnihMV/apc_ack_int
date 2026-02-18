@@ -1,11 +1,6 @@
 package su.petrosoft.apk_ack_integration.util;
 
-import su.petrosoft.apk_ack_integration.model.data.xml.rpl.PlDirectionLine;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
-import su.petrosoft.apk_ack_integration.model.enums.ViewType;
+import static su.petrosoft.apk_ack_integration.model.enums.SqlOperation.IN;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -13,8 +8,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
-
-import static su.petrosoft.apk_ack_integration.model.enums.SqlOperation.IN;
+import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
+import su.petrosoft.apk_ack_integration.model.data.xml.rpl.PlDirectionLine;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
+import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 
 public class CashPlanLimitUtil {
 
@@ -63,29 +63,32 @@ public class CashPlanLimitUtil {
     public static final long OCT_BALANCE_ATTR = 3294;
     public static final long NOV_BALANCE_ATTR = 3296;
     public static final long DEC_BALANCE_ATTR = 3298;
-    public static final long QUARTER_1_BAL_ATTR = 1616;
-    public static final long QUARTER_2_BAL_ATTR = 1621;
-    public static final long QUARTER_3_BAL_ATTR = 1626;
-    public static final long QUARTER_4_BAL_ATTR = 1631;
+    public static final long Q_1_BALANCE_ATTR = 1616;
+    public static final long Q_2_BALANCE_ATTR = 1621;
+    public static final long Q_3_BALANCE_ATTR = 1626;
+    public static final long Q_4_BALANCE_ATTR = 1631;
+    public static final long JAN_EXPENSE_ATTR = 3275;
+    public static final long FEB_EXPENSE_ATTR = 3277;
+    public static final long MAR_EXPENSE_ATTR = 3279;
+    public static final long APR_EXPENSE_ATTR = 3281;
+    public static final long MAY_EXPENSE_ATTR = 3283;
+    public static final long JUN_EXPENSE_ATTR = 3285;
+    public static final long JUL_EXPENSE_ATTR = 3287;
+    public static final long AUG_EXPENSE_ATTR = 3289;
+    public static final long SEP_EXPENSE_ATTR = 3291;
+    public static final long OCT_EXPENSE_ATTR = 3293;
+    public static final long NOV_EXPENSE_ATTR = 3295;
+    public static final long DEC_EXPENSE_ATTR = 3297;
+    public static final long Q_1_EXPENSE_ATTR = 1615;
+    public static final long Q_2_EXPENSE_ATTR = 1620;
+    public static final long Q_3_EXPENSE_ATTR = 1625;
+    public static final long Q_4_EXPENSE_ATTR = 1630;
 
     public static GetAttributesListRequestDto requestDtoToGettingCplEqualsFieldsByCurrentYear() {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(ViewType.DETAILED_FORM_VIEW)
-                .attributes(List.of(
-                        new RequestedAttribute(YEAR_ATTR),
-                        new RequestedAttribute(KVSR_ATTR),
-                        new RequestedAttribute(KFSR_ATTR),
-                        new RequestedAttribute(KCSR_ATTR),
-                        new RequestedAttribute(KVR_ATTR),
-                        new RequestedAttribute(KOSGU_ATTR),
-                        new RequestedAttribute(DOPFK_ATTR),
-                        new RequestedAttribute(DOPEK_ATTR),
-                        new RequestedAttribute(DOPKR_ATTR),
-                        new RequestedAttribute(PURPOSE_ATTR),
-                        new RequestedAttribute(RECIPIENT_INN),
-                        new RequestedAttribute(RECIPIENT_KPP)
-                ))
+                .attributes(getEqualsFieldsAttributes())
                 .filter(new Filter(List.of(
                         new LongFilterAttribute(YEAR_ATTR, LocalDate.now().getYear())
                 )))
@@ -96,24 +99,93 @@ public class CashPlanLimitUtil {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(ViewType.DETAILED_FORM_VIEW)
-                .attributes(List.of(
-                        new RequestedAttribute(YEAR_ATTR),
-                        new RequestedAttribute(KVSR_ATTR),
-                        new RequestedAttribute(KFSR_ATTR),
-                        new RequestedAttribute(KCSR_ATTR),
-                        new RequestedAttribute(KVR_ATTR),
-                        new RequestedAttribute(KOSGU_ATTR),
-                        new RequestedAttribute(DOPFK_ATTR),
-                        new RequestedAttribute(DOPEK_ATTR),
-                        new RequestedAttribute(DOPKR_ATTR),
-                        new RequestedAttribute(PURPOSE_ATTR),
-                        new RequestedAttribute(RECIPIENT_INN),
-                        new RequestedAttribute(RECIPIENT_KPP)
-                ))
+                .attributes(getEqualsFieldsAttributes())
                 .filter(new Filter(List.of(
                         new LongFilterAttribute(ID_ATTR, List.of(IN), ids)
                 )))
                 .build();
+    }
+
+    public static GetAttributesListRequestDto requestDtoToGettingExpenseFieldsById(long id) {
+        return GetAttributesListRequestDto.builder()
+            .templateId(TEMPLATE_ID)
+            .viewType(ViewType.DETAILED_FORM_VIEW)
+            .attributes(List.of(
+                new RequestedAttribute(JAN_EXPENSE_ATTR),
+                new RequestedAttribute(FEB_EXPENSE_ATTR),
+                new RequestedAttribute(MAR_EXPENSE_ATTR),
+                new RequestedAttribute(APR_EXPENSE_ATTR),
+                new RequestedAttribute(MAY_EXPENSE_ATTR),
+                new RequestedAttribute(JUN_EXPENSE_ATTR),
+                new RequestedAttribute(JUL_EXPENSE_ATTR),
+                new RequestedAttribute(AUG_EXPENSE_ATTR),
+                new RequestedAttribute(SEP_EXPENSE_ATTR),
+                new RequestedAttribute(OCT_EXPENSE_ATTR),
+                new RequestedAttribute(NOV_EXPENSE_ATTR),
+                new RequestedAttribute(DEC_EXPENSE_ATTR)
+            ))
+            .filter(new Filter(List.of(
+                new LongFilterAttribute(ID_ATTR, id)
+            )))
+            .build();
+    }
+
+    public static CashPlanLimit recalculateLimits(CashPlanLimit dst, CashPlanLimit src) {
+
+        BigDecimal janBal = src.getJanLimit().subtract(dst.getJanExpense());
+        BigDecimal febBal = src.getFebLimit().subtract(dst.getFebExpense());
+        BigDecimal marBal = src.getMarLimit().subtract(dst.getMarExpense());
+        BigDecimal aprBal = src.getAprLimit().subtract(dst.getAprExpense());
+        BigDecimal mayBal = src.getMayLimit().subtract(dst.getMayExpense());
+        BigDecimal junBal = src.getJunLimit().subtract(dst.getJunExpense());
+        BigDecimal julBal = src.getJulLimit().subtract(dst.getJulExpense());
+        BigDecimal augBal = src.getAugLimit().subtract(dst.getAugExpense());
+        BigDecimal sepBal = src.getSepLimit().subtract(dst.getSepExpense());
+        BigDecimal octBal = src.getOctLimit().subtract(dst.getOctExpense());
+        BigDecimal novBal = src.getNovLimit().subtract(dst.getNovExpense());
+        BigDecimal decBal = src.getDecLimit().subtract(dst.getDecExpense());
+        BigDecimal fstQrt = janBal.add(febBal).add(marBal);
+        BigDecimal scdQrt = aprBal.add(mayBal).add(junBal);
+        BigDecimal trdQrt = julBal.add(augBal).add(sepBal);
+        BigDecimal frtQrt = octBal.add(novBal).add(decBal);
+        BigDecimal totalBalance = fstQrt.add(scdQrt).add(trdQrt).add(frtQrt);
+
+        return CashPlanLimit.builder()
+            .id(dst.getId())
+            .version(dst.getVersion())
+            .totalLimit(src.getTotalLimit())
+            .totalBalance(totalBalance)
+            .federalBudget(src.getFederalBudget())
+            .regionalBudget(src.getRegionalBudget())
+            .janLimit(src.getJanLimit())
+            .febLimit(src.getFebLimit())
+            .marLimit(src.getMarLimit())
+            .aprLimit(src.getAprLimit())
+            .mayLimit(src.getMayLimit())
+            .junLimit(src.getJunLimit())
+            .julLimit(src.getJulLimit())
+            .augLimit(src.getAugLimit())
+            .sepLimit(src.getSepLimit())
+            .octLimit(src.getOctLimit())
+            .novLimit(src.getNovLimit())
+            .decLimit(src.getDecLimit())
+            .janBalance(janBal)
+            .febBalance(febBal)
+            .marBalance(marBal)
+            .aprBalance(aprBal)
+            .mayBalance(mayBal)
+            .junBalance(junBal)
+            .julBalance(julBal)
+            .augBalance(augBal)
+            .sepBalance(sepBal)
+            .octBalance(octBal)
+            .novBalance(novBal)
+            .decBalance(decBal)
+            .fstQuarterBalance(fstQrt)
+            .scdQuarterBalance(scdQrt)
+            .trdQuarterBalance(trdQrt)
+            .frtQuarterBalance(frtQrt)
+            .build();
     }
 
     public static BigDecimal getTotalLimit(PlDirectionLine line) {
@@ -132,5 +204,22 @@ public class CashPlanLimitUtil {
         return Stream.of(items)
                 .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private static List<RequestedAttribute> getEqualsFieldsAttributes() {
+        return List.of(
+            new RequestedAttribute(YEAR_ATTR),
+            new RequestedAttribute(KVSR_ATTR),
+            new RequestedAttribute(KFSR_ATTR),
+            new RequestedAttribute(KCSR_ATTR),
+            new RequestedAttribute(KVR_ATTR),
+            new RequestedAttribute(KOSGU_ATTR),
+            new RequestedAttribute(DOPFK_ATTR),
+            new RequestedAttribute(DOPEK_ATTR),
+            new RequestedAttribute(DOPKR_ATTR),
+            new RequestedAttribute(PURPOSE_ATTR),
+            new RequestedAttribute(RECIPIENT_INN),
+            new RequestedAttribute(RECIPIENT_KPP)
+        );
     }
 }
