@@ -1,17 +1,17 @@
 package su.petrosoft.apk_ack_integration.util;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 public class FinancingSourceUtil {
     public static final long TEMPLATE_ID = 25387;
     public static final String FS_TITLE = "Источник финансирования";
 
+    public static final long ID_ATTR = 3383;
     public static final long YEAR_ATTR = 3393;
     public static final long KVSR_ATTR = 3449;
     public static final long KFSR_ATTR = 3450;
@@ -35,5 +35,15 @@ public class FinancingSourceUtil {
                     new LongFilterAttribute(YEAR_ATTR, LocalDateTime.now().getYear())
                 )))
                 .build();
+    }
+
+    public static GetAttributesListRequestDto requestDtoForGettingFsForUpdateById(long id) {
+        return GetAttributesListRequestDto.builder()
+            .templateId(TEMPLATE_ID)
+            .viewType(ViewType.DETAILED_FORM_VIEW)
+            .filter(new Filter(List.of(
+                new LongFilterAttribute(ID_ATTR, id)
+            )))
+            .build();
     }
 }

@@ -78,7 +78,7 @@ public class LoanAgreementService {
             log.warn("Third level subsidy programs not found");
             return;
         }
-        Map<Dictionary, Map<Long, String>> codesMap = apkPlicanteService.getDictionariesCodesMap(Set.of(KCSR, DOPKR));
+        Map<Dictionary, Map<String, Long>> codesMap = apkPlicanteService.getDictionariesCodesMap(Set.of(KCSR, DOPKR));
         Map<SubsidyProgram, Long> spMap = foundSpInstances.stream()
                 .map(dto->spMapper.toEntity(dto))
                 .collect(Collectors.toMap(

@@ -59,12 +59,11 @@ public class ApkPlicanteService {
     }
 
     public Set<SubsidyProgram> findSubsidyPrograms(
-        GetAttributesListRequestDto requestDto,
-        Map<Dictionary, Map<Long, String>> codesMap
+        GetAttributesListRequestDto requestDto
     ) {
         List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(requestDto);
         return dtoList.stream()
-            .map(dto -> spMapper.toEntity(dto))
+            .map(spMapper::toEntity)
             .collect(toSet());
     }
 
@@ -94,7 +93,7 @@ public class ApkPlicanteService {
         return cplMapper.toEntity(instance);
     }
 
-    public SubsidyProgram createSubsidyProgram(SubsidyProgram sp, Map<Dictionary, Map<Long, String>> codesMap) {
+    public SubsidyProgram createSubsidyProgram(SubsidyProgram sp) {
         CreateInstanceRequestDto dto = spMapper.toCreateDto(sp);
         log.info("Creating [{}] level Subsidy_Program ...", sp.getLevel());
         InstanceDto instance = apkRestClient.createInstance(dto);
@@ -102,7 +101,7 @@ public class ApkPlicanteService {
         return spMapper.toEntity(instance);
     }
 
-    public FinancingSource createFinancingSource(FinancingSource financingSource, Map<Dictionary, Map<Long, String>> codesMap) {
+    public FinancingSource createFinancingSource(FinancingSource financingSource, Map<Dictionary, Map<String, Long>> codesMap) {
         CreateInstanceRequestDto createDto = fsMapper.toCreatingDto(financingSource, codesMap);
         log.info("Creating new Financing_Source ...");
         InstanceDto instance = apkRestClient.createInstance(createDto);
@@ -110,7 +109,7 @@ public class ApkPlicanteService {
         return fsMapper.toEntity(instance);
     }
 
-    public CofinancingLevel createCofinancingLevel(CofinancingLevel cofinancingLevel, Map<Dictionary, Map<Long, String>> codesMap) {
+    public CofinancingLevel createCofinancingLevel(CofinancingLevel cofinancingLevel, Map<Dictionary, Map<String, Long>> codesMap) {
         CreateInstanceRequestDto creatingDto = cflMapper.toCreatingDto(cofinancingLevel, codesMap);
         InstanceDto created = apkRestClient.createInstance(creatingDto);
         return cflMapper.toEntity(created, codesMap);
@@ -136,20 +135,20 @@ public class ApkPlicanteService {
         return responseDto;
     }
 
-    public UpdateInstanceResponseDto updateSubsidyProgram(SubsidyProgram subsidyProgram,
-        Map<Dictionary, Map<Long, Entry<String, String>>> codesMap) {
-        UpdateInstanceRequestDto dto = spMapper.toUpdatingDto(subsidyProgram);
+    public long updateSubsidyProgram(UpdateInstanceRequestDto dto) {
+        log.info("Updating Subsidy_Program [{}] ...", dto.instance().id());
         UpdateInstanceResponseDto responseDto = apkRestClient.updateInstance(dto);
-        return responseDto;
+        log.info("Subsidy_Program [{}] updated", responseDto.id());
+        return responseDto.version();
     }
 
-    public Map<Dictionary, Map<Long, String>> getDictionariesCodesMap(
+    public Map<Dictionary, Map<String, Long>> getDictionariesCodesMap(
         Set<Dictionary> dictionaries) {
         log.info("Receiving existing codes for types: {}...",
             dictionaries.stream().map(Enum::name).collect(joining(",")));
-        Map<Dictionary, Map<Long, String>> dictionaryCodesMap = new EnumMap<>(Dictionary.class);
+        Map<Dictionary, Map<String, Long>> dictionaryCodesMap = new EnumMap<>(Dictionary.class);
         for (Dictionary dictionary : dictionaries) {
-            Map<Long, String> codesMap = dictionaryCodes(dictionary);
+            Map<String, Long> codesMap = dictionaryCodes(dictionary);
             dictionaryCodesMap.put(dictionary, codesMap);
             log.debug("Received {} codes map", dictionary.name());
         }
@@ -177,7 +176,7 @@ public class ApkPlicanteService {
         return codes;
     }
 
-    private Map<Long, String> dictionaryCodes(Dictionary dictionary) {
+    private Map<String, Long> dictionaryCodes(Dictionary dictionary) {
         List<InstanceDto> list = apkRestClient.getTableAttributesList(
             requestDtoForGettingDictionaryCodes(dictionary));
         return buildDictionaryCodesMap(dictionary, list);
@@ -209,12 +208,12 @@ public class ApkPlicanteService {
             .build();
     }
 
-    private Map<Long, String> buildDictionaryCodesMap(Dictionary dictionary,
+    private Map<String, Long> buildDictionaryCodesMap(Dictionary dictionary,
         List<InstanceDto> list) {
         return list.stream()
             .collect(toMap(
-                InstanceDto::id,
-                dto -> extractData(dto.attributes(), dictionary.getCodeAttrId())
+                dto -> extractData(dto.attributes(), dictionary.getCodeAttrId()),
+                InstanceDto::id
             ));
     }
 

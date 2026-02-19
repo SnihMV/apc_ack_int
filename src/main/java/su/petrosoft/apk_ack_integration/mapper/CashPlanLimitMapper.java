@@ -32,7 +32,7 @@ import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 @RequiredArgsConstructor
 public class CashPlanLimitMapper {
 
-    public CashPlanLimit toEntity(Line line, Map<Dictionary, Map<Long, String>> codesMap) {
+    public CashPlanLimit toEntity(Line line, Map<Dictionary, Map<String, Long>> codesMap) {
 
         PlDirectionLine pl = getPlDirectionLine(line);
 
@@ -66,7 +66,7 @@ public class CashPlanLimitMapper {
     }
 
     public CashPlanLimit toEntity(UpdateCashPlanLimitXml updateDto,
-        Map<Dictionary, Map<Long, String>> codesMap) {
+        Map<Dictionary, Map<String, Long>> codesMap) {
 
         PlDirectionLine pl = updateDto.plDirectionLineWrapper().plDirectionLine();
 
@@ -171,7 +171,7 @@ public class CashPlanLimitMapper {
 
     public CashPlanLimit toEntity(
         CashPlanLimitData valueObject,
-        Map<Dictionary, Map<Long, String>> codesMap
+        Map<Dictionary, Map<String, Long>> codesMap
     ) {
 
         return CashPlanLimit.builder()
@@ -291,7 +291,7 @@ public class CashPlanLimitMapper {
         return List.of(
             new DoubleAttribute(TOTAL_LIMIT_ATTR, cpl.getTotalLimit()),
             new DoubleAttribute(TOTAL_BALANCE_ATTR, cpl.getTotalBalance()),
-            new DoubleAttribute(FEDERAL_BUDGET_ATTR, cpl.getFederalBudget()),
+            new DoubleAttribute(FEDERAL_BUDGET_ATTR, cpl. getFederalBudget()),
             new DoubleAttribute(REGIONAL_BUDGET_ATTR, cpl.getRegionalBudget()),
             new DoubleAttribute(JAN_LIMIT_ATTR, cpl.getJanLimit()),
             new DoubleAttribute(FEB_LIMIT_ATTR, cpl.getFebLimit()),

@@ -30,7 +30,7 @@ public class DictionaryService {
     private final ApkPlicanteService apkPlicanteService;
 
     public Map<Dictionary, Set<Long>> addNewDictionaryCodes(
-            Map<Dictionary, Map<Long, String>> existingDictionariesMap,
+            Map<Dictionary, Map<String, Long>> existingDictionariesMap,
             List<DescriptedBudgetItemData> rows
     ) {
         Set<Dictionary> extractableDictionaries = rows.get(0).dictionariesData().keySet();
@@ -45,7 +45,7 @@ public class DictionaryService {
         return createdDictionaries;
     }
 
-    private void fillMapWithExtraDictionaries(Map<Dictionary, Map<Long, String>> codesMap, Set<Dictionary> extractableDictionaries) {
+    private void fillMapWithExtraDictionaries(Map<Dictionary, Map<String, Long>> codesMap, Set<Dictionary> extractableDictionaries) {
         Set<Dictionary> extraDictionaries = extractableDictionaries.stream()
                 .filter(d -> !codesMap.containsKey(d))
                 .collect(toSet());
@@ -55,11 +55,11 @@ public class DictionaryService {
     private void updateDictionariesByContainableObject(
             DictionaryContaining containable,
             Set<Dictionary> updatableDictionaries,
-            Map<Dictionary, Map<Long, String>> existingDictionariesMap,
+            Map<Dictionary, Map<String, Long>> existingDictionariesMap,
             Map<Dictionary, Set<Long>> createdDictionaries
     ) {
         for (Dictionary updatingDictionary : updatableDictionaries) {
-            Map<Long, String> existingValues = existingDictionariesMap.get(updatingDictionary);
+            Map<String, Long> existingValues = existingDictionariesMap.get(updatingDictionary);
             Optional<Long> createdId = createNewIfPresent(updatingDictionary, containable, existingValues);
             createdId.ifPresent(id -> createdDictionaries.computeIfAbsent(updatingDictionary, k -> new HashSet<>()).add(id));
         }
@@ -68,13 +68,13 @@ public class DictionaryService {
     private Optional<Long> createNewIfPresent(
             Dictionary dictionary,
             DictionaryContaining containable,
-            Map<Long, String> existingValues
+            Map<String, Long> existingValues
     ) {
         String code = containable.dictionariesData().get(dictionary).getKey();
         String description = containable.dictionariesData().get(dictionary).getValue();
 
         return existingValues.entrySet().stream()
-                .anyMatch(entry -> code.equalsIgnoreCase(entry.getValue()))
+                .anyMatch(entry -> code.equalsIgnoreCase(entry.getKey()))
                 ? Optional.empty()
                 : Optional.of(createNewDictionaryInstance(dictionary, code, description));
     }
@@ -99,13 +99,13 @@ public class DictionaryService {
         return id;
     }
 
-    public Map<Long, String> findByCodes(Dictionary dictionary, Set<String> codes) {
+    public Map<String, Long> findByCodes(Dictionary dictionary, Set<String> codes) {
         List<InstanceDto> dtoList = restClient.getTableAttributesList(
             requestDtoForGettingDictionaryDataByCodes(dictionary, codes));
         return dtoList.stream()
             .collect(toMap(
-                InstanceDto::id,
-                dto -> extractData(dto.attributes(), dictionary.getCodeAttrId())
+                dto -> extractData(dto.attributes(), dictionary.getCodeAttrId()),
+                InstanceDto::id
             ));
     }
 }

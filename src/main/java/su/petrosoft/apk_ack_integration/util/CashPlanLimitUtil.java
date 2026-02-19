@@ -111,6 +111,21 @@ public class CashPlanLimitUtil {
             .templateId(TEMPLATE_ID)
             .viewType(ViewType.DETAILED_FORM_VIEW)
             .attributes(List.of(
+                new RequestedAttribute(TOTAL_LIMIT_ATTR),
+                new RequestedAttribute(FEDERAL_BUDGET_ATTR),
+                new RequestedAttribute(REGIONAL_BUDGET_ATTR),
+                new RequestedAttribute(JAN_LIMIT_ATTR),
+                new RequestedAttribute(FEB_LIMIT_ATTR),
+                new RequestedAttribute(MAR_LIMIT_ATTR),
+                new RequestedAttribute(APR_LIMIT_ATTR),
+                new RequestedAttribute(MAY_LIMIT_ATTR),
+                new RequestedAttribute(JUN_LIMIT_ATTR),
+                new RequestedAttribute(JUL_LIMIT_ATTR),
+                new RequestedAttribute(AUG_LIMIT_ATTR),
+                new RequestedAttribute(SEP_LIMIT_ATTR),
+                new RequestedAttribute(OCT_LIMIT_ATTR),
+                new RequestedAttribute(NOV_LIMIT_ATTR),
+                new RequestedAttribute(DEC_LIMIT_ATTR),
                 new RequestedAttribute(JAN_EXPENSE_ATTR),
                 new RequestedAttribute(FEB_EXPENSE_ATTR),
                 new RequestedAttribute(MAR_EXPENSE_ATTR),
@@ -130,7 +145,7 @@ public class CashPlanLimitUtil {
             .build();
     }
 
-    public static CashPlanLimit recalculateLimits(CashPlanLimit dst, CashPlanLimit src) {
+    public static CashPlanLimit recalculateValues(CashPlanLimit dst, CashPlanLimit src) {
 
         BigDecimal janBal = src.getJanLimit().subtract(dst.getJanExpense());
         BigDecimal febBal = src.getFebLimit().subtract(dst.getFebExpense());
@@ -169,6 +184,18 @@ public class CashPlanLimitUtil {
             .octLimit(src.getOctLimit())
             .novLimit(src.getNovLimit())
             .decLimit(src.getDecLimit())
+            .janExpense(dst.getJanExpense())
+            .febExpense(dst.getFebExpense())
+            .marExpense(dst.getMarExpense())
+            .aprExpense(dst.getAprExpense())
+            .mayExpense(dst.getMayExpense())
+            .junExpense(dst.getJunExpense())
+            .julExpense(dst.getJulExpense())
+            .augExpense(dst.getAugExpense())
+            .sepExpense(dst.getSepExpense())
+            .octExpense(dst.getOctExpense())
+            .novExpense(dst.getNovExpense())
+            .decExpense(dst.getDecExpense())
             .janBalance(janBal)
             .febBalance(febBal)
             .marBalance(marBal)

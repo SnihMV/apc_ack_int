@@ -1,5 +1,6 @@
 package su.petrosoft.apk_ack_integration.mapper;
 
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KOSGU;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVSR;
 import static su.petrosoft.apk_ack_integration.util.DictionaryUtil.ownershipForm;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.CASH_PLAN_LIMITS_ATTR;
@@ -17,12 +18,14 @@ import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.PURPOSE_
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.SUBSIDY_PROGRAM_ATTR;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.TEMPLATE_ID;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.YEAR_ATTR;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryCodeById;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractAllData;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -59,12 +62,12 @@ public class FinancingSourceMapper {
             .purpose(extractData(attributes, PURPOSE_ATTR))
             .ownershipForm(extractData(attributes, OWNERSHIP_FORM_ATTR))
             .subsidyProgramId(extractData(attributes, SUBSIDY_PROGRAM_ATTR))
-            .cashPlanLimitIds(extractAllData(attributes, CASH_PLAN_LIMITS_ATTR))
+            .cashPlanLimitIds(new HashSet<>(extractAllData(attributes, CASH_PLAN_LIMITS_ATTR)))
             .concatenatedKBK(extractData(attributes, CONCAT_KBK_ATTR))
             .build();
     }
 
-    public FinancingSource toEntity(BudgetItemData row, Map<Dictionary, Map<Long, String>> codesMap) {
+    public FinancingSource toEntity(BudgetItemData row, Map<Dictionary, Map<String, Long>> codesMap) {
         return FinancingSource.builder()
             .year((long) LocalDate.now().getYear())
             .kvsr(dictionaryIdByCode(codesMap, KVSR, row.kvsr()))
@@ -82,7 +85,8 @@ public class FinancingSourceMapper {
     }
 
     public CreateInstanceRequestDto toCreatingDto(FinancingSource fs,
-        Map<Dictionary, Map<Long, String>> codesMap) {
+        Map<Dictionary, Map<String, Long>> codesMap) {
+        long ownershipFormId = ownershipForm(dictionaryCodeById(codesMap, KOSGU, fs.getKosgu()));
         return new CreateInstanceRequestDto(
             InstanceDto.builder()
                 .templateId(TEMPLATE_ID)
@@ -97,10 +101,10 @@ public class FinancingSourceMapper {
                     new LinkedAttribute(DOPFK_ATTR, fs.getDopFk()),
                     new LinkedAttribute(DOPKR_ATTR, fs.getDopKr()),
                     new LinkedAttribute(PURPOSE_ATTR, fs.getPurpose()),
-                    new LinkedAttribute(OWNERSHIP_FORM_ATTR, fs.getOwnershipForm()),
                     new LinkedAttribute(SUBSIDY_PROGRAM_ATTR, fs.getSubsidyProgramId()),
                     new LinkedAttribute(CASH_PLAN_LIMITS_ATTR, fs.getCashPlanLimitIds()),
-                    new StringAttribute(CONCAT_KBK_ATTR, fs.getConcatenatedKBK())
+                    new LinkedAttribute(OWNERSHIP_FORM_ATTR, ownershipFormId),
+                    new StringAttribute(CONCAT_KBK_ATTR, concatKBK(fs))
                 ))
                 .build()
         );
@@ -134,5 +138,11 @@ public class FinancingSourceMapper {
         sb.append("-");
         sb.append(row.dopKr());
         return sb.toString();
+    }
+
+    private String concatKBK(FinancingSource fs) {
+        return LocalDateTime.now().getYear() +
+               "-" + fs.getKvsr() + fs.getKfsr() + fs.getKcsr() + fs.getKvr() + "-"
+               + fs.getDopKr();
     }
 }

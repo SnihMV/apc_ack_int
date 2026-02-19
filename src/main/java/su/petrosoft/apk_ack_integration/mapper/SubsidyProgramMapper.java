@@ -43,7 +43,6 @@ public class SubsidyProgramMapper {
             .id(dto.id())
             .version(dto.version())
             .title(extractData(attributes, NAME_ATTR))
-//                .code(extractData(attributes, CODE_ATTR))
             .level(level)
             .parentId(extractData(attributes, PARENT_ATTR))
             .kcsr(extractData(attributes, KCSR_ATTR))
@@ -60,7 +59,7 @@ public class SubsidyProgramMapper {
 //                .build();
 //    }
 
-    public SubsidyProgram toFirstLevelSP(DescriptedBudgetItemData dto, Map<Dictionary, Map<Long, String>> codesMap) {
+    public SubsidyProgram toFirstLevelSP(DescriptedBudgetItemData dto, Map<Dictionary, Map<String, Long>> codesMap) {
         return SubsidyProgram.builder()
             .level(1L)
             .title(dto.kcsrTitle())
@@ -68,7 +67,7 @@ public class SubsidyProgramMapper {
                 .build();
     }
 
-    public SubsidyProgram toSecondLevelSP(DescriptedBudgetItemData dto, Map<Dictionary, Map<Long, String>> codesMap) {
+    public SubsidyProgram toSecondLevelSP(DescriptedBudgetItemData dto, Map<Dictionary, Map<String, Long>> codesMap) {
         return SubsidyProgram.builder()
                 .level(2L)
                 .title(dto.dopKrTitle())
@@ -95,7 +94,7 @@ public class SubsidyProgramMapper {
         );
     }
 
-    public SubsidyProgram toEntity(CofinancingLevelData row, Map<Dictionary, Map<Long, String>> codesMap) {
+    public SubsidyProgram toEntity(CofinancingLevelData row, Map<Dictionary, Map<String, Long>> codesMap) {
         return SubsidyProgram.builder()
                 .level(2L)
                 .kcsr(dictionaryIdByCode(codesMap, KCSR, row.kcsr()))

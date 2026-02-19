@@ -1,11 +1,8 @@
 package su.petrosoft.apk_ack_integration.service;
 
-import static java.util.Collections.*;
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.comparingInt;
+import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparingLong;
 import static java.util.function.BinaryOperator.maxBy;
-import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DISTRICT;
 import static su.petrosoft.apk_ack_integration.model.enums.ReportType.FORM_1;
@@ -14,14 +11,11 @@ import static su.petrosoft.apk_ack_integration.model.enums.ReportType.FORM_3;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessage.RECIPIENT_BY_ID_NOT_FOUND;
 import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.requestDtoForGettingOperationalReportsByTypeAndDate;
 import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.requestDtoForGettingOperationalReportsByTypeAndStatusAndDateInterval;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryCodeById;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.toEpochMilli;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.requestDtoToFindRecipientNameAndDistrictById;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +24,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -117,7 +110,7 @@ public class CropProductionService {
 //                requestDtoForGettingOperationalReportsByTypesAndStatusAndDateInterval(since, until,
 //                        5858, List.of(FORM_1.getId(), FORM_2.getId(), FORM_3.getId())));
 
-        Map<Dictionary, Map<Long, String>> codesMap = plicanteService.getDictionariesCodesMap(Set.of(DISTRICT));
+        Map<Dictionary, Map<String, Long>> codesMap = plicanteService.getDictionariesCodesMap(Set.of(DISTRICT));
 
 //        Map<Long, Map<ReportType, OperationalReport>> collect = or.stream()
 //                .collect(groupingBy(
@@ -172,8 +165,9 @@ public class CropProductionService {
 
         Set<DistrictData> result = codesMap.get(DISTRICT).entrySet().stream()
                 .map(entry -> new DistrictData(
-                        entry.getValue(),
-                        distIdToProducersList.getOrDefault(entry.getKey(), emptyList())))
+                        entry.getKey(),
+                        distIdToProducersList.getOrDefault(entry.getKey(), emptyList())
+                ))
                 .collect(Collectors.toCollection(
                         TreeSet::new
                 ));

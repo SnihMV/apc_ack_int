@@ -53,7 +53,7 @@ public class CashPlanLimitService {
         log.debug("Extracted from excel file: [{}] CashPlanLimit rows", dtoList.size());
         List<CashPlanLimit> createdLimits = new ArrayList<>();
         if (!dtoList.isEmpty()) {
-            Map<Dictionary, Map<Long, String>> codesMap = apkService.getDictionariesCodesMap(
+            Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
                 Set.of(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
             Set<CashPlanLimit> existedLimits = apkService.findCashPlanLimits(
                 requestDtoToGettingCplEqualsFieldsByCurrentYear());
@@ -85,7 +85,7 @@ public class CashPlanLimitService {
 
         List<CashPlanLimit> createdLimits = new ArrayList<>();
         if (!fromExcelCPL.isEmpty()) {
-            Map<Dictionary, Map<Long, String>> codesMap = apkService.getDictionariesCodesMap(
+            Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
                 Set.of(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
 
             createdLimits = fromExcelCPL.stream()
@@ -107,7 +107,7 @@ public class CashPlanLimitService {
         }
         log.debug("Received request for Cash Plan Limit update: [{}]", updatingXml);
 
-        Map<Dictionary, Map<Long, String>> codesMap = apkService.getDictionariesCodesMap(
+        Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
             Set.of(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
         CashPlanLimit updatingCPL = mapper.toEntity(updatingXml, codesMap);
         log.debug("Mapped to CashPlanLimit: [{}]", updatingCPL);
@@ -134,7 +134,7 @@ public class CashPlanLimitService {
     }
 
     public Set<CashPlanLimit> getLimitsForCurrentYear() {
-        Map<Dictionary, Map<Long, String>> codesMap = apkService.getDictionariesCodesMap(
+        Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
             Set.of(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
         Set<CashPlanLimit> allSplByCurrentYear = apkService.findCashPlanLimits(
             requestDtoToGettingCplEqualsFieldsByCurrentYear());
@@ -144,7 +144,7 @@ public class CashPlanLimitService {
     }
 
     public UpdateCashPlanLimitResponseDto updateByExcel(MultipartFile file) {
-        Map<Dictionary, Map<Long, String>> codesMap = apkService.getDictionariesCodesMap(
+        Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
             Set.of(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
         List<DescriptedBudgetItemData> uniBudgetExcelRows = excelExtractor.uniBudgetExcelRows(file);
         Set<CashPlanLimit> limitsFromExcel = uniBudgetExcelRows.stream()

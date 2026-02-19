@@ -85,35 +85,33 @@ public class PlicanteInstanceUtil {
 //                        .build());
 //    }
 
-    public static Long dictionaryIdByCode(Map<Dictionary, Map<Long, String>> allCodes,
+    public static Long dictionaryIdByCode(Map<Dictionary, Map<String, Long>> codesMap,
         Dictionary dictionary, String code) {
-        return allCodes.get(dictionary).entrySet().stream()
-            .filter(entry -> entry.getValue().equalsIgnoreCase(code))
-            .findFirst()
-            .map(Map.Entry::getKey)
-            .orElseThrow(() -> new DictionaryException(
-                DICTIONARY_CODE_NOT_FOUND.getMessage().formatted(code, dictionary)));
+        Long id = codesMap.get(dictionary).get(code);
+        if (id == null) {
+            throw new DictionaryException(DICTIONARY_CODE_NOT_FOUND.getMessage().formatted(code, dictionary));
+        }
+        return id;
     }
 
-    public static String dictionaryCodeById(Map<Dictionary, Map<Long, String>> allCodes,
+    public static String dictionaryCodeById(Map<Dictionary, Map<String, Long>> codesMap,
         Dictionary dictionary, long id) {
-        return allCodes.get(dictionary).entrySet().stream()
-            .filter(entry -> entry.getKey().equals(id))
+        return codesMap.get(dictionary).entrySet().stream()
+            .filter(entry -> entry.getValue().equals(id))
             .findFirst()
-            .map(Entry::getValue)
+            .map(Entry::getKey)
             .orElseThrow(() -> new DictionaryException(
                 DICTIONARY_ID_NOT_FOUND.getMessage().formatted(dictionary, id)));
     }
 
     public static String dictionaryCodeDescription(
-        Map<Dictionary, Map<Long, Entry<String, String>>> allCodes, Dictionary dictionary,
-        String code) {
-        return allCodes.get(dictionary).entrySet().stream()
-            .filter(entry -> entry.getValue().getKey().equalsIgnoreCase(code))
-            .findFirst()
-            .map(entry -> entry.getValue().getValue())
-            .orElseThrow(() -> new DictionaryException(
-                DICTIONARY_DESCRIPTION_NOT_FOUND.getMessage().formatted(code, dictionary)));
+        Map<Dictionary, Map<String, String>> allCodes, Dictionary dictionary, String code) {
+        String description = allCodes.get(dictionary).get(code);
+        if (description == null) {
+            throw new DictionaryException(
+                DICTIONARY_DESCRIPTION_NOT_FOUND.getMessage().formatted(code, dictionary));
+        }
+        return description;
     }
 
     public static Long toEpochMilli(LocalDate day) {

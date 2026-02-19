@@ -24,21 +24,12 @@ public class SubsidyProgram extends PlicanteInstance{
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         SubsidyProgram that = (SubsidyProgram) o;
-        return
-//                Objects.equals(code, that.code) &&
-//                Objects.equals(level, that.level) &&
-                        Objects.equals(kcsr, that.kcsr) &&
-                        Objects.equals(dopKr, that.dopKr);
+        return Objects.equals(kcsr, that.kcsr) && Objects.equals(dopKr, that.dopKr);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(
-//                code,
-//                level,
-                kcsr,
-                dopKr
-        );
+        return Objects.hash(kcsr, dopKr);
     }
 }
 
