@@ -1,5 +1,8 @@
 package su.petrosoft.apk_ack_integration.util;
 
+import static su.petrosoft.apk_ack_integration.model.enums.ViewType.DETAILED_FORM_VIEW;
+
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
@@ -10,10 +13,6 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LinkedFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
-
-import java.util.List;
-
-import static su.petrosoft.apk_ack_integration.model.enums.ViewType.DETAILED_FORM_VIEW;
 
 @Slf4j
 public class SubsidyProgramUtil {
@@ -127,5 +126,16 @@ public class SubsidyProgramUtil {
                         .attributes(List.of(
                                 new LinkedAttribute(COFIN_LVL_ATTR, updatedSP.getCofinancingLevelIds())))
                         .build());
+    }
+
+    public static UpdateInstanceRequestDto requestDtoForUpdatingParentId(SubsidyProgram sp) {
+        return new UpdateInstanceRequestDto(
+            InstanceDto.builder()
+                .id(sp.getId())
+                .templateId(TEMPLATE_ID)
+                .version(sp.getVersion())
+                .attributes(List.of(
+                    new LinkedAttribute(PARENT_ATTR, sp.getParentId())))
+                .build());
     }
 }

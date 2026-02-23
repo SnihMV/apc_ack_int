@@ -1,15 +1,12 @@
 package su.petrosoft.apk_ack_integration.model;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import su.petrosoft.apk_ack_integration.model.enums.FinancingForm;
-import su.petrosoft.apk_ack_integration.model.enums.OwnershipForm;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Objects;
 
 @Data
 @NoArgsConstructor
@@ -20,8 +17,8 @@ public class CofinancingLevel extends PlicanteInstance {
     private LocalDate startDate;
     private BigDecimal obCoeff;
     private BigDecimal fbCoeff;
-    private FinancingForm financingForm;
-    private OwnershipForm ownershipForm;
+    private Long financingForm;
+    private Long ownershipForm;
 
     @Override
     public boolean equals(Object o) {

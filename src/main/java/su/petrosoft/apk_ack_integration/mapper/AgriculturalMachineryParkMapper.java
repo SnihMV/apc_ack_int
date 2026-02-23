@@ -1,22 +1,8 @@
 package su.petrosoft.apk_ack_integration.mapper;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryPark;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.BooleanAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DoubleAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.*;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.PROD_COUNTRY;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.TECH_STATE;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.values;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.BRAND_MODEL_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.COST_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.COUNT_ATTR;
@@ -33,6 +19,21 @@ import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUti
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.TEMPLATE_ID;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryPark;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.BooleanAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DoubleAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
+import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
+
 
 @Slf4j
 @Component
@@ -45,7 +46,7 @@ public class AgriculturalMachineryParkMapper {
                 .build();
     }
 
-    public CreateInstanceRequestDto toCreationDto(AgriculturalMachineryPark park, Map<Dictionary, Map<Long, String>> codesMap) {
+    public CreateInstanceRequestDto toCreationDto(AgriculturalMachineryPark park, Map<Dictionary, Map<String, Long>> codesMap) {
         Map<String, Long> indicateMap = Map.of(
                 "Тракторы всех марок", 537L,
                 "Комбайны зерноуборочные", 538L,

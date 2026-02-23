@@ -2,7 +2,6 @@ package su.petrosoft.apk_ack_integration.model.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import su.petrosoft.apk_ack_integration.model.PlicanteInstance;
 
 @RequiredArgsConstructor
 @Getter
@@ -16,7 +15,7 @@ public enum Dictionary {
     DOPKR("Доп.КР", 10885, 1725, 1867, 1868, 83748),
     DOPFK("Доп.ФК", 19070, 1725, 3492, 2863, 83748),
     PURPOSE("Код цели", 11006, 1725, 1858, 1859, 83748),
-    OWNERSHIP_FORM("Форма собственности", 25265, 1725, 589, 590, 75730),
+    OWNERSHIP_FORM("Форма собственности", 25265, 1725, 4293, 590, 75730),
     FINANCING_FORM("Форма финансирования", 25327,1725,  589, 590, 83748),
     DISTRICT("Районы Ленинградской области", 6633, 1725,  2193, 2193, 83748),
     PROD_COUNTRY("Страны-производители", 4718, 1725, 590, 590, 83748),

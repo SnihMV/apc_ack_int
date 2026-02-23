@@ -15,15 +15,15 @@ import java.util.Objects;
 public class CashPlanLimit extends PlicanteInstance {
 
     private Long year;
-    private String kfsr;
-    private String kcsr;
-    private String kvr;
-    private String kosgu;
-    private String kvsr;
-    private String dopFk;
-    private String dopEk;
-    private String dopKr;
-    private String purpose;
+    private Long kfsr;
+    private Long kcsr;
+    private Long kvr;
+    private Long kosgu;
+    private Long kvsr;
+    private Long dopFk;
+    private Long dopEk;
+    private Long dopKr;
+    private Long purpose;
     private String recipientName;
     private String recipientInn;
     private String recipientKpp;

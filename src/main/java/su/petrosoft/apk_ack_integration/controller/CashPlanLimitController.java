@@ -7,13 +7,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import su.petrosoft.apk_ack_integration.model.dto.response.CreatingInstancesFromFileResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.UpdateCashPlanLimitResponseDto;
 import su.petrosoft.apk_ack_integration.service.CashPlanLimitService;
 
@@ -24,21 +22,21 @@ import su.petrosoft.apk_ack_integration.service.CashPlanLimitService;
 public class CashPlanLimitController {
     private final CashPlanLimitService service;
 
-    @Operation(
-            summary = "Upload Excel file with Cash Plan Limits",
-            description = "Upload an Excel file to create new Cash Plan Limits. " +
-                    "File should contain specific columns and format.")
-    @PostMapping("excel")
-    @ResponseStatus(HttpStatus.OK)
-    public CreatingInstancesFromFileResponseDto createFromExcel(
-            @Parameter(description = "Excel file with Cash Plan Limits data",
-                    required = true,
-                    content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-            @RequestParam("file") MultipartFile file) {
-        log.debug("Received file [{}] to create CashPlanLimits", file.getOriginalFilename());
-        CreatingInstancesFromFileResponseDto fromUniBudgetExcel = service.createFromUniBudgetExcel(file);
-        return fromUniBudgetExcel;
-    }
+//    @Operation(
+//            summary = "Upload Excel file with Cash Plan Limits",
+//            description = "Upload an Excel file to create new Cash Plan Limits. " +
+//                    "File should contain specific columns and format.")
+//    @PostMapping("excel")
+//    @ResponseStatus(HttpStatus.OK)
+//    public CreatingInstancesFromFileResponseDto createFromExcel(
+//            @Parameter(description = "Excel file with Cash Plan Limits data",
+//                    required = true,
+//                    content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+//            @RequestParam("file") MultipartFile file) {
+//        log.debug("Received file [{}] to create CashPlanLimits", file.getOriginalFilename());
+//        CreatingInstancesFromFileResponseDto fromUniBudgetExcel = service.createFromUniBudgetExcel(file);
+//        return fromUniBudgetExcel;
+//    }
 
     @PatchMapping("xml")
     @ResponseStatus(HttpStatus.OK)

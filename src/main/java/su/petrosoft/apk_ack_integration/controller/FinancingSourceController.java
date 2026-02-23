@@ -28,7 +28,7 @@ public class FinancingSourceController {
                     "File should contain specific columns and format.")
     @PostMapping("excel")
     @ResponseStatus(HttpStatus.OK)
-    public Map<String, Set<Long>> createFinancingSources(
+    public Map<su.petrosoft.apk_ack_integration.model.enums.Operation, Map<String, Set<Long>>> createFinancingSources(
             @Parameter(description = "Excel file with financing sources data",
                     required = true,
                     content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
