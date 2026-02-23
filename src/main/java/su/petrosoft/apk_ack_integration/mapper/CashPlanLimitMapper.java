@@ -37,7 +37,7 @@ public class CashPlanLimitMapper {
         PlDirectionLine pl = getPlDirectionLine(line);
 
         return CashPlanLimit.builder()
-            .year(Long.valueOf(LocalDate.now().getYear()))
+            .year((long) LocalDate.now().getYear())
             .kfsr(dictionaryIdByCode(codesMap, KFSR, line.kfsrCode()))
             .kcsr(dictionaryIdByCode(codesMap, KCSR, line.kcsrCode()))
             .kvr(dictionaryIdByCode(codesMap, KVR, line.kvrCode()))
@@ -71,7 +71,7 @@ public class CashPlanLimitMapper {
         PlDirectionLine pl = updateDto.plDirectionLineWrapper().plDirectionLine();
 
         return CashPlanLimit.builder()
-            .year(Long.valueOf(LocalDate.now().getYear()))
+            .year((long) LocalDate.now().getYear())
             .kvsr(dictionaryIdByCode(codesMap, KVSR, updateDto.kadmrCode()))
             .kfsr(dictionaryIdByCode(codesMap, KFSR, updateDto.kfsrCode()))
             .kcsr(dictionaryIdByCode(codesMap, KCSR, updateDto.kcsrCode()))
@@ -170,40 +170,41 @@ public class CashPlanLimitMapper {
     }
 
     public CashPlanLimit toEntity(
-        CashPlanLimitData valueObject,
+        CashPlanLimitData dto,
         Map<Dictionary, Map<String, Long>> codesMap
     ) {
 
         return CashPlanLimit.builder()
             .year((long) LocalDateTime.now().getYear())
-            .kfsr(dictionaryIdByCode(codesMap, KFSR, valueObject.kfsr()))
-            .kvsr(dictionaryIdByCode(codesMap, KVSR, valueObject.kvsr()))
-            .kcsr(dictionaryIdByCode(codesMap, KCSR, valueObject.kcsr()))
-            .kvr(dictionaryIdByCode(codesMap, KVR, valueObject.kvr()))
-            .kosgu(dictionaryIdByCode(codesMap, KOSGU, valueObject.kosgu()))
-            .dopEk(dictionaryIdByCode(codesMap, DOPEK, valueObject.dopEk()))
-            .dopKr(dictionaryIdByCode(codesMap, DOPKR, valueObject.dopKr()))
-            .purpose(dictionaryIdByCode(codesMap, PURPOSE, valueObject.purpose()))
-            .dopFk(dictionaryIdByCode(codesMap, DOPFK, valueObject.dopFk()))
-            .recipientName(valueObject.recipientName())
-            .recipientInn(valueObject.recipientInn())
-            .recipientKpp(valueObject.recipientKpp())
-            .totalLimit(BigDecimal.valueOf(valueObject.assignTotal()))
-            .totalBalance(BigDecimal.valueOf(valueObject.assignTotal()))
-            .federalBudget(BigDecimal.valueOf(valueObject.assignFederal()))
-            .regionalBudget(BigDecimal.valueOf(valueObject.assignRegional()))
-            .janLimit(BigDecimal.valueOf(valueObject.janLimit()))
-            .febLimit(BigDecimal.valueOf(valueObject.febLimit()))
-            .marLimit(BigDecimal.valueOf(valueObject.marLimit()))
-            .aprLimit(BigDecimal.valueOf(valueObject.aprLimit()))
-            .mayLimit(BigDecimal.valueOf(valueObject.mayLimit()))
-            .junLimit(BigDecimal.valueOf(valueObject.junLimit()))
-            .julLimit(BigDecimal.valueOf(valueObject.julLimit()))
-            .augLimit(BigDecimal.valueOf(valueObject.augLimit()))
-            .sepLimit(BigDecimal.valueOf(valueObject.sepLimit()))
-            .octLimit(BigDecimal.valueOf(valueObject.octLimit()))
-            .novLimit(BigDecimal.valueOf(valueObject.novLimit()))
-            .decLimit(BigDecimal.valueOf(valueObject.decLimit()))
+            .kfsr(dictionaryIdByCode(codesMap, KFSR, dto.kfsr()))
+            .kvsr(dictionaryIdByCode(codesMap, KVSR, dto.kvsr()))
+            .kcsr(dictionaryIdByCode(codesMap, KCSR, dto.kcsr()))
+            .kvr(dictionaryIdByCode(codesMap, KVR, dto.kvr()))
+            .kosgu(dictionaryIdByCode(codesMap, KOSGU, dto.kosgu()))
+            .dopEk(dictionaryIdByCode(codesMap, DOPEK, dto.dopEk()))
+            .dopKr(dictionaryIdByCode(codesMap, DOPKR, dto.dopKr()))
+            .purpose(dictionaryIdByCode(codesMap, PURPOSE, dto.purpose()))
+            .dopFk(dictionaryIdByCode(codesMap, DOPFK, dto.dopFk()))
+            .recipientName(dto.recipientName())
+            .recipientInn(dto.recipientInn())
+            .recipientKpp(dto.recipientKpp())
+            .totalLimit(BigDecimal.valueOf(dto.assignTotal()))
+            .totalExpense(BigDecimal.ZERO)
+            .totalBalance(BigDecimal.valueOf(dto.assignTotal()))
+            .federalBudget(BigDecimal.valueOf(dto.assignFederal()))
+            .regionalBudget(BigDecimal.valueOf(dto.assignRegional()))
+            .janLimit(BigDecimal.valueOf(dto.janLimit()))
+            .febLimit(BigDecimal.valueOf(dto.febLimit()))
+            .marLimit(BigDecimal.valueOf(dto.marLimit()))
+            .aprLimit(BigDecimal.valueOf(dto.aprLimit()))
+            .mayLimit(BigDecimal.valueOf(dto.mayLimit()))
+            .junLimit(BigDecimal.valueOf(dto.junLimit()))
+            .julLimit(BigDecimal.valueOf(dto.julLimit()))
+            .augLimit(BigDecimal.valueOf(dto.augLimit()))
+            .sepLimit(BigDecimal.valueOf(dto.sepLimit()))
+            .octLimit(BigDecimal.valueOf(dto.octLimit()))
+            .novLimit(BigDecimal.valueOf(dto.novLimit()))
+            .decLimit(BigDecimal.valueOf(dto.decLimit()))
             .janExpense(BigDecimal.ZERO)
             .febExpense(BigDecimal.ZERO)
             .marExpense(BigDecimal.ZERO)
@@ -216,34 +217,26 @@ public class CashPlanLimitMapper {
             .octExpense(BigDecimal.ZERO)
             .novExpense(BigDecimal.ZERO)
             .decExpense(BigDecimal.ZERO)
-            .janBalance(BigDecimal.valueOf(valueObject.janLimit()))
-            .febBalance(BigDecimal.valueOf(valueObject.febLimit()))
-            .marBalance(BigDecimal.valueOf(valueObject.marLimit()))
-            .aprBalance(BigDecimal.valueOf(valueObject.aprLimit()))
-            .mayBalance(BigDecimal.valueOf(valueObject.mayLimit()))
-            .junBalance(BigDecimal.valueOf(valueObject.junLimit()))
-            .julBalance(BigDecimal.valueOf(valueObject.julLimit()))
-            .augBalance(BigDecimal.valueOf(valueObject.augLimit()))
-            .sepBalance(BigDecimal.valueOf(valueObject.sepLimit()))
-            .octBalance(BigDecimal.valueOf(valueObject.octLimit()))
-            .novBalance(BigDecimal.valueOf(valueObject.novLimit()))
-            .decBalance(BigDecimal.valueOf(valueObject.decLimit()))
+            .janBalance(BigDecimal.valueOf(dto.janLimit()))
+            .febBalance(BigDecimal.valueOf(dto.febLimit()))
+            .marBalance(BigDecimal.valueOf(dto.marLimit()))
+            .aprBalance(BigDecimal.valueOf(dto.aprLimit()))
+            .mayBalance(BigDecimal.valueOf(dto.mayLimit()))
+            .junBalance(BigDecimal.valueOf(dto.junLimit()))
+            .julBalance(BigDecimal.valueOf(dto.julLimit()))
+            .augBalance(BigDecimal.valueOf(dto.augLimit()))
+            .sepBalance(BigDecimal.valueOf(dto.sepLimit()))
+            .octBalance(BigDecimal.valueOf(dto.octLimit()))
+            .novBalance(BigDecimal.valueOf(dto.novLimit()))
+            .decBalance(BigDecimal.valueOf(dto.decLimit()))
             .fstQuarterExpense(BigDecimal.ZERO)
             .scdQuarterExpense(BigDecimal.ZERO)
             .trdQuarterExpense(BigDecimal.ZERO)
             .frtQuarterExpense(BigDecimal.ZERO)
-            .fstQuarterBalance(sumOf(BigDecimal.valueOf(valueObject.janLimit()),
-                BigDecimal.valueOf(valueObject.febLimit()),
-                BigDecimal.valueOf(valueObject.marLimit())))
-            .scdQuarterBalance(sumOf(BigDecimal.valueOf(valueObject.aprLimit()),
-                BigDecimal.valueOf(valueObject.mayLimit()),
-                BigDecimal.valueOf(valueObject.junLimit())))
-            .trdQuarterBalance(sumOf(BigDecimal.valueOf(valueObject.julLimit()),
-                BigDecimal.valueOf(valueObject.augLimit()),
-                BigDecimal.valueOf(valueObject.sepLimit())))
-            .frtQuarterBalance(sumOf(BigDecimal.valueOf(valueObject.octLimit()),
-                BigDecimal.valueOf(valueObject.novLimit()),
-                BigDecimal.valueOf(valueObject.decLimit())))
+            .fstQuarterBalance(sumOf(dto.janLimit(), dto.febLimit(), dto.marLimit()))
+            .scdQuarterBalance(sumOf(dto.aprLimit(), dto.mayLimit(), dto.junLimit()))
+            .trdQuarterBalance(sumOf(dto.julLimit(), dto.augLimit(), dto.sepLimit()))
+            .frtQuarterBalance(sumOf(dto.octLimit(), dto.novLimit(), dto.decLimit()))
             .build();
     }
 
@@ -256,14 +249,13 @@ public class CashPlanLimitMapper {
     }
 
     public UpdateInstanceRequestDto toUpdateDto(CashPlanLimit cpl) {
-        UpdateInstanceRequestDto dto = new UpdateInstanceRequestDto(
+        return new UpdateInstanceRequestDto(
             InstanceDto.builder()
                 .id(cpl.getId())
                 .templateId(TEMPLATE_ID)
                 .version(cpl.getVersion())
                 .attributes(buildAttributeListToUpdate(cpl))
                 .build());
-        return dto;
     }
 
     private List<Attribute<?>> buildAttributeListToCreate(CashPlanLimit cpl) {
@@ -290,6 +282,7 @@ public class CashPlanLimitMapper {
     private static List<Attribute<?>> buildAttributeListToUpdate(CashPlanLimit cpl) {
         return List.of(
             new DoubleAttribute(TOTAL_LIMIT_ATTR, cpl.getTotalLimit()),
+            new DoubleAttribute(TOTAL_EXPENSE_ATTR, cpl.getTotalExpense()),
             new DoubleAttribute(TOTAL_BALANCE_ATTR, cpl.getTotalBalance()),
             new DoubleAttribute(FEDERAL_BUDGET_ATTR, cpl. getFederalBudget()),
             new DoubleAttribute(REGIONAL_BUDGET_ATTR, cpl.getRegionalBudget()),
@@ -353,14 +346,6 @@ public class CashPlanLimitMapper {
 
         return null;
     }
-//
-//    private Object getAttrData(List<Attribute<?>> attributes, long attributeId) {
-//        return attributes.stream()
-//                .filter(a -> a.id().equals(attributeId))
-//                .findFirst()
-//                .map(Attribute::getData)
-//                .orElse(null);
-//    }
 
     private String getAttrShortForm(List<Attribute<?>> attributes, Long attributeId) {
         return attributes.stream()

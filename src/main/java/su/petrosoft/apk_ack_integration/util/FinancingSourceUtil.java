@@ -37,7 +37,7 @@ public class FinancingSourceUtil {
                 .build();
     }
 
-    public static GetAttributesListRequestDto requestDtoForGettingFsForUpdateById(long id) {
+    public static GetAttributesListRequestDto requestDtoForGettingFsById(long id) {
         return GetAttributesListRequestDto.builder()
             .templateId(TEMPLATE_ID)
             .viewType(ViewType.DETAILED_FORM_VIEW)

@@ -36,6 +36,7 @@ public class CashPlanLimitUtil {
     public static final long RECIPIENT_INN = 4427;
     public static final long RECIPIENT_KPP = 4428;
     public static final long TOTAL_LIMIT_ATTR = 1609;
+    public static final long TOTAL_EXPENSE_ATTR = 1610;
     public static final long TOTAL_BALANCE_ATTR = 1611;
     public static final long FEDERAL_BUDGET_ATTR = 1828;
     public static final long REGIONAL_BUDGET_ATTR = 1829;
@@ -216,20 +217,21 @@ public class CashPlanLimitUtil {
     }
 
     public static BigDecimal getTotalLimit(PlDirectionLine line) {
-        return sumOf(line.limitAmt1(), line.limitAmt2(), line.limitAmt3());
+        return line.limitAmt1().add(line.limitAmt2()).add(line.limitAmt3());
     }
 
     public static BigDecimal getTotalFederal(PlDirectionLine line) {
-        return sumOf(line.limitFederalAmt1(), line.limitFederalAmt2(), line.limitFederalAmt3());
+        return line.limitFederalAmt1().add(line.limitFederalAmt2().add(line.limitFederalAmt3()));
     }
 
     public static BigDecimal getTotalRegional(PlDirectionLine line) {
-        return sumOf(line.limitRegionalAmt1(), line.limitRegionalAmt2(), line.limitRegionalAmt3());
+        return line.limitRegionalAmt1().add(line.limitRegionalAmt2()).add(line.limitRegionalAmt3());
     }
 
-    public static BigDecimal sumOf(BigDecimal... items) {
+    public static BigDecimal sumOf(Double... items) {
         return Stream.of(items)
-                .filter(Objects::nonNull)
+            .filter(Objects::nonNull)
+            .map(BigDecimal::valueOf)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
