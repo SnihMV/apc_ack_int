@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import su.petrosoft.apk_ack_integration.model.dto.request.FillingMainFormRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.GetCropProductionSummaryReportDto;
@@ -47,7 +45,7 @@ public class CropProductionController {
 
         byte[] fileContent = service.createExcelSummaryReport(dto);
 
-        String fileName = "Crop production summary report " + LocalDate.now() + ".xlsx";
+        String fileName = "Crop production "+ dto.type() +" summary report " + LocalDate.now() + ".xlsx";
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")

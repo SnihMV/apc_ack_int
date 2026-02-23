@@ -19,5 +19,4 @@ public class ProducerData {
     public void addValue(String key, BigDecimal value) {
         values.put(key, value);
     }
-
 }

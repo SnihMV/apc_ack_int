@@ -213,7 +213,8 @@ public class ApkPlicanteService {
         return list.stream()
             .collect(toMap(
                 dto -> extractData(dto.attributes(), dictionary.getCodeAttrId()),
-                InstanceDto::id
+                InstanceDto::id,
+                (d1,d2)->d1
             ));
     }
 
