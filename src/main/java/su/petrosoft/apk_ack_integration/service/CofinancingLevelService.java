@@ -1,5 +1,24 @@
 package su.petrosoft.apk_ack_integration.service;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toSet;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPKR;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.FINANCING_FORM;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KCSR;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.OWNERSHIP_FORM;
+import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.creatingRequestDto;
+import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.getCofinLevelRepresentationRequestDto;
+import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.getDefaultCfl;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.buildUpdatingByCofinLevelsRequestDto;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToFindSubsidyProgramsForCreationCofinancingLevels;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -16,26 +35,6 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateCofinancingLevelsFromExcelResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toSet;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPKR;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.FINANCING_FORM;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KCSR;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.OWNERSHIP_FORM;
-import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.creatingRequestDto;
-import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.getCofinLevelRepresentationRequestDto;
-import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.getDefaultCfl;
-import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.buildUpdatingByCofinLevelsRequestDto;
-import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToFindSubsidyProgramsForCreationCofinancingLevels;
 
 @Slf4j
 @Service
@@ -55,17 +54,16 @@ public class CofinancingLevelService {
 
         Map<Long, Set<Long>> updatedByFile = new HashMap<>();
         Map<Long, Set<Long>> updatedByDefault = new HashMap<>();
-
+        Map<Dictionary, Map<String, Long>> codesMap = plicanteService.getDictionariesCodesMap(
+            Set.of(KCSR, DOPKR, OWNERSHIP_FORM, FINANCING_FORM));
         Map<SubsidyProgram, Set<CofinancingLevel>> excelEntitiesMap = rows.stream()
                 .collect(groupingBy(
-                        spMapper::toEntity,
+                        row->spMapper.toEntity(row, codesMap),
                         mapping(cflMapper::toEntity, toSet())));
         log.info("Found [{}] Subsidy_Programs in Excel file", excelEntitiesMap.size());
-        Map<Dictionary, Map<Long, String>> codesMap = plicanteService.getDictionariesCodesMap(
-            Set.of(KCSR, DOPKR, OWNERSHIP_FORM, FINANCING_FORM));
         log.info("Getting Existing Subsidy_Programs ...");
         Set<SubsidyProgram> existingSpList = plicanteService.findSubsidyPrograms(
-                requestDtoToFindSubsidyProgramsForCreationCofinancingLevels(), codesMap);
+                requestDtoToFindSubsidyProgramsForCreationCofinancingLevels());
         log.info("Existing Subsidy_Programs count: [{}]", existingSpList.size());
 
         if (!rows.isEmpty() || !existingSpList.isEmpty()) {
@@ -84,7 +82,7 @@ public class CofinancingLevelService {
         return new CreateCofinancingLevelsFromExcelResponseDto(updatedByFile, updatedByDefault);
     }
 
-    private Map<Long, Set<Long>> updateSubsidyProgramsByDefaultCofinLevel(HashSet<SubsidyProgram> unAffectedSps, Map<Dictionary, Map<Long, String>> codesMap) {
+    private Map<Long, Set<Long>> updateSubsidyProgramsByDefaultCofinLevel(HashSet<SubsidyProgram> unAffectedSps, Map<Dictionary, Map<String, Long>> codesMap) {
         Map<Long, Set<Long>> result = new HashMap<>();
         Set<SubsidyProgram> emptySubsidyPrograms = unAffectedSps.stream()
                 .filter(sp -> sp.getCofinancingLevelIds().isEmpty())
@@ -113,7 +111,7 @@ public class CofinancingLevelService {
     private Map<Long, Set<Long>> updateSubsidyProgramsByCofinLevelsFromFile(
             HashSet<SubsidyProgram> affectedSps,
             Map<SubsidyProgram, Set<CofinancingLevel>> excelEntitiesMap,
-            Map<Dictionary, Map<Long, String>> codesMap
+            Map<Dictionary, Map<String, Long>> codesMap
     ) {
         if (!affectedSps.isEmpty()) {
             log.info("Updating Subsidy_Programs by Cofinancing_Levels from file ...");

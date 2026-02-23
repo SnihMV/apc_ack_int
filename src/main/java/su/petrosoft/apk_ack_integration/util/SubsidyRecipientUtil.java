@@ -76,8 +76,7 @@ public class SubsidyRecipientUtil {
                 new RequestedAttribute(INN_ATTR)
             ))
             .filter(new Filter(List.of(
-                new StringFilterAttribute(INN_ATTR, List.of(IN),
-                    innListFromXml.toArray(String[]::new))
+                new StringFilterAttribute(INN_ATTR, List.of(IN), innListFromXml)
             )))
             .build();
     }

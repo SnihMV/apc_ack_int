@@ -1,7 +1,12 @@
 package su.petrosoft.apk_ack_integration.util;
 
+import static su.petrosoft.apk_ack_integration.util.DictionaryUtil.DEFAULT_OWNERSHIP_FORM;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.toEpochMilli;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import su.petrosoft.apk_ack_integration.model.CofinancingLevel;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DateAttribute;
@@ -11,16 +16,6 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribu
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.GettingInstanceRepresentationRequestDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
-
-import java.util.List;
-import java.util.Map;
-
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.FINANCING_FORM;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.OWNERSHIP_FORM;
-import static su.petrosoft.apk_ack_integration.model.enums.FinancingForm.*;
-import static su.petrosoft.apk_ack_integration.model.enums.OwnershipForm.*;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
 
 public class CofinanceLevelUtil {
     public static final long TEMPLATE_ID = 25588;
@@ -40,8 +35,8 @@ public class CofinanceLevelUtil {
             .startDate(LocalDate.of(currentYear, 1, 1))
             .obCoeff(BigDecimal.ONE)
             .fbCoeff(BigDecimal.ZERO)
-            .financingForm(OB)
-            .ownershipForm(ALL)
+//            .financingForm(OB)
+            .ownershipForm(DEFAULT_OWNERSHIP_FORM)
             .build();
     }
 
@@ -53,7 +48,7 @@ public class CofinanceLevelUtil {
                 .build();
     }
 
-    public static CreateInstanceRequestDto creatingRequestDto(CofinancingLevel cflToSave, Map<Dictionary, Map<Long, String>> codesMap) {
+    public static CreateInstanceRequestDto creatingRequestDto(CofinancingLevel cflToSave, Map<Dictionary, Map<String, Long>> codesMap) {
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()
                         .templateId(TEMPLATE_ID)
@@ -62,8 +57,8 @@ public class CofinanceLevelUtil {
                                 new DateAttribute(START_DATE_ATTR, toEpochMilli(cflToSave.getStartDate())),
                                 new DoubleAttribute(COEFF_OB_ATTR, cflToSave.getObCoeff()),
                                 new DoubleAttribute(COEFF_FB_ATTR, cflToSave.getFbCoeff()),
-                                new LinkedAttribute(FIN_FORM_ATTR, dictionaryIdByCode(codesMap, FINANCING_FORM, cflToSave.getFinancingForm().getCode())),
-                                new LinkedAttribute(OWN_FORM_ATTR, dictionaryIdByCode(codesMap, OWNERSHIP_FORM, cflToSave.getOwnershipForm().getCode()))))
+//                                new LinkedAttribute(FIN_FORM_ATTR, dictionaryIdByCode(codesMap, FINANCING_FORM, cflToSave.getFinancingForm().getCode())),
+                                new LinkedAttribute(OWN_FORM_ATTR, cflToSave.getOwnershipForm())))
                         .build());
     }
 }

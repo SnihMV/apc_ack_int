@@ -1,7 +1,22 @@
 package su.petrosoft.apk_ack_integration.service;
 
+import static su.petrosoft.apk_ack_integration.model.data.xml.CreatingSubsidiesAmountsXml.SubsidyAmountXml;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPKR;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KCSR;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.NO_CONTENT;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.getThirdLevelSpRequestDto;
+import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.INN_ATTR;
+import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.buildGettingRecipientsByInnsRequestDto;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -16,25 +31,11 @@ import su.petrosoft.apk_ack_integration.mapper.SubsidyRecipientMapper;
 import su.petrosoft.apk_ack_integration.model.SubsidyAmount;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
+import su.petrosoft.apk_ack_integration.model.data.xml.CreatingSubsidiesAmountsXml;
 import su.petrosoft.apk_ack_integration.model.dto.nifi.GetDataFromEgrulByInnDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.data.xml.CreatingSubsidiesAmountsXml;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static su.petrosoft.apk_ack_integration.model.data.xml.CreatingSubsidiesAmountsXml.SubsidyAmountXml;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.*;
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.NO_CONTENT;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
-import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.*;
-import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.INN_ATTR;
-import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.buildGettingRecipientsByInnsRequestDto;
 
 @Slf4j
 @Service
@@ -77,9 +78,9 @@ public class LoanAgreementService {
             log.warn("Third level subsidy programs not found");
             return;
         }
-        Map<Dictionary, Map<Long, String>> codesMap = apkPlicanteService.getDictionariesCodesMap(Set.of(KCSR, DOPKR));
+        Map<Dictionary, Map<String, Long>> codesMap = apkPlicanteService.getDictionariesCodesMap(Set.of(KCSR, DOPKR));
         Map<SubsidyProgram, Long> spMap = foundSpInstances.stream()
-                .map(dto->spMapper.toEntity(dto,codesMap))
+                .map(dto->spMapper.toEntity(dto))
                 .collect(Collectors.toMap(
                         Function.identity(),
                         SubsidyProgram::getId));
@@ -92,8 +93,8 @@ public class LoanAgreementService {
             String dopKr = amountXml.dopKR();
             SubsidyProgram searchKey = SubsidyProgram.builder()
                     .level(3L)
-                    .kcsr(kcsr)
-                    .dopKr(dopKr)
+                    .kcsr(dictionaryIdByCode(codesMap, KCSR, kcsr))
+                    .dopKr(dictionaryIdByCode(codesMap, DOPKR, dopKr))
                     .build();
 
             Long spId = spMap.get(searchKey);

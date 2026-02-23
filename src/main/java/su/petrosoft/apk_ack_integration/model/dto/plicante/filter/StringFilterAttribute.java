@@ -1,7 +1,7 @@
 package su.petrosoft.apk_ack_integration.model.dto.plicante.filter;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.value.StringValue;
 import su.petrosoft.apk_ack_integration.model.enums.SqlOperation;
@@ -17,7 +17,7 @@ public record StringFilterAttribute(
         this(id, ValueType.STRING, new Condition<>(List.of(SqlOperation.EQUALS), List.of(new StringValue(data))));
     }
 
-    public StringFilterAttribute(long id, List<SqlOperation> operations, String... data) {
-        this(id, ValueType.STRING, new Condition<>(operations, Arrays.stream(data).map(StringValue::new).toList()));
+    public StringFilterAttribute(long id, List<SqlOperation> operations, Collection<String> data) {
+        this(id, ValueType.STRING, new Condition<>(operations, data.stream().map(StringValue::new).toList()));
     }
 }
