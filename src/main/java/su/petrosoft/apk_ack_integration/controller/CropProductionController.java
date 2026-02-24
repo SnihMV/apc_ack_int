@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import su.petrosoft.apk_ack_integration.model.dto.request.FillingMainFormRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.GetCropProductionSummaryReportDto;
@@ -42,12 +40,12 @@ public class CropProductionController {
             summary = "Generate summary report",
             description = "Creates an excel file with a summary report on crop production based on operational" +
                     "reports accepted in the specified interval")
-    @GetMapping(value = "summaryReport/excel", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @GetMapping(value = "summaryReport/createExcel", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public ResponseEntity<byte[]> getSummaryReport(@RequestBody GetCropProductionSummaryReportDto dto) {
 
         byte[] fileContent = service.createExcelSummaryReport(dto);
 
-        String fileName = "Crop production summary report " + LocalDate.now() + ".xlsx";
+        String fileName = "Crop production "+ dto.type() +" summary report " + LocalDate.now() + ".xlsx";
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
@@ -55,6 +53,9 @@ public class CropProductionController {
                 .body(fileContent);
     }
 
+    @Operation(
+            summary = "Get available report types",
+            description = "Returns a list of all available report types with their codes and titles")
     @GetMapping("summaryReport/types")
     public List<GetSummaryReportTypeResponseDto> getReportTypes() {
         return Arrays.stream(ReportType.values())
