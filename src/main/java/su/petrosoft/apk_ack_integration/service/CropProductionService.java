@@ -9,6 +9,7 @@ import static su.petrosoft.apk_ack_integration.model.enums.ReportType.FORM_1;
 import static su.petrosoft.apk_ack_integration.model.enums.ReportType.FORM_2;
 import static su.petrosoft.apk_ack_integration.model.enums.ReportType.FORM_3;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessage.RECIPIENT_BY_ID_NOT_FOUND;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.REPORTS_NOT_FOUND;
 import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.requestDtoForGettingOperationalReportsByTypeAndDate;
 import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.requestDtoForGettingOperationalReportsByTypeAndStatusAndDateInterval;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.toEpochMilli;
@@ -29,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
 import su.petrosoft.apk_ack_integration.exception.EntityNotFoundException;
+import su.petrosoft.apk_ack_integration.exception.NoDataFoundException;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyRecipientMapper;
 import su.petrosoft.apk_ack_integration.model.CropProductionMainForm;
 import su.petrosoft.apk_ack_integration.model.DistrictData;
@@ -107,7 +109,7 @@ public class CropProductionService {
         Map<Dictionary, Map<String, Long>> codesMap = plicanteService.getDictionariesCodesMap(Set.of(DISTRICT));
 
         if (operationalReports == null || operationalReports.isEmpty()) {
-            return null;
+            throw new NoDataFoundException(REPORTS_NOT_FOUND);
         }
 
         Map<Long, OperationalReport> recipientIdToLastReportMap = operationalReports.stream()
