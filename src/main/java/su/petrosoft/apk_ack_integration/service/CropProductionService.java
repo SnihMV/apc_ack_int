@@ -48,7 +48,6 @@ import su.petrosoft.apk_ack_integration.util.CropProductionUtil;
 @RequiredArgsConstructor
 public class CropProductionService {
 
-    private static final String TEMPLATE_PATH = "/templates/summaryReportForm1.xlsx";
     private final ApkPlicanteService plicanteService;
     private final PlicanteRestClient plicanteRestClient;
     private final SubsidyRecipientMapper srMapper;
@@ -103,46 +102,9 @@ public class CropProductionService {
         long until = toEpochMilli(to);
 
         List<OperationalReport> operationalReports = plicanteService.getOperationalReports(
-                requestDtoForGettingOperationalReportsByTypeAndStatusAndDateInterval(dto.type(), since,
-                        until));
-
-//        List<OperationalReport> or = plicanteService.getOperationalReports(
-//                requestDtoForGettingOperationalReportsByTypesAndStatusAndDateInterval(since, until,
-//                        5858, List.of(FORM_1.getId(), FORM_2.getId(), FORM_3.getId())));
+                requestDtoForGettingOperationalReportsByTypeAndStatusAndDateInterval(dto.type(), since, until));
 
         Map<Dictionary, Map<String, Long>> codesMap = plicanteService.getDictionariesCodesMap(Set.of(DISTRICT));
-
-//        Map<Long, Map<ReportType, OperationalReport>> collect = or.stream()
-//                .collect(groupingBy(
-//                        OperationalReport::getRecipientId,
-//                        toMap(
-//                                OperationalReport::getReportType,
-//                                Function.identity(),
-//                                maxBy(comparingLong(OperationalReport::getReportDate))
-//                        )));
-//
-//        Map<String, List<ProducerData>> collect1 = collect.entrySet().stream()
-//                .map(e -> {
-//                    SubsidyRecipient recipient = getRecipientInfoById(e.getKey());
-//                    String districtName = dictionaryCodeById(codesMap, DISTRICT, recipient.getDistrictId());
-//                    Map<String, BigDecimal> summaryValues = e.getValue().values().stream()
-//                            .flatMap(rep -> rep.getReportValues().entrySet().stream())
-//                            .collect(toMap(
-//                                    Entry::getKey,
-//                                    Entry::getValue
-//                            ));
-//                    return Map.entry(
-//                            districtName,
-//                            new ProducerData(
-//                                    recipient.getShortTitle(),
-//                                    recipient.getInn(),
-//                                    summaryValues
-//                            ));
-//                })
-//                .collect(groupingBy(
-//                        Entry::getKey,
-//                        mapping(Entry::getValue, toList())
-//                ));
 
         if (operationalReports == null || operationalReports.isEmpty()) {
             return null;
@@ -166,19 +128,19 @@ public class CropProductionService {
         Set<DistrictData> result = codesMap.get(DISTRICT).entrySet().stream()
                 .map(entry -> new DistrictData(
                         entry.getKey(),
-                        distIdToProducersList.getOrDefault(entry.getKey(), emptyList())
+                        distIdToProducersList.getOrDefault(entry.getValue(), emptyList())
                 ))
                 .collect(Collectors.toCollection(
                         TreeSet::new
                 ));
 
         Map<String, Object> headerData = Map.of(
-                "reportDate", LocalDate.now(),
+                "reportDate", to,
                 "year", LocalDate.now().getYear()
         );
 
         return excelReportFiller.fillReport(
-                getClass().getResourceAsStream(TEMPLATE_PATH), result, headerData, dto.isDetailed());
+                getClass().getResourceAsStream(dto.type().getTemplatePath()), result, headerData, dto.isDetailed());
     }
 
     private SubsidyRecipient getRecipientInfoById(Long id) {

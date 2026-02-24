@@ -1,16 +1,10 @@
 package su.petrosoft.apk_ack_integration.model;
 
-import static java.util.Comparator.*;
-
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -37,18 +31,6 @@ public class DistrictData implements Comparable<DistrictData> {
                 sums.merge(entry.getKey(), entry.getValue(), BigDecimal::add);
             }
         }
-    }
-
-    public BigDecimal percent(String numeratorKey, String denominatorKey) {
-        BigDecimal numerator = getSum(numeratorKey);
-        BigDecimal denominator = getSum(denominatorKey);
-
-        if (denominator.compareTo(BigDecimal.ZERO) == 0) {
-            return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
-        }
-
-        return numerator.multiply(BigDecimal.valueOf(100))
-            .divide(denominator, 2, RoundingMode.HALF_UP);
     }
 
     @Override

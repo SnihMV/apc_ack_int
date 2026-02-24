@@ -14,9 +14,10 @@ import java.time.LocalDate;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record GetCropProductionSummaryReportDto(
         @NotNull
+        @JsonProperty(required = true)
         ReportType type,
 
-        @JsonProperty("isDetailed")
+        @JsonProperty(required = true)
         boolean isDetailed,
 
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
