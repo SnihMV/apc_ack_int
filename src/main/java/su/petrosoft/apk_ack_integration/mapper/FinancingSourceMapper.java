@@ -1,6 +1,10 @@
 package su.petrosoft.apk_ack_integration.mapper;
 
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPKR;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KCSR;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KFSR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KOSGU;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVSR;
 import static su.petrosoft.apk_ack_integration.util.DictionaryUtil.ownershipForm;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.CASH_PLAN_LIMITS_ATTR;
@@ -18,6 +22,7 @@ import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.PURPOSE_
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.SUBSIDY_PROGRAM_ATTR;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.TEMPLATE_ID;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.YEAR_ATTR;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryCodeById;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractAllData;
@@ -40,6 +45,7 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribu
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
+import su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil;
 
 @Slf4j
 @Component
@@ -104,7 +110,7 @@ public class FinancingSourceMapper {
                     new LinkedAttribute(SUBSIDY_PROGRAM_ATTR, fs.getSubsidyProgramId()),
                     new LinkedAttribute(CASH_PLAN_LIMITS_ATTR, fs.getCashPlanLimitIds()),
                     new LinkedAttribute(OWNERSHIP_FORM_ATTR, ownershipFormId),
-                    new StringAttribute(CONCAT_KBK_ATTR, concatKBK(fs))
+                    new StringAttribute(CONCAT_KBK_ATTR, concatKBK(fs, codesMap))
                 ))
                 .build()
         );
@@ -140,9 +146,14 @@ public class FinancingSourceMapper {
         return sb.toString();
     }
 
-    private String concatKBK(FinancingSource fs) {
+    private String concatKBK(FinancingSource fs, Map<Dictionary, Map<String, Long>> codesMap) {
         return LocalDateTime.now().getYear() +
-               "-" + fs.getKvsr() + fs.getKfsr() + fs.getKcsr() + fs.getKvr() + "-"
-               + fs.getDopKr();
+               "-" +
+                dictionaryCodeById(codesMap, KVSR, fs.getKvsr()) +
+                dictionaryCodeById(codesMap, KFSR, fs.getKfsr()) +
+                dictionaryCodeById(codesMap, KCSR, fs.getKcsr()) +
+                dictionaryCodeById(codesMap, KVR, fs.getKvr()) +
+                "-" +
+                dictionaryCodeById(codesMap, DOPKR, fs.getDopKr());
     }
 }
