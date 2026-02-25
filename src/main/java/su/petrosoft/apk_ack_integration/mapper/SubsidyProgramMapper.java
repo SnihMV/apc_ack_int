@@ -98,7 +98,7 @@ public class SubsidyProgramMapper {
         return SubsidyProgram.builder()
                 .level(2L)
                 .kcsr(dictionaryIdByCode(codesMap, KCSR, row.kcsr()))
-                .dopKr(dictionaryIdByCode(codesMap, KCSR, row.dopKr()))
+                .dopKr(dictionaryIdByCode(codesMap, DOPKR, row.dopKr()))
                 .build();
     }
 
