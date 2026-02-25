@@ -22,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -61,7 +62,7 @@ public class CropProductionController {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponseDto.class)))
     })
-    @GetMapping(value = "summaryReport/createExcel", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @PostMapping(value = "summaryReport/createExcel", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public ResponseEntity<byte[]> getSummaryReport(@RequestBody GetCropProductionSummaryReportDto dto) {
 
         byte[] fileContent = service.createExcelSummaryReport(dto);
