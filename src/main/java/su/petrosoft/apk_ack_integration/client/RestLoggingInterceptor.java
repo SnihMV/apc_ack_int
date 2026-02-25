@@ -17,6 +17,7 @@ import java.util.UUID;
 public class RestLoggingInterceptor implements ClientHttpRequestInterceptor {
 
     private final ObjectMapper objectMapper;
+    private static final int MAX_BODY_LENGTH = 750;
 
     @Override
     public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
@@ -39,13 +40,20 @@ public class RestLoggingInterceptor implements ClientHttpRequestInterceptor {
 
     private void logRequest(String requestId, HttpRequest request, byte[] body) {
         String json = body.length > 0 ? prettyPrint(new String(body, StandardCharsets.UTF_8)) : "{}";
-        log.debug("[REST-{}] >>> {} {} Request body:\n{}", requestId, request.getMethod(), request.getURI(), json);
+        log.debug("[REST-{}] >>> {} {} Request body:\n{}", requestId, request.getMethod(), request.getURI(), truncate(json));
     }
 
     private void logResponse(String requestId, ClientHttpResponse response, long duration) throws IOException {
         byte[] body = response.getBody().readAllBytes();
         String json = body.length > 0 ? prettyPrint(new String(body, StandardCharsets.UTF_8)) : "{}";
-        log.debug("[REST-{}] <<< {} ({} ms) Response body:\n{}", requestId, response.getStatusCode(), duration, json);
+        log.debug("[REST-{}] <<< {} ({} ms) Response body:\n{}", requestId, response.getStatusCode(), duration, truncate(json));
+    }
+
+    private String truncate(String text) {
+        if (text.length() <= MAX_BODY_LENGTH) {
+            return text;
+        }
+        return text.substring(0, MAX_BODY_LENGTH) + " ... (truncated)";
     }
 
     private String prettyPrint(String stringBody) {
