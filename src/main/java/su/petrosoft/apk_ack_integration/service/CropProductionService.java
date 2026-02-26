@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -138,7 +139,8 @@ public class CropProductionService {
 
         Map<String, Object> headerData = Map.of(
                 "reportDate", to,
-                "year", LocalDate.now().getYear()
+                "year", to.getYear(),
+                "lastYear", to.getYear() - 1
         );
 
         return excelReportFiller.fillReport(
