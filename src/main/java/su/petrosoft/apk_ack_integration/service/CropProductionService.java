@@ -97,8 +97,8 @@ public class CropProductionService {
     }
 
     public byte[] createExcelSummaryReport(GetCropProductionSummaryReportDto dto) {
-        LocalDate from = dto.from() != null ? dto.from() : LocalDate.of(LocalDate.now().getYear(), 1, 1);
         LocalDate to = dto.to() != null ? dto.to() : LocalDate.now();
+        LocalDate from = dto.from() != null && dto.from().isBefore(to) ? dto.from() : LocalDate.of(to.getYear(), 1, 1);
 
         long since = toEpochMilli(from);
         long until = toEpochMilli(to);
@@ -106,11 +106,11 @@ public class CropProductionService {
         List<OperationalReport> operationalReports = plicanteService.getOperationalReports(
                 requestDtoForGettingOperationalReportsByTypeAndStatusAndDateInterval(dto.type(), since, until));
 
-        Map<Dictionary, Map<String, Long>> codesMap = plicanteService.getDictionariesCodesMap(Set.of(DISTRICT));
-
         if (operationalReports == null || operationalReports.isEmpty()) {
             throw new NoDataFoundException(REPORTS_NOT_FOUND);
         }
+
+        Map<Dictionary, Map<String, Long>> codesMap = plicanteService.getDictionariesCodesMap(Set.of(DISTRICT));
 
         Map<Long, OperationalReport> recipientIdToLastReportMap = operationalReports.stream()
                 .collect(toMap(

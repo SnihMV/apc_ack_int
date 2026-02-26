@@ -1,5 +1,6 @@
 package su.petrosoft.apk_ack_integration.service.excel;
 
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.INVALID_MARKER;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.MARKER_NOT_FOUND;
 
 import java.io.ByteArrayOutputStream;
@@ -44,16 +45,18 @@ public class ExcelReportFiller {
      * @param headerData     - данные для шапки
      * @return готовый Excel файл в виде байтов
      */
-    public byte[] fillReport(InputStream templateStream,
-                             Collection<DistrictData> districts,
-                             Map<String, Object> headerData,
-                             boolean isDetailed) {
+    public byte[] fillReport(
+            InputStream templateStream,
+            Collection<DistrictData> districts,
+            Map<String, Object> headerData,
+            boolean isDetailed
+    ) {
         try (Workbook workbook = new XSSFWorkbook(templateStream)) {
             Sheet sheet = workbook.getSheetAt(0);
 
             TemplateStructure structure = analyzeTemplate(sheet);
 
-            fillHeader(sheet, structure.markers.get(HEADER_KEY), headerData);
+            fillHeader(sheet, structure, headerData);
 
             fillData(sheet, structure, districts, isDetailed);
 
@@ -106,8 +109,9 @@ public class ExcelReportFiller {
     /**
      * Заполняет шапку отчета
      */
-    private void fillHeader(Sheet sheet, List<MarkerInfo> headerMarkers,
+    private void fillHeader(Sheet sheet, TemplateStructure structure,
                             Map<String, Object> headerData) {
+        List<MarkerInfo> headerMarkers = structure.markers.getOrDefault(HEADER_KEY, new ArrayList<>());
         for (MarkerInfo marker : headerMarkers) {
             Row row = sheet.getRow(marker.row);
             Cell cell = row.getCell(marker.col);
@@ -271,7 +275,7 @@ public class ExcelReportFiller {
                     BigDecimal denominator = data.getValue(parts[2]);
                     cell.setCellValue(percent(numerator, denominator).doubleValue());
                 } else {
-                    throw new ExcelTemplateException("Неверный формат маркера процента: " + key);
+                    throw new ExcelTemplateException(INVALID_MARKER.formatted(key));
                 }
             } else if (key.startsWith("pctofsum_")) {
                 String[] parts = key.split("_");
@@ -282,7 +286,7 @@ public class ExcelReportFiller {
                     BigDecimal denominator = data.getValue(parts[3]);
                     cell.setCellValue(percent(numerator, denominator).doubleValue());
                 } else {
-                    throw new ExcelTemplateException("Неверный формат маркера процента: " + key);
+                    throw new ExcelTemplateException(INVALID_MARKER.formatted(key));
                 }
             } else if (key.startsWith("pctof2sum_")) {
                 String[] parts = key.split("_");
@@ -294,7 +298,7 @@ public class ExcelReportFiller {
                     BigDecimal denominator = data.getValue(parts[4]);
                     cell.setCellValue(percent(numerator, denominator).doubleValue());
                 } else {
-                    throw new ExcelTemplateException("Неверный формат маркера процента: " + key);
+                    throw new ExcelTemplateException(INVALID_MARKER.formatted(key));
                 }
             } else if (key.startsWith("sub_")) {
                 String[] parts = key.split("_");
@@ -303,7 +307,7 @@ public class ExcelReportFiller {
                     BigDecimal subtrahend = data.getValue(parts[2]);
                     cell.setCellValue(minuend.subtract(subtrahend).doubleValue());
                 } else {
-                    throw new ExcelTemplateException("Неверный формат маркера процента: " + key);
+                    throw new ExcelTemplateException(INVALID_MARKER.formatted(key));
                 }
             } else if (key.startsWith("2sub_")) {
                 String[] parts = key.split("_");
@@ -314,7 +318,7 @@ public class ExcelReportFiller {
                     cell.setCellValue(
                             minuend.subtract(sub1).subtract(sub2).doubleValue());
                 } else {
-                    throw new ExcelTemplateException("Неверный формат маркера процента: " + key);
+                    throw new ExcelTemplateException(INVALID_MARKER.formatted(key));
                 }
             } else if (key.startsWith("3sub_")) {
                 String[] parts = key.split("_");
@@ -326,7 +330,7 @@ public class ExcelReportFiller {
                     cell.setCellValue(
                             minuend.subtract(sub1).subtract(sub2).subtract(sub3).doubleValue());
                 } else {
-                    throw new ExcelTemplateException("Неверный формат маркера процента: " + key);
+                    throw new ExcelTemplateException(INVALID_MARKER.formatted(key));
                 }
             } else if (key.startsWith("prd_")) {
                 String[] parts = key.split("_");
@@ -338,11 +342,23 @@ public class ExcelReportFiller {
                             numerator.multiply(BigDecimal.TEN).divide(denominator, 2, RoundingMode.HALF_UP);
                     cell.setCellValue(result.doubleValue());
                 } else {
-                    throw new ExcelTemplateException("Неверный формат маркера процента: " + key);
+                    throw new ExcelTemplateException(INVALID_MARKER.formatted(key));
+                }
+
+            } else if (key.startsWith("prd1000_")) {
+                String[] parts = key.split("_");
+                if (parts.length == 3) {
+                    BigDecimal numerator = data.getValue(parts[1]);
+                    BigDecimal denominator = data.getValue(parts[2]);
+                    BigDecimal result = denominator.compareTo(BigDecimal.ZERO) == 0 ?
+                            BigDecimal.ZERO :
+                            numerator.multiply(BigDecimal.valueOf(1000)).divide(denominator, 2, RoundingMode.HALF_UP);
+                    cell.setCellValue(result.doubleValue());
+                } else {
+                    throw new ExcelTemplateException(INVALID_MARKER.formatted(key));
                 }
 
             } else {
-                // Обычное значение
                 BigDecimal value = data.getValue(key);
                 cell.setCellValue(value != null ? value.doubleValue() : 0.0);
             }
