@@ -94,8 +94,7 @@ public class PlicanteInstanceUtil {
         return id;
     }
 
-    public static String dictionaryCodeById(Map<Dictionary, Map<String, Long>> codesMap,
-        Dictionary dictionary, long id) {
+    public static String dictionaryCodeById(Map<Dictionary, Map<String, Long>> codesMap, Dictionary dictionary, long id) {
         return codesMap.get(dictionary).entrySet().stream()
             .filter(entry -> entry.getValue().equals(id))
             .findFirst()

@@ -11,13 +11,14 @@ import java.util.function.BiPredicate;
 @Getter
 @AllArgsConstructor
 public enum FinancingForm {
-    OB("ОБ", (ob, fb) -> ob.compareTo(BigDecimal.ONE) == 0 && fb.compareTo(BigDecimal.ZERO) == 0),
+    OB("ОБ", 75732, (ob, fb) -> ob.compareTo(BigDecimal.ONE) == 0 && fb.compareTo(BigDecimal.ZERO) == 0),
 
-    OFB("ОФБ", (ob, fb) -> ob.compareTo(BigDecimal.ZERO) > 0 && ob.compareTo(BigDecimal.ONE) < 0
+    OFB("ОФБ", 75733, (ob, fb) -> ob.compareTo(BigDecimal.ZERO) > 0 && ob.compareTo(BigDecimal.ONE) < 0
             && fb.compareTo(BigDecimal.ZERO) > 0 && fb.compareTo(BigDecimal.ONE) < 0),
-    OVER("СВЕРХ", (ob, fb) -> ob.compareTo(BigDecimal.ZERO) == 0 && fb.compareTo(BigDecimal.ZERO) == 0);
+    OVER("СВЕРХ", 75734, (ob, fb) -> ob.compareTo(BigDecimal.ZERO) == 0 && fb.compareTo(BigDecimal.ZERO) == 0);
 
     private String code;
+    private long id;
     private BiPredicate<BigDecimal, BigDecimal> matcher;
 
     public static FinancingForm finFormByCoeffs(BigDecimal obCoeff, BigDecimal fbCoeff) {

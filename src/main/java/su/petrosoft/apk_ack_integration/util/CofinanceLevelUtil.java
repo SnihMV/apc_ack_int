@@ -1,5 +1,6 @@
 package su.petrosoft.apk_ack_integration.util;
 
+import static su.petrosoft.apk_ack_integration.model.enums.FinancingForm.OB;
 import static su.petrosoft.apk_ack_integration.util.DictionaryUtil.DEFAULT_OWNERSHIP_FORM;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.toEpochMilli;
 
@@ -35,7 +36,7 @@ public class CofinanceLevelUtil {
             .startDate(LocalDate.of(currentYear, 1, 1))
             .obCoeff(BigDecimal.ONE)
             .fbCoeff(BigDecimal.ZERO)
-//            .financingForm(OB)
+            .financingForm(OB.getId())
             .ownershipForm(DEFAULT_OWNERSHIP_FORM)
             .build();
     }
@@ -57,7 +58,7 @@ public class CofinanceLevelUtil {
                                 new DateAttribute(START_DATE_ATTR, toEpochMilli(cflToSave.getStartDate())),
                                 new DoubleAttribute(COEFF_OB_ATTR, cflToSave.getObCoeff()),
                                 new DoubleAttribute(COEFF_FB_ATTR, cflToSave.getFbCoeff()),
-//                                new LinkedAttribute(FIN_FORM_ATTR, dictionaryIdByCode(codesMap, FINANCING_FORM, cflToSave.getFinancingForm().getCode())),
+                                new LinkedAttribute(FIN_FORM_ATTR, cflToSave.getFinancingForm()),
                                 new LinkedAttribute(OWN_FORM_ATTR, cflToSave.getOwnershipForm())))
                         .build());
     }
