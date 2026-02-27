@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
+
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.data.xml.rpl.PlDirectionLine;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
@@ -109,41 +110,41 @@ public class CashPlanLimitUtil {
 
     public static GetAttributesListRequestDto requestDtoToGettingExpenseFieldsById(long id) {
         return GetAttributesListRequestDto.builder()
-            .templateId(TEMPLATE_ID)
-            .viewType(ViewType.DETAILED_FORM_VIEW)
-            .attributes(List.of(
-                new RequestedAttribute(TOTAL_LIMIT_ATTR),
-                new RequestedAttribute(FEDERAL_BUDGET_ATTR),
-                new RequestedAttribute(REGIONAL_BUDGET_ATTR),
-                new RequestedAttribute(JAN_LIMIT_ATTR),
-                new RequestedAttribute(FEB_LIMIT_ATTR),
-                new RequestedAttribute(MAR_LIMIT_ATTR),
-                new RequestedAttribute(APR_LIMIT_ATTR),
-                new RequestedAttribute(MAY_LIMIT_ATTR),
-                new RequestedAttribute(JUN_LIMIT_ATTR),
-                new RequestedAttribute(JUL_LIMIT_ATTR),
-                new RequestedAttribute(AUG_LIMIT_ATTR),
-                new RequestedAttribute(SEP_LIMIT_ATTR),
-                new RequestedAttribute(OCT_LIMIT_ATTR),
-                new RequestedAttribute(NOV_LIMIT_ATTR),
-                new RequestedAttribute(DEC_LIMIT_ATTR),
-                new RequestedAttribute(JAN_EXPENSE_ATTR),
-                new RequestedAttribute(FEB_EXPENSE_ATTR),
-                new RequestedAttribute(MAR_EXPENSE_ATTR),
-                new RequestedAttribute(APR_EXPENSE_ATTR),
-                new RequestedAttribute(MAY_EXPENSE_ATTR),
-                new RequestedAttribute(JUN_EXPENSE_ATTR),
-                new RequestedAttribute(JUL_EXPENSE_ATTR),
-                new RequestedAttribute(AUG_EXPENSE_ATTR),
-                new RequestedAttribute(SEP_EXPENSE_ATTR),
-                new RequestedAttribute(OCT_EXPENSE_ATTR),
-                new RequestedAttribute(NOV_EXPENSE_ATTR),
-                new RequestedAttribute(DEC_EXPENSE_ATTR)
-            ))
-            .filter(new Filter(List.of(
-                new LongFilterAttribute(ID_ATTR, id)
-            )))
-            .build();
+                .templateId(TEMPLATE_ID)
+                .viewType(ViewType.DETAILED_FORM_VIEW)
+                .attributes(List.of(
+                        new RequestedAttribute(TOTAL_LIMIT_ATTR),
+                        new RequestedAttribute(FEDERAL_BUDGET_ATTR),
+                        new RequestedAttribute(REGIONAL_BUDGET_ATTR),
+                        new RequestedAttribute(JAN_LIMIT_ATTR),
+                        new RequestedAttribute(FEB_LIMIT_ATTR),
+                        new RequestedAttribute(MAR_LIMIT_ATTR),
+                        new RequestedAttribute(APR_LIMIT_ATTR),
+                        new RequestedAttribute(MAY_LIMIT_ATTR),
+                        new RequestedAttribute(JUN_LIMIT_ATTR),
+                        new RequestedAttribute(JUL_LIMIT_ATTR),
+                        new RequestedAttribute(AUG_LIMIT_ATTR),
+                        new RequestedAttribute(SEP_LIMIT_ATTR),
+                        new RequestedAttribute(OCT_LIMIT_ATTR),
+                        new RequestedAttribute(NOV_LIMIT_ATTR),
+                        new RequestedAttribute(DEC_LIMIT_ATTR),
+                        new RequestedAttribute(JAN_EXPENSE_ATTR),
+                        new RequestedAttribute(FEB_EXPENSE_ATTR),
+                        new RequestedAttribute(MAR_EXPENSE_ATTR),
+                        new RequestedAttribute(APR_EXPENSE_ATTR),
+                        new RequestedAttribute(MAY_EXPENSE_ATTR),
+                        new RequestedAttribute(JUN_EXPENSE_ATTR),
+                        new RequestedAttribute(JUL_EXPENSE_ATTR),
+                        new RequestedAttribute(AUG_EXPENSE_ATTR),
+                        new RequestedAttribute(SEP_EXPENSE_ATTR),
+                        new RequestedAttribute(OCT_EXPENSE_ATTR),
+                        new RequestedAttribute(NOV_EXPENSE_ATTR),
+                        new RequestedAttribute(DEC_EXPENSE_ATTR)
+                ))
+                .filter(new Filter(List.of(
+                        new LongFilterAttribute(ID_ATTR, id)
+                )))
+                .build();
     }
 
     public static CashPlanLimit recalculateValues(CashPlanLimit dst, CashPlanLimit src) {
@@ -160,60 +161,68 @@ public class CashPlanLimitUtil {
         BigDecimal octBal = src.getOctLimit().subtract(dst.getOctExpense());
         BigDecimal novBal = src.getNovLimit().subtract(dst.getNovExpense());
         BigDecimal decBal = src.getDecLimit().subtract(dst.getDecExpense());
-        BigDecimal fstQrt = janBal.add(febBal).add(marBal);
-        BigDecimal scdQrt = aprBal.add(mayBal).add(junBal);
-        BigDecimal trdQrt = julBal.add(augBal).add(sepBal);
-        BigDecimal frtQrt = octBal.add(novBal).add(decBal);
-        BigDecimal totalBalance = fstQrt.add(scdQrt).add(trdQrt).add(frtQrt);
+        BigDecimal fstQrtExpense = dst.getJanBalance().add(dst.getFebBalance()).add(dst.getMarBalance());
+        BigDecimal scdQrtExpense = dst.getAprBalance().add(dst.getMayBalance()).add(dst.getJunBalance());
+        BigDecimal trdQrtExpense = dst.getJulBalance().add(dst.getAugBalance()).add(dst.getSepBalance());
+        BigDecimal frtQrtExpense = dst.getOctBalance().add(dst.getNovBalance()).add(dst.getDecBalance());
+        BigDecimal fstQrtBalance = janBal.add(febBal).add(marBal);
+        BigDecimal scdQrtBalance = aprBal.add(mayBal).add(junBal);
+        BigDecimal trdQrtBalance = julBal.add(augBal).add(sepBal);
+        BigDecimal frtQrtBalance = octBal.add(novBal).add(decBal);
+        BigDecimal totalBalance = fstQrtBalance.add(scdQrtBalance).add(trdQrtBalance).add(frtQrtBalance);
 
         return CashPlanLimit.builder()
-            .id(dst.getId())
-            .version(dst.getVersion())
-            .totalLimit(src.getTotalLimit())
-            .totalBalance(totalBalance)
-            .federalBudget(src.getFederalBudget())
-            .regionalBudget(src.getRegionalBudget())
-            .janLimit(src.getJanLimit())
-            .febLimit(src.getFebLimit())
-            .marLimit(src.getMarLimit())
-            .aprLimit(src.getAprLimit())
-            .mayLimit(src.getMayLimit())
-            .junLimit(src.getJunLimit())
-            .julLimit(src.getJulLimit())
-            .augLimit(src.getAugLimit())
-            .sepLimit(src.getSepLimit())
-            .octLimit(src.getOctLimit())
-            .novLimit(src.getNovLimit())
-            .decLimit(src.getDecLimit())
-            .janExpense(dst.getJanExpense())
-            .febExpense(dst.getFebExpense())
-            .marExpense(dst.getMarExpense())
-            .aprExpense(dst.getAprExpense())
-            .mayExpense(dst.getMayExpense())
-            .junExpense(dst.getJunExpense())
-            .julExpense(dst.getJulExpense())
-            .augExpense(dst.getAugExpense())
-            .sepExpense(dst.getSepExpense())
-            .octExpense(dst.getOctExpense())
-            .novExpense(dst.getNovExpense())
-            .decExpense(dst.getDecExpense())
-            .janBalance(janBal)
-            .febBalance(febBal)
-            .marBalance(marBal)
-            .aprBalance(aprBal)
-            .mayBalance(mayBal)
-            .junBalance(junBal)
-            .julBalance(julBal)
-            .augBalance(augBal)
-            .sepBalance(sepBal)
-            .octBalance(octBal)
-            .novBalance(novBal)
-            .decBalance(decBal)
-            .fstQuarterBalance(fstQrt)
-            .scdQuarterBalance(scdQrt)
-            .trdQuarterBalance(trdQrt)
-            .frtQuarterBalance(frtQrt)
-            .build();
+                .id(dst.getId())
+                .version(dst.getVersion())
+                .totalLimit(src.getTotalLimit())
+                .totalBalance(totalBalance)
+                .federalBudget(src.getFederalBudget())
+                .regionalBudget(src.getRegionalBudget())
+                .janLimit(src.getJanLimit())
+                .febLimit(src.getFebLimit())
+                .marLimit(src.getMarLimit())
+                .aprLimit(src.getAprLimit())
+                .mayLimit(src.getMayLimit())
+                .junLimit(src.getJunLimit())
+                .julLimit(src.getJulLimit())
+                .augLimit(src.getAugLimit())
+                .sepLimit(src.getSepLimit())
+                .octLimit(src.getOctLimit())
+                .novLimit(src.getNovLimit())
+                .decLimit(src.getDecLimit())
+                .janExpense(dst.getJanExpense())
+                .febExpense(dst.getFebExpense())
+                .marExpense(dst.getMarExpense())
+                .aprExpense(dst.getAprExpense())
+                .mayExpense(dst.getMayExpense())
+                .junExpense(dst.getJunExpense())
+                .julExpense(dst.getJulExpense())
+                .augExpense(dst.getAugExpense())
+                .sepExpense(dst.getSepExpense())
+                .octExpense(dst.getOctExpense())
+                .novExpense(dst.getNovExpense())
+                .decExpense(dst.getDecExpense())
+                .fstQuarterExpense(fstQrtExpense)
+                .scdQuarterExpense(scdQrtExpense)
+                .trdQuarterExpense(trdQrtExpense)
+                .frtQuarterExpense(frtQrtExpense)
+                .janBalance(janBal)
+                .febBalance(febBal)
+                .marBalance(marBal)
+                .aprBalance(aprBal)
+                .mayBalance(mayBal)
+                .junBalance(junBal)
+                .julBalance(julBal)
+                .augBalance(augBal)
+                .sepBalance(sepBal)
+                .octBalance(octBal)
+                .novBalance(novBal)
+                .decBalance(decBal)
+                .fstQuarterBalance(fstQrtBalance)
+                .scdQuarterBalance(scdQrtBalance)
+                .trdQuarterBalance(trdQrtBalance)
+                .frtQuarterBalance(frtQrtBalance)
+                .build();
     }
 
     public static BigDecimal getTotalLimit(PlDirectionLine line) {
@@ -230,25 +239,25 @@ public class CashPlanLimitUtil {
 
     public static BigDecimal sumOf(Double... items) {
         return Stream.of(items)
-            .filter(Objects::nonNull)
-            .map(BigDecimal::valueOf)
+                .filter(Objects::nonNull)
+                .map(BigDecimal::valueOf)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private static List<RequestedAttribute> getEqualsFieldsAttributes() {
         return List.of(
-            new RequestedAttribute(YEAR_ATTR),
-            new RequestedAttribute(KVSR_ATTR),
-            new RequestedAttribute(KFSR_ATTR),
-            new RequestedAttribute(KCSR_ATTR),
-            new RequestedAttribute(KVR_ATTR),
-            new RequestedAttribute(KOSGU_ATTR),
-            new RequestedAttribute(DOPFK_ATTR),
-            new RequestedAttribute(DOPEK_ATTR),
-            new RequestedAttribute(DOPKR_ATTR),
-            new RequestedAttribute(PURPOSE_ATTR),
-            new RequestedAttribute(RECIPIENT_INN),
-            new RequestedAttribute(RECIPIENT_KPP)
+                new RequestedAttribute(YEAR_ATTR),
+                new RequestedAttribute(KVSR_ATTR),
+                new RequestedAttribute(KFSR_ATTR),
+                new RequestedAttribute(KCSR_ATTR),
+                new RequestedAttribute(KVR_ATTR),
+                new RequestedAttribute(KOSGU_ATTR),
+                new RequestedAttribute(DOPFK_ATTR),
+                new RequestedAttribute(DOPEK_ATTR),
+                new RequestedAttribute(DOPKR_ATTR),
+                new RequestedAttribute(PURPOSE_ATTR),
+                new RequestedAttribute(RECIPIENT_INN),
+                new RequestedAttribute(RECIPIENT_KPP)
         );
     }
 }

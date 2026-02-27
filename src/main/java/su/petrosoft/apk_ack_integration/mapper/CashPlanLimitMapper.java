@@ -326,7 +326,7 @@ public class CashPlanLimitMapper {
             new DoubleAttribute(Q_2_EXPENSE_ATTR, cpl.getScdQuarterExpense()),
             new DoubleAttribute(Q_3_EXPENSE_ATTR, cpl.getTrdQuarterExpense()),
             new DoubleAttribute(Q_4_EXPENSE_ATTR, cpl.getFrtQuarterExpense()),
-            new DoubleAttribute(Q_1_BALANCE_ATTR, cpl.getFstQuarterExpense()),
+            new DoubleAttribute(Q_1_BALANCE_ATTR, cpl.getFstQuarterBalance()),
             new DoubleAttribute(Q_2_BALANCE_ATTR, cpl.getScdQuarterBalance()),
             new DoubleAttribute(Q_3_BALANCE_ATTR, cpl.getTrdQuarterBalance()),
             new DoubleAttribute(Q_4_BALANCE_ATTR, cpl.getFrtQuarterBalance())

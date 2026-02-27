@@ -63,10 +63,7 @@ public class BudgetItemService {
     private final UniBudgetRowService rowProcessor;
     private final CashPlanLimitMapper cplMapper;
     private final SubsidyProgramMapper spMapper;
-    private final FinancingSourceMapper fsMapper;
     private final SubsidyProgramService subsidyProgramService;
-    private final CashPlanLimitService cashPlanLimitService;
-    private final PlicanteRestClient plicanteRestClient;
 
     public Set<SubsidyProgram> createSubsidyProgramsTree(
         List<DescriptedBudgetItemData> rowDtoList) {
