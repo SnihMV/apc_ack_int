@@ -33,9 +33,9 @@ import su.petrosoft.apk_ack_integration.model.ProducerData;
 public class ExcelReportFiller {
 
     private static final String MARKER_PREFIX = "$";
-    private static final String HEADER_KEY = "header";
-    private static final String DISTRICT_KEY = "dist";
-    private static final String PRODUCER_KEY = "prod";
+    private static final String STATIC_CELL_KEY = "cell";
+    private static final String DISTRICT_ROW_CELL_KEY = "dist";
+    private static final String PRODUCER_ROW_CELL_KEY = "prod";
 
     /**
      * Заполняет шаблон отчета данными
@@ -85,19 +85,18 @@ public class ExcelReportFiller {
 
                     if (value.startsWith(MARKER_PREFIX)) {
                         structure.addMarker(new MarkerInfo(
-                                value.substring(MARKER_PREFIX.length()), row.getRowNum(),
-                                cell.getColumnIndex()));
+                                value.substring(MARKER_PREFIX.length()), row.getRowNum(), cell.getColumnIndex()));
                     }
                 }
             }
         }
         if (structure.districtMarkerRowNum == -1) {
             throw new ExcelTemplateException(
-                    MARKER_NOT_FOUND.formatted(MARKER_PREFIX, DISTRICT_KEY));
+                    MARKER_NOT_FOUND.formatted(MARKER_PREFIX, DISTRICT_ROW_CELL_KEY));
         }
         if (structure.producerMarkerRowNum == -1) {
             throw new ExcelTemplateException(
-                    MARKER_NOT_FOUND.formatted(MARKER_PREFIX, PRODUCER_KEY));
+                    MARKER_NOT_FOUND.formatted(MARKER_PREFIX, PRODUCER_ROW_CELL_KEY));
         }
         structure.districtStyles = extractStylesFromRow(
                 sheet.getRow(structure.districtMarkerRowNum));
@@ -111,7 +110,7 @@ public class ExcelReportFiller {
      */
     private void fillHeader(Sheet sheet, TemplateStructure structure,
                             Map<String, Object> headerData) {
-        List<MarkerInfo> headerMarkers = structure.markers.getOrDefault(HEADER_KEY, new ArrayList<>());
+        List<MarkerInfo> headerMarkers = structure.markers.getOrDefault(STATIC_CELL_KEY, new ArrayList<>());
         for (MarkerInfo marker : headerMarkers) {
             Row row = sheet.getRow(marker.row);
             Cell cell = row.getCell(marker.col);
@@ -146,21 +145,21 @@ public class ExcelReportFiller {
 
             Row districtRow = getOrCreateRow(sheet, currentRow);
             applyStyles(districtRow, structure.districtStyles);
-            fillDistrictRow(districtRow, structure.markers.get(DISTRICT_KEY), district);
+            fillDistrictRow(districtRow, structure.markers.get(DISTRICT_ROW_CELL_KEY), district);
             currentRow++;
 
             if (isDetailed) {
                 for (ProducerData producer : district.getProducers()) {
                     Row producerRow = getOrCreateRow(sheet, currentRow);
                     applyStyles(producerRow, structure.producerStyles);
-                    fillProducerRow(producerRow, structure.markers.get(PRODUCER_KEY), producer);
+                    fillProducerRow(producerRow, structure.markers.get(PRODUCER_ROW_CELL_KEY), producer);
                     currentRow++;
                 }
             }
         }
         Row totalRow = sheet.createRow(currentRow);
         applyStyles(totalRow, structure.districtStyles);
-        fillDistrictRow(totalRow, structure.markers.get(DISTRICT_KEY), totalData);
+        fillDistrictRow(totalRow, structure.markers.get(DISTRICT_ROW_CELL_KEY), totalData);
     }
 
     /**
@@ -267,8 +266,18 @@ public class ExcelReportFiller {
                 cell.setCellValue(data.getName() != null ? data.getName() : "");
             } else if (data.hasInn() && key.equals("inn")) {
                 cell.setCellValue(data.getInn() != null ? data.getInn() : "");
+            }
+            else if (key.startsWith("div_")) {
+                String[] parts = key.split("_");
+                if (parts.length == 3) {
+                    BigDecimal numerator = data.getValue(parts[1]);
+                    BigDecimal denominator = data.getValue(parts[2]);
+                    cell.setCellValue(divide(numerator, denominator).doubleValue());
+                } else {
+                    throw new ExcelTemplateException(INVALID_MARKER.formatted(key));
+                }
             } else if (key.startsWith("pct_")) {
-                // Формат: pct_value17_value14
+                // Percent: pct_x_y -> x * 100 / y
                 String[] parts = key.split("_");
                 if (parts.length == 3) {
                     BigDecimal numerator = data.getValue(parts[1]);
@@ -277,30 +286,55 @@ public class ExcelReportFiller {
                 } else {
                     throw new ExcelTemplateException(INVALID_MARKER.formatted(key));
                 }
+            }  else if (key.startsWith("pdc_")) {
+                // Per decile: pdc_x_y -> x * 10 / y
+                String[] parts = key.split("_");
+                if (parts.length == 3) {
+                    BigDecimal numerator = data.getValue(parts[1]);
+                    BigDecimal denominator = data.getValue(parts[2]);
+                    cell.setCellValue(perDecile(numerator, denominator).doubleValue());
+                } else {
+                    throw new ExcelTemplateException(INVALID_MARKER.formatted(key));
+                }
+
+            } else if (key.startsWith("pml_")) {
+                // Per mille: pdc_x_y -> x * 1000 / y
+                String[] parts = key.split("_");
+                if (parts.length == 3) {
+                    BigDecimal numerator = data.getValue(parts[1]);
+                    BigDecimal denominator = data.getValue(parts[2]);
+                    cell.setCellValue(perMille(numerator, denominator).doubleValue());
+                } else {
+                    throw new ExcelTemplateException(INVALID_MARKER.formatted(key));
+                }
+
             } else if (key.startsWith("pctofsum_")) {
+                // Percent of sum: pct_a_b_c -> (a + b) / c * 100
                 String[] parts = key.split("_");
                 if (parts.length == 4) {
-                    BigDecimal s1 = data.getValue(parts[1]);
-                    BigDecimal s2 = data.getValue(parts[2]);
-                    BigDecimal numerator = s1.add(s2);
+                    BigDecimal a = data.getValue(parts[1]);
+                    BigDecimal b = data.getValue(parts[2]);
+                    BigDecimal numerator = a.add(b);
                     BigDecimal denominator = data.getValue(parts[3]);
                     cell.setCellValue(percent(numerator, denominator).doubleValue());
                 } else {
                     throw new ExcelTemplateException(INVALID_MARKER.formatted(key));
                 }
             } else if (key.startsWith("pctof2sum_")) {
+                // Percent of 2 sums: pct_a_b_c_d -> (a + b + c) / d * 100
                 String[] parts = key.split("_");
                 if (parts.length == 5) {
-                    BigDecimal s1 = data.getValue(parts[1]);
-                    BigDecimal s2 = data.getValue(parts[2]);
-                    BigDecimal s3 = data.getValue(parts[3]);
-                    BigDecimal numerator = s1.add(s2).add(s3);
+                    BigDecimal a = data.getValue(parts[1]);
+                    BigDecimal b = data.getValue(parts[2]);
+                    BigDecimal c = data.getValue(parts[3]);
+                    BigDecimal numerator = a.add(b).add(c);
                     BigDecimal denominator = data.getValue(parts[4]);
                     cell.setCellValue(percent(numerator, denominator).doubleValue());
                 } else {
                     throw new ExcelTemplateException(INVALID_MARKER.formatted(key));
                 }
             } else if (key.startsWith("sub_")) {
+                // Subtract: sub_a_b -> a - b
                 String[] parts = key.split("_");
                 if (parts.length == 3) {
                     BigDecimal minuend = data.getValue(parts[1]);
@@ -310,6 +344,7 @@ public class ExcelReportFiller {
                     throw new ExcelTemplateException(INVALID_MARKER.formatted(key));
                 }
             } else if (key.startsWith("2sub_")) {
+                // 2 subtracts: sub_a_b_c -> a - b - c
                 String[] parts = key.split("_");
                 if (parts.length == 4) {
                     BigDecimal minuend = data.getValue(parts[1]);
@@ -321,6 +356,7 @@ public class ExcelReportFiller {
                     throw new ExcelTemplateException(INVALID_MARKER.formatted(key));
                 }
             } else if (key.startsWith("3sub_")) {
+                // 3 subtracts: sub_a_b_c_d -> a - b - c - d
                 String[] parts = key.split("_");
                 if (parts.length == 5) {
                     BigDecimal minuend = data.getValue(parts[1]);
@@ -332,32 +368,6 @@ public class ExcelReportFiller {
                 } else {
                     throw new ExcelTemplateException(INVALID_MARKER.formatted(key));
                 }
-            } else if (key.startsWith("prd_")) {
-                String[] parts = key.split("_");
-                if (parts.length == 3) {
-                    BigDecimal numerator = data.getValue(parts[1]);
-                    BigDecimal denominator = data.getValue(parts[2]);
-                    BigDecimal result = denominator.compareTo(BigDecimal.ZERO) == 0 ?
-                            BigDecimal.ZERO :
-                            numerator.multiply(BigDecimal.TEN).divide(denominator, 2, RoundingMode.HALF_UP);
-                    cell.setCellValue(result.doubleValue());
-                } else {
-                    throw new ExcelTemplateException(INVALID_MARKER.formatted(key));
-                }
-
-            } else if (key.startsWith("prd1000_")) {
-                String[] parts = key.split("_");
-                if (parts.length == 3) {
-                    BigDecimal numerator = data.getValue(parts[1]);
-                    BigDecimal denominator = data.getValue(parts[2]);
-                    BigDecimal result = denominator.compareTo(BigDecimal.ZERO) == 0 ?
-                            BigDecimal.ZERO :
-                            numerator.multiply(BigDecimal.valueOf(1000)).divide(denominator, 2, RoundingMode.HALF_UP);
-                    cell.setCellValue(result.doubleValue());
-                } else {
-                    throw new ExcelTemplateException(INVALID_MARKER.formatted(key));
-                }
-
             } else {
                 BigDecimal value = data.getValue(key);
                 cell.setCellValue(value != null ? value.doubleValue() : 0.0);
@@ -365,13 +375,23 @@ public class ExcelReportFiller {
         }
     }
 
-    private BigDecimal percent(BigDecimal value1, BigDecimal value2) {
-        if (value2.compareTo(BigDecimal.ZERO) == 0) {
+    private BigDecimal divide(BigDecimal numerator, BigDecimal denominator) {
+        if (denominator.compareTo(BigDecimal.ZERO) == 0) {
             return BigDecimal.ZERO;
         }
+        return numerator.divide(denominator, 2, RoundingMode.HALF_UP);
+    }
 
-        return value1.multiply(BigDecimal.valueOf(100))
-                .divide(value2, 2, RoundingMode.HALF_UP);
+    private BigDecimal perDecile(BigDecimal value1, BigDecimal value2) {
+        return divide(value1, value2).multiply(BigDecimal.TEN);
+    }
+
+    private BigDecimal percent(BigDecimal value1, BigDecimal value2) {
+        return divide(value1, value2).multiply(BigDecimal.valueOf(100));
+    }
+
+    private BigDecimal perMille(BigDecimal value1, BigDecimal value2) {
+        return divide(value1, value2).multiply(BigDecimal.valueOf(1000));
     }
 
     /**
@@ -452,10 +472,10 @@ public class ExcelReportFiller {
 
 
         public void addMarker(MarkerInfo marker) {
-            if (districtMarkerRowNum == -1 && DISTRICT_KEY.equalsIgnoreCase(marker.type)) {
+            if (districtMarkerRowNum == -1 && DISTRICT_ROW_CELL_KEY.equalsIgnoreCase(marker.type)) {
                 districtMarkerRowNum = marker.row;
             }
-            if (producerMarkerRowNum == -1 && PRODUCER_KEY.equalsIgnoreCase(marker.type)) {
+            if (producerMarkerRowNum == -1 && PRODUCER_ROW_CELL_KEY.equalsIgnoreCase(marker.type)) {
                 producerMarkerRowNum = marker.row;
             }
             markers.computeIfAbsent(marker.type, k -> new ArrayList<>()).add(marker);
