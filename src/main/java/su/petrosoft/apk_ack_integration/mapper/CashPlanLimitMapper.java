@@ -1,5 +1,6 @@
 package su.petrosoft.apk_ack_integration.mapper;
 
+import static java.util.stream.Collectors.toMap;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.*;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.*;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
@@ -11,6 +12,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
@@ -27,6 +31,9 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribu
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
+import su.petrosoft.apk_ack_integration.util.AttrInfo;
+import su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil;
+import su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil;
 
 @Component
 @RequiredArgsConstructor
@@ -102,6 +109,18 @@ public class CashPlanLimitMapper {
     public CashPlanLimit toEntity(InstanceDto dto) {
 
         List<Attribute<?>> attributes = dto.attributes();
+
+        Map<String, Object> collect = attrInfoList.stream()
+                .map(attrInfo -> {
+                    Object data = extractData(attributes, attrInfo.id());
+                    return data != null ? Map.entry(attrInfo.name(), data) : null;
+                })
+                .filter(Objects::nonNull)
+                .collect(toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue
+                ));
+
 
         return CashPlanLimit.builder()
             .id(dto.id())
@@ -241,10 +260,12 @@ public class CashPlanLimitMapper {
     }
 
     public CreateInstanceRequestDto toCreateDto(CashPlanLimit cpl) {
+        List<Attribute<?>> resultList = new ArrayList<>(identifyingAttributeList(cpl));
+        resultList.addAll(businessAttributeList(cpl));
         return new CreateInstanceRequestDto(
             InstanceDto.builder()
                 .templateId(TEMPLATE_ID)
-                .attributes(buildAttributeListToCreate(cpl))
+                .attributes(resultList)
                 .build());
     }
 
@@ -254,32 +275,29 @@ public class CashPlanLimitMapper {
                 .id(cpl.getId())
                 .templateId(TEMPLATE_ID)
                 .version(cpl.getVersion())
-                .attributes(buildAttributeListToUpdate(cpl))
+                .attributes(businessAttributeList(cpl))
                 .build());
     }
 
-    private List<Attribute<?>> buildAttributeListToCreate(CashPlanLimit cpl) {
-        List<Attribute<?>> equalsAttributes = List.of(
-            new LongAttribute(YEAR_ATTR, cpl.getYear()),
-            new LinkedAttribute(KVSR_ATTR, cpl.getKvsr()),
-            new LinkedAttribute(KFSR_ATTR, cpl.getKfsr()),
-            new LinkedAttribute(KCSR_ATTR, cpl.getKcsr()),
-            new LinkedAttribute(KVR_ATTR, cpl.getKvr()),
-            new LinkedAttribute(KOSGU_ATTR, cpl.getKosgu()),
-            new LinkedAttribute(DOPFK_ATTR, cpl.getDopFk()),
-            new LinkedAttribute(DOPEK_ATTR, cpl.getDopEk()),
-            new LinkedAttribute(DOPKR_ATTR, cpl.getDopKr()),
-            new LinkedAttribute(PURPOSE_ATTR, cpl.getPurpose()),
-            new StringAttribute(RECIPIENT_NAME, cpl.getRecipientName()),
-            new StringAttribute(RECIPIENT_INN, cpl.getRecipientInn()),
-            new StringAttribute(RECIPIENT_KPP, cpl.getRecipientKpp())
+    private List<Attribute<?>> identifyingAttributeList(CashPlanLimit cpl) {
+        return List.of(
+                new LongAttribute(YEAR_ATTR, cpl.getYear()),
+                new LinkedAttribute(KVSR_ATTR, cpl.getKvsr()),
+                new LinkedAttribute(KFSR_ATTR, cpl.getKfsr()),
+                new LinkedAttribute(KCSR_ATTR, cpl.getKcsr()),
+                new LinkedAttribute(KVR_ATTR, cpl.getKvr()),
+                new LinkedAttribute(KOSGU_ATTR, cpl.getKosgu()),
+                new LinkedAttribute(DOPFK_ATTR, cpl.getDopFk()),
+                new LinkedAttribute(DOPEK_ATTR, cpl.getDopEk()),
+                new LinkedAttribute(DOPKR_ATTR, cpl.getDopKr()),
+                new LinkedAttribute(PURPOSE_ATTR, cpl.getPurpose()),
+                new StringAttribute(RECIPIENT_NAME, cpl.getRecipientName()),
+                new StringAttribute(RECIPIENT_INN, cpl.getRecipientInn()),
+                new StringAttribute(RECIPIENT_KPP, cpl.getRecipientKpp())
         );
-        List<Attribute<?>> resultList = new ArrayList<>(buildAttributeListToUpdate(cpl));
-        resultList.addAll(equalsAttributes);
-        return resultList;
     }
 
-    private static List<Attribute<?>> buildAttributeListToUpdate(CashPlanLimit cpl) {
+    private List<Attribute<?>> businessAttributeList(CashPlanLimit cpl) {
         return List.of(
             new DoubleAttribute(TOTAL_LIMIT_ATTR, cpl.getTotalLimit()),
             new DoubleAttribute(TOTAL_EXPENSE_ATTR, cpl.getTotalExpense()),
@@ -333,33 +351,55 @@ public class CashPlanLimitMapper {
         );
     }
 
-    private BigDecimal getBigDecimalValue(Object data) {
-        if (data == null) {
-            return null;
-        }
-        if (data instanceof BigDecimal bd) {
-            return bd;
-        }
-        if (data instanceof Number num) {
-            return BigDecimal.valueOf(num.doubleValue());
-        }
-
-        return null;
-    }
-
-    private String getAttrShortForm(List<Attribute<?>> attributes, Long attributeId) {
-        return attributes.stream()
-            .filter(a -> a.id().equals(attributeId))
-            .findFirst()
-            .map(Attribute::getShortForm)
-            .orElse(null);
-    }
-
     private PlDirectionLine getPlDirectionLine(Line line) {
         if (line.plDirectionLineWrapper() != null &&
             line.plDirectionLineWrapper().plDirectionLine() != null) {
             return line.plDirectionLineWrapper().plDirectionLine();
         }
         return null;
+    }
+
+    public CashPlanLimit toEntity(List<Attribute<?>> attributes) {
+        Map<? extends AttrInfo<?>, Object> collect = attrInfoList.stream()
+                .map(attrInfo -> {
+                    Object data = extractData(attributes, attrInfo.id());
+                    return data != null ? Map.entry(attrInfo, data) : null;
+                })
+                .filter(Objects::nonNull)
+                .collect(toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue
+                ));
+
+        CashPlanLimit build = CashPlanLimit.builder()
+                .id(extractData(attributes, ID_ATTR))
+                .version(extractData(attributes, VERSION_ATTR))
+                .year(extractData(attributes, YEAR_ATTR))
+                .kvsr(extractData(attributes, KVSR_ATTR))
+                .kfsr(extractData(attributes, KFSR_ATTR))
+                .kcsr(extractData(attributes, KCSR_ATTR))
+                .kvr(extractData(attributes, KVR_ATTR))
+                .kosgu(extractData(attributes, KOSGU_ATTR))
+                .dopFk(extractData(attributes, DOPFK_ATTR))
+                .dopEk(extractData(attributes, DOPEK_ATTR))
+                .dopKr(extractData(attributes, DOPKR_ATTR))
+                .purpose(extractData(attributes, PURPOSE_ATTR))
+                .recipientName(extractData(attributes, RECIPIENT_NAME))
+                .recipientInn(extractData(attributes, RECIPIENT_INN))
+                .recipientKpp(extractData(attributes, RECIPIENT_KPP))
+                .monetaryValues(collect)
+                .build();
+        return build;
+    }
+
+    public CreateInstanceRequestDto toCreatingDto(CashPlanLimit cpl) {
+        List<Attribute<?>> resultList = new ArrayList<>(identifyingAttributeList(cpl));
+        attrInfoList.stream()
+                .map(ai->cpl.getMonetaryValues(new AttrInfo<>()ai.name())
+        return new CreateInstanceRequestDto(
+                InstanceDto.builder()
+                        .templateId(TEMPLATE_ID)
+                        .attributes(resultList)
+                        .build());
     }
 }

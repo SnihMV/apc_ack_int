@@ -18,8 +18,7 @@ public record StatusFilterAttribute(
 ) implements FilterAttribute<StatusValue> {
 
     public StatusFilterAttribute(long attrId, long statusId) {
-        this(attrId, STATUS,
-            new Condition<>(List.of(SqlOperation.EQUALS), List.of(new StatusValue(statusId))));
+        this(attrId, STATUS, new Condition<>(List.of(SqlOperation.EQUALS), List.of(new StatusValue(statusId))));
     }
 
     public StatusFilterAttribute(long attrId, List<SqlOperation> operations, long... data) {

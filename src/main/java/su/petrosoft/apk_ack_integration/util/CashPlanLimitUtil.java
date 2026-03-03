@@ -13,16 +13,73 @@ import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.data.xml.rpl.PlDirectionLine;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DoubleAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 
 public class CashPlanLimitUtil {
 
+    public static final List<AttrInfo<?>> attrInfoList = List.of(
+            new DoubleAttributeInfo("totalLimit", 1609),
+            new DoubleAttributeInfo("totalExpense", 1610),
+            new DoubleAttributeInfo("totalBalance", 1611),
+            new DoubleAttributeInfo("federalBudget", 1828),
+            new DoubleAttributeInfo("regionalBudget", 1829),
+            new StringAttributeInfo("recipientName", 4426),
+            new StringAttributeInfo("recipientInn", 4427),
+            new StringAttributeInfo("recipientKpp", 4428),
+            new DoubleAttributeInfo("janLimit", 1612),
+            new DoubleAttributeInfo("febLimit", 1613),
+            new DoubleAttributeInfo("marLimit", 1614),
+            new DoubleAttributeInfo("aprLimit", 1617),
+            new DoubleAttributeInfo("mayLimit", 1618),
+            new DoubleAttributeInfo("junLimit", 1619),
+            new DoubleAttributeInfo("julLimit", 1622),
+            new DoubleAttributeInfo("augLimit", 1623),
+            new DoubleAttributeInfo("sepLimit", 1624),
+            new DoubleAttributeInfo("octLimit", 1627),
+            new DoubleAttributeInfo("novLimit", 1628),
+            new DoubleAttributeInfo("decLimit", 1629),
+            new DoubleAttributeInfo("janBalance", 3276),
+            new DoubleAttributeInfo("febBalance", 3278),
+            new DoubleAttributeInfo("marBalance", 3280),
+            new DoubleAttributeInfo("aprBalance", 3282),
+            new DoubleAttributeInfo("mayBalance", 3284),
+            new DoubleAttributeInfo("junBalance", 3286),
+            new DoubleAttributeInfo("julBalance", 3288),
+            new DoubleAttributeInfo("augBalance", 3290),
+            new DoubleAttributeInfo("sepBalance", 3292),
+            new DoubleAttributeInfo("octBalance", 3294),
+            new DoubleAttributeInfo("novBalance", 3296),
+            new DoubleAttributeInfo("decBalance", 3298),
+            new DoubleAttributeInfo("janExpense", 3275),
+            new DoubleAttributeInfo("febExpense", 3277),
+            new DoubleAttributeInfo("marExpense", 3279),
+            new DoubleAttributeInfo("aprExpense", 3281),
+            new DoubleAttributeInfo("mayExpense", 3283),
+            new DoubleAttributeInfo("junExpense", 3285),
+            new DoubleAttributeInfo("julExpense", 3287),
+            new DoubleAttributeInfo("augExpense", 3289),
+            new DoubleAttributeInfo("sepExpense", 3291),
+            new DoubleAttributeInfo("octExpense", 3293),
+            new DoubleAttributeInfo("novExpense", 3295),
+            new DoubleAttributeInfo("decExpense", 3297),
+            new DoubleAttributeInfo("fstQuarterBalance", 1616),
+            new DoubleAttributeInfo("scdQuarterBalance", 1621),
+            new DoubleAttributeInfo("trdQuarterBalance", 1626),
+            new DoubleAttributeInfo("frtQuarterBalance", 1631),
+            new DoubleAttributeInfo("fstQuarterExpense", 1615),
+            new DoubleAttributeInfo("scdQuarterExpense", 1620),
+            new DoubleAttributeInfo("trdQuarterExpense", 1625),
+            new DoubleAttributeInfo("frtQuarterExpense", 1630)
+    );
+
     public static final long TEMPLATE_ID = 9460;
     public static final String CPL_TITLE = "Лимиты кассового плана";
 
     public static final long ID_ATTR = 1586;
+    public static final long VERSION_ATTR = 1588;
     public static final long YEAR_ATTR = 3303;
     public static final long KVSR_ATTR = 1733;
     public static final long KFSR_ATTR = 1734;
