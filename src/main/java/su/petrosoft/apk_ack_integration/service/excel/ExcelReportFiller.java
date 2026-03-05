@@ -379,7 +379,7 @@ public class ExcelReportFiller {
         if (denominator.compareTo(BigDecimal.ZERO) == 0) {
             return BigDecimal.ZERO;
         }
-        return numerator.divide(denominator, 4, RoundingMode.HALF_UP);
+        return numerator.divide(denominator, 8, RoundingMode.HALF_UP);
     }
 
     private BigDecimal perDecile(BigDecimal value1, BigDecimal value2) {
