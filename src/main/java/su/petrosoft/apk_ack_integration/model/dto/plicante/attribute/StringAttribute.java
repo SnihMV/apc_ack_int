@@ -1,33 +1,24 @@
 package su.petrosoft.apk_ack_integration.model.dto.plicante.attribute;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.value.StringValue;
+import su.petrosoft.apk_ack_integration.model.enums.AttributeType;
 
 import java.util.List;
+
+import static su.petrosoft.apk_ack_integration.model.enums.AttributeType.STRING;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record StringAttribute(
         Long id,
         String code,
-        String type,
+        AttributeType type,
         List<StringValue> value
-) implements Attribute<StringValue> {
-
-    public StringAttribute(long id) {
-        this(id, null);
-    }
+) implements Attribute<String> {
 
     public StringAttribute(long id, String data) {
-        this(id, null, "STRING", List.of(new StringValue(data)));
-    }
-
-    @Override
-    @JsonIgnore
-    public String getData() {
-        StringValue firstValue = getFirstValue();
-        return firstValue != null ? firstValue.data() : null;
+        this(id, null, STRING, List.of(new StringValue(data)));
     }
 }

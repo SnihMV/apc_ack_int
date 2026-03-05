@@ -3,11 +3,10 @@ package su.petrosoft.apk_ack_integration.model.dto.plicante.attribute;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.value.LinkedValue;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.value.Value;
+import su.petrosoft.apk_ack_integration.model.enums.AttributeType;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -35,9 +34,9 @@ public sealed interface Attribute<T>
 
     String code();
 
-    String type();
+    AttributeType type();
 
-    List<T> value();
+    List<? extends Value<T>> value();
 
     @JsonIgnore
     default boolean hasValue() {
@@ -45,60 +44,23 @@ public sealed interface Attribute<T>
     }
 
     @JsonIgnore
-    default T getFirstValue() {
+    default Value<T> getFirstValue() {
         return hasValue() ? value().get(0) : null;
     }
 
     @JsonIgnore
-    default Object getData() {
-        T firstValue = getFirstValue();
-        return firstValue instanceof Value<?> value ? value.data() : null;
+    default T getData() {
+        Value<T> firstValue = getFirstValue();
+        return firstValue != null ? firstValue.data() : null;
     }
 
     @JsonIgnore
-    default String getShortForm() {
-        T firstValue = getFirstValue();
-        return firstValue instanceof LinkedValue value ? value.shortForm() : null;
-    }
-
-    @JsonIgnore
-    default Pair getPair() {
-        T firstValue = getFirstValue();
-        if (firstValue instanceof LinkedValue linkedValue) {
-            return new Pair(linkedValue.data(), linkedValue.shortForm());
-        }
-        return null;
-    }
-
-    @JsonIgnore
-    default List<?> getAllData() {
+    default List<T> getAllData() {
         if (value() == null) return new ArrayList<>();
         return value().stream()
-                .map(Value.class::cast)
+                .map(v -> (Value<T>) v)
                 .map(Value::data)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-    }
-
-    @JsonIgnore
-    default List<String> getAllShortForms() {
-        if (value() == null) return Collections.emptyList();
-        return value().stream()
-                .filter(LinkedValue.class::isInstance)
-                .map(LinkedValue.class::cast)
-                .map(LinkedValue::shortForm)
-                .filter(Objects::nonNull)
-                .toList();
-    }
-
-    @JsonIgnore
-    default List<Pair> getAllPairs() {
-        if (value() == null) return Collections.emptyList();
-        return value().stream()
-                .filter(LinkedValue.class::isInstance)
-                .map(LinkedValue.class::cast)
-                .map(lv -> new Pair(lv.data(), lv.shortForm()))
-                .filter(pair -> pair.data() != null || pair.shortForm() != null)
-                .toList();
     }
 }

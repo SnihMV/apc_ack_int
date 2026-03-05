@@ -1,8 +1,8 @@
 package su.petrosoft.apk_ack_integration.model.dto.plicante.attribute;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.value.BlobFileValue;
+import su.petrosoft.apk_ack_integration.model.enums.AttributeType;
 
 import java.util.List;
 
@@ -10,20 +10,7 @@ import java.util.List;
 public record BlobFileAttribute(
         Long id,
         String code,
-        String type,
+        AttributeType type,
         List<BlobFileValue> value
-) implements Attribute<BlobFileValue> {
-
-    @Override
-    @JsonIgnore
-    public BlobFileValue getFirstValue() {
-        return Attribute.super.getFirstValue();
-    }
-
-    @Override
-    @JsonIgnore
-    public String getData() {
-        BlobFileValue firstValue = getFirstValue();
-        return firstValue != null ? firstValue.data() : null;
-    }
+) implements Attribute<String> {
 }

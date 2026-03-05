@@ -1,28 +1,23 @@
 package su.petrosoft.apk_ack_integration.model.dto.plicante.attribute;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.value.DoubleValue;
+import su.petrosoft.apk_ack_integration.model.enums.AttributeType;
 
 import java.math.BigDecimal;
 import java.util.List;
+
+import static su.petrosoft.apk_ack_integration.model.enums.AttributeType.DOUBLE;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record DoubleAttribute(
         Long id,
         String code,
-        String type,
+        AttributeType type,
         List<DoubleValue> value
-) implements Attribute<DoubleValue> {
+) implements Attribute<BigDecimal> {
 
     public DoubleAttribute(long id, BigDecimal data) {
-        this(id, null, "DOUBLE", List.of(new DoubleValue(data)));
-    }
-
-    @Override
-    @JsonIgnore
-    public BigDecimal getData() {
-        DoubleValue firstValue = getFirstValue();
-        return firstValue != null ? firstValue.data() : null;
+        this(id, null, DOUBLE, List.of(new DoubleValue(data)));
     }
 }

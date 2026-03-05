@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import su.petrosoft.apk_ack_integration.util.AttrInfo;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -12,8 +11,6 @@ import java.util.Map;
 import java.util.Objects;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @SuperBuilder
 public class CashPlanLimit extends PlicanteInstance {
 
@@ -80,7 +77,9 @@ public class CashPlanLimit extends PlicanteInstance {
     private BigDecimal trdQuarterBalance;
     private BigDecimal frtQuarterBalance;
 
-    private Map<? extends AttrInfo<?>, Object> monetaryValues = new HashMap<>();
+    private final Map<IdentAttr, Object> identityValues;
+    private Map<BusinessAttr, Object> monetaryValues;
+
 
     @Override
     public boolean equals(Object o) {

@@ -149,37 +149,12 @@ public class PlicanteInstanceUtil {
                 .orElse(null);
     }
 
-    public static String extractShortForm(List<Attribute<?>> attributes, Long attributeId) {
-        return findAttribute(attributes, attributeId)
-                .map(Attribute::getShortForm)
-                .orElse(null);
-    }
-
     @SuppressWarnings("unchecked")
     public static <T> Collection<T> extractAllData(List<Attribute<?>> attributes,
                                                    long attributeId) {
         return findAttribute(attributes, attributeId)
                 .map(attr -> (Collection<T>) attr.getAllData())
                 .orElse(new ArrayList<>());
-    }
-
-    public static List<String> extractAllShortForms(List<Attribute<?>> attributes,
-                                                    long attributeId) {
-        return findAttribute(attributes, attributeId)
-                .map(Attribute::getAllShortForms)
-                .orElse(Collections.emptyList());
-    }
-
-    public static Pair extractPair(List<Attribute<?>> attributes, long attributeId) {
-        return findAttribute(attributes, attributeId)
-                .map(Attribute::getPair)
-                .orElse(null);
-    }
-
-    public static List<Pair> extractAllPairs(List<Attribute<?>> attributes, long attributeId) {
-        return findAttribute(attributes, attributeId)
-                .map(Attribute::getAllPairs)
-                .orElse(Collections.emptyList());
     }
 
     private static Optional<Attribute<?>> findAttribute(List<Attribute<?>> attributes, long attributeId) {
