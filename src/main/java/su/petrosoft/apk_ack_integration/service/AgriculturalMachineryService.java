@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
 import su.petrosoft.apk_ack_integration.client.PlicanteSoapClient;
 import su.petrosoft.apk_ack_integration.exception.EntityNotFoundException;
-import su.petrosoft.apk_ack_integration.exception.JsonFileException;
+import su.petrosoft.apk_ack_integration.exception.JsonParsingException;
 import su.petrosoft.apk_ack_integration.mapper.AgriculturalMachineryParkMapper;
 import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryPark;
 import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryReport;
@@ -23,6 +23,8 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
+import su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil;
+import su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -50,9 +52,13 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.TR_V_M;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.buildRequestDtoToFindMachineryParkByRecipientId;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.JSON_FILE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.RECIPIENT_ID;
+import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.requestDtoForGetReportById;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.requestDtoForReportProcessing;
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessage.FAILED_TO_READ_JSON_FILE;
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessage.RECIPIENT_BY_ID_NOT_FOUND;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.FAILED_TO_READ_JSON_FILE;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.INSTANCE_NOT_FOUND_BY_ID;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.INVALID_FIELD_NAME;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.JSON_FIELD_ABSENT;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.JSON_NODE_ABSENT;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.*;
 
@@ -61,6 +67,8 @@ import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.*;
 @RequiredArgsConstructor
 public class AgriculturalMachineryService {
 
+    private static final String VALUES_NODE_NAME = "data";
+    private static final String VALUE_FIELD_PREFIX = "value_1_";
     private final PlicanteRestClient plicanteRestClient;
     private final ApkPlicanteService apkPlicanteService;
     private final AgriculturalMachineryParkMapper ampMapper;
@@ -137,8 +145,7 @@ public class AgriculturalMachineryService {
         List<InstanceDto> instanceDtoList =
             plicanteRestClient.getTableAttributesList(requestDtoToFindRecipientById(recipientId));
         if (instanceDtoList == null || instanceDtoList.isEmpty()) {
-            throw new EntityNotFoundException(RECIPIENT_BY_ID_NOT_FOUND.getMessage().formatted(
-                recipientId));
+            throw new EntityNotFoundException(INSTANCE_NOT_FOUND_BY_ID.formatted(recipientId, TEMPLATE_TITLE));
         }
         InstanceDto instanceDto = instanceDtoList.get(0);
         Long districtId = extractData(instanceDto.attributes(), DISTRICT_ATTR);
@@ -152,9 +159,13 @@ public class AgriculturalMachineryService {
     }
 
     private AgriculturalMachineryReport getAgriculturalMachineryReport(Long id) {
-        List<Attribute<?>> attributes = plicanteRestClient.getInstanceRepresentation(
-            requestDtoForReportProcessing(id));
+        List<Attribute<?>> attributes = plicanteRestClient.getInstanceRepresentation(requestDtoForReportProcessing(id));
 
+        List<InstanceDto> dtoList = plicanteRestClient.getTableAttributesList(requestDtoForGetReportById(id));
+        if (dtoList == null || dtoList.isEmpty()) {
+            throw new EntityNotFoundException(INSTANCE_NOT_FOUND_BY_ID.formatted(id, AgriculturalMachineryReportUtil.TEMPLATE_ID));
+        }
+//        List<Attribute<?>> attributes = dtoList.get(0).attributes();
         Long recipientId = extractData(attributes, RECIPIENT_ID);
         log.debug("Recipient id [{}]", recipientId);
 
@@ -193,45 +204,44 @@ public class AgriculturalMachineryService {
             JsonNode dataNode = root.path("data");
 
             if (dataNode.isMissingNode()) {
-                throw new IllegalArgumentException("Field \"data\" is absent");
+                throw new JsonParsingException(JSON_NODE_ABSENT.formatted(VALUES_NODE_NAME));
             }
             Map<Integer, List<String>> result = new TreeMap<>();
 
             Set<Map.Entry<String, JsonNode>> fields = dataNode.properties();
-            for (Map.Entry<String, JsonNode> entry : fields) {
-                fillResultMap(entry, result);
+            for (Map.Entry<String, JsonNode> field : fields) {
+                fillResultMap(field, result);
             }
             if (result.isEmpty()) {
-                throw new IllegalArgumentException("\"value_\" fields not found");
+                throw new JsonParsingException(JSON_FIELD_ABSENT.formatted(VALUE_FIELD_PREFIX));
             }
             return result;
         } catch (Exception e) {
-            throw new JsonFileException(FAILED_TO_READ_JSON_FILE.getMessage().formatted(e.getMessage()));
+            throw new JsonParsingException(FAILED_TO_READ_JSON_FILE.formatted(e.getMessage()));
         }
     }
 
-    private static void fillResultMap(Entry<String, JsonNode> entry,
-        Map<Integer, List<String>> result) {
-        String fieldName = entry.getKey();
+    private static void fillResultMap(Entry<String, JsonNode> field, Map<Integer, List<String>> result) {
+        String fieldName = field.getKey();
 
-        if (fieldName.startsWith("value_1_")) {
+        if (fieldName.startsWith(VALUE_FIELD_PREFIX)) {
             String[] parts = fieldName.split("_");
             if (parts.length == 4) {
                 try {
                     int objectNumber = Integer.parseInt(parts[2]);
                     int fieldIndex = Integer.parseInt(parts[3]);
-                    String fieldValue = entry.getValue().asText("");
+                    String fieldValue = field.getValue().asText("");
 
                     List<String> objectFields = result.computeIfAbsent(
-                        objectNumber,
-                        k -> new ArrayList<>(Collections.nCopies(12, null))
+                            objectNumber,
+                            k -> new ArrayList<>(Collections.nCopies(12, null))
                     );
                     objectFields.set(fieldIndex - 1, fieldValue);
                 } catch (NumberFormatException ignore) {
-                    throw new JsonFileException(
-                        "Cannot parse JSON file. Some kind of problem with [%s] field"
-                            .formatted(fieldName));
+                    throw new JsonParsingException(INVALID_FIELD_NAME.formatted(fieldName));
                 }
+            } else {
+                throw new JsonParsingException(INVALID_FIELD_NAME.formatted(fieldName));
             }
         }
     }

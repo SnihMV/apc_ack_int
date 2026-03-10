@@ -212,8 +212,8 @@ public class BudgetItemService {
                     continue;
                 }
                 parentId.ifPresent(createdSp::add);
-                apkService.updateSubsidyProgram(requestDtoForUpdatingParentId(sp));
-                updatedSp.add(sp.getId());
+                long updatedSpId = apkService.updateSubsidyProgram(requestDtoForUpdatingParentId(sp));
+                updatedSp.add(updatedSpId);
             }
         }
         if (!createdSp.isEmpty()) {

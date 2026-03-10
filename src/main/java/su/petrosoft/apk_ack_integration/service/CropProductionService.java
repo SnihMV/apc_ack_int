@@ -8,11 +8,12 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DISTRICT;
 import static su.petrosoft.apk_ack_integration.model.enums.ReportType.FORM_1;
 import static su.petrosoft.apk_ack_integration.model.enums.ReportType.FORM_2;
 import static su.petrosoft.apk_ack_integration.model.enums.ReportType.FORM_3;
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessage.RECIPIENT_BY_ID_NOT_FOUND;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.INSTANCE_NOT_FOUND_BY_ID;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.REPORTS_NOT_FOUND;
 import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.requestDtoForGettingOperationalReportsByTypeAndDate;
 import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.requestDtoForGettingOperationalReportsByTypeAndStatusAndDateInterval;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.toEpochMilli;
+import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.TEMPLATE_TITLE;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.requestDtoToFindRecipientNameAndDistrictById;
 
 import java.time.LocalDate;
@@ -151,7 +152,7 @@ public class CropProductionService {
         List<InstanceDto> dtoList = plicanteRestClient.getTableAttributesList(
                 requestDtoToFindRecipientNameAndDistrictById(id));
         if (dtoList == null || dtoList.isEmpty()) {
-            throw new EntityNotFoundException(RECIPIENT_BY_ID_NOT_FOUND.getMessage().formatted(id));
+            throw new EntityNotFoundException(INSTANCE_NOT_FOUND_BY_ID.formatted(id, TEMPLATE_TITLE));
         }
         return srMapper.toEntity(dtoList.get(0));
     }
