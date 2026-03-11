@@ -1,43 +1,5 @@
 package su.petrosoft.apk_ack_integration.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map.Entry;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
-import su.petrosoft.apk_ack_integration.client.PlicanteSoapClient;
-import su.petrosoft.apk_ack_integration.exception.EntityNotFoundException;
-import su.petrosoft.apk_ack_integration.exception.JsonParsingException;
-import su.petrosoft.apk_ack_integration.exception.MachineryParkReportException;
-import su.petrosoft.apk_ack_integration.mapper.AgriculturalMachineryParkMapper;
-import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryPark;
-import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryReport;
-import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceResponseDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
-import su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-
-import static java.lang.Boolean.parseBoolean;
-import static java.lang.Long.parseLong;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DISTRICT;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DIS_BEN_GEN;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.IZD_AVT_PR;
@@ -62,8 +24,51 @@ import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.INSTAN
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.INVALID_FIELD_NAME;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.JSON_FIELDS_ABSENT;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.JSON_NODE_ABSENT;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
-import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.*;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.MANAGED_DICTIONARY_NOT_FOUND;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.REPORT_READING_PROBLEM;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractAllData;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
+import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.DISTRICT_ATTR;
+import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.MACHINE_PARK_ATTR;
+import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.TEMPLATE_ID;
+import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.requestDtoToFindRecipientById;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
+import su.petrosoft.apk_ack_integration.client.PlicanteSoapClient;
+import su.petrosoft.apk_ack_integration.exception.DictionaryException;
+import su.petrosoft.apk_ack_integration.exception.EntityNotFoundException;
+import su.petrosoft.apk_ack_integration.exception.JsonParsingException;
+import su.petrosoft.apk_ack_integration.exception.MachineryParkReportException;
+import su.petrosoft.apk_ack_integration.mapper.AgriculturalMachineryParkMapper;
+import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryPark;
+import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryReport;
+import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceResponseDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
+import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
+import su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil;
 
 @Slf4j
 @Service
@@ -82,15 +87,13 @@ public class AgriculturalMachineryService {
         AgriculturalMachineryReport report = getAgriculturalMachineryReport(id);
 
         SubsidyRecipient recipient = findSubsidyRecipient(report.getRecipientId());
-        Map<Integer, List<String>> reportValues = parseJsonReport(report.getJsonReport());
 
         List<AgriculturalMachineryPark> parksFromReport = createMachineryParks(report.getJsonReport(), recipient);
         Collection<Long> existedParkIds = recipient.getMachineParkIds();
 
-        List<Long> savedIds = saveMachineryParks(parksFromReport);
+        List<Long> savedParkIds = saveMachineryParks(parksFromReport);
 
-        updateRecipient(recipient, savedIds);
-
+        updateRecipient(recipient, savedParkIds);
         removeRecipientParks(existedParkIds);
 
     }
@@ -109,18 +112,11 @@ public class AgriculturalMachineryService {
     }
 
     private List<Long> saveMachineryParks(List<AgriculturalMachineryPark> parksFromReport) {
-
-        Map<Dictionary, Map<String, Long>> codesMap = apkPlicanteService.getDictionariesCodesMap(
-            Set.of(DISTRICT, TR_V_M, KOM_ZER, KOM_KOR, MAS_SH, MAS_ZH, MAS_ZH_PT_KOR, DIS_BEN_GEN,
-                MAS_KART, IZD_AVT_PR, TECH_FISHING, OTHER_TECH, PROD_COUNTRY, TECH_STATE));
-
         List<Long> savedIds = new ArrayList<>();
-
-        for (int i = 0; i < parksFromReport.size(); i++) {
-            AgriculturalMachineryPark park = parksFromReport.get(i);
-            CreateInstanceRequestDto creationDto = ampMapper.toCreationDto(park, codesMap);
+        for (AgriculturalMachineryPark park : parksFromReport) {
+            CreateInstanceRequestDto creationDto = ampMapper.toCreationDto(park);
             InstanceDto instance = plicanteRestClient.createInstance(creationDto);
-            log.debug("Park [{}] created", instance.id());
+            log.info("Park [{}] created", instance.id());
             savedIds.add(instance.id());
         }
         return savedIds;
@@ -131,8 +127,8 @@ public class AgriculturalMachineryService {
         log.debug("Extracted value-fields from JSON: \n{}", groupedValues);
 
         Map<Dictionary, Map<String, Long>> codesMap = apkPlicanteService.getDictionariesCodesMap(
-                Set.of(DISTRICT, TR_V_M, KOM_ZER, KOM_KOR, MAS_SH, MAS_ZH, MAS_ZH_PT_KOR, DIS_BEN_GEN,
-                        MAS_KART, IZD_AVT_PR, TECH_FISHING, OTHER_TECH, PROD_COUNTRY, TECH_STATE));
+            Set.of(DISTRICT, TR_V_M, KOM_ZER, KOM_KOR, MAS_SH, MAS_ZH, MAS_ZH_PT_KOR, DIS_BEN_GEN,
+                MAS_KART, IZD_AVT_PR, TECH_FISHING, OTHER_TECH, PROD_COUNTRY, TECH_STATE));
 
         List<AgriculturalMachineryPark> result = new ArrayList<>();
 
@@ -141,10 +137,15 @@ public class AgriculturalMachineryService {
             if (fields == null || fields.isEmpty()) {
                 continue;
             }
-            AgriculturalMachineryPark machineryPark = createParkFromFieldList(fields, codesMap);
-            machineryPark.setRecipientId(recipient.getId());
-            machineryPark.setDistrictId(recipient.getDistrictId());
-            result.add(machineryPark);
+            try {
+                AgriculturalMachineryPark machineryPark = createParkFromFieldList(fields, codesMap);
+                machineryPark.setRecipientId(recipient.getId());
+                machineryPark.setDistrictId(recipient.getDistrictId());
+                result.add(machineryPark);
+            } catch (RuntimeException e) {
+                log.error(e.getMessage());
+                throw new MachineryParkReportException(REPORT_READING_PROBLEM.formatted(entry.getKey(), e.getMessage()));
+            }
         }
         return result;
     }
@@ -153,7 +154,8 @@ public class AgriculturalMachineryService {
         List<InstanceDto> instanceDtoList =
             plicanteRestClient.getTableAttributesList(requestDtoToFindRecipientById(recipientId));
         if (instanceDtoList == null || instanceDtoList.isEmpty()) {
-            throw new EntityNotFoundException(INSTANCE_NOT_FOUND_BY_ID.formatted(recipientId, TEMPLATE_ID));
+            throw new EntityNotFoundException(
+                INSTANCE_NOT_FOUND_BY_ID.formatted(recipientId, TEMPLATE_ID));
         }
         InstanceDto instanceDto = instanceDtoList.get(0);
         Long districtId = extractData(instanceDto.attributes(), DISTRICT_ATTR);
@@ -169,22 +171,25 @@ public class AgriculturalMachineryService {
     private AgriculturalMachineryReport getAgriculturalMachineryReport(Long id) {
 //        List<Attribute<?>> attributes = plicanteRestClient.getInstanceRepresentation(requestDtoForReportProcessing(id));
 
-        List<InstanceDto> dtoList = plicanteRestClient.getTableAttributesList(requestDtoForGetReportById(id));
+        List<InstanceDto> dtoList = plicanteRestClient.getTableAttributesList(
+            requestDtoForGetReportById(id));
         if (dtoList == null || dtoList.isEmpty()) {
-            throw new EntityNotFoundException(INSTANCE_NOT_FOUND_BY_ID.formatted(id, AgriculturalMachineryReportUtil.TEMPLATE_ID));
+            throw new EntityNotFoundException(INSTANCE_NOT_FOUND_BY_ID.formatted(id,
+                AgriculturalMachineryReportUtil.TEMPLATE_ID));
         }
         List<Attribute<?>> attributes = dtoList.get(0).attributes();
         Long recipientId = extractData(attributes, RECIPIENT_ID);
         log.debug("Recipient id [{}]", recipientId);
 
         String codedJsonFile = extractData(attributes, JSON_FILE_ATTR);
-        String jsonReport = new String(Base64.getDecoder().decode(codedJsonFile), StandardCharsets.UTF_8);
+        String jsonReport = new String(Base64.getDecoder().decode(codedJsonFile),
+            StandardCharsets.UTF_8);
 
-            return AgriculturalMachineryReport.builder()
-                .id(id)
-                .recipientId(recipientId)
-                .jsonReport(jsonReport)
-                .build();
+        return AgriculturalMachineryReport.builder()
+            .id(id)
+            .recipientId(recipientId)
+            .jsonReport(jsonReport)
+            .build();
     }
 
     private void removeRecipientParks(Collection<Long> parkIds) {
@@ -225,11 +230,13 @@ public class AgriculturalMachineryService {
             }
             return result;
         } catch (Exception e) {
-            throw new MachineryParkReportException(FAILED_TO_PARSE_JSON_FILE.formatted(e.getMessage()));
+            throw new MachineryParkReportException(
+                FAILED_TO_PARSE_JSON_FILE.formatted(e.getMessage()));
         }
     }
 
-    private static void fillResultMap(Entry<String, JsonNode> field, Map<Integer, List<String>> result) {
+    private static void fillResultMap(Entry<String, JsonNode> field,
+        Map<Integer, List<String>> result) {
         String fieldName = field.getKey();
 
         if (fieldName.startsWith(VALUE_FIELD_PREFIX)) {
@@ -241,8 +248,8 @@ public class AgriculturalMachineryService {
                     String fieldValue = field.getValue().asText("");
 
                     List<String> objectFields = result.computeIfAbsent(
-                            objectNumber,
-                            k -> new ArrayList<>(Collections.nCopies(12, null))
+                        objectNumber,
+                        k -> new ArrayList<>(Collections.nCopies(12, null))
                     );
                     objectFields.set(fieldIndex - 1, fieldValue);
                 } catch (NumberFormatException ignore) {
@@ -256,30 +263,30 @@ public class AgriculturalMachineryService {
 
     private AgriculturalMachineryPark createParkFromFieldList(List<String> fields, Map<Dictionary, Map<String, Long>> codesMap) {
         Map<String, Long> indicateMap = Map.of(
-                "Тракторы всех марок", 537L,
-                "Комбайны зерноуборочные", 538L,
-                "Комбайны кормоуборочные", 539L,
-                "Машины сельскохозяйственные", 540L,
-                "Машины для животноводства, птицеводства и кормопроизводства", 541L,
-                "Дизельные и бензиновые генераторы для резервного питания", 542L,
-                "Машины для производства картофеля, овощей, плодов и ягод", 543L,
-                "Изделия автомобильной промышленности", 544L,
-                "Техника и оборудование для рыбоводства и рыболовства", 545L,
-                "Прочая техника и оборудование", 546L
+            "Тракторы всех марок", 537L,
+            "Комбайны зерноуборочные", 538L,
+            "Комбайны кормоуборочные", 539L,
+            "Машины сельскохозяйственные", 540L,
+            "Машины для животноводства, птицеводства и кормопроизводства", 541L,
+            "Дизельные и бензиновые генераторы для резервного питания", 542L,
+            "Машины для производства картофеля, овощей, плодов и ягод", 543L,
+            "Изделия автомобильной промышленности", 544L,
+            "Техника и оборудование для рыбоводства и рыболовства", 545L,
+            "Прочая техника и оборудование", 546L
         );
         return AgriculturalMachineryPark.builder()
-                .indicator(indicateMap.get(fields.get(0)))
-                .machineryAndEquip(dictionaryIdByCode(codesMap, getType(fields.get(0)), fields.get(1)))
-                .brandModel(fields.get(2))
-                .serialNumber(fields.get(3))
-                .count(parseLong(fields.get(4)))
-                .power(parseBigDecimal(fields.get(5)))
-                .cost(parseBigDecimal(fields.get(6)))
-                .productionCountry(dictionaryIdByCode(codesMap, PROD_COUNTRY, fields.get(7)))
-                .productionYear(parseLong(fields.get(8)))
-                .stateSupport(parseBoolean(fields.get(9)))
-                .techState(dictionaryIdByCode(codesMap, TECH_STATE, fields.get(10)))
-                .build();
+            .indicator(indicateMap.get(fields.get(0)))
+            .machineryAndEquip(dictionaryIdByCode(codesMap, getType(fields.get(0)), fields.get(1)))
+            .brandModel(fields.get(2))
+            .serialNumber(fields.get(3))
+            .count(parseLong(fields.get(4)))
+            .power(parseBigDecimal(fields.get(5)))
+            .cost(parseBigDecimal(fields.get(6)))
+            .productionCountry(dictionaryIdByCode(codesMap, PROD_COUNTRY, fields.get(7)))
+            .productionYear(parseLong(fields.get(8)))
+            .stateSupport(parseBoolean(fields.get(9)))
+            .techState(dictionaryIdByCode(codesMap, TECH_STATE, fields.get(10)))
+            .build();
     }
 
 
@@ -334,11 +341,11 @@ public class AgriculturalMachineryService {
                "1".equals(trimmed);
     }
 
-private static Dictionary getType(String indicator) {
-    return Arrays.stream(values())
+    private static Dictionary getType(String indicator) {
+        return Arrays.stream(values())
             .filter(type -> type.getName().equalsIgnoreCase(indicator))
             .findFirst()
-            .orElseThrow(()-> new RuntimeException("Could not find Machinery/Equipment's type: [%s]".formatted(indicator)));
-}
+            .orElseThrow(() -> new DictionaryException(MANAGED_DICTIONARY_NOT_FOUND.formatted(indicator)));
+    }
 
 }

@@ -7,6 +7,7 @@ public class ExceptionMessageClass {
     public static final String MARKER_NOT_FOUND = "Не найдена строка с маркерами района [%s%s] в шаблоне";
     public static final String INVALID_MARKER = "Неверный формат маркера: [%s]";
     public static final String REPORTS_NOT_FOUND = "Не нашлось ни одного оперативного отчета с заданными параметрами";
+    public static final String REPORT_READING_PROBLEM = "Не удалось интерпретировать [%d] строку отчета. Причина: %s";
     public static final String FAILED_TO_PARSE_JSON_FILE = "Не удалось интерпретировать json файл. Причина: %s";
     public static final String INVALID_FIELD_NAME = "Недопустимое имя поля [%s]";
     public static final String JSON_NODE_ABSENT = "Обязательное поле [%s] не найдено в json файле";
@@ -15,5 +16,6 @@ public class ExceptionMessageClass {
     public static final String DICTIONARY_ID_NOT_FOUND = "Не найден экземпляр справочника [%s] с id = [%d]";
     public static final String DICTIONARY_CODE_NOT_FOUND = "Неверное значение [%s] справочника [%s]";
     public static final String DICTIONARY_DESCRIPTION_NOT_FOUND = "Не найдено описание кода [%s] в справочнике [%s]";
+    public static final String MANAGED_DICTIONARY_NOT_FOUND = "Управляемый справочник [%s] не найден";
 
 }

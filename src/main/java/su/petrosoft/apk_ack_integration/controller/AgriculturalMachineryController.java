@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import su.petrosoft.apk_ack_integration.exception.EntityNotFoundException;
 import su.petrosoft.apk_ack_integration.exception.JsonParsingException;
+import su.petrosoft.apk_ack_integration.exception.MachineryParkReportException;
 import su.petrosoft.apk_ack_integration.model.dto.response.ErrorResponseDto;
 import su.petrosoft.apk_ack_integration.service.AgriculturalMachineryService;
 
@@ -28,8 +29,8 @@ public class AgriculturalMachineryController {
         service.processReport(id);
     }
 
-    @ExceptionHandler(JsonParsingException.class)
-    public ResponseEntity<ErrorResponseDto> handleJsonParsingException(JsonParsingException e, HttpServletRequest request) {
+    @ExceptionHandler({JsonParsingException.class, MachineryParkReportException.class})
+    public ResponseEntity<ErrorResponseDto> handleJsonParsingException(Throwable e, HttpServletRequest request) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.APPLICATION_JSON)
