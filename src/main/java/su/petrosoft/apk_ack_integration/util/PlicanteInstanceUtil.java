@@ -1,8 +1,8 @@
 package su.petrosoft.apk_ack_integration.util;
 
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessage.DICTIONARY_CODE_NOT_FOUND;
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessage.DICTIONARY_DESCRIPTION_NOT_FOUND;
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessage.DICTIONARY_ID_NOT_FOUND;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_CODE_NOT_FOUND;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_DESCRIPTION_NOT_FOUND;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_ID_NOT_FOUND;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -89,7 +89,7 @@ public class PlicanteInstanceUtil {
         Dictionary dictionary, String code) {
         Long id = codesMap.get(dictionary).get(code);
         if (id == null) {
-            throw new DictionaryException(DICTIONARY_CODE_NOT_FOUND.getMessage().formatted(code, dictionary));
+            throw new DictionaryException(DICTIONARY_CODE_NOT_FOUND.formatted(code, dictionary));
         }
         return id;
     }
@@ -99,16 +99,14 @@ public class PlicanteInstanceUtil {
             .filter(entry -> entry.getValue().equals(id))
             .findFirst()
             .map(Entry::getKey)
-            .orElseThrow(() -> new DictionaryException(
-                DICTIONARY_ID_NOT_FOUND.getMessage().formatted(dictionary, id)));
+            .orElseThrow(() -> new DictionaryException(DICTIONARY_ID_NOT_FOUND.formatted(dictionary, id)));
     }
 
     public static String dictionaryCodeDescription(
         Map<Dictionary, Map<String, String>> allCodes, Dictionary dictionary, String code) {
         String description = allCodes.get(dictionary).get(code);
         if (description == null) {
-            throw new DictionaryException(
-                DICTIONARY_DESCRIPTION_NOT_FOUND.getMessage().formatted(code, dictionary));
+            throw new DictionaryException(DICTIONARY_DESCRIPTION_NOT_FOUND.formatted(code, dictionary));
         }
         return description;
     }

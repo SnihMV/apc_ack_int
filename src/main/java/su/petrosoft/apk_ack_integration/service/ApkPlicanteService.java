@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractShortForm;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -142,8 +143,7 @@ public class ApkPlicanteService {
         return responseDto.version();
     }
 
-    public Map<Dictionary, Map<String, Long>> getDictionariesCodesMap(
-        Set<Dictionary> dictionaries) {
+    public Map<Dictionary, Map<String, Long>> getDictionariesCodesMap(Set<Dictionary> dictionaries) {
         log.info("Receiving existing codes for types: {}...",
             dictionaries.stream().map(Enum::name).collect(joining(",")));
         Map<Dictionary, Map<String, Long>> dictionaryCodesMap = new EnumMap<>(Dictionary.class);
@@ -178,7 +178,7 @@ public class ApkPlicanteService {
 
     private Map<String, Long> dictionaryCodes(Dictionary dictionary) {
         List<InstanceDto> list = apkRestClient.getTableAttributesList(
-            requestDtoForGettingDictionaryCodes(dictionary));
+            requestDtoForGetDictionaryCodes(dictionary));
         return buildDictionaryCodesMap(dictionary, list);
     }
 
@@ -188,7 +188,7 @@ public class ApkPlicanteService {
         return buildDictionaryNamedCodesMap(dictionary, list);
     }
 
-    private GetAttributesListRequestDto requestDtoForGettingDictionaryCodes(Dictionary dictionary) {
+    private GetAttributesListRequestDto requestDtoForGetDictionaryCodes(Dictionary dictionary) {
         return GetAttributesListRequestDto.builder()
             .templateId(dictionary.getTemplateId())
             .attributes(List.of(
@@ -208,8 +208,7 @@ public class ApkPlicanteService {
             .build();
     }
 
-    private Map<String, Long> buildDictionaryCodesMap(Dictionary dictionary,
-        List<InstanceDto> list) {
+    private Map<String, Long> buildDictionaryCodesMap(Dictionary dictionary, List<InstanceDto> list) {
         return list.stream()
             .collect(toMap(
                 dto -> extractData(dto.attributes(), dictionary.getCodeAttrId()),

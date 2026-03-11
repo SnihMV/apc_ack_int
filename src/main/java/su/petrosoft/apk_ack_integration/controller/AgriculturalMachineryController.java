@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import su.petrosoft.apk_ack_integration.exception.EntityNotFoundException;
 import su.petrosoft.apk_ack_integration.exception.JsonParsingException;
 import su.petrosoft.apk_ack_integration.model.dto.response.ErrorResponseDto;
 import su.petrosoft.apk_ack_integration.service.AgriculturalMachineryService;
@@ -33,5 +34,13 @@ public class AgriculturalMachineryController {
                 .status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ErrorResponseDto.badRequest(e.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleEntityNotFoundException(EntityNotFoundException e, HttpServletRequest request) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ErrorResponseDto.notFound(e.getMessage(), request.getRequestURI()));
     }
 }

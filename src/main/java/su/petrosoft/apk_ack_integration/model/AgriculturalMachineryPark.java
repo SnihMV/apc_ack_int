@@ -14,16 +14,16 @@ import java.math.BigDecimal;
 public class AgriculturalMachineryPark extends PlicanteInstance {
     private Long recipientId;
     private Long districtId;
-    private String indicator;
-    private String machineryAndEquip;
+    private Long indicator;
+    private Long machineryAndEquip;
     private String brandModel;
     private String serialNumber;
     private Long count;
     private BigDecimal power;
     private BigDecimal cost;
-    private String productionCountry;
+    private Long productionCountry;
     private Long productionYear;
     private Boolean stateSupport;
-    private String techState;
+    private Long techState;
 
 }

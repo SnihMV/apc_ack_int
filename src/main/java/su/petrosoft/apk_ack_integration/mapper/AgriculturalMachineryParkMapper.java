@@ -1,5 +1,7 @@
 package su.petrosoft.apk_ack_integration.mapper;
 
+import static java.lang.Boolean.parseBoolean;
+import static java.lang.Long.parseLong;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.PROD_COUNTRY;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.TECH_STATE;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.values;
@@ -47,43 +49,26 @@ public class AgriculturalMachineryParkMapper {
     }
 
     public CreateInstanceRequestDto toCreationDto(AgriculturalMachineryPark park, Map<Dictionary, Map<String, Long>> codesMap) {
-        Map<String, Long> indicateMap = Map.of(
-                "Тракторы всех марок", 537L,
-                "Комбайны зерноуборочные", 538L,
-                "Комбайны кормоуборочные", 539L,
-                "Машины сельскохозяйственные", 540L,
-                "Машины для животноводства, птицеводства и кормопроизводства", 541L,
-                "Дизельные и бензиновые генераторы для резервного питания", 542L,
-                "Машины для производства картофеля, овощей, плодов и ягод", 543L,
-                "Изделия автомобильной промышленности", 544L,
-                "Техника и оборудование для рыбоводства и рыболовства", 545L,
-                "Прочая техника и оборудование", 546L
-        );
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()
                         .templateId(TEMPLATE_ID)
                         .attributes(List.of(
                                 new LinkedAttribute(RECIPIENT_ATTR, park.getRecipientId()),
                                 new LinkedAttribute(DISTRICT_ATTR, park.getDistrictId()),
-                                new LinkedAttribute(INDICATOR_ATTR, indicateMap.get(park.getIndicator())),
-                                new LinkedAttribute(MACH_EQUIP_ATTR, dictionaryIdByCode(codesMap, getType(park), park.getMachineryAndEquip())),
+                                new LinkedAttribute(INDICATOR_ATTR, park.getIndicator()),
+                                new LinkedAttribute(MACH_EQUIP_ATTR, park.getMachineryAndEquip()),
                                 new StringAttribute(BRAND_MODEL_ATTR, park.getBrandModel()),
                                 new StringAttribute(SERIAL_NUMBER_ATTR, park.getSerialNumber()),
                                 new LongAttribute(COUNT_ATTR, park.getCount()),
                                 new DoubleAttribute(POWER_ATTR, park.getPower()),
                                 new DoubleAttribute(COST_ATTR, park.getCost()),
-                                new LinkedAttribute(PROD_COUNTRY_ATTR, dictionaryIdByCode(codesMap, PROD_COUNTRY, park.getProductionCountry())),
+                                new LinkedAttribute(PROD_COUNTRY_ATTR, park.getProductionCountry()),
                                 new LongAttribute(PROD_YEAR_ATTR, park.getProductionYear()),
                                 new BooleanAttribute(STATE_SUPPORT_ATTR, park.getStateSupport()),
-                                new LinkedAttribute(TECH_STATE_ATTR, dictionaryIdByCode(codesMap, TECH_STATE, park.getTechState()))
+                                new LinkedAttribute(TECH_STATE_ATTR, park.getTechState())
                         ))
                         .build());
     }
 
-    private static Dictionary getType(AgriculturalMachineryPark park) {
-        return Arrays.stream(values())
-                .filter(type -> type.getName().equalsIgnoreCase(park.getIndicator()))
-                .findFirst()
-                .orElseThrow(()-> new RuntimeException("Could not find Machinery/Equipment's type: [%s]".formatted(park.getIndicator())));
-    }
+
 }

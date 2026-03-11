@@ -13,6 +13,7 @@ import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.REPORT
 import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.requestDtoForGettingOperationalReportsByTypeAndDate;
 import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.requestDtoForGettingOperationalReportsByTypeAndStatusAndDateInterval;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.toEpochMilli;
+import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.TEMPLATE_ID;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.TEMPLATE_TITLE;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.requestDtoToFindRecipientNameAndDistrictById;
 
@@ -152,7 +153,7 @@ public class CropProductionService {
         List<InstanceDto> dtoList = plicanteRestClient.getTableAttributesList(
                 requestDtoToFindRecipientNameAndDistrictById(id));
         if (dtoList == null || dtoList.isEmpty()) {
-            throw new EntityNotFoundException(INSTANCE_NOT_FOUND_BY_ID.formatted(id, TEMPLATE_TITLE));
+            throw new EntityNotFoundException(INSTANCE_NOT_FOUND_BY_ID.formatted(id, TEMPLATE_ID));
         }
         return srMapper.toEntity(dtoList.get(0));
     }

@@ -173,10 +173,10 @@ public class CashPlanLimitUtil {
         BigDecimal octBal = src.getOctLimit().subtract(dst.getOctExpense());
         BigDecimal novBal = src.getNovLimit().subtract(dst.getNovExpense());
         BigDecimal decBal = src.getDecLimit().subtract(dst.getDecExpense());
-        BigDecimal fstQrtExpense = dst.getJanBalance().add(dst.getFebBalance()).add(dst.getMarBalance());
-        BigDecimal scdQrtExpense = dst.getAprBalance().add(dst.getMayBalance()).add(dst.getJunBalance());
-        BigDecimal trdQrtExpense = dst.getJulBalance().add(dst.getAugBalance()).add(dst.getSepBalance());
-        BigDecimal frtQrtExpense = dst.getOctBalance().add(dst.getNovBalance()).add(dst.getDecBalance());
+        BigDecimal fstQrtExpense = dst.getJanExpense().add(dst.getFebExpense()).add(dst.getMarExpense());
+        BigDecimal scdQrtExpense = dst.getAprExpense().add(dst.getMayExpense()).add(dst.getJunExpense());
+        BigDecimal trdQrtExpense = dst.getJulExpense().add(dst.getAugExpense()).add(dst.getSepExpense());
+        BigDecimal frtQrtExpense = dst.getOctExpense().add(dst.getNovExpense()).add(dst.getDecExpense());
         BigDecimal fstQrtBalance = janBal.add(febBal).add(marBal);
         BigDecimal scdQrtBalance = aprBal.add(mayBal).add(junBal);
         BigDecimal trdQrtBalance = julBal.add(augBal).add(sepBal);
