@@ -2,6 +2,7 @@ package su.petrosoft.apk_ack_integration.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import su.petrosoft.apk_ack_integration.exception.MachineryParkReportException;
 import su.petrosoft.apk_ack_integration.model.dto.response.ErrorResponseDto;
 import su.petrosoft.apk_ack_integration.service.AgriculturalMachineryService;
 
+@Slf4j
 @RestController
 @RequestMapping("api/v1/agriculturalMachinery")
 @RequiredArgsConstructor
@@ -29,8 +31,9 @@ public class AgriculturalMachineryController {
         service.processReport(id);
     }
 
-    @ExceptionHandler({JsonParsingException.class, MachineryParkReportException.class})
-    public ResponseEntity<ErrorResponseDto> handleJsonParsingException(Throwable e, HttpServletRequest request) {
+    @ExceptionHandler({MachineryParkReportException.class})
+    public ResponseEntity<ErrorResponseDto> handleJsonParsingException(MachineryParkReportException e, HttpServletRequest request) {
+        log.error(e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.APPLICATION_JSON)
