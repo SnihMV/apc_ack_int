@@ -15,10 +15,8 @@ public class GlobalCorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowCredentials(true);
+        config.addAllowedOriginPattern("https://apk-plicante.lenobl.ru");
         config.addAllowedOriginPattern("https://plicante-apk-test-vue.plicante.ru");
-        config.addAllowedOriginPattern("http://plicante-apk-test-vue.plicante.ru");
-        config.addAllowedOriginPattern("http://192.168.0.*:[*]");
-        config.addAllowedOriginPattern("http://localhost:[*]");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
 
