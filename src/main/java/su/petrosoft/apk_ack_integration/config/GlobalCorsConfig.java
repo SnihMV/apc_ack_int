@@ -16,7 +16,9 @@ public class GlobalCorsConfig {
 
         config.setAllowCredentials(true);
         config.addAllowedOriginPattern("https://apk-plicante.lenobl.ru");
+        config.addAllowedOriginPattern("http://apk-plicante.lenobl.ru");
         config.addAllowedOriginPattern("https://plicante-apk-test-vue.plicante.ru");
+        config.addAllowedOriginPattern("http://plicante-apk-test-vue.plicante.ru");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
 
