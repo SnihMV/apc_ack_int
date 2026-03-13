@@ -104,19 +104,6 @@ public class SubsidyProgramUtil {
                 .build();
     }
 
-    public static GetAttributesListRequestDto getSpByKcsrAndDopkrRequestDto(String kcsrCode, String dopkrCode) {
-        return GetAttributesListRequestDto.builder()
-                .templateId(TEMPLATE_ID)
-                .viewType(DETAILED_FORM_VIEW)
-                .attributes(List.of(
-                        new RequestedAttribute(COFIN_LVL_ATTR)))
-                .filter(new Filter(List.of(
-                        new LongFilterAttribute(LEVEL_ATTR, 3),
-                        new LinkedFilterAttribute(KCSR_ATTR, kcsrCode),
-                        new LinkedFilterAttribute(DOPKR_ATTR, dopkrCode))))
-                .build();
-    }
-
     public static UpdateInstanceRequestDto buildUpdatingByCofinLevelsRequestDto(SubsidyProgram updatedSP) {
         return new UpdateInstanceRequestDto(
                 InstanceDto.builder()

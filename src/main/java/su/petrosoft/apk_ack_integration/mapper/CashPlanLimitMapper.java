@@ -387,19 +387,7 @@ public class CashPlanLimitMapper {
                 .recipientName(extractData(attributes, RECIPIENT_NAME))
                 .recipientInn(extractData(attributes, RECIPIENT_INN))
                 .recipientKpp(extractData(attributes, RECIPIENT_KPP))
-                .monetaryValues(collect)
                 .build();
         return build;
-    }
-
-    public CreateInstanceRequestDto toCreatingDto(CashPlanLimit cpl) {
-        List<Attribute<?>> resultList = new ArrayList<>(identifyingAttributeList(cpl));
-        attrInfoList.stream()
-                .map(ai->cpl.getMonetaryValues(new AttrInfo<>()ai.name())
-        return new CreateInstanceRequestDto(
-                InstanceDto.builder()
-                        .templateId(TEMPLATE_ID)
-                        .attributes(resultList)
-                        .build());
     }
 }

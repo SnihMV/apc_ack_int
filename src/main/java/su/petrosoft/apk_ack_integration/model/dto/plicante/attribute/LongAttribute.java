@@ -18,7 +18,7 @@ public record LongAttribute(
         List<LongValue> value
 ) implements Attribute<Long> {
 
-    public LongAttribute(long id, Long data) {
-        this(id, null, LONG, List.of(new LongValue(data)));
+    public LongAttribute(long id, Object data) {
+        this(id, null, LONG, List.of(new LongValue(LONG.cast(data))));
     }
 }

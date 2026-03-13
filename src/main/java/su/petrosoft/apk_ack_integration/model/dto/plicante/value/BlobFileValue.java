@@ -13,8 +13,9 @@ public record BlobFileValue(
     }
 
     public BlobFileValue(String name) {
-        this(null, name, null);
+        this(null, null, name);
     }
+
     @Override
     public String data() {
         return bytes;

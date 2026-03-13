@@ -18,7 +18,7 @@ public record StringAttribute(
         List<StringValue> value
 ) implements Attribute<String> {
 
-    public StringAttribute(long id, String data) {
-        this(id, null, STRING, List.of(new StringValue(data)));
+    public StringAttribute(long id, Object data) {
+        this(id, null, STRING, List.of(new StringValue(STRING.cast(data))));
     }
 }

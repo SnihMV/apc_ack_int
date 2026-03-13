@@ -16,7 +16,7 @@ public record BooleanAttribute(
         List<BooleanValue> value
 ) implements Attribute<Boolean> {
 
-    public BooleanAttribute(long id, boolean data) {
-        this(id, null, BOOLEAN, List.of(new BooleanValue(data)));
+    public BooleanAttribute(long id, Object data) {
+        this(id, null, BOOLEAN, List.of(new BooleanValue(BOOLEAN.cast(data))));
     }
 }

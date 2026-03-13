@@ -16,7 +16,7 @@ public record DateAttribute(
         List<LongValue> value
 ) implements Attribute<Long> {
 
-    public DateAttribute(long id, Long value) {
-        this(id, null, DATE, List.of(new LongValue(value)));
+    public DateAttribute(long id, Object value) {
+        this(id, null, DATE, List.of(new LongValue(DATE.cast(value))));
     }
 }

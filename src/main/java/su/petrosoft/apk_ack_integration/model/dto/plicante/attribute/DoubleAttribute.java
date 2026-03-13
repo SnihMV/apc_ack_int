@@ -17,7 +17,7 @@ public record DoubleAttribute(
         List<DoubleValue> value
 ) implements Attribute<BigDecimal> {
 
-    public DoubleAttribute(long id, BigDecimal data) {
-        this(id, null, DOUBLE, List.of(new DoubleValue(data)));
+    public DoubleAttribute(long id, Object data) {
+        this(id, null, DOUBLE, List.of(new DoubleValue(DOUBLE.cast(data))));
     }
 }

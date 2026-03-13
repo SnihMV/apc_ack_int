@@ -19,8 +19,8 @@ public record LinkedAttribute(
         List<LinkedValue> value
 ) implements Attribute<Long> {
 
-    public LinkedAttribute(long id, Long data) {
-        this(id, null, LINKED, List.of(new LinkedValue(data)));
+    public LinkedAttribute(long id, Object data) {
+        this(id, null, LINKED, List.of(new LinkedValue(LINKED.cast(data))));
     }
 
     public LinkedAttribute(long id, Collection<Long> values) {

@@ -11,7 +11,4 @@ public record LinkedValue(
     public LinkedValue(Long data) {
         this(data, null);
     }
-    public LinkedValue(String shortForm) {
-        this(null, shortForm);
-    }
 }

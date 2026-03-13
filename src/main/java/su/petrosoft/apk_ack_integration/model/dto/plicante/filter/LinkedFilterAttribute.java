@@ -15,9 +15,6 @@ public record LinkedFilterAttribute(
         ValueType type,
         Condition<LinkedValue> condition
 ) implements FilterAttribute<LinkedValue> {
-    public LinkedFilterAttribute(long id, String data) {
-        this(id, LINKED, new Condition<>(List.of(SqlOperation.EQUALS), List.of(new LinkedValue(data))));
-    }
 
     public LinkedFilterAttribute(long id, long data) {
         this(id, LINKED, new Condition<>(List.of(SqlOperation.EQUALS), List.of(new LinkedValue(data))));
