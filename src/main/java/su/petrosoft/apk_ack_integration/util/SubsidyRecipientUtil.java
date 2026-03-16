@@ -14,6 +14,7 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DateAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LinkedFilterAttribute;
@@ -117,6 +118,17 @@ public class SubsidyRecipientUtil {
                 .attributes(defineUpdatedAttributes(recipient, egrulData))
                 .build()
         );
+    }
+
+    public static UpdateInstanceRequestDto requestDtoForUpdateRecipientByParks(SubsidyRecipient recipient, List<Long> parkIds) {
+        return new UpdateInstanceRequestDto(
+                InstanceDto.builder()
+                        .id(recipient.getId())
+                        .templateId(TEMPLATE_ID)
+                        .version(recipient.getVersion())
+                        .attributes(List.of(
+                                new LinkedAttribute(MACHINE_PARK_ATTR, parkIds)))
+                        .build());
     }
 
     public static List<Attribute<?>> defineUpdatedAttributes(SubsidyRecipient recipient,

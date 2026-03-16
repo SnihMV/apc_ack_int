@@ -15,10 +15,10 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.TECH_FISHI
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.TECH_STATE;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.TR_V_M;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.values;
-import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.buildRequestDtoToFindMachineryParkByRecipientId;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.JSON_FILE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.RECIPIENT_ID;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.requestDtoForGetReportById;
+import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.requestDtoForUpdateReportByParks;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.FAILED_TO_PARSE_JSON_FILE;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.INSTANCE_NOT_FOUND_BY_ID;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.INVALID_FIELD_NAME;
@@ -32,6 +32,7 @@ import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extract
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.DISTRICT_ATTR;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.MACHINE_PARK_ATTR;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.TEMPLATE_ID;
+import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.requestDtoForUpdateRecipientByParks;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.requestDtoToFindRecipientById;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -96,20 +97,19 @@ public class AgriculturalMachineryService {
         List<Long> savedParkIds = saveMachineryParks(parksFromReport);
 
         updateRecipient(recipient, savedParkIds);
-        removeRecipientParks(existedParkIds);
+        updateReport(report, savedParkIds);
+
+        removeFormerRecipientParks(existedParkIds);
 
     }
 
+    private void updateReport(AgriculturalMachineryReport report, List<Long> savedParkIds) {
+        UpdateInstanceResponseDto updated = plicanteRestClient.updateInstance(requestDtoForUpdateReportByParks(report, savedParkIds));
+        log.debug("Report [{}] updated", updated.id());
+    }
+
     private void updateRecipient(SubsidyRecipient recipient, List<Long> savedIds) {
-        UpdateInstanceRequestDto updatingDto = new UpdateInstanceRequestDto(
-                InstanceDto.builder()
-                        .id(recipient.getId())
-                        .templateId(TEMPLATE_ID)
-                        .version(recipient.getVersion())
-                        .attributes(List.of(
-                                new LinkedAttribute(MACHINE_PARK_ATTR, savedIds)))
-                        .build());
-        UpdateInstanceResponseDto updated = plicanteRestClient.updateInstance(updatingDto);
+        UpdateInstanceResponseDto updated = plicanteRestClient.updateInstance(requestDtoForUpdateRecipientByParks(recipient, savedIds));
         log.debug("Recipient [{}] updated", updated.id());
     }
 
@@ -177,7 +177,9 @@ public class AgriculturalMachineryService {
             throw new EntityNotFoundException(INSTANCE_NOT_FOUND_BY_ID.formatted(id,
                     AgriculturalMachineryReportUtil.TEMPLATE_ID));
         }
-        List<Attribute<?>> attributes = dtoList.get(0).attributes();
+        InstanceDto foundInstance = dtoList.get(0);
+        Long reportVersion = foundInstance.version();
+        List<Attribute<?>> attributes = foundInstance.attributes();
         Long recipientId = extractData(attributes, RECIPIENT_ID);
         log.debug("Recipient id [{}]", recipientId);
 
@@ -187,12 +189,13 @@ public class AgriculturalMachineryService {
 
         return AgriculturalMachineryReport.builder()
                 .id(id)
+                .version(reportVersion)
                 .recipientId(recipientId)
                 .jsonReport(jsonReport)
                 .build();
     }
 
-    private void removeRecipientParks(Collection<Long> parkIds) {
+    private void removeFormerRecipientParks(Collection<Long> parkIds) {
 
         plicanteSoapClient.deleteInstancesList(parkIds);
 

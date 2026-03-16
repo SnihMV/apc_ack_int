@@ -198,8 +198,8 @@ public class ExcelRowMapper {
                 .kcsr(row.getCell(1).getStringCellValue())
                 .dopKr(row.getCell(2).getStringCellValue())
                 .kosgu(row.getCell(3).getStringCellValue())
-                .obCoeff(row.getCell(4).getNumericCellValue())
-                .fbCoeff(row.getCell(5).getNumericCellValue())
+                .fbCoeff(row.getCell(4).getNumericCellValue())
+                .obCoeff(row.getCell(5).getNumericCellValue())
                 .build();
     }
 
