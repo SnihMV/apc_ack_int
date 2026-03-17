@@ -1,12 +1,12 @@
-package su.petrosoft.apk_ack_integration.model;
+package su.petrosoft.apk_ack_integration.model.instance;
 
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.enums.AttributeType;
 
-public interface AttributeKey<T> {
+public interface AttributeKey {
     Long id();
     String code();
-    String name();
+    String title();
     AttributeType type();
 
     default Attribute<?> createAttribute(Object value) {

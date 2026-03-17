@@ -18,5 +18,7 @@ public class ExceptionMessageClass {
     public static final String DICTIONARY_DESCRIPTION_NOT_FOUND = "Не найдено описание кода [%s] в справочнике [%s]";
     public static final String MANAGED_DICTIONARY_NOT_FOUND = "Управляемый справочник [%s] не найден";
     public static final String CLASS_MISMATCH = "Ошибка приведения типов объекта [%s]: ожидаемый тип [%s], фактический - [%s]";
+    public static final String MISSING_IDENT_KEY = "Отсутствует идентификационное значение [%s]";
+    public static final String MISMATCH_IDENT_VALUES = "Экземпляры не равны";
 
 }

@@ -77,10 +77,6 @@ public class CashPlanLimit extends PlicanteInstance {
     private BigDecimal trdQuarterBalance;
     private BigDecimal frtQuarterBalance;
 
-    private final Map<IdentAttr, Object> identityValues;
-    private Map<BusinessAttr, Object> monetaryValues;
-
-
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
