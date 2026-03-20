@@ -13,16 +13,11 @@ import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
 import su.petrosoft.apk_ack_integration.model.dto.nifi.GetDataFromEgrulByInnDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceResponseDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.value.Value;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.LongStream;
 
-import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.defineUpdatedAttributes;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.requestDtoForUpdateRecipientData;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.requestDtoToFindRecipientsByAppTypeForUpdate;
 
@@ -51,7 +46,7 @@ public class ScriptService {
                 continue;
             }
             UpdateInstanceRequestDto updateInstanceRequestDto = requestDtoForUpdateRecipientData(recipient, egrulData);
-            if (updateInstanceRequestDto.instance().attributes().isEmpty()) {
+            if (updateInstanceRequestDto.instance().attributeDtos().isEmpty()) {
                 continue;
             }
             UpdateInstanceResponseDto responseDto = apkRestClient.updateInstance(updateInstanceRequestDto);

@@ -1,35 +1,34 @@
 package su.petrosoft.apk_ack_integration.util;
 
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_CODE_NOT_FOUND;
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_DESCRIPTION_NOT_FOUND;
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_ID_NOT_FOUND;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
 import su.petrosoft.apk_ack_integration.exception.DictionaryException;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Pair;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.AttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttributeDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.StringFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreatingInstancesFromFileResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.model.enums.SqlOperation;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_CODE_NOT_FOUND;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_DESCRIPTION_NOT_FOUND;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_ID_NOT_FOUND;
 
 @Slf4j
 public class PlicanteInstanceUtil {
@@ -69,8 +68,8 @@ public class PlicanteInstanceUtil {
                 InstanceDto.builder()
                         .templateId(type.getTemplateId())
                         .attributes(List.of(
-                                new StringAttribute(type.getCodeAttrId(), code),
-                                new StringAttribute(type.getDescriptionAttrId(), description)))
+                                new StringAttributeDto(type.getCodeAttrId(), code),
+                                new StringAttributeDto(type.getDescriptionAttrId(), description)))
                         .build());
     }
 
@@ -143,22 +142,22 @@ public class PlicanteInstanceUtil {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T extractData(List<Attribute<?>> attributes, long attributeId) {
-        return findAttribute(attributes, attributeId)
+    public static <T> T extractData(List<AttributeDto<?>> attributeDtos, long attributeId) {
+        return findAttribute(attributeDtos, attributeId)
                 .map(attr -> (T) attr.getData())
                 .orElse(null);
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> Collection<T> extractAllData(List<Attribute<?>> attributes,
+    public static <T> Collection<T> extractAllData(List<AttributeDto<?>> attributeDtos,
                                                    long attributeId) {
-        return findAttribute(attributes, attributeId)
+        return findAttribute(attributeDtos, attributeId)
                 .map(attr -> (Collection<T>) attr.getAllData())
                 .orElse(new ArrayList<>());
     }
 
-    private static Optional<Attribute<?>> findAttribute(List<Attribute<?>> attributes, long attributeId) {
-        return attributes.stream()
+    private static Optional<AttributeDto<?>> findAttribute(List<AttributeDto<?>> attributeDtos, long attributeId) {
+        return attributeDtos.stream()
                 .filter(a -> a.id().equals(attributeId))
                 .findFirst();
     }

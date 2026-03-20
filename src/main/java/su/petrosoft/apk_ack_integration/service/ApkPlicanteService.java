@@ -211,7 +211,7 @@ public class ApkPlicanteService {
     private Map<String, Long> buildDictionaryCodesMap(Dictionary dictionary, List<InstanceDto> list) {
         return list.stream()
             .collect(toMap(
-                dto -> extractData(dto.attributes(), dictionary.getCodeAttrId()),
+                dto -> extractData(dto.attributeDtos(), dictionary.getCodeAttrId()),
                 InstanceDto::id
             ));
     }
@@ -223,8 +223,8 @@ public class ApkPlicanteService {
             .collect(toMap(
                 InstanceDto::id,
                 dto -> Map.entry(
-                    extractData(dto.attributes(), dictionary.getCodeAttrId()),
-                    extractData(dto.attributes(), dictionary.getDescriptionAttrId())
+                    extractData(dto.attributeDtos(), dictionary.getCodeAttrId()),
+                    extractData(dto.attributeDtos(), dictionary.getDescriptionAttrId())
                 )));
     }
 }

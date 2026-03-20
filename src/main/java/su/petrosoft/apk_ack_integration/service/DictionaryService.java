@@ -104,7 +104,7 @@ public class DictionaryService {
             requestDtoForGettingDictionaryDataByCodes(dictionary, codes));
         return dtoList.stream()
             .collect(toMap(
-                dto -> extractData(dto.attributes(), dictionary.getCodeAttrId()),
+                dto -> extractData(dto.attributeDtos(), dictionary.getCodeAttrId()),
                 InstanceDto::id
             ));
     }

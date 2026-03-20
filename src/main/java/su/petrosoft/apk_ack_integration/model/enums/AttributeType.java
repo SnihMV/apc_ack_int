@@ -2,14 +2,15 @@ package su.petrosoft.apk_ack_integration.model.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.BlobFileAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.BooleanAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DateAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DoubleAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
+import su.petrosoft.apk_ack_integration.exception.PlicanteInstanceException;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.AttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.BlobFileAttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.BooleanAttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DateAttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DoubleAttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttributeDto;
 
 import java.math.BigDecimal;
 
@@ -18,16 +19,17 @@ import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.CLASS_
 @RequiredArgsConstructor
 @Getter
 public enum AttributeType {
-    BOOLEAN(Boolean.class, BooleanAttribute::new),
-    BLOB(String.class, BlobFileAttribute::new),
-    DATE(Long.class, DateAttribute::new),
-    DOUBLE(BigDecimal.class, DoubleAttribute::new),
-    LINKED(Long.class, LinkedAttribute::new),
-    LONG(Long.class, LongAttribute::new),
-    STRING(String.class, StringAttribute::new);
+    BOOLEAN(Boolean.class, BooleanAttributeDto::new, Boolean.FALSE),
+    BLOB(String.class, BlobFileAttributeDto::new, null),
+    DATE(Long.class, DateAttributeDto::new, null),
+    DOUBLE(BigDecimal.class, DoubleAttributeDto::new, BigDecimal.ZERO),
+    LINKED(Long.class, LinkedAttributeDto::new, null),
+    LONG(Long.class, LongAttributeDto::new, 0L),
+    STRING(String.class, StringAttributeDto::new, "");
 
     private final Class<?> javaType;
     private final AttributeFactory factory;
+    private final Object defaultValue;
 
     @SuppressWarnings("unchecked")
     public <T> T cast(Object value) {
@@ -53,11 +55,11 @@ public enum AttributeType {
                 }
             }
         }
-        throw new ClassCastException(CLASS_MISMATCH.formatted(value, javaType, value.getClass()));
+        throw new PlicanteInstanceException(CLASS_MISMATCH.formatted(value, javaType, value.getClass()));
     }
 
     @FunctionalInterface
     public interface AttributeFactory {
-        Attribute<?> create(long id, Object value);
+        AttributeDto<?> create(long id, Object value);
     }
 }

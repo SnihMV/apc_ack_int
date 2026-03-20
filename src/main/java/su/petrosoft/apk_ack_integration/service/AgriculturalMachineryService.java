@@ -65,10 +65,8 @@ import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryPark;
 import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryReport;
 import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceResponseDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.AttributeDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil;
@@ -159,8 +157,8 @@ public class AgriculturalMachineryService {
                     INSTANCE_NOT_FOUND_BY_ID.formatted(recipientId, TEMPLATE_ID));
         }
         InstanceDto instanceDto = instanceDtoList.get(0);
-        Long districtId = extractData(instanceDto.attributes(), DISTRICT_ATTR);
-        Collection<Long> parkIds = extractAllData(instanceDto.attributes(), MACHINE_PARK_ATTR);
+        Long districtId = extractData(instanceDto.attributeDtos(), DISTRICT_ATTR);
+        Collection<Long> parkIds = extractAllData(instanceDto.attributeDtos(), MACHINE_PARK_ATTR);
         return SubsidyRecipient.builder()
                 .id(instanceDto.id())
                 .version(instanceDto.version())
@@ -179,11 +177,11 @@ public class AgriculturalMachineryService {
         }
         InstanceDto foundInstance = dtoList.get(0);
         Long reportVersion = foundInstance.version();
-        List<Attribute<?>> attributes = foundInstance.attributes();
-        Long recipientId = extractData(attributes, RECIPIENT_ID);
+        List<AttributeDto<?>> attributeDtos = foundInstance.attributeDtos();
+        Long recipientId = extractData(attributeDtos, RECIPIENT_ID);
         log.debug("Recipient id [{}]", recipientId);
 
-        String codedJsonFile = extractData(attributes, JSON_FILE_ATTR);
+        String codedJsonFile = extractData(attributeDtos, JSON_FILE_ATTR);
         String jsonReport = new String(Base64.getDecoder().decode(codedJsonFile),
                 StandardCharsets.UTF_8);
 

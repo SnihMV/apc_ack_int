@@ -1,15 +1,13 @@
 package su.petrosoft.apk_ack_integration.util;
 
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DoubleAttribute;
-
-import java.math.BigDecimal;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DoubleAttributeDto;
 
 public record DoubleAttributeInfo(
         String name,
         long id
-) implements AttrInfo<DoubleAttribute> {
+) implements AttrInfo<DoubleAttributeDto> {
     @Override
-    public Class<DoubleAttribute> attrType() {
-        return DoubleAttribute.class;
+    public Class<DoubleAttributeDto> attrType() {
+        return DoubleAttributeDto.class;
     }
 }

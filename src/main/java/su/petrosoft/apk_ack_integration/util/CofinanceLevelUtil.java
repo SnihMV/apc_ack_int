@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Map;
 import su.petrosoft.apk_ack_integration.model.CofinancingLevel;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DateAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DoubleAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DateAttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DoubleAttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttributeDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.GettingInstanceRepresentationRequestDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
@@ -54,12 +54,12 @@ public class CofinanceLevelUtil {
                 InstanceDto.builder()
                         .templateId(TEMPLATE_ID)
                         .attributes(List.of(
-                                new LongAttribute(YEAR_ATTR, cflToSave.getYear()),
-                                new DateAttribute(START_DATE_ATTR, toEpochMilli(cflToSave.getStartDate())),
-                                new DoubleAttribute(COEFF_OB_ATTR, cflToSave.getObCoeff()),
-                                new DoubleAttribute(COEFF_FB_ATTR, cflToSave.getFbCoeff()),
-                                new LinkedAttribute(FIN_FORM_ATTR, cflToSave.getFinancingForm()),
-                                new LinkedAttribute(OWN_FORM_ATTR, cflToSave.getOwnershipForm())))
+                                new LongAttributeDto(YEAR_ATTR, cflToSave.getYear()),
+                                new DateAttributeDto(START_DATE_ATTR, toEpochMilli(cflToSave.getStartDate())),
+                                new DoubleAttributeDto(COEFF_OB_ATTR, cflToSave.getObCoeff()),
+                                new DoubleAttributeDto(COEFF_FB_ATTR, cflToSave.getFbCoeff()),
+                                new LinkedAttributeDto(FIN_FORM_ATTR, cflToSave.getFinancingForm()),
+                                new LinkedAttributeDto(OWN_FORM_ATTR, cflToSave.getOwnershipForm())))
                         .build());
     }
 }

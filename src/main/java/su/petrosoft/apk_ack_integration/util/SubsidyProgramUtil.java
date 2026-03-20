@@ -8,9 +8,8 @@ import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttributeDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LinkedFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 
@@ -111,7 +110,7 @@ public class SubsidyProgramUtil {
                         .templateId(TEMPLATE_ID)
                         .version(updatedSP.getVersion())
                         .attributes(List.of(
-                                new LinkedAttribute(COFIN_LVL_ATTR, updatedSP.getCofinancingLevelIds())))
+                                new LinkedAttributeDto(COFIN_LVL_ATTR, updatedSP.getCofinancingLevelIds())))
                         .build());
     }
 
@@ -122,7 +121,7 @@ public class SubsidyProgramUtil {
                 .templateId(TEMPLATE_ID)
                 .version(sp.getVersion())
                 .attributes(List.of(
-                    new LinkedAttribute(PARENT_ATTR, sp.getParentId())))
+                    new LinkedAttributeDto(PARENT_ATTR, sp.getParentId())))
                 .build());
     }
 }

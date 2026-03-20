@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.OperationalReport;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.AttributeDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.ReportType;
 
@@ -31,14 +31,14 @@ public class OperationalReportMapper {
     private final ObjectMapper objectMapper;
 
     public OperationalReport toEntity(InstanceDto dto) {
-        List<Attribute<?>> attributes = dto.attributes();
+        List<AttributeDto<?>> attributeDtos = dto.attributeDtos();
         return OperationalReport.builder()
             .id(dto.id())
             .version(dto.version())
-            .recipientId(extractData(attributes, RECIPIENT_ATTR))
-            .reportType(ReportType.getById(extractData(attributes, REPORT_TYPE_ATTR)))
-            .reportDate(extractData(attributes, REPORT_DATE_ATTR))
-            .reportValues(extractDataAsBigDecimalMap(extractData(attributes, FILE_JSON_ATTR)))
+            .recipientId(extractData(attributeDtos, RECIPIENT_ATTR))
+            .reportType(ReportType.getById(extractData(attributeDtos, REPORT_TYPE_ATTR)))
+            .reportDate(extractData(attributeDtos, REPORT_DATE_ATTR))
+            .reportValues(extractDataAsBigDecimalMap(extractData(attributeDtos, FILE_JSON_ATTR)))
             .build();
     }
 

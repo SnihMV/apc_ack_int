@@ -31,7 +31,7 @@ import su.petrosoft.apk_ack_integration.model.CofinancingLevel;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.data.excel.CofinancingLevel2026ExcelRow;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.AttributeDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateCofinancingLevelsFromExcelResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
@@ -125,9 +125,9 @@ public class CofinancingLevelService {
             Set<CofinancingLevel> existingCflList = new HashSet<>();
             for (Long id : existingCflIdList) {
                 log.debug("Getting Cofinancing_Level [{}]", id);
-                List<Attribute<?>> attributes =
+                List<AttributeDto<?>> attributeDtos =
                         plicanteRestClient.getInstanceRepresentation(getCofinLevelRepresentationRequestDto(id));
-                CofinancingLevel existingCfl = cflMapper.toEntity(attributes, codesMap);
+                CofinancingLevel existingCfl = cflMapper.toEntity(attributeDtos, codesMap);
                 existingCflList.add(existingCfl);
             }
             Set<CofinancingLevel> fromFileCflList = excelEntitiesMap.get(updatedSp);

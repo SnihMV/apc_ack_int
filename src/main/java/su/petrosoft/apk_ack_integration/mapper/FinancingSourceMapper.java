@@ -22,7 +22,6 @@ import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.PURPOSE_
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.SUBSIDY_PROGRAM_ATTR;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.TEMPLATE_ID;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.YEAR_ATTR;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryCodeById;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractAllData;
@@ -39,37 +38,36 @@ import su.petrosoft.apk_ack_integration.model.FinancingSource;
 import su.petrosoft.apk_ack_integration.model.data.BudgetItemData;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.AttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttributeDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
-import su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil;
 
 @Slf4j
 @Component
 public class FinancingSourceMapper {
 
     public FinancingSource toEntity(InstanceDto dto) {
-        List<Attribute<?>> attributes = dto.attributes();
+        List<AttributeDto<?>> attributeDtos = dto.attributeDtos();
         return FinancingSource.builder()
             .id(dto.id())
             .version(dto.version())
-            .year(extractData(attributes, YEAR_ATTR))
-            .kvsr(extractData(attributes, KVSR_ATTR))
-            .kfsr(extractData(attributes, KFSR_ATTR))
-            .kcsr(extractData(attributes, KCSR_ATTR))
-            .kvr(extractData(attributes, KVR_ATTR))
-            .kosgu(extractData(attributes, KOSGU_ATTR))
-            .dopFk(extractData(attributes, DOPFK_ATTR))
-            .dopEk(extractData(attributes, DOPEK_ATTR))
-            .dopKr(extractData(attributes, DOPKR_ATTR))
-            .purpose(extractData(attributes, PURPOSE_ATTR))
-            .ownershipForm(extractData(attributes, OWNERSHIP_FORM_ATTR))
-            .subsidyProgramId(extractData(attributes, SUBSIDY_PROGRAM_ATTR))
-            .cashPlanLimitIds(new HashSet<>(extractAllData(attributes, CASH_PLAN_LIMITS_ATTR)))
-            .concatenatedKBK(extractData(attributes, CONCAT_KBK_ATTR))
+            .year(extractData(attributeDtos, YEAR_ATTR))
+            .kvsr(extractData(attributeDtos, KVSR_ATTR))
+            .kfsr(extractData(attributeDtos, KFSR_ATTR))
+            .kcsr(extractData(attributeDtos, KCSR_ATTR))
+            .kvr(extractData(attributeDtos, KVR_ATTR))
+            .kosgu(extractData(attributeDtos, KOSGU_ATTR))
+            .dopFk(extractData(attributeDtos, DOPFK_ATTR))
+            .dopEk(extractData(attributeDtos, DOPEK_ATTR))
+            .dopKr(extractData(attributeDtos, DOPKR_ATTR))
+            .purpose(extractData(attributeDtos, PURPOSE_ATTR))
+            .ownershipForm(extractData(attributeDtos, OWNERSHIP_FORM_ATTR))
+            .subsidyProgramId(extractData(attributeDtos, SUBSIDY_PROGRAM_ATTR))
+            .cashPlanLimitIds(new HashSet<>(extractAllData(attributeDtos, CASH_PLAN_LIMITS_ATTR)))
+            .concatenatedKBK(extractData(attributeDtos, CONCAT_KBK_ATTR))
             .build();
     }
 
@@ -97,20 +95,20 @@ public class FinancingSourceMapper {
             InstanceDto.builder()
                 .templateId(TEMPLATE_ID)
                 .attributes(List.of(
-                    new LongAttribute(YEAR_ATTR, fs.getYear()),
-                    new LinkedAttribute(KVSR_ATTR, fs.getKvsr()),
-                    new LinkedAttribute(KFSR_ATTR, fs.getKfsr()),
-                    new LinkedAttribute(KCSR_ATTR, fs.getKcsr()),
-                    new LinkedAttribute(KVR_ATTR, fs.getKvr()),
-                    new LinkedAttribute(KOSGU_ATTR, fs.getKosgu()),
-                    new LinkedAttribute(DOPEK_ATTR, fs.getDopEk()),
-                    new LinkedAttribute(DOPFK_ATTR, fs.getDopFk()),
-                    new LinkedAttribute(DOPKR_ATTR, fs.getDopKr()),
-                    new LinkedAttribute(PURPOSE_ATTR, fs.getPurpose()),
-                    new LinkedAttribute(SUBSIDY_PROGRAM_ATTR, fs.getSubsidyProgramId()),
-                    new LinkedAttribute(CASH_PLAN_LIMITS_ATTR, fs.getCashPlanLimitIds()),
-                    new LinkedAttribute(OWNERSHIP_FORM_ATTR, ownershipFormId),
-                    new StringAttribute(CONCAT_KBK_ATTR, concatKBK(fs, codesMap))
+                    new LongAttributeDto(YEAR_ATTR, fs.getYear()),
+                    new LinkedAttributeDto(KVSR_ATTR, fs.getKvsr()),
+                    new LinkedAttributeDto(KFSR_ATTR, fs.getKfsr()),
+                    new LinkedAttributeDto(KCSR_ATTR, fs.getKcsr()),
+                    new LinkedAttributeDto(KVR_ATTR, fs.getKvr()),
+                    new LinkedAttributeDto(KOSGU_ATTR, fs.getKosgu()),
+                    new LinkedAttributeDto(DOPEK_ATTR, fs.getDopEk()),
+                    new LinkedAttributeDto(DOPFK_ATTR, fs.getDopFk()),
+                    new LinkedAttributeDto(DOPKR_ATTR, fs.getDopKr()),
+                    new LinkedAttributeDto(PURPOSE_ATTR, fs.getPurpose()),
+                    new LinkedAttributeDto(SUBSIDY_PROGRAM_ATTR, fs.getSubsidyProgramId()),
+                    new LinkedAttributeDto(CASH_PLAN_LIMITS_ATTR, fs.getCashPlanLimitIds()),
+                    new LinkedAttributeDto(OWNERSHIP_FORM_ATTR, ownershipFormId),
+                    new StringAttributeDto(CONCAT_KBK_ATTR, concatKBK(fs, codesMap))
                 ))
                 .build()
         );
@@ -126,10 +124,10 @@ public class FinancingSourceMapper {
                 .build());
     }
 
-    private static List<Attribute<?>> buildAttributeListToUpdateByCplListAndSp(FinancingSource fs) {
+    private static List<AttributeDto<?>> buildAttributeListToUpdateByCplListAndSp(FinancingSource fs) {
         return List.of(
-            new LinkedAttribute(CASH_PLAN_LIMITS_ATTR, fs.getCashPlanLimitIds()),
-            new LinkedAttribute(SUBSIDY_PROGRAM_ATTR, fs.getSubsidyProgramId())
+            new LinkedAttributeDto(CASH_PLAN_LIMITS_ATTR, fs.getCashPlanLimitIds()),
+            new LinkedAttributeDto(SUBSIDY_PROGRAM_ATTR, fs.getSubsidyProgramId())
         );
     }
 

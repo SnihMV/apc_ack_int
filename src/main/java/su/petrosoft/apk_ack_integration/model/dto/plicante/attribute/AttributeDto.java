@@ -5,9 +5,12 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.value.Value;
 import su.petrosoft.apk_ack_integration.model.enums.AttributeType;
+import su.petrosoft.apk_ack_integration.model.instance.InstanceAttributeEnum;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -18,17 +21,17 @@ import java.util.stream.Collectors;
         property = "type"
 )
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = StringAttribute.class, name = "STRING"),
-        @JsonSubTypes.Type(value = DoubleAttribute.class, name = "DOUBLE"),
-        @JsonSubTypes.Type(value = LongAttribute.class, name = "LONG"),
-        @JsonSubTypes.Type(value = BooleanAttribute.class, name = "BOOLEAN"),
-        @JsonSubTypes.Type(value = DateAttribute.class, name = "DATE"),
-        @JsonSubTypes.Type(value = LinkedAttribute.class, name = "LINKED"),
-        @JsonSubTypes.Type(value = BlobFileAttribute.class, name = "BLOB")
+        @JsonSubTypes.Type(value = StringAttributeDto.class, name = "STRING"),
+        @JsonSubTypes.Type(value = DoubleAttributeDto.class, name = "DOUBLE"),
+        @JsonSubTypes.Type(value = LongAttributeDto.class, name = "LONG"),
+        @JsonSubTypes.Type(value = BooleanAttributeDto.class, name = "BOOLEAN"),
+        @JsonSubTypes.Type(value = DateAttributeDto.class, name = "DATE"),
+        @JsonSubTypes.Type(value = LinkedAttributeDto.class, name = "LINKED"),
+        @JsonSubTypes.Type(value = BlobFileAttributeDto.class, name = "BLOB")
 })
-public sealed interface Attribute<T>
-        permits StringAttribute, DoubleAttribute, LongAttribute,
-        BooleanAttribute, DateAttribute, LinkedAttribute, BlobFileAttribute {
+public sealed interface AttributeDto<T>
+        permits StringAttributeDto, DoubleAttributeDto, LongAttributeDto,
+        BooleanAttributeDto, DateAttributeDto, LinkedAttributeDto, BlobFileAttributeDto {
 
     Long id();
 
@@ -58,7 +61,7 @@ public sealed interface Attribute<T>
     default List<T> getAllData() {
         if (value() == null) return new ArrayList<>();
         return value().stream()
-                .map(v -> (Value<T>) v)
+//                .map(v -> (Value<T>) v)
                 .map(Value::data)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());

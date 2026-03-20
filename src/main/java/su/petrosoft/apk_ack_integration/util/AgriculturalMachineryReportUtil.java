@@ -4,12 +4,11 @@ import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryReport;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttributeDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.GettingInstanceRepresentationRequestDto;
-import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 
 import java.util.List;
 
@@ -56,7 +55,7 @@ public class AgriculturalMachineryReportUtil {
                         .templateId(AgriculturalMachineryReportUtil.TEMPLATE_ID)
                         .version(report.getVersion())
                         .attributes(List.of(
-                                new LinkedAttribute(MACHINE_PARK_ATTR, parkIds)))
+                                new LinkedAttributeDto(MACHINE_PARK_ATTR, parkIds)))
                         .build());
     }
 }

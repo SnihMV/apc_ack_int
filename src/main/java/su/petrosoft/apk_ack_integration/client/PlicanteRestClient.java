@@ -11,7 +11,7 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequest
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceResponseDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.AttributeDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.request.GettingInstanceRepresentationRequestDto;
 
@@ -48,7 +48,7 @@ public class PlicanteRestClient {
         }
     }
 
-    public List<Attribute<?>> getInstanceRepresentation(GettingInstanceRepresentationRequestDto dto) {
+    public List<AttributeDto<?>> getInstanceRepresentation(GettingInstanceRepresentationRequestDto dto) {
         return restClient
                 .post()
                 .uri("register-rest/operator/v2/representation/instance/data-view")

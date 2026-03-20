@@ -23,10 +23,10 @@ import su.petrosoft.apk_ack_integration.model.data.CofinancingLevelData;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.AttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttributeDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.value.LinkedValue;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
@@ -37,17 +37,17 @@ import su.petrosoft.apk_ack_integration.util.CropProductionUtil;
 public class SubsidyProgramMapper {
 
     public SubsidyProgram toEntity(InstanceDto dto) {
-        List<Attribute<?>> attributes = dto.attributes();
-        long level = extractData(attributes, LEVEL_ATTR);
+        List<AttributeDto<?>> attributeDtos = dto.attributeDtos();
+        long level = extractData(attributeDtos, LEVEL_ATTR);
         return SubsidyProgram.builder()
             .id(dto.id())
             .version(dto.version())
-            .title(extractData(attributes, NAME_ATTR))
+            .title(extractData(attributeDtos, NAME_ATTR))
             .level(level)
-            .parentId(extractData(attributes, PARENT_ATTR))
-            .kcsr(extractData(attributes, KCSR_ATTR))
-            .dopKr(level == 2 ?  extractData(attributes, DOPKR_ATTR) : null)
-            .cofinancingLevelIds(extractAllData(attributes, COFIN_LVL_ATTR))
+            .parentId(extractData(attributeDtos, PARENT_ATTR))
+            .kcsr(extractData(attributeDtos, KCSR_ATTR))
+            .dopKr(level == 2 ?  extractData(attributeDtos, DOPKR_ATTR) : null)
+            .cofinancingLevelIds(extractAllData(attributeDtos, COFIN_LVL_ATTR))
             .build();
     }
 
@@ -77,19 +77,19 @@ public class SubsidyProgramMapper {
     }
 
     public CreateInstanceRequestDto toCreateDto(SubsidyProgram sp) {
-        List<Attribute<?>> attributes = new ArrayList<>(List.of(
-                new StringAttribute(NAME_ATTR, sp.getTitle()),
+        List<AttributeDto<?>> attributeDtos = new ArrayList<>(List.of(
+                new StringAttributeDto(NAME_ATTR, sp.getTitle()),
 //                new StringAttribute(CODE_ATTR, sp.getCode()),
-                new LongAttribute(LEVEL_ATTR, sp.getLevel()),
-                new LinkedAttribute(PARENT_ATTR, sp.getParentId()),
-                new LinkedAttribute(KCSR_ATTR,  sp.getKcsr())));
+                new LongAttributeDto(LEVEL_ATTR, sp.getLevel()),
+                new LinkedAttributeDto(PARENT_ATTR, sp.getParentId()),
+                new LinkedAttributeDto(KCSR_ATTR,  sp.getKcsr())));
         if (sp.getLevel() == 2) {
-            attributes.add(new LinkedAttribute(DOPKR_ATTR,  sp.getDopKr()));
+            attributeDtos.add(new LinkedAttributeDto(DOPKR_ATTR,  sp.getDopKr()));
         }
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()
                         .templateId(TEMPLATE_ID)
-                        .attributes(attributes)
+                        .attributes(attributeDtos)
                         .build()
         );
     }
@@ -110,7 +110,7 @@ public class SubsidyProgramMapper {
                         .templateId(CropProductionUtil.TEMPLATE_ID)
                         .version(subsidyProgram.getVersion())
                         .attributes(List.of(
-                                new LinkedAttribute(COFIN_LVL_ATTR, subsidyProgram.getCofinancingLevelIds())))
+                                new LinkedAttributeDto(COFIN_LVL_ATTR, subsidyProgram.getCofinancingLevelIds())))
                         .build());
     }
 

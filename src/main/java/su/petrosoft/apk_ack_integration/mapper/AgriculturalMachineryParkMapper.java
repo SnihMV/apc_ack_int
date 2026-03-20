@@ -20,11 +20,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryPark;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.BooleanAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DoubleAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.BooleanAttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DoubleAttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttributeDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 
 
@@ -43,20 +43,20 @@ public class AgriculturalMachineryParkMapper {
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()
                         .templateId(TEMPLATE_ID)
-                        .attributes(List.of(
-                                new LinkedAttribute(RECIPIENT_ATTR, park.getRecipientId()),
-                                new LinkedAttribute(DISTRICT_ATTR, park.getDistrictId()),
-                                new LinkedAttribute(INDICATOR_ATTR, park.getIndicator()),
-                                new LinkedAttribute(MACH_EQUIP_ATTR, park.getMachineryAndEquip()),
-                                new StringAttribute(BRAND_MODEL_ATTR, park.getBrandModel()),
-                                new StringAttribute(SERIAL_NUMBER_ATTR, park.getSerialNumber()),
-                                new LongAttribute(COUNT_ATTR, park.getCount()),
-                                new DoubleAttribute(POWER_ATTR, park.getPower()),
-                                new DoubleAttribute(COST_ATTR, park.getCost()),
-                                new LinkedAttribute(PROD_COUNTRY_ATTR, park.getProductionCountry()),
-                                new LongAttribute(PROD_YEAR_ATTR, park.getProductionYear()),
-                                new BooleanAttribute(STATE_SUPPORT_ATTR, park.getStateSupport()),
-                                new LinkedAttribute(TECH_STATE_ATTR, park.getTechState())
+                        .attributeDtos(List.of(
+                                new LinkedAttributeDto(RECIPIENT_ATTR, park.getRecipientId()),
+                                new LinkedAttributeDto(DISTRICT_ATTR, park.getDistrictId()),
+                                new LinkedAttributeDto(INDICATOR_ATTR, park.getIndicator()),
+                                new LinkedAttributeDto(MACH_EQUIP_ATTR, park.getMachineryAndEquip()),
+                                new StringAttributeDto(BRAND_MODEL_ATTR, park.getBrandModel()),
+                                new StringAttributeDto(SERIAL_NUMBER_ATTR, park.getSerialNumber()),
+                                new LongAttributeDto(COUNT_ATTR, park.getCount()),
+                                new DoubleAttributeDto(POWER_ATTR, park.getPower()),
+                                new DoubleAttributeDto(COST_ATTR, park.getCost()),
+                                new LinkedAttributeDto(PROD_COUNTRY_ATTR, park.getProductionCountry()),
+                                new LongAttributeDto(PROD_YEAR_ATTR, park.getProductionYear()),
+                                new BooleanAttributeDto(STATE_SUPPORT_ATTR, park.getStateSupport()),
+                                new LinkedAttributeDto(TECH_STATE_ATTR, park.getTechState())
                         ))
                         .build());
     }

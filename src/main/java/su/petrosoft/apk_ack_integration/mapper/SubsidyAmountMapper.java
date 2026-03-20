@@ -4,9 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.SubsidyAmount;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DoubleAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DoubleAttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttributeDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 
 import java.util.List;
@@ -45,12 +45,12 @@ public class SubsidyAmountMapper {
                 InstanceDto.builder()
                         .templateId(TEMPLATE_ID)
                         .attributes(List.of(
-                                new LongAttribute(YEAR_ATTR, subsidyAmount.getYear()),
-                                new LinkedAttribute(RECIPIENT_ATTR, subsidyAmount.getRecipientId()),
-                                new LinkedAttribute(PROGRAM_ATTR, subsidyAmount.getSubsidyProgramId()),
-                                new DoubleAttribute(SOB_ATTR, subsidyAmount.getSob()),
-                                new DoubleAttribute(SST_ATTR, subsidyAmount.getSst()),
-                                new DoubleAttribute(SN_ATTR, subsidyAmount.getSn())
+                                new LongAttributeDto(YEAR_ATTR, subsidyAmount.getYear()),
+                                new LinkedAttributeDto(RECIPIENT_ATTR, subsidyAmount.getRecipientId()),
+                                new LinkedAttributeDto(PROGRAM_ATTR, subsidyAmount.getSubsidyProgramId()),
+                                new DoubleAttributeDto(SOB_ATTR, subsidyAmount.getSob()),
+                                new DoubleAttributeDto(SST_ATTR, subsidyAmount.getSst()),
+                                new DoubleAttributeDto(SN_ATTR, subsidyAmount.getSn())
                         ))
                         .build()
         );

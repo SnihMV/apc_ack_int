@@ -21,28 +21,28 @@ import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
 import su.petrosoft.apk_ack_integration.model.dto.nifi.GetDataFromEgrulByInnDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DateAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.AttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DateAttributeDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttributeDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil;
 
 @Component
 public class SubsidyRecipientMapper {
     public SubsidyRecipient toEntity(InstanceDto dto) {
-        List<Attribute<?>> attributes = dto.attributes();
+        List<AttributeDto<?>> attributeDtos = dto.attributeDtos();
         return SubsidyRecipient.builder()
             .id(dto.id())
             .version(dto.version())
-            .fullTitle(extractData(attributes, FULL_TITLE_ATTR))
-            .shortTitle(extractData(attributes, SHORT_TITLE_ATTR))
-            .inn(extractData(attributes, INN_ATTR))
-            .kpp(extractData(attributes, KPP_ATTR))
-            .ogrn(extractData(attributes, OGRN_ATTR))
-            .ogrnDate(toLocalDate(extractData(attributes, OGRN_DATE_ATTR)))
-            .appType(extractData(attributes, APP_TYPE_ATTR))
-            .machineParkIds(extractAllData(attributes, MACHINE_PARK_ATTR))
-            .districtId(extractData(attributes, DISTRICT_ATTR))
+            .fullTitle(extractData(attributeDtos, FULL_TITLE_ATTR))
+            .shortTitle(extractData(attributeDtos, SHORT_TITLE_ATTR))
+            .inn(extractData(attributeDtos, INN_ATTR))
+            .kpp(extractData(attributeDtos, KPP_ATTR))
+            .ogrn(extractData(attributeDtos, OGRN_ATTR))
+            .ogrnDate(toLocalDate(extractData(attributeDtos, OGRN_DATE_ATTR)))
+            .appType(extractData(attributeDtos, APP_TYPE_ATTR))
+            .machineParkIds(extractAllData(attributeDtos, MACHINE_PARK_ATTR))
+            .districtId(extractData(attributeDtos, DISTRICT_ATTR))
             .build();
 
     }
@@ -62,12 +62,12 @@ public class SubsidyRecipientMapper {
                 InstanceDto.builder()
                         .templateId(CashPlanLimitUtil.TEMPLATE_ID)
                         .attributes(List.of(
-                                new StringAttribute(FULL_TITLE_ATTR, recipient.getFullTitle()),
-                                new StringAttribute(SHORT_TITLE_ATTR, recipient.getShortTitle()),
-                                new StringAttribute(KPP_ATTR, recipient.getKpp()),
-                                new StringAttribute(INN_ATTR, recipient.getInn()),
-                                new StringAttribute(OGRN_ATTR, recipient.getOgrn()),
-                                new DateAttribute(OGRN_DATE_ATTR, toEpochMilli(recipient.getOgrnDate()))))
+                                new StringAttributeDto(FULL_TITLE_ATTR, recipient.getFullTitle()),
+                                new StringAttributeDto(SHORT_TITLE_ATTR, recipient.getShortTitle()),
+                                new StringAttributeDto(KPP_ATTR, recipient.getKpp()),
+                                new StringAttributeDto(INN_ATTR, recipient.getInn()),
+                                new StringAttributeDto(OGRN_ATTR, recipient.getOgrn()),
+                                new DateAttributeDto(OGRN_DATE_ATTR, toEpochMilli(recipient.getOgrnDate()))))
                         .build()
         );
     }

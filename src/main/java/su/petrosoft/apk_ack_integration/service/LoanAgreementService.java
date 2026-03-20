@@ -69,7 +69,7 @@ public class LoanAgreementService {
 
         Map<String, Long> innToIdMap = foundRecipientInstances.stream()
                 .collect(Collectors.toMap(
-                        ins -> extractData(ins.attributes(), INN_ATTR),
+                        ins -> extractData(ins.attributeDtos(), INN_ATTR),
                         InstanceDto::id));
         log.debug("Existed recipients' inn map: [{}]", innToIdMap);
 
