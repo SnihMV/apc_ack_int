@@ -5,12 +5,9 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.value.Value;
 import su.petrosoft.apk_ack_integration.model.enums.AttributeType;
-import su.petrosoft.apk_ack_integration.model.instance.InstanceAttributeEnum;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 

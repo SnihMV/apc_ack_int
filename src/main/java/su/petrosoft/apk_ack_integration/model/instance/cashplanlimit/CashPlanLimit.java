@@ -2,27 +2,25 @@ package su.petrosoft.apk_ack_integration.model.instance.cashplanlimit;
 
 import lombok.Builder;
 import su.petrosoft.apk_ack_integration.model.instance.BasePlicanteInstance;
+import su.petrosoft.apk_ack_integration.model.instance.InstanceAttributeInfo;
 
 import java.util.Map;
 
 @Builder
-public class CashPlanLimit extends BasePlicanteInstance<CashPlanLimitAttributeEnum> {
+public class CashPlanLimit extends BasePlicanteInstance<CashPlanLimitIdentAttribute, CashPlanLimitOptionAttribute> {
 
-    public CashPlanLimit() {
-    }
-
-    public CashPlanLimit(Map<CashPlanLimitAttributeEnum, Object> values) {
-        super(values);
-
+    @Override
+    protected Class<CashPlanLimitIdentAttribute> getIdentifyAttributeInfoClass() {
+        return CashPlanLimitIdentAttribute.class;
     }
 
     @Override
-    protected Class<CashPlanLimitAttributeEnum> getAttributeInfoClass() {
-        return CashPlanLimitAttributeEnum.class;
+    protected Class getOptionalAttributeInfoClass() {
+        return CashPlanLimitOptionAttribute.class;
     }
 
     @Override
-    protected Map<CashPlanLimitAttributeEnum, Object> updateData(Map<CashPlanLimitAttributeEnum, Object> updatingData) {
+    protected Map updateData(Map updatingData) {
         return Map.of();
     }
 }

@@ -94,7 +94,7 @@ public class FinancingSourceMapper {
         return new CreateInstanceRequestDto(
             InstanceDto.builder()
                 .templateId(TEMPLATE_ID)
-                .attributes(List.of(
+                .attributeDtos(List.of(
                     new LongAttributeDto(YEAR_ATTR, fs.getYear()),
                     new LinkedAttributeDto(KVSR_ATTR, fs.getKvsr()),
                     new LinkedAttributeDto(KFSR_ATTR, fs.getKfsr()),
@@ -120,7 +120,7 @@ public class FinancingSourceMapper {
                 .id(fs.getId())
                 .templateId(TEMPLATE_ID)
                 .version(fs.getVersion())
-                .attributes(buildAttributeListToUpdateByCplListAndSp(fs))
+                .attributeDtos(buildAttributeListToUpdateByCplListAndSp(fs))
                 .build());
     }
 

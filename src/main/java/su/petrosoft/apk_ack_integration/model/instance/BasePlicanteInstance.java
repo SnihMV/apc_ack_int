@@ -11,85 +11,86 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.IDENT_MODIFICATION;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.MISMATCH_INSTANCES;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.MISSING_IDENT_KEY;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.MISSING_IDENT_VALUE;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.UNKNOWN_ATTRIBUTE;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.UPDATER_IS_NULL;
 
-public abstract class BasePlicanteInstance<A extends Enum<A> & InstanceAttributeEnum> {
+public abstract class BasePlicanteInstance<IA extends Enum<IA> & InstanceAttributeInfo, OA extends Enum<OA> & InstanceAttributeInfo> {
 
     protected Long id;
     protected Long version;
-    private final Map<A, Object> identData;
-    protected final Map<A, Object> simpleData;
+    private final Map<IA, Object> identData;
+    protected final Map<OA, Object> optionData;
 
     public BasePlicanteInstance() {
         this.identData = Collections.emptyMap();
-        this.simpleData = new EnumMap<>(getAttributeInfoClass());
+        this.optionData = new EnumMap<>(getOptionalAttributeInfoClass());
     }
 
-    public BasePlicanteInstance(Map<A, Object> values) {
-        Map<A, Object> tempIdents = new EnumMap<>(getAttributeInfoClass());
-        this.simpleData = new EnumMap<>(getAttributeInfoClass());
+    public BasePlicanteInstance(Map<? extends InstanceAttributeInfo, Object> values) {
+        Map<IA, Object> tempIdents = new EnumMap<>(getIdentifyAttributeInfoClass());
+        this.optionData = new EnumMap<>(getOptionalAttributeInfoClass());
 
-        for (Map.Entry<A, Object> entry : values.entrySet()) {
-            A key = entry.getKey();
+        for (Map.Entry<? extends InstanceAttributeInfo, Object> entry : values.entrySet()) {
+            InstanceAttributeInfo attr = entry.getKey();
             Object value = entry.getValue();
-            if (key.isIdentifying()) {
+            Class<IA> identAttrClass = getIdentifyAttributeInfoClass();
+            Class<OA> simpleAttrClass = getOptionalAttributeInfoClass();
+            if (identAttrClass.isInstance(attr)) {
+                IA identAttr = identAttrClass.cast(attr);
                 if (value == null) {
-                    throw new PlicanteInstanceException(MISSING_IDENT_VALUE.formatted(key.name()));
+                    throw new PlicanteInstanceException(MISSING_IDENT_VALUE.formatted(identAttr.name()));
                 }
-                tempIdents.put(key, value);
-            } else {
-                if (value != null && !key.isEmpty(value)) {
-                    simpleData.put(key, value);
+                tempIdents.put(identAttr, value);
+            } else if (simpleAttrClass.isInstance(attr)) {
+                OA optionAttr = simpleAttrClass.cast(attr);
+                if (!optionAttr.isEmpty(value)) {
+                    optionData.put(optionAttr, value);
                 }
-            }
+            } else throw new PlicanteInstanceException(UNKNOWN_ATTRIBUTE.formatted(attr.getId()));
         }
-        for (A key : getAttributeInfoClass().getEnumConstants()) {
-            if (key.isIdentifying() && !tempIdents.containsKey(key)) {
+        for (IA key : getIdentifyAttributeInfoClass().getEnumConstants()) {
+            if (!tempIdents.containsKey(key)) {
                 throw new PlicanteInstanceException(MISSING_IDENT_KEY.formatted(key.name()));
             }
         }
         this.identData = Collections.unmodifiableMap(tempIdents);
     }
 
-    public <T> void set(A key, T value) {
-        if (key.isIdentifying()) {
-            throw new PlicanteInstanceException(IDENT_MODIFICATION.formatted(key));
-        }
+    public <T> void set(OA key, T value) {
         if (value == null || key.isEmpty(value)) {
-            simpleData.remove(key);
+            optionData.remove(key);
         } else {
-            simpleData.put(key, value);
+            optionData.put(key, value);
         }
     }
 
     public List<? extends AttributeDto<?>> attributesToCreate() {
-        return Stream.concat(identData.entrySet().stream(), simpleData.entrySet().stream())
+        return Stream.concat(identData.entrySet().stream(), optionData.entrySet().stream())
                 .filter(e -> !e.getKey().isEmpty(e.getValue()))
                 .map(e -> e.getKey().createAttributeDto(e.getValue()))
                 .toList();
     }
 
-    public List<? extends AttributeDto<?>> attributesToUpdate(Map<A, Object> oldData, Map<A, Object> newData) {
+    public List<? extends AttributeDto<?>> attributesToUpdate(Map<OA, Object> oldData, Map<OA, Object> newData) {
         return newData.entrySet().stream()
                 .filter(e -> !Objects.equals(oldData.get(e.getKey()), e.getValue()))
                 .map(e -> e.getKey().createAttributeDto(e.getValue()))
                 .toList();
     }
 
-    public List<? extends AttributeDto<?>> updateAndGetRenewalAttributes(BasePlicanteInstance<A> renewal) {
+    public List<? extends AttributeDto<?>> updateAndGetRenewalAttributes(BasePlicanteInstance<IA, OA> renewal) {
         checkRenewalInstance(renewal);
-        Map<A, Object> updatedData = updateData(renewal.simpleData);
-        return attributesToUpdate(simpleData, updatedData);
+        Map<OA, Object> updatedData = updateData(renewal.optionData);
+        return attributesToUpdate(optionData, updatedData);
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        BasePlicanteInstance<?> that = (BasePlicanteInstance<?>) o;
+        BasePlicanteInstance<?, ?> that = (BasePlicanteInstance<?, ?>) o;
         return Objects.equals(identData, that.identData);
     }
 
@@ -98,7 +99,17 @@ public abstract class BasePlicanteInstance<A extends Enum<A> & InstanceAttribute
         return Objects.hashCode(identData);
     }
 
-    private void checkRenewalInstance(BasePlicanteInstance<A> updater) {
+    @Override
+    public String toString() {
+        return "Plicante Instance {" +
+                "id=" + id +
+                ", version=" + version +
+                ", identData=" + identData +
+                ", simpleData=" + optionData +
+                '}';
+    }
+
+    private void checkRenewalInstance(BasePlicanteInstance<IA, OA> updater) {
         if (updater == null) {
             throw new UpdateInstanceException(UPDATER_IS_NULL);
         }
@@ -107,18 +118,10 @@ public abstract class BasePlicanteInstance<A extends Enum<A> & InstanceAttribute
         }
     }
 
-    @Override
-    public String toString() {
-        return "Plicante Instance {" +
-                "id=" + id +
-                ", version=" + version +
-                ", identData=" + identData +
-                ", simpleData=" + simpleData +
-                '}';
-    }
+    protected abstract Class<IA> getIdentifyAttributeInfoClass();
 
-    protected abstract Class<A> getAttributeInfoClass();
+    protected abstract Class<OA> getOptionalAttributeInfoClass();
 
-    protected abstract Map<A, Object> updateData(Map<A, Object> updatingData);
+    protected abstract Map<OA, Object> updateData(Map<OA, Object> updatingData);
 
 }
