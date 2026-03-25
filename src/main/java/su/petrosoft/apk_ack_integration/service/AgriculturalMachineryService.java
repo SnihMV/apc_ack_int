@@ -1,5 +1,6 @@
 package su.petrosoft.apk_ack_integration.service;
 
+import static java.util.stream.Collectors.*;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DISTRICT;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DIS_BEN_GEN;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.IZD_AVT_PR;
@@ -15,11 +16,14 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.TECH_FISHI
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.TECH_STATE;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.TR_V_M;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.values;
+import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.*;
+import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.requestDtoForGetParksByIdsAndSupportToValidation;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.JSON_FILE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.RECIPIENT_ID;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.requestDtoForGetReportById;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.requestDtoForUpdateReportByParks;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.FAILED_TO_PARSE_JSON_FILE;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.INCORRECT_PARKS_COUNT;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.INSTANCE_NOT_FOUND_BY_ID;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.INVALID_FIELD_NAME;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.JSON_FIELDS_ABSENT;
@@ -45,6 +49,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -59,16 +64,15 @@ import su.petrosoft.apk_ack_integration.client.PlicanteSoapClient;
 import su.petrosoft.apk_ack_integration.exception.DictionaryException;
 import su.petrosoft.apk_ack_integration.exception.EntityNotFoundException;
 import su.petrosoft.apk_ack_integration.exception.JsonParsingException;
-import su.petrosoft.apk_ack_integration.exception.MachineryParkReportException;
+import su.petrosoft.apk_ack_integration.exception.MachineryParkReportCountValidationException;
+import su.petrosoft.apk_ack_integration.exception.MachineryParkReportParsingException;
 import su.petrosoft.apk_ack_integration.mapper.AgriculturalMachineryParkMapper;
 import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryPark;
 import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryReport;
 import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil;
@@ -89,10 +93,12 @@ public class AgriculturalMachineryService {
     public void processReport(Long id) {
         AgriculturalMachineryReport report = getAgriculturalMachineryReport(id);
 
-        SubsidyRecipient recipient = findSubsidyRecipient(report.getRecipientId());
-
-        List<AgriculturalMachineryPark> parksFromReport = createMachineryParks(report.getJsonReport(), recipient);
+        SubsidyRecipient recipient = getSubsidyRecipient(report.getRecipientId());
         Collection<Long> existedParkIds = recipient.getMachineParkIds();
+
+        List<AgriculturalMachineryPark> parksFromReport = createMachineryParks(report, recipient);
+
+        validateCounts(getParksWithSupportCount(existedParkIds), getParksWithSupportCount(parksFromReport));
 
         List<Long> savedParkIds = saveMachineryParks(parksFromReport);
 
@@ -101,6 +107,36 @@ public class AgriculturalMachineryService {
 
         removeFormerRecipientParks(existedParkIds);
 
+    }
+
+    private void validateCounts(Map<Long, Long> existing, Map<Long, Long> fromReport) {
+        Set<Long> problemTypes = new HashSet<>();
+        for (Entry<Long, Long> entry : existing.entrySet()) {
+            if (fromReport.getOrDefault(entry.getKey(), 0L) < entry.getValue()) {
+                problemTypes.add(entry.getKey());
+            }
+        }
+        if (!problemTypes.isEmpty()) {
+            throw new MachineryParkReportCountValidationException(INCORRECT_PARKS_COUNT);
+        }
+    }
+
+    private Map<Long, Long> getParksWithSupportCount(List<AgriculturalMachineryPark> parksFromReport) {
+        return parksFromReport.stream()
+                .filter(AgriculturalMachineryPark::getStateSupport)
+                .collect(groupingBy(
+                        AgriculturalMachineryPark::getMachineryAndEquip,
+                        summingLong(AgriculturalMachineryPark::getCount)
+                ));
+    }
+
+    private Map<Long, Long> getParksWithSupportCount(Collection<Long> existedParkIds) {
+        List<InstanceDto> dtoList = plicanteRestClient.getTableAttributesList(requestDtoForGetParksByIdsAndSupportToValidation(existedParkIds, true));
+        return dtoList.stream()
+                .collect(groupingBy(
+                        dto -> extractData(dto.attributes(), MACH_EQUIP_ATTR),
+                        summingLong(dto -> extractData(dto.attributes(), COUNT_ATTR))
+                ));
     }
 
     private void updateReport(AgriculturalMachineryReport report, List<Long> savedParkIds) {
@@ -124,9 +160,8 @@ public class AgriculturalMachineryService {
         return savedIds;
     }
 
-    private List<AgriculturalMachineryPark> createMachineryParks(String jsonReport, SubsidyRecipient recipient) {
-        Map<Integer, List<String>> groupedValues = parseJsonReport(jsonReport);
-        log.debug("Extracted value-fields from JSON: \n{}", groupedValues);
+    private List<AgriculturalMachineryPark> createMachineryParks(AgriculturalMachineryReport jsonReport, SubsidyRecipient recipient) {
+        Map<Integer, List<String>> groupedValues = parseJsonReport(jsonReport.getJsonReport());
 
         Map<Dictionary, Map<String, Long>> codesMap = apkPlicanteService.getDictionariesCodesMap(
                 Set.of(DISTRICT, TR_V_M, KOM_ZER, KOM_KOR, MAS_SH, MAS_ZH, MAS_ZH_PT_KOR, DIS_BEN_GEN,
@@ -145,13 +180,13 @@ public class AgriculturalMachineryService {
                 machineryPark.setDistrictId(recipient.getDistrictId());
                 result.add(machineryPark);
             } catch (RuntimeException e) {
-                throw new MachineryParkReportException(REPORT_READING_PROBLEM.formatted(entry.getKey(), e.getMessage()));
+                throw new MachineryParkReportParsingException(REPORT_READING_PROBLEM.formatted(entry.getKey(), e.getMessage()));
             }
         }
         return result;
     }
 
-    private SubsidyRecipient findSubsidyRecipient(Long recipientId) {
+    private SubsidyRecipient getSubsidyRecipient(Long recipientId) {
         List<InstanceDto> instanceDtoList =
                 plicanteRestClient.getTableAttributesList(requestDtoToFindRecipientById(recipientId));
         if (instanceDtoList == null || instanceDtoList.isEmpty()) {
@@ -171,11 +206,9 @@ public class AgriculturalMachineryService {
 
     private AgriculturalMachineryReport getAgriculturalMachineryReport(Long id) {
 
-        List<InstanceDto> dtoList = plicanteRestClient.getTableAttributesList(
-                requestDtoForGetReportById(id));
+        List<InstanceDto> dtoList = plicanteRestClient.getTableAttributesList(requestDtoForGetReportById(id));
         if (dtoList == null || dtoList.isEmpty()) {
-            throw new EntityNotFoundException(INSTANCE_NOT_FOUND_BY_ID.formatted(id,
-                    AgriculturalMachineryReportUtil.TEMPLATE_ID));
+            throw new EntityNotFoundException(INSTANCE_NOT_FOUND_BY_ID.formatted(id, AgriculturalMachineryReportUtil.TEMPLATE_ID));
         }
         InstanceDto foundInstance = dtoList.get(0);
         Long reportVersion = foundInstance.version();
@@ -212,8 +245,7 @@ public class AgriculturalMachineryService {
             }
             Map<Integer, List<String>> result = new TreeMap<>();
 
-            Set<Map.Entry<String, JsonNode>> fields = dataNode.properties();
-            for (Map.Entry<String, JsonNode> field : fields) {
+            for (Map.Entry<String, JsonNode> field : dataNode.properties()) {
                 fillResultMap(field, result);
             }
             if (result.isEmpty()) {
@@ -221,8 +253,7 @@ public class AgriculturalMachineryService {
             }
             return result;
         } catch (Exception e) {
-            throw new MachineryParkReportException(
-                    FAILED_TO_PARSE_JSON_FILE.formatted(e.getMessage()));
+            throw new MachineryParkReportParsingException(FAILED_TO_PARSE_JSON_FILE.formatted(e.getMessage()), e);
         }
     }
 

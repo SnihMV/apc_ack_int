@@ -33,12 +33,6 @@ public class SubsidyProgramUtil {
         if (lvl == null) {
             return false;
         }
-//        if (lvl == 1) {
-//            return sp.getCode() != null
-//                    && sp.getKcsr() == null
-//                    && sp.getDopKr() == null
-//                    && sp.getParentId() == null;
-//        }
         if (lvl == 1) {
             return sp.getKcsr() != null &&
                     sp.getDopKr() == null;

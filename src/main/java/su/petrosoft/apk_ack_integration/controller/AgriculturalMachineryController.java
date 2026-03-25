@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import su.petrosoft.apk_ack_integration.exception.EntityNotFoundException;
-import su.petrosoft.apk_ack_integration.exception.JsonParsingException;
-import su.petrosoft.apk_ack_integration.exception.MachineryParkReportException;
+import su.petrosoft.apk_ack_integration.exception.MachineryParkReportCountValidationException;
+import su.petrosoft.apk_ack_integration.exception.MachineryParkReportParsingException;
 import su.petrosoft.apk_ack_integration.model.dto.response.ErrorResponseDto;
 import su.petrosoft.apk_ack_integration.service.AgriculturalMachineryService;
 
@@ -31,13 +31,23 @@ public class AgriculturalMachineryController {
         service.processReport(id);
     }
 
-    @ExceptionHandler({MachineryParkReportException.class})
-    public ResponseEntity<ErrorResponseDto> handleJsonParsingException(MachineryParkReportException e, HttpServletRequest request) {
+    @ExceptionHandler({MachineryParkReportParsingException.class})
+    public ResponseEntity<ErrorResponseDto> handleJsonParsingException(MachineryParkReportParsingException e, HttpServletRequest request) {
         log.error(e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ErrorResponseDto.badRequest(e.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler({MachineryParkReportCountValidationException.class})
+    public ResponseEntity<ErrorResponseDto> handleReportValidationException(MachineryParkReportCountValidationException e, HttpServletRequest request) {
+        log.error(e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ErrorResponseDto.of(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), request.getRequestURI()
+                ));
     }
 
     @ExceptionHandler(EntityNotFoundException.class)

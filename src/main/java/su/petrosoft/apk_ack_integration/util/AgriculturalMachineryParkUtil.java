@@ -2,10 +2,15 @@ package su.petrosoft.apk_ack_integration.util;
 
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.BooleanFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LinkedFilterAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
+import su.petrosoft.apk_ack_integration.model.enums.SqlOperation;
 
+import java.util.Collection;
 import java.util.List;
+
+import static su.petrosoft.apk_ack_integration.model.enums.ViewType.DETAILED_FORM_VIEW;
 
 public class AgriculturalMachineryParkUtil {
     public static final long TEMPLATE_ID = 3297;
@@ -14,6 +19,7 @@ public class AgriculturalMachineryParkUtil {
     public static final long STATUS_ACTIVE = 4840;
     public static final long STATUS_INACTIVE = 20674;
 
+    public static final long ID_ATTR = 519;
     public static final long RECIPIENT_ATTR = 4322;
     public static final long DISTRICT_ATTR = 3032;
     public static final long INDICATOR_ATTR = 749;
@@ -28,13 +34,17 @@ public class AgriculturalMachineryParkUtil {
     public static final long STATE_SUPPORT_ATTR = 764;
     public static final long TECH_STATE_ATTR = 3910;
 
-    public static GetAttributesListRequestDto buildRequestDtoToFindMachineryParkByRecipientId(Long id) {
+    public static GetAttributesListRequestDto requestDtoForGetParksByIdsAndSupportToValidation(Collection<Long> ids, boolean support) {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
-                .statusId(STATUS_ACTIVE)
-                .attributes(List.of(new RequestedAttribute(RECIPIENT_ATTR)))
+                .viewType(DETAILED_FORM_VIEW)
+                .attributes(List.of(
+                        new RequestedAttribute(MACH_EQUIP_ATTR),
+                        new RequestedAttribute(COUNT_ATTR)
+                ))
                 .filter(new Filter(List.of(
-                        new LinkedFilterAttribute(RECIPIENT_ATTR, id)
+                        new LongFilterAttribute(ID_ATTR, List.of(SqlOperation.IN), ids),
+                        new BooleanFilterAttribute(STATE_SUPPORT_ATTR, support)
                 )))
                 .build();
     }
