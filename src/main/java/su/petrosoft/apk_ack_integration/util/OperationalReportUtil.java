@@ -12,6 +12,8 @@ import su.petrosoft.apk_ack_integration.model.enums.ReportType;
 import su.petrosoft.apk_ack_integration.model.enums.SqlOperation;
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 
+import static su.petrosoft.apk_ack_integration.model.enums.SqlOperation.*;
+
 public class OperationalReportUtil {
 
     public static final long TEMPLATE_ID = 5575;
@@ -21,6 +23,10 @@ public class OperationalReportUtil {
     public static final long RECIPIENT_ATTR = 3780;
     public static final long REPORT_DATE_ATTR = 3850;
     public static final long FILE_JSON_ATTR = 3127;
+
+    public static final long STATUS_SENT = 5830;
+    public static final long STATUS_PENDING = 5844;
+    public static final long STATUS_ACCEPTED = 5858;
 
 
     public static GetAttributesListRequestDto requestDtoForGettingOperationalReportsByTypeAndDate(
@@ -42,7 +48,7 @@ public class OperationalReportUtil {
             .build();
     }
 
-    public static GetAttributesListRequestDto requestDtoForGettingOperationalReportsByTypeAndStatusAndDateInterval(
+    public static GetAttributesListRequestDto requestDtoForGettingOperationalReportsByTypeAndStatusesAndDateInterval(
         ReportType reportType, long from, long to) {
         return GetAttributesListRequestDto.builder()
             .templateId(TEMPLATE_ID)
@@ -56,8 +62,8 @@ public class OperationalReportUtil {
             ))
             .filter(new Filter(List.of(
                 new LinkedFilterAttribute(REPORT_TYPE_ATTR, reportType.getId()),
-                new StatusFilterAttribute(STATUS_ATTR, 5858),
-                new DateFilterAttribute(REPORT_DATE_ATTR, List.of(SqlOperation.BETWEEN), from, to)
+                new StatusFilterAttribute(STATUS_ATTR, List.of(IN), List.of(STATUS_SENT, STATUS_PENDING, STATUS_ACCEPTED)),
+                new DateFilterAttribute(REPORT_DATE_ATTR, List.of(BETWEEN), from, to)
             )))
             .build();
     }
@@ -75,9 +81,9 @@ public class OperationalReportUtil {
                 new RequestedAttribute(FILE_JSON_ATTR)
             ))
             .filter(new Filter(List.of(
-                new LinkedFilterAttribute(REPORT_TYPE_ATTR, List.of(SqlOperation.IN), reportTypes),
+                new LinkedFilterAttribute(REPORT_TYPE_ATTR, List.of(IN), reportTypes),
                 new StatusFilterAttribute(STATUS_ATTR, statusId),
-                new DateFilterAttribute(REPORT_DATE_ATTR, List.of(SqlOperation.BETWEEN), from, to)
+                new DateFilterAttribute(REPORT_DATE_ATTR, List.of(BETWEEN), from, to)
             )))
             .build();
     }

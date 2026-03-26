@@ -5,6 +5,7 @@ import static su.petrosoft.apk_ack_integration.model.enums.ValueType.STATUS;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.value.StatusValue;
 import su.petrosoft.apk_ack_integration.model.enums.SqlOperation;
@@ -22,7 +23,7 @@ public record StatusFilterAttribute(
             new Condition<>(List.of(SqlOperation.EQUALS), List.of(new StatusValue(statusId))));
     }
 
-    public StatusFilterAttribute(long attrId, List<SqlOperation> operations, long... data) {
-        this(attrId, STATUS, new Condition<>(operations, Arrays.stream(data).mapToObj(StatusValue::new).toList()));
+    public StatusFilterAttribute(long attrId, List<SqlOperation> operations, Collection<Long> data) {
+        this(attrId, STATUS, new Condition<>(operations, data.stream().map(StatusValue::new).toList()));
     }
 }

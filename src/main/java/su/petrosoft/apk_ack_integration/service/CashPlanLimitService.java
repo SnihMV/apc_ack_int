@@ -75,8 +75,8 @@ public class CashPlanLimitService {
     }
 
    /* public CreatingInstancesFromFileResponseDto createFromUniBudgetExcel(MultipartFile file) {
-//        List<BaseUniBudgetExcelRow> dtoList = excelExtractor.getUniBudgetCodedRows(file);
-//        List<DescriptedBudgetItemData> dtoList = excelExtractor.getUniBudget2026ClarifiedRows(file);
+        List<BaseUniBudgetExcelRow> dtoList = excelExtractor.getUniBudgetCodedRows(file);
+        List<DescriptedBudgetItemData> dtoList = excelExtractor.getUniBudget2026ClarifiedRows(file);
         List<DescriptedBudgetItemData> dtoList = excelExtractor.getUniBudget20262801Rows(file);
         Set<CashPlanLimit> existingCPL = getLimitsForCurrentYear();
         List<CashPlanLimit> fromExcelCPL = uniBudgetRowService.getLimitsFromExcel(dtoList);
@@ -95,13 +95,22 @@ public class CashPlanLimitService {
         return creatingInstancesFromFileResponseDto(dtoList, createdLimits, CashPlanLimit::getId);
     }*/
 
+
+
+    public UpdateCashPlanLimitResponseDto updateByXmlFile(MultipartFile file) {
+        UpdateCashPlanLimitResponseDto response = UpdateCashPlanLimitResponseDto.builder()
+                .updatedIds(new ArrayList<>())
+                .build();
+        xmlExtractor.extractFromFile(file, UpdateCashPlanLimitXml.class);
+        return response;
+    }
+
     public UpdateCashPlanLimitResponseDto updateByXml() {
         UpdateCashPlanLimitResponseDto response = UpdateCashPlanLimitResponseDto.builder()
             .updatedIds(new ArrayList<>())
             .build();
         AckGetUpdateMessageResponseDto message = niFiRestClient.getUpdateMessage();
-        UpdateCashPlanLimitXml updatingXml = xmlExtractor.convertBase64String(message,
-            UpdateCashPlanLimitXml.class);
+        UpdateCashPlanLimitXml updatingXml = xmlExtractor.convertBase64String(message, UpdateCashPlanLimitXml.class);
         if (updatingXml == null) {
             return response;
         }

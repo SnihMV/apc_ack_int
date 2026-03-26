@@ -1,6 +1,44 @@
 package su.petrosoft.apk_ack_integration.service;
 
-import static java.util.stream.Collectors.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
+import su.petrosoft.apk_ack_integration.client.PlicanteSoapClient;
+import su.petrosoft.apk_ack_integration.exception.DictionaryException;
+import su.petrosoft.apk_ack_integration.exception.EntityNotFoundException;
+import su.petrosoft.apk_ack_integration.exception.JsonParsingException;
+import su.petrosoft.apk_ack_integration.exception.MachineryParkReportCountValidationException;
+import su.petrosoft.apk_ack_integration.exception.MachineryParkReportParsingException;
+import su.petrosoft.apk_ack_integration.mapper.AgriculturalMachineryParkMapper;
+import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryPark;
+import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryReport;
+import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceResponseDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
+import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
+import su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil;
+
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
+
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.summingLong;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DISTRICT;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DIS_BEN_GEN;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.IZD_AVT_PR;
@@ -16,7 +54,8 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.TECH_FISHI
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.TECH_STATE;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.TR_V_M;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.values;
-import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.*;
+import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.COUNT_ATTR;
+import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.MACH_EQUIP_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryParkUtil.requestDtoForGetParksByIdsAndSupportToValidation;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.JSON_FILE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.RECIPIENT_ID;
@@ -38,44 +77,6 @@ import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.MACHINE
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.TEMPLATE_ID;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.requestDtoForUpdateRecipientByParks;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.requestDtoToFindRecipientById;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
-import su.petrosoft.apk_ack_integration.client.PlicanteSoapClient;
-import su.petrosoft.apk_ack_integration.exception.DictionaryException;
-import su.petrosoft.apk_ack_integration.exception.EntityNotFoundException;
-import su.petrosoft.apk_ack_integration.exception.JsonParsingException;
-import su.petrosoft.apk_ack_integration.exception.MachineryParkReportCountValidationException;
-import su.petrosoft.apk_ack_integration.exception.MachineryParkReportParsingException;
-import su.petrosoft.apk_ack_integration.mapper.AgriculturalMachineryParkMapper;
-import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryPark;
-import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryReport;
-import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceResponseDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
-import su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil;
 
 @Slf4j
 @Service
@@ -257,8 +258,7 @@ public class AgriculturalMachineryService {
         }
     }
 
-    private static void fillResultMap(Entry<String, JsonNode> field,
-                                      Map<Integer, List<String>> result) {
+    private static void fillResultMap(Entry<String, JsonNode> field, Map<Integer, List<String>> result) {
         String fieldName = field.getKey();
 
         if (fieldName.startsWith(VALUE_FIELD_PREFIX)) {
@@ -310,7 +310,6 @@ public class AgriculturalMachineryService {
                 .techState(dictionaryIdByCode(codesMap, TECH_STATE, getField(fields, 10)))
                 .build();
     }
-
 
     /**
      * Вспомогательный метод для безопасного получения поля из списка

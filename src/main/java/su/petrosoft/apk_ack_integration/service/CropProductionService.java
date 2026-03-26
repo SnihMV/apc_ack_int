@@ -11,10 +11,9 @@ import static su.petrosoft.apk_ack_integration.model.enums.ReportType.FORM_3;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.INSTANCE_NOT_FOUND_BY_ID;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.REPORTS_NOT_FOUND;
 import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.requestDtoForGettingOperationalReportsByTypeAndDate;
-import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.requestDtoForGettingOperationalReportsByTypeAndStatusAndDateInterval;
+import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.requestDtoForGettingOperationalReportsByTypeAndStatusesAndDateInterval;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.toEpochMilli;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.TEMPLATE_ID;
-import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.TEMPLATE_TITLE;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.requestDtoToFindRecipientNameAndDistrictById;
 
 import java.time.LocalDate;
@@ -107,7 +106,7 @@ public class CropProductionService {
         long until = toEpochMilli(to);
 
         List<OperationalReport> operationalReports = plicanteService.getOperationalReports(
-                requestDtoForGettingOperationalReportsByTypeAndStatusAndDateInterval(dto.type(), since, until));
+                requestDtoForGettingOperationalReportsByTypeAndStatusesAndDateInterval(dto.type(), since, until));
 
         if (operationalReports == null || operationalReports.isEmpty()) {
             throw new NoDataFoundException(REPORTS_NOT_FOUND);
