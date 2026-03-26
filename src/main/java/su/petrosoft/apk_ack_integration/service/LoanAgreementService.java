@@ -7,6 +7,7 @@ import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.NO_CON
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.getThirdLevelSpRequestDto;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToFindSecondLevelSubsidyPrograms;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.INN_ATTR;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.buildGettingRecipientsByInnsRequestDto;
 
@@ -73,14 +74,14 @@ public class LoanAgreementService {
                         InstanceDto::id));
         log.debug("Existed recipients' inn map: [{}]", innToIdMap);
 
-        List<InstanceDto> foundSpInstances = plicanteRestClient.getTableAttributesList(getThirdLevelSpRequestDto());
+        List<InstanceDto> foundSpInstances = plicanteRestClient.getTableAttributesList(requestDtoToFindSecondLevelSubsidyPrograms());
         if (foundSpInstances.isEmpty()) {
             log.warn("Third level subsidy programs not found");
             return;
         }
         Map<Dictionary, Map<String, Long>> codesMap = apkPlicanteService.getDictionariesCodesMap(Set.of(KCSR, DOPKR));
         Map<SubsidyProgram, Long> spMap = foundSpInstances.stream()
-                .map(dto->spMapper.toEntity(dto))
+                .map(spMapper::toEntity)
                 .collect(Collectors.toMap(
                         Function.identity(),
                         SubsidyProgram::getId));
@@ -92,7 +93,6 @@ public class LoanAgreementService {
             String kcsr = amountXml.kcsr();
             String dopKr = amountXml.dopKR();
             SubsidyProgram searchKey = SubsidyProgram.builder()
-                    .level(3L)
                     .kcsr(dictionaryIdByCode(codesMap, KCSR, kcsr))
                     .dopKr(dictionaryIdByCode(codesMap, DOPKR, dopKr))
                     .build();
@@ -108,15 +108,17 @@ public class LoanAgreementService {
             if (recipientId == null) {
                 log.info("Recipient with inn = [{}] not existed. Trying to find it in NiFi", inn);
                 GetDataFromEgrulByInnDto dto = niFiRestClient.getCompanyByInn(inn);
-                log.debug("=== FROM NiFi: [{}]", dto);
+                if (dto.inn() == null) {
+                    continue;
+                }
                 SubsidyRecipient recipient = srMapper.toEntity(dto);
                 recipient.setInn(inn);
                 CreateInstanceRequestDto creatingDto = srMapper.toCreatingDto(recipient);
                 String s = objectMapper.writeValueAsString(creatingDto);
-                log.debug("Recipient creating JSON: {}", s);
                 InstanceDto createdInstance = plicanteRestClient.createInstance(creatingDto);
                 SubsidyRecipient createdRecipient = srMapper.toEntity(createdInstance);
                 log.debug("Created Recipient: [{}]", createdRecipient);
+                recipientId = createdRecipient.getId();
             }
 
             SubsidyAmount subsidyAmount = SubsidyAmount.builder()

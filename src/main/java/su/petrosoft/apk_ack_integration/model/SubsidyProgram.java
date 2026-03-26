@@ -14,7 +14,6 @@ import lombok.experimental.SuperBuilder;
 public class SubsidyProgram extends PlicanteInstance{
     private Long parentId;
     private Long level;
-    //    private String code;
     private Long kcsr;
     private Long dopKr;
     private String title;
