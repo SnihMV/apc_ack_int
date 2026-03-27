@@ -99,7 +99,7 @@ public class LoanAgreementService {
 
             Long spId = spMap.get(searchKey);
             if (spId == null) {
-                log.warn("Subsidy Program with kcsr=[{}] and dopKR=[{}] not found", kcsr, dopKr);
+                log.warn("Subsidy Program with kcsr = [{}] and dopKR = [{}] not found", kcsr, dopKr);
                 continue;
             }
 

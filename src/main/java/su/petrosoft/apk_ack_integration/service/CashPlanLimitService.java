@@ -101,7 +101,7 @@ public class CashPlanLimitService {
         UpdateCashPlanLimitResponseDto response = UpdateCashPlanLimitResponseDto.builder()
                 .updatedIds(new ArrayList<>())
                 .build();
-        xmlExtractor.extractFromFile(file, UpdateCashPlanLimitXml.class);
+        UpdateCashPlanLimitXml updatingXml = xmlExtractor.extractFromFile(file, UpdateCashPlanLimitXml.class);
         return response;
     }
 

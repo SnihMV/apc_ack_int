@@ -18,6 +18,7 @@ import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.request
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,6 +116,7 @@ public class CropProductionService {
         Map<Dictionary, Map<String, Long>> codesMap = plicanteService.getDictionariesCodesMap(Set.of(DISTRICT));
 
         Map<Long, OperationalReport> recipientIdToLastReportMap = operationalReports.stream()
+                .filter(report -> report.getReportDate() != null)
                 .collect(toMap(
                         OperationalReport::getRecipientId,
                         Function.identity(),
@@ -125,7 +127,8 @@ public class CropProductionService {
         for (Entry<Long, OperationalReport> entry : recipientIdToLastReportMap.entrySet()) {
             SubsidyRecipient recipient = getRecipientInfoById(entry.getKey());
             ProducerData producerData = new ProducerData(
-                    recipient.getShortTitle(), recipient.getInn(), entry.getValue().getReportValues());
+                    recipient.getShortTitle(), recipient.getInn(), entry.getValue().getReportValues()
+            );
             distIdToProducersList.computeIfAbsent(recipient.getDistrictId(), k -> new ArrayList<>()).add(producerData);
         }
 
