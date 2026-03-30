@@ -260,7 +260,7 @@ public class CropProductionUtil {
         mainForm.setB1_l4_a3(getDivision(summedValues, "value86", 1000, 1));
         mainForm.setB1_l4_a4(getPercent(summedValues, "value88", "value87", 0));
         mainForm.setB1_l4_a5(getDivision(summedValues, "value87", 1000, 1));
-        mainForm.setB1_l4_a6(summedValues.get("value92"));
+        mainForm.setB1_l4_a6(summedValues.getOrDefault("value92", ZERO));
 
         mainForm.setB1_l5_a1(getDivision(summedValues, "value96", 1000, 3));
         mainForm.setB1_l5_a2(getPercent(summedValues, "value96", "value94", 0));
@@ -268,17 +268,17 @@ public class CropProductionUtil {
         mainForm.setB1_l5_a4(getPercent(summedValues, "value96", "value95", 0));
         mainForm.setB1_l5_a5(getDivision(summedValues, "value95", 1000, 1));
 
-        mainForm.setB1_l6_a1(summedValues.get("value64"));
+        mainForm.setB1_l6_a1(summedValues.getOrDefault("value64", ZERO));
         mainForm.setB1_l6_a2(getPercent(summedValues, "value64", "value62", 0));
-        mainForm.setB1_l6_a3(summedValues.get("value62"));
+        mainForm.setB1_l6_a3(summedValues.getOrDefault("value62", ZERO));
         mainForm.setB1_l6_a4(getPercent(summedValues, "value64", "value63", 0));
-        mainForm.setB1_l6_a5(summedValues.get("value63"));
+        mainForm.setB1_l6_a5(summedValues.getOrDefault("value63", ZERO));
 
-        mainForm.setB1_l7_a1(summedValues.get("value68"));
+        mainForm.setB1_l7_a1(summedValues.getOrDefault("value68", ZERO));
         mainForm.setB1_l7_a2(getPercent(summedValues, "value68", "value66", 0));
-        mainForm.setB1_l7_a3(summedValues.get("value66"));
+        mainForm.setB1_l7_a3(summedValues.getOrDefault("value66", ZERO));
         mainForm.setB1_l7_a4(getPercent(summedValues, "value68", "value67", 0));
-        mainForm.setB1_l7_a5(summedValues.get("value67"));
+        mainForm.setB1_l7_a5(summedValues.getOrDefault("value67", ZERO));
 
         mainForm.setB1_l8_a1(getDivision(summedValues, "value100", 1000, 3));
         mainForm.setB1_l8_a2(getPercent(summedValues, "value100", "value98", 0));
@@ -286,11 +286,11 @@ public class CropProductionUtil {
         mainForm.setB1_l8_a4(getPercent(summedValues, "value100", "value99", 0));
         mainForm.setB1_l8_a5(getDivision(summedValues, "value99", 1000, 1));
 
-        mainForm.setB1_l16_a1(summedValues.get("value659"));
+        mainForm.setB1_l16_a1(summedValues.getOrDefault("value659", ZERO));
         mainForm.setB1_l16_a2(getPercent(summedValues, "value659", "value658", 0));
-        mainForm.setB1_l16_a3(summedValues.get("value658"));
+        mainForm.setB1_l16_a3(summedValues.getOrDefault("value658", ZERO));
         mainForm.setB1_l16_a4(getPercent(summedValues, "value659", "value660", 0));
-        mainForm.setB1_l16_a5(summedValues.get("value660"));
+        mainForm.setB1_l16_a5(summedValues.getOrDefault("value660", ZERO));
 
         mainForm.setB1_l9_a1(getDivision(summedValues, "value120", 1000, 1));
         mainForm.setB1_l9_a2(getDivision(summedValues, "value636", 1000, 1));
@@ -304,11 +304,11 @@ public class CropProductionUtil {
         mainForm.setB1_l12_a1(getDivision(summedValues, "value116", 1000, 1));
         mainForm.setB1_l12_a2(getDivision(summedValues, "value634", 1000, 1));
 
-        mainForm.setB1_l13_a1(summedValues.get("value112"));
-        mainForm.setB1_l13_a2(summedValues.get("value632"));
+        mainForm.setB1_l13_a1(summedValues.getOrDefault("value112", ZERO));
+        mainForm.setB1_l13_a2(summedValues.getOrDefault("value632", ZERO));
 
-        mainForm.setB1_l14_a1(summedValues.get("value108"));
-        mainForm.setB1_l14_a2(summedValues.get("value630"));
+        mainForm.setB1_l14_a1(summedValues.getOrDefault("value108", ZERO));
+        mainForm.setB1_l14_a2(summedValues.getOrDefault("value630", ZERO));
 
         mainForm.setB1_l15_a1(getDivision(summedValues, "value132", 1000, 1));
         mainForm.setB1_l15_a2(getDivision(summedValues, "value640", 1000, 1));
@@ -379,98 +379,98 @@ public class CropProductionUtil {
         mainForm.setB3_l1_a1(getDivision(summedValues, "value3", 1000, 1));
         mainForm.setB3_l1_a2(getDivision(summedValues, "value10", 1000, 1));
         mainForm.setB3_l1_a3(getFraction(
-                summedValues.get("value3").add(summedValues.get("value10")).add(summedValues.get("value11")),
-                summedValues.get("value2"), 100, 0));
+                summedValues.getOrDefault("value3", ZERO).add(summedValues.getOrDefault("value10", ZERO)).add(summedValues.getOrDefault("value11", ZERO)),
+                summedValues.getOrDefault("value2", ZERO), 100, 0));
         mainForm.setB3_l1_a4(getDivision(summedValues, "value2", 1000, 1));
         mainForm.setB3_l1_a5(getDivision(summedValues, "value1", 1000, 1));
 
         mainForm.setB3_l2_a1(getDivision(summedValues, "value15", 1000, 1));
         mainForm.setB3_l2_a2(getDivision(summedValues, "value108", 1000, 1));
-        mainForm.setB3_l2_a3(getFraction(summedValues.get("value15"), summedValues.get("value3"), 10, 1));
-        mainForm.setB3_l2_a4(getFraction(summedValues.get("value108"), summedValues.get("value206"), 10, 1));
+        mainForm.setB3_l2_a3(getFraction(summedValues.getOrDefault("value15", ZERO), summedValues.getOrDefault("value3", ZERO), 10, 1));
+        mainForm.setB3_l2_a4(getFraction(summedValues.getOrDefault("value108", ZERO), summedValues.getOrDefault("value206", ZERO), 10, 1));
 
         mainForm.setB3_l3_a1(getDivision(summedValues, "value17", 1000, 1));
         mainForm.setB3_l3_a2(getPercent(summedValues, "value17", "value16", 0));
         mainForm.setB3_l3_a3(getDivision(summedValues, "value16", 1000, 1));
 
-        mainForm.setB3_l4_a1(summedValues.get("value41").setScale(1, HALF_UP));
+        mainForm.setB3_l4_a1(summedValues.getOrDefault("value41", ZERO).setScale(1, HALF_UP));
         mainForm.setB3_l4_a2(getFraction(
-                summedValues.get("value41").add(summedValues.get("value42")),
-                summedValues.get("value40"), 100, 0));
-        mainForm.setB3_l4_a3(summedValues.get("value40").setScale(1, HALF_UP));
-        mainForm.setB3_l4_a4(summedValues.get("value39").setScale(1, HALF_UP));
+                summedValues.getOrDefault("value41", ZERO).add(summedValues.getOrDefault("value42", ZERO)),
+                summedValues.getOrDefault("value40", ZERO), 100, 0));
+        mainForm.setB3_l4_a3(summedValues.getOrDefault("value40", ZERO).setScale(1, HALF_UP));
+        mainForm.setB3_l4_a4(summedValues.getOrDefault("value39", ZERO).setScale(1, HALF_UP));
 
         mainForm.setB3_l5_a1(getDivision(summedValues, "value48", 1000, 1));
         mainForm.setB3_l5_a2(getPercent(summedValues, "value48", "value47", 0));
         mainForm.setB3_l5_a3(getDivision(summedValues, "value47", 1000, 1));
         mainForm.setB3_l5_a4(getDivision(summedValues, "value46", 1000, 1));
-        mainForm.setB3_l5_a5(getFraction(summedValues.get("value48"), summedValues.get("value41"), 10, 1));
-        mainForm.setB3_l5_a6(getFraction(summedValues.get("value46"), summedValues.get("value39"), 10, 1));
+        mainForm.setB3_l5_a5(getFraction(summedValues.getOrDefault("value48", ZERO), summedValues.getOrDefault("value41", ZERO), 10, 1));
+        mainForm.setB3_l5_a6(getFraction(summedValues.getOrDefault("value46", ZERO), summedValues.getOrDefault("value39", ZERO), 10, 1));
 
-        mainForm.setB3_l6_a1(summedValues.get("value57").setScale(1, HALF_UP));
+        mainForm.setB3_l6_a1(summedValues.getOrDefault("value57", ZERO).setScale(1, HALF_UP));
         mainForm.setB3_l6_a2(getFraction(
-                summedValues.get("value57").add(summedValues.get("value62")),
-                summedValues.get("value56"), 100, 0));
-        mainForm.setB3_l6_a3(summedValues.get("value56").setScale(1, HALF_UP));
-        mainForm.setB3_l6_a4(summedValues.get("value55").setScale(1, HALF_UP));
+                summedValues.getOrDefault("value57", ZERO).add(summedValues.getOrDefault("value62", ZERO)),
+                summedValues.getOrDefault("value56", ZERO), 100, 0));
+        mainForm.setB3_l6_a3(summedValues.getOrDefault("value56", ZERO).setScale(1, HALF_UP));
+        mainForm.setB3_l6_a4(summedValues.getOrDefault("value55", ZERO).setScale(1, HALF_UP));
 
         mainForm.setB3_l7_a1(getDivision(summedValues, "value68", 1000, 1));
         mainForm.setB3_l7_a2(getPercent(summedValues, "value68", "value67", 0));
         mainForm.setB3_l7_a3(getDivision(summedValues, "value67", 1000, 1));
         mainForm.setB3_l7_a4(getDivision(summedValues, "value66", 1000, 1));
-        mainForm.setB3_l7_a5(getFraction(summedValues.get("value67"), summedValues.get("value56"), 10, 1));
-        mainForm.setB3_l7_a6(getFraction(summedValues.get("value66"), summedValues.get("value55"), 10, 1));
+        mainForm.setB3_l7_a5(getFraction(summedValues.getOrDefault("value67", ZERO), summedValues.getOrDefault("value56", ZERO), 10, 1));
+        mainForm.setB3_l7_a6(getFraction(summedValues.getOrDefault("value66", ZERO), summedValues.getOrDefault("value55", ZERO), 10, 1));
 
-        mainForm.setB3_l8_a1(summedValues.get("value31").setScale(1, HALF_UP));
+        mainForm.setB3_l8_a1(summedValues.getOrDefault("value31", ZERO).setScale(1, HALF_UP));
         mainForm.setB3_l8_a2(getPercent(summedValues, "value31", "value104", 0));
-        mainForm.setB3_l8_a3(summedValues.get("value104").setScale(1, HALF_UP));
-        mainForm.setB3_l8_a4(summedValues.get("value103").setScale(1, HALF_UP));
+        mainForm.setB3_l8_a3(summedValues.getOrDefault("value104", ZERO).setScale(1, HALF_UP));
+        mainForm.setB3_l8_a4(summedValues.getOrDefault("value103", ZERO).setScale(1, HALF_UP));
 
         mainForm.setB3_l9_a1(getDivision(summedValues, "value32", 1000, 1));
         mainForm.setB3_l9_a2(getDivision(summedValues, "value109", 1000, 1));
-        mainForm.setB3_l9_a3(getFraction(summedValues.get("value32"), summedValues.get("value31"), 10, 1));
-        mainForm.setB3_l9_a4(getFraction(summedValues.get("value109"), summedValues.get("value103"), 10, 1));
+        mainForm.setB3_l9_a3(getFraction(summedValues.getOrDefault("value32", ZERO), summedValues.getOrDefault("value31", ZERO), 10, 1));
+        mainForm.setB3_l9_a4(getFraction(summedValues.getOrDefault("value109", ZERO), summedValues.getOrDefault("value103", ZERO), 10, 1));
 
         mainForm.setB3_l10_a1(getDivision(summedValues, "value33", 1000, 1));
         mainForm.setB3_l10_a2(getPercent(summedValues, "value33", "value111", 0));
         mainForm.setB3_l10_a3(getDivision(summedValues, "value111", 1000, 1));
 
-        mainForm.setB3_l11_a1(summedValues.get("value36").setScale(1, HALF_UP));
-        mainForm.setB3_l11_a2(summedValues.get("value116").setScale(1, HALF_UP));
-        mainForm.setB3_l11_a3(summedValues.get("value37").setScale(1, HALF_UP));
-        mainForm.setB3_l11_a4(summedValues.get("value117").setScale(1, HALF_UP));
-        mainForm.setB3_l11_a5(getFraction(summedValues.get("value37"), summedValues.get("value36"), 10, 1));
-        mainForm.setB3_l11_a6(getFraction(summedValues.get("value117"), summedValues.get("value116"), 10, 1));
+        mainForm.setB3_l11_a1(summedValues.getOrDefault("value36", ZERO).setScale(1, HALF_UP));
+        mainForm.setB3_l11_a2(summedValues.getOrDefault("value116", ZERO).setScale(1, HALF_UP));
+        mainForm.setB3_l11_a3(summedValues.getOrDefault("value37", ZERO).setScale(1, HALF_UP));
+        mainForm.setB3_l11_a4(summedValues.getOrDefault("value117", ZERO).setScale(1, HALF_UP));
+        mainForm.setB3_l11_a5(getFraction(summedValues.getOrDefault("value37", ZERO), summedValues.getOrDefault("value36", ZERO), 10, 1));
+        mainForm.setB3_l11_a6(getFraction(summedValues.getOrDefault("value117", ZERO), summedValues.getOrDefault("value116", ZERO), 10, 1));
 
-        mainForm.setB3_l12_a1(summedValues.get("value88").setScale(1, HALF_UP));
+        mainForm.setB3_l12_a1(summedValues.getOrDefault("value88", ZERO).setScale(1, HALF_UP));
         mainForm.setB3_l12_a2(getPercent(summedValues, "value88", "value197", 0));
-        mainForm.setB3_l12_a3(summedValues.get("value197").setScale(1, HALF_UP));
-        mainForm.setB3_l12_a4(summedValues.get("value213").setScale(1, HALF_UP));
+        mainForm.setB3_l12_a3(summedValues.getOrDefault("value197", ZERO).setScale(1, HALF_UP));
+        mainForm.setB3_l12_a4(summedValues.getOrDefault("value213", ZERO).setScale(1, HALF_UP));
 
-        mainForm.setB3_l13_a1(summedValues.get("value84").add(summedValues.get("value85"))
-                .add(summedValues.get("value86")).add(summedValues.get("value85")).setScale(1, HALF_UP));
-        mainForm.setB3_l13_a3(summedValues.get("value193").add(summedValues.get("value194"))
-                .add(summedValues.get("value195")).add(summedValues.get("value196")).setScale(1, HALF_UP));
+        mainForm.setB3_l13_a1(summedValues.getOrDefault("value84", ZERO).add(summedValues.getOrDefault("value85", ZERO))
+                .add(summedValues.getOrDefault("value86", ZERO)).add(summedValues.getOrDefault("value85", ZERO)).setScale(1, HALF_UP));
+        mainForm.setB3_l13_a3(summedValues.getOrDefault("value193", ZERO).add(summedValues.getOrDefault("value194", ZERO))
+                .add(summedValues.getOrDefault("value195", ZERO)).add(summedValues.getOrDefault("value196", ZERO)).setScale(1, HALF_UP));
         mainForm.setB3_l13_a2(getDivision(mainForm.getB3_l13_a1(), mainForm.getB3_l13_a3(), 1));
-        mainForm.setB3_l13_a4(summedValues.get("value209").add(summedValues.get("value210"))
-                .add(summedValues.get("value211")).add(summedValues.get("value212")).setScale(1, HALF_UP));
+        mainForm.setB3_l13_a4(summedValues.getOrDefault("value209", ZERO).add(summedValues.getOrDefault("value210", ZERO))
+                .add(summedValues.getOrDefault("value211", ZERO)).add(summedValues.getOrDefault("value212", ZERO)).setScale(1, HALF_UP));
 
-        mainForm.setB3_l14_a1(summedValues.get("value90").setScale(1, HALF_UP));
-        mainForm.setB3_l14_a2(summedValues.get("value214").setScale(1, HALF_UP));
+        mainForm.setB3_l14_a1(summedValues.getOrDefault("value90", ZERO).setScale(1, HALF_UP));
+        mainForm.setB3_l14_a2(summedValues.getOrDefault("value214", ZERO).setScale(1, HALF_UP));
 
-        mainForm.setB3_l15_a1(summedValues.get("value119").setScale(1, HALF_UP));
+        mainForm.setB3_l15_a1(summedValues.getOrDefault("value119", ZERO).setScale(1, HALF_UP));
         mainForm.setB3_l15_a2(getFraction(
-                summedValues.get("value119").add(summedValues.get("value123")),
-                summedValues.get("value120"), 100, 0));
-        mainForm.setB3_l15_a3(summedValues.get("value120").setScale(1, HALF_UP));
-        mainForm.setB3_l15_a4(summedValues.get("value118").setScale(1, HALF_UP));
+                summedValues.getOrDefault("value119", ZERO).add(summedValues.getOrDefault("value123", ZERO)),
+                summedValues.getOrDefault("value120", ZERO), 100, 0));
+        mainForm.setB3_l15_a3(summedValues.getOrDefault("value120", ZERO).setScale(1, HALF_UP));
+        mainForm.setB3_l15_a4(summedValues.getOrDefault("value118", ZERO).setScale(1, HALF_UP));
 
         mainForm.setB3_l16_a1(getDivision(summedValues, "value125", 1000, 1));
         mainForm.setB3_l16_a2(getPercent(summedValues, "value125", "value126", 0));
         mainForm.setB3_l16_a3(getDivision(summedValues, "value126", 1000, 1));
         mainForm.setB3_l16_a4(getDivision(summedValues, "value124", 1000, 1));
-        mainForm.setB3_l16_a5(getFraction(summedValues.get("value125"), summedValues.get("value119"), 10, 1));
-        mainForm.setB3_l16_a6(getFraction(summedValues.get("value124"), summedValues.get("value118"), 10, 1));
+        mainForm.setB3_l16_a5(getFraction(summedValues.getOrDefault("value125", ZERO), summedValues.getOrDefault("value119", ZERO), 10, 1));
+        mainForm.setB3_l16_a6(getFraction(summedValues.getOrDefault("value124", ZERO), summedValues.getOrDefault("value118", ZERO), 10, 1));
     }
 
     private static Map<String, BigDecimal> getSummedValueMap(List<OperationalReport> reports) {
