@@ -16,7 +16,7 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVSR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.PURPOSE;
 import static su.petrosoft.apk_ack_integration.model.enums.Operation.CREATED;
 import static su.petrosoft.apk_ack_integration.model.enums.Operation.UPDATED;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.CPL_TITLE;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.TEMPLATE_TITLE;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.recalculateValues;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGettingCplEqualsFieldsByCurrentYear;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGettingExpenseFieldsById;
@@ -40,9 +40,7 @@ import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
-import su.petrosoft.apk_ack_integration.mapper.FinancingSourceMapper;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyProgramMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.FinancingSource;
@@ -289,7 +287,7 @@ public class BudgetItemService {
 
         Set<Long> updatedIds = updateAllCpl(toUpdateCplList);
         if (!updatedIds.isEmpty()) {
-            statistics.computeIfAbsent(UPDATED, k -> new HashMap<>()).put(CPL_TITLE, updatedIds);
+            statistics.computeIfAbsent(UPDATED, k -> new HashMap<>()).put(TEMPLATE_TITLE, updatedIds);
         }
 
         Set<CashPlanLimit> toCreateCplList = new HashSet<>(incomingCplSet);
@@ -303,7 +301,7 @@ public class BudgetItemService {
             ));
         if (!createdCplMap.isEmpty()) {
             statistics.computeIfAbsent(CREATED, k -> new HashMap<>())
-                .put(CPL_TITLE, new HashSet<>(createdCplMap.values()));
+                .put(TEMPLATE_TITLE, new HashSet<>(createdCplMap.values()));
             existingCplMap.putAll(createdCplMap);
         }
         return existingCplMap;
@@ -525,7 +523,7 @@ public class BudgetItemService {
         Collection<FinancingSource> savedFsList) {
         return new CreateBudgetItemsResponseDto(
             Map.of(
-                CPL_TITLE, savedCplList.stream()
+                    TEMPLATE_TITLE, savedCplList.stream()
                     .map(CashPlanLimit::getId)
                     .collect(toSet()),
                 SP_TITLE, savedSpList.stream()

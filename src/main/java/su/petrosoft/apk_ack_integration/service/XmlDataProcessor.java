@@ -43,7 +43,7 @@ public class XmlDataProcessor {
 
     public void doUpsert() {
         AckGetUpdateMessageResponseDto message = ackClient.getUpdateMessage();
-        UpdateCashPlanLimitXml upsertingXml = xmlExtractor.convertBase64String(message,
+        UpdateCashPlanLimitXml upsertingXml = xmlExtractor.extractFromBase64String(message,
             UpdateCashPlanLimitXml.class);
         if (upsertingXml == null) {
             return;
@@ -80,7 +80,7 @@ public class XmlDataProcessor {
 
     public void doCreate() {
         AckGetUpdateMessageResponseDto message = ackClient.getUpdateMessage();
-        CreateCashPlanLimitsXml creatingXml = xmlExtractor.convertBase64String(message,
+        CreateCashPlanLimitsXml creatingXml = xmlExtractor.extractFromBase64String(message,
             CreateCashPlanLimitsXml.class);
     }
 

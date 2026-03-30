@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.math.BigDecimal.*;
+import static java.math.RoundingMode.*;
+
 @Slf4j
 public class CropProductionUtil {
     public static final long TEMPLATE_ID = 11376;
@@ -324,10 +327,10 @@ public class CropProductionUtil {
         mainForm.setB2_l1_a4(getPercent(summedValueMap, "winterCrops", "x", 1));
         mainForm.setB2_l1_a5(getDivision(summedValueMap, "x", 1000, 1));
 
-        mainForm.setB2_l2_a1(summedValueMap.get("value7").setScale(0, RoundingMode.HALF_UP));
+        mainForm.setB2_l2_a1(summedValueMap.getOrDefault("value7", ZERO).setScale(0, HALF_UP));
         mainForm.setB2_l2_a2(null);
 
-        mainForm.setB2_l3_a1(summedValueMap.get("value10").setScale(0, RoundingMode.HALF_UP));
+        mainForm.setB2_l3_a1(summedValueMap.getOrDefault("value10", ZERO).setScale(0, HALF_UP));
         mainForm.setB2_l3_a2(null);
 
         mainForm.setB2_l4_a1(getDivision(summedValueMap, "value37", 1000, 1));
@@ -361,10 +364,10 @@ public class CropProductionUtil {
         mainForm.setB2_l8_a5(getDivision(summedValueMap, "value67", 1000, 1));
 
         mainForm.setB2_l9_a1(getDivision(summedValueMap, "value73", 1000, 1));
-        mainForm.setB2_l9_a2(summedValueMap.get("value77").setScale(1, RoundingMode.HALF_UP));
-        mainForm.setB2_l9_a3(summedValueMap.get("value75").setScale(1, RoundingMode.HALF_UP));
+        mainForm.setB2_l9_a2(summedValueMap.getOrDefault("value77", ZERO).setScale(1, HALF_UP));
+        mainForm.setB2_l9_a3(summedValueMap.getOrDefault("value75", ZERO).setScale(1, HALF_UP));
         mainForm.setB2_l9_a4(getPercent(summedValueMap, "value77", "value72", 0));
-        mainForm.setB2_l9_a5(summedValueMap.get("value72").setScale(1, RoundingMode.HALF_UP));
+        mainForm.setB2_l9_a5(summedValueMap.getOrDefault("value72", ZERO).setScale(1, HALF_UP));
     }
 
     public static void fillHarvestingFields(CropProductionMainForm mainForm, List<OperationalReport> reports) {
@@ -390,12 +393,12 @@ public class CropProductionUtil {
         mainForm.setB3_l3_a2(getPercent(summedValues, "value17", "value16", 0));
         mainForm.setB3_l3_a3(getDivision(summedValues, "value16", 1000, 1));
 
-        mainForm.setB3_l4_a1(summedValues.get("value41").setScale(1, RoundingMode.HALF_UP));
+        mainForm.setB3_l4_a1(summedValues.get("value41").setScale(1, HALF_UP));
         mainForm.setB3_l4_a2(getFraction(
                 summedValues.get("value41").add(summedValues.get("value42")),
                 summedValues.get("value40"), 100, 0));
-        mainForm.setB3_l4_a3(summedValues.get("value40").setScale(1, RoundingMode.HALF_UP));
-        mainForm.setB3_l4_a4(summedValues.get("value39").setScale(1, RoundingMode.HALF_UP));
+        mainForm.setB3_l4_a3(summedValues.get("value40").setScale(1, HALF_UP));
+        mainForm.setB3_l4_a4(summedValues.get("value39").setScale(1, HALF_UP));
 
         mainForm.setB3_l5_a1(getDivision(summedValues, "value48", 1000, 1));
         mainForm.setB3_l5_a2(getPercent(summedValues, "value48", "value47", 0));
@@ -404,12 +407,12 @@ public class CropProductionUtil {
         mainForm.setB3_l5_a5(getFraction(summedValues.get("value48"), summedValues.get("value41"), 10, 1));
         mainForm.setB3_l5_a6(getFraction(summedValues.get("value46"), summedValues.get("value39"), 10, 1));
 
-        mainForm.setB3_l6_a1(summedValues.get("value57").setScale(1, RoundingMode.HALF_UP));
+        mainForm.setB3_l6_a1(summedValues.get("value57").setScale(1, HALF_UP));
         mainForm.setB3_l6_a2(getFraction(
                 summedValues.get("value57").add(summedValues.get("value62")),
                 summedValues.get("value56"), 100, 0));
-        mainForm.setB3_l6_a3(summedValues.get("value56").setScale(1, RoundingMode.HALF_UP));
-        mainForm.setB3_l6_a4(summedValues.get("value55").setScale(1, RoundingMode.HALF_UP));
+        mainForm.setB3_l6_a3(summedValues.get("value56").setScale(1, HALF_UP));
+        mainForm.setB3_l6_a4(summedValues.get("value55").setScale(1, HALF_UP));
 
         mainForm.setB3_l7_a1(getDivision(summedValues, "value68", 1000, 1));
         mainForm.setB3_l7_a2(getPercent(summedValues, "value68", "value67", 0));
@@ -418,10 +421,10 @@ public class CropProductionUtil {
         mainForm.setB3_l7_a5(getFraction(summedValues.get("value67"), summedValues.get("value56"), 10, 1));
         mainForm.setB3_l7_a6(getFraction(summedValues.get("value66"), summedValues.get("value55"), 10, 1));
 
-        mainForm.setB3_l8_a1(summedValues.get("value31").setScale(1, RoundingMode.HALF_UP));
+        mainForm.setB3_l8_a1(summedValues.get("value31").setScale(1, HALF_UP));
         mainForm.setB3_l8_a2(getPercent(summedValues, "value31", "value104", 0));
-        mainForm.setB3_l8_a3(summedValues.get("value104").setScale(1, RoundingMode.HALF_UP));
-        mainForm.setB3_l8_a4(summedValues.get("value103").setScale(1, RoundingMode.HALF_UP));
+        mainForm.setB3_l8_a3(summedValues.get("value104").setScale(1, HALF_UP));
+        mainForm.setB3_l8_a4(summedValues.get("value103").setScale(1, HALF_UP));
 
         mainForm.setB3_l9_a1(getDivision(summedValues, "value32", 1000, 1));
         mainForm.setB3_l9_a2(getDivision(summedValues, "value109", 1000, 1));
@@ -432,35 +435,35 @@ public class CropProductionUtil {
         mainForm.setB3_l10_a2(getPercent(summedValues, "value33", "value111", 0));
         mainForm.setB3_l10_a3(getDivision(summedValues, "value111", 1000, 1));
 
-        mainForm.setB3_l11_a1(summedValues.get("value36").setScale(1, RoundingMode.HALF_UP));
-        mainForm.setB3_l11_a2(summedValues.get("value116").setScale(1, RoundingMode.HALF_UP));
-        mainForm.setB3_l11_a3(summedValues.get("value37").setScale(1, RoundingMode.HALF_UP));
-        mainForm.setB3_l11_a4(summedValues.get("value117").setScale(1, RoundingMode.HALF_UP));
+        mainForm.setB3_l11_a1(summedValues.get("value36").setScale(1, HALF_UP));
+        mainForm.setB3_l11_a2(summedValues.get("value116").setScale(1, HALF_UP));
+        mainForm.setB3_l11_a3(summedValues.get("value37").setScale(1, HALF_UP));
+        mainForm.setB3_l11_a4(summedValues.get("value117").setScale(1, HALF_UP));
         mainForm.setB3_l11_a5(getFraction(summedValues.get("value37"), summedValues.get("value36"), 10, 1));
         mainForm.setB3_l11_a6(getFraction(summedValues.get("value117"), summedValues.get("value116"), 10, 1));
 
-        mainForm.setB3_l12_a1(summedValues.get("value88").setScale(1, RoundingMode.HALF_UP));
+        mainForm.setB3_l12_a1(summedValues.get("value88").setScale(1, HALF_UP));
         mainForm.setB3_l12_a2(getPercent(summedValues, "value88", "value197", 0));
-        mainForm.setB3_l12_a3(summedValues.get("value197").setScale(1, RoundingMode.HALF_UP));
-        mainForm.setB3_l12_a4(summedValues.get("value213").setScale(1, RoundingMode.HALF_UP));
+        mainForm.setB3_l12_a3(summedValues.get("value197").setScale(1, HALF_UP));
+        mainForm.setB3_l12_a4(summedValues.get("value213").setScale(1, HALF_UP));
 
         mainForm.setB3_l13_a1(summedValues.get("value84").add(summedValues.get("value85"))
-                .add(summedValues.get("value86")).add(summedValues.get("value85")).setScale(1, RoundingMode.HALF_UP));
+                .add(summedValues.get("value86")).add(summedValues.get("value85")).setScale(1, HALF_UP));
         mainForm.setB3_l13_a3(summedValues.get("value193").add(summedValues.get("value194"))
-                .add(summedValues.get("value195")).add(summedValues.get("value196")).setScale(1, RoundingMode.HALF_UP));
+                .add(summedValues.get("value195")).add(summedValues.get("value196")).setScale(1, HALF_UP));
         mainForm.setB3_l13_a2(getDivision(mainForm.getB3_l13_a1(), mainForm.getB3_l13_a3(), 1));
         mainForm.setB3_l13_a4(summedValues.get("value209").add(summedValues.get("value210"))
-                .add(summedValues.get("value211")).add(summedValues.get("value212")).setScale(1, RoundingMode.HALF_UP));
+                .add(summedValues.get("value211")).add(summedValues.get("value212")).setScale(1, HALF_UP));
 
-        mainForm.setB3_l14_a1(summedValues.get("value90").setScale(1, RoundingMode.HALF_UP));
-        mainForm.setB3_l14_a2(summedValues.get("value214").setScale(1, RoundingMode.HALF_UP));
+        mainForm.setB3_l14_a1(summedValues.get("value90").setScale(1, HALF_UP));
+        mainForm.setB3_l14_a2(summedValues.get("value214").setScale(1, HALF_UP));
 
-        mainForm.setB3_l15_a1(summedValues.get("value119").setScale(1, RoundingMode.HALF_UP));
+        mainForm.setB3_l15_a1(summedValues.get("value119").setScale(1, HALF_UP));
         mainForm.setB3_l15_a2(getFraction(
                 summedValues.get("value119").add(summedValues.get("value123")),
                 summedValues.get("value120"), 100, 0));
-        mainForm.setB3_l15_a3(summedValues.get("value120").setScale(1, RoundingMode.HALF_UP));
-        mainForm.setB3_l15_a4(summedValues.get("value118").setScale(1, RoundingMode.HALF_UP));
+        mainForm.setB3_l15_a3(summedValues.get("value120").setScale(1, HALF_UP));
+        mainForm.setB3_l15_a4(summedValues.get("value118").setScale(1, HALF_UP));
 
         mainForm.setB3_l16_a1(getDivision(summedValues, "value125", 1000, 1));
         mainForm.setB3_l16_a2(getPercent(summedValues, "value125", "value126", 0));
@@ -502,32 +505,32 @@ public class CropProductionUtil {
         if (numerator == null
                 || denominator == null
                 || multiplier == 0
-                || denominator.compareTo(BigDecimal.ZERO) == 0
+                || denominator.compareTo(ZERO) == 0
         ) {
-            return BigDecimal.ZERO.setScale(scale, RoundingMode.HALF_UP);
+            return ZERO.setScale(scale, HALF_UP);
         }
 
         return numerator
                 .multiply(BigDecimal.valueOf(multiplier))
-                .divide(denominator, scale, RoundingMode.HALF_UP);
+                .divide(denominator, scale, HALF_UP);
     }
 
     private static BigDecimal getDivision(Map<String, BigDecimal> summedValues, String field, int divisor, int scale) {
         BigDecimal value = summedValues.get(field);
 
         if (value == null || divisor == 0) {
-            return BigDecimal.ZERO.setScale(scale, RoundingMode.HALF_UP);
+            return ZERO.setScale(scale, HALF_UP);
         }
 
-        return value.divide(BigDecimal.valueOf(divisor), scale, RoundingMode.HALF_UP);
+        return value.divide(BigDecimal.valueOf(divisor), scale, HALF_UP);
     }
 
     private static BigDecimal getDivision(BigDecimal divisible, BigDecimal divisor, int scale) {
 
-        if (divisible == null || divisor == null || divisor.compareTo(BigDecimal.ZERO) == 0) {
-            return BigDecimal.ZERO.setScale(scale, RoundingMode.HALF_UP);
+        if (divisible == null || divisor == null || divisor.compareTo(ZERO) == 0) {
+            return ZERO.setScale(scale, HALF_UP);
         }
 
-        return divisible.divide(divisor, scale, RoundingMode.HALF_UP);
+        return divisible.divide(divisor, scale, HALF_UP);
     }
 }

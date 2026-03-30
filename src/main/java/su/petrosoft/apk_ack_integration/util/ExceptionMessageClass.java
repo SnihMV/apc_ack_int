@@ -14,6 +14,7 @@ public class ExceptionMessageClass {
     public static final String JSON_FIELDS_ABSENT = "Обязательные поля вида [%s*] отсутствуют в json файле";
     public static final String INCORRECT_PARKS_COUNT = "Количество техники, приобретенной с гос. поддержкой меньше текущего значения";
     public static final String INSTANCE_NOT_FOUND_BY_ID = "Экземпляр с id = [%d] журнала [%s] не найден";
+    public static final String INSTANCE_NOT_FOUND = "Запрашиваемый экземпляр [%s] не найден";
     public static final String DICTIONARY_ID_NOT_FOUND = "Не найден экземпляр справочника [%s] с id = [%d]";
     public static final String DICTIONARY_CODE_NOT_FOUND = "Неверное значение [%s] справочника [%s]";
     public static final String DICTIONARY_DESCRIPTION_NOT_FOUND = "Не найдено описание кода [%s] в справочнике [%s]";

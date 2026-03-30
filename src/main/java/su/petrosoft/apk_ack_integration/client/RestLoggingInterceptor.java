@@ -40,7 +40,7 @@ public class RestLoggingInterceptor implements ClientHttpRequestInterceptor {
 
     private void logRequest(String requestId, HttpRequest request, byte[] body) {
         String json = body.length > 0 ? prettyPrint(new String(body, StandardCharsets.UTF_8)) : "{}";
-        log.debug("[REST-{}] >>> {} {} Request body:\n{}", requestId, request.getMethod(), request.getURI(), truncate(json));
+        log.debug("[REST-{}] >>> {} {} Request body:\n{}", requestId, request.getMethod(), request.getURI(), json);
     }
 
     private void logResponse(String requestId, ClientHttpResponse response, long duration) throws IOException {

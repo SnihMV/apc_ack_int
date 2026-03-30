@@ -31,13 +31,13 @@ public class XmlExtractor {
         }
     }
 
-    public <T> T convertBase64String(AckGetUpdateMessageResponseDto dto, Class<T> xmlType) {
+    public <T> T extractFromBase64String(AckGetUpdateMessageResponseDto dto, Class<T> xmlType) {
         byte[] decodedRawData = Base64.getDecoder().decode(dto.data());
         String xml = new String(decodedRawData, StandardCharsets.UTF_8);
         return convertString(xml, xmlType);
     }
 
-    private <T> T convertString(String str, Class<T> xmlType) {
+    public <T> T convertString(String str, Class<T> xmlType) {
         try {
             return xmlMapper.readValue(str, xmlType);
         } catch (Exception e) {

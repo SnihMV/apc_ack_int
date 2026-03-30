@@ -106,6 +106,8 @@ public record UpdateCashPlanLimitXml(
         @JacksonXmlProperty(isAttribute = true, localName = "KDE_CODE") String kdeCode,
         @JacksonXmlProperty(isAttribute = true, localName = "KDR_CODE") String kdrCode,
         @JacksonXmlProperty(isAttribute = true, localName = "PURPOSEFULGRANT_CODE") String purposeFulGrantCode,
+        @JacksonXmlProperty(isAttribute = true, localName = "RECIPIENT_INN") String recipientInn,
+        @JacksonXmlProperty(isAttribute = true, localName = "RECIPIENT_KPP") String recipientKpp,
 
         @JacksonXmlProperty(isAttribute = true, localName = "PURPOSEFULGRANT_ID") Long purposefulgrantId,
         @JacksonXmlProperty(isAttribute = true, localName = "FSR_ID") Integer fsrId,

@@ -9,7 +9,11 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KOSGU;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVSR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.PURPOSE;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.*;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.TEMPLATE_ID;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGetCplByIdents;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGettingCplEqualsFieldsByCurrentYear;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.*;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.creatingInstancesFromFileResponseDto;
 
 import java.time.LocalDateTime;
@@ -24,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import su.petrosoft.apk_ack_integration.client.NiFiRestClient;
+import su.petrosoft.apk_ack_integration.exception.EntityNotFoundException;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.data.CashPlanLimitData;
@@ -33,6 +38,8 @@ import su.petrosoft.apk_ack_integration.model.dto.response.AckGetUpdateMessageRe
 import su.petrosoft.apk_ack_integration.model.dto.response.CreatingInstancesFromFileResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.UpdateCashPlanLimitResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
+import su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil;
+import su.petrosoft.apk_ack_integration.util.ExceptionMessageClass;
 
 @Service
 @Slf4j
@@ -43,7 +50,7 @@ public class CashPlanLimitService {
     private final NiFiRestClient niFiRestClient;
     private final ExcelExtractor excelExtractor;
     private final XmlExtractor xmlExtractor;
-    private final CashPlanLimitMapper mapper;
+    private final CashPlanLimitMapper cplMapper;
     private final UniBudgetRowService uniBudgetRowService;
     private final ExcelRowMapper excelRowMapper;
 
@@ -60,7 +67,7 @@ public class CashPlanLimitService {
             log.debug("Found in Plicante {} CashPlanLimits in total", existedLimits.size());
 
             List<CashPlanLimit> limitsFromExcel = dtoList.stream()
-                .map(dto->mapper.toEntity(dto, codesMap))
+                .map(dto-> cplMapper.toEntity(dto, codesMap))
                 .collect(Collectors.toList());
 
             limitsFromExcel.removeAll(existedLimits);
@@ -101,7 +108,16 @@ public class CashPlanLimitService {
         UpdateCashPlanLimitResponseDto response = UpdateCashPlanLimitResponseDto.builder()
                 .updatedIds(new ArrayList<>())
                 .build();
-        UpdateCashPlanLimitXml updatingXml = xmlExtractor.extractFromFile(file, UpdateCashPlanLimitXml.class);
+        UpdateCashPlanLimitXml xml = xmlExtractor.extractFromFile(file, UpdateCashPlanLimitXml.class);
+
+        Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
+                Set.of(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
+        CashPlanLimit updateCpl = cplMapper.toEntity(xml, codesMap);
+        CashPlanLimit targetCpl = findCplToUpdate(updateCpl);
+
+
+
+        int i =123;
         return response;
     }
 
@@ -110,15 +126,15 @@ public class CashPlanLimitService {
             .updatedIds(new ArrayList<>())
             .build();
         AckGetUpdateMessageResponseDto message = niFiRestClient.getUpdateMessage();
-        UpdateCashPlanLimitXml updatingXml = xmlExtractor.convertBase64String(message, UpdateCashPlanLimitXml.class);
-        if (updatingXml == null) {
+        UpdateCashPlanLimitXml xml = xmlExtractor.extractFromBase64String(message, UpdateCashPlanLimitXml.class);
+        if (xml == null) {
             return response;
         }
-        log.debug("Received request for Cash Plan Limit update: [{}]", updatingXml);
+        log.debug("Received request for Cash Plan Limit update: [{}]", xml);
 
         Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
             Set.of(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
-        CashPlanLimit updatingCPL = mapper.toEntity(updatingXml, codesMap);
+        CashPlanLimit updatingCPL = cplMapper.toEntity(xml, codesMap);
         log.debug("Mapped to CashPlanLimit: [{}]", updatingCPL);
 
         Set<CashPlanLimit> allCashPlanLimits = apkService.findCashPlanLimits(
@@ -142,6 +158,15 @@ public class CashPlanLimitService {
         return response;
     }
 
+    private CashPlanLimit findCplToUpdate(CashPlanLimit updater) {
+
+        Set<CashPlanLimit> cashPlanLimits = apkService.findCashPlanLimits(requestDtoToGetCplByIdents(updater));
+        if (cashPlanLimits.iterator().hasNext()) {
+            return cashPlanLimits.iterator().next();
+        }
+        throw new EntityNotFoundException(INSTANCE_NOT_FOUND.formatted(TEMPLATE_TITLE));
+    }
+
     public Set<CashPlanLimit> getLimitsForCurrentYear() {
         Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
             Set.of(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
@@ -157,7 +182,7 @@ public class CashPlanLimitService {
             Set.of(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
         List<DescriptedBudgetItemData> uniBudgetExcelRows = excelExtractor.uniBudgetExcelRows(file);
         Set<CashPlanLimit> limitsFromExcel = uniBudgetExcelRows.stream()
-            .map(cpl->mapper.toEntity(cpl,codesMap))
+            .map(cpl-> cplMapper.toEntity(cpl,codesMap))
             .collect(Collectors.toSet());
         Set<CashPlanLimit> existingCurrentYearLimits = getLimitsForCurrentYear();
 

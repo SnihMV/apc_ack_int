@@ -14,13 +14,15 @@ import su.petrosoft.apk_ack_integration.model.data.xml.rpl.PlDirectionLine;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LinkedFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.StringFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 
 public class CashPlanLimitUtil {
 
     public static final long TEMPLATE_ID = 9460;
-    public static final String CPL_TITLE = "Лимиты кассового плана";
+    public static final String TEMPLATE_TITLE = "Лимиты кассового плана";
 
     public static final long ID_ATTR = 1586;
     public static final long YEAR_ATTR = 3303;
@@ -93,6 +95,27 @@ public class CashPlanLimitUtil {
                 .attributes(getEqualsFieldsAttributes())
                 .filter(new Filter(List.of(
                         new LongFilterAttribute(YEAR_ATTR, LocalDate.now().getYear())
+                )))
+                .build();
+    }
+
+    public static GetAttributesListRequestDto requestDtoToGetCplByIdents(CashPlanLimit cpl) {
+        return GetAttributesListRequestDto.builder()
+                .templateId(TEMPLATE_ID)
+                .viewType(ViewType.DETAILED_FORM_VIEW)
+                .filter(new Filter(List.of(
+                        new LongFilterAttribute(YEAR_ATTR, LocalDate.now().getYear()),
+                        new LinkedFilterAttribute(KVSR_ATTR, cpl.getKvsr()),
+                        new LinkedFilterAttribute(KFSR_ATTR, cpl.getKfsr()),
+                        new LinkedFilterAttribute(KCSR_ATTR, cpl.getKcsr()),
+                        new LinkedFilterAttribute(KVR_ATTR, cpl.getKvr()),
+                        new LinkedFilterAttribute(KOSGU_ATTR, cpl.getKosgu()),
+                        new LinkedFilterAttribute(DOPFK_ATTR, cpl.getDopFk()),
+                        new LinkedFilterAttribute(DOPEK_ATTR, cpl.getDopEk()),
+                        new LinkedFilterAttribute(DOPKR_ATTR, cpl.getDopKr()),
+                        new LinkedFilterAttribute(PURPOSE_ATTR, cpl.getPurpose()),
+                        new StringFilterAttribute(RECIPIENT_KPP, cpl.getRecipientKpp()),
+                        new StringFilterAttribute(RECIPIENT_INN, cpl.getRecipientInn())
                 )))
                 .build();
     }
