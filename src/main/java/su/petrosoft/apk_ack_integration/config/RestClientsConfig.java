@@ -24,6 +24,7 @@ import su.petrosoft.apk_ack_integration.client.SoapLoggingInterceptor;
 import su.petrosoft.apk_ack_integration.client.PlicanteSoapClient;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Configuration
@@ -55,11 +56,14 @@ public class RestClientsConfig {
 
     @Bean
     public PlicanteRestClient plicanteRestClient(
+            ObjectMapper objectMapper,
             IntegrationProperties props,
-            RestLoggingInterceptor loggingInterceptor) {
+            RestLoggingInterceptor loggingInterceptor
+    ) {
         log.info("Configuring Plicante REST client for URL: {}", props.apk().baseUrl());
 
         return new PlicanteRestClient(
+                objectMapper,
                 RestClient.builder()
                         .requestFactory(
                                 new BufferingClientHttpRequestFactory(

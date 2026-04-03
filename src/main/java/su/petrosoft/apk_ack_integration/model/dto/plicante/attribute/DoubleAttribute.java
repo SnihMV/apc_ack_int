@@ -23,6 +23,6 @@ public record DoubleAttribute(
     @JsonIgnore
     public BigDecimal getData() {
         DoubleValue firstValue = getFirstValue();
-        return firstValue != null ? firstValue.data() : null;
+        return firstValue != null ? firstValue.data() : BigDecimal.ZERO;
     }
 }

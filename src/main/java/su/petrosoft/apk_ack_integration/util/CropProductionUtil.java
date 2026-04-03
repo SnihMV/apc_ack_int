@@ -521,7 +521,6 @@ public class CropProductionUtil {
         if (value == null || divisor == 0) {
             return ZERO.setScale(scale, HALF_UP);
         }
-
         return value.divide(BigDecimal.valueOf(divisor), scale, HALF_UP);
     }
 
@@ -530,7 +529,6 @@ public class CropProductionUtil {
         if (divisible == null || divisor == null || divisor.compareTo(ZERO) == 0) {
             return ZERO.setScale(scale, HALF_UP);
         }
-
         return divisible.divide(divisor, scale, HALF_UP);
     }
 }

@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.FILE_IS_EMPTY;
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.INVALID_XML_FORMAT;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.FAILED_TO_PARSE_XML;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +27,7 @@ public class XmlExtractor {
         try {
             return xmlMapper.readValue(file.getInputStream(), xmlType);
         } catch (IOException e) {
-            throw new InvalidXmlException(INVALID_XML_FORMAT.formatted(e.getMessage()), e);
+            throw new InvalidXmlException(FAILED_TO_PARSE_XML.formatted(e.getMessage()), e);
         }
     }
 
@@ -41,7 +41,7 @@ public class XmlExtractor {
         try {
             return xmlMapper.readValue(str, xmlType);
         } catch (Exception e) {
-            throw new InvalidXmlException(INVALID_XML_FORMAT.formatted(e.getMessage()), e);
+            throw new InvalidXmlException(FAILED_TO_PARSE_XML.formatted(e.getMessage()), e);
         }
     }
 }

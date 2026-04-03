@@ -66,39 +66,38 @@ public class CashPlanLimitMapper {
                 .build();
     }
 
-    public CashPlanLimit toEntity(UpdateCashPlanLimitXml updateDto,
-                                  Map<Dictionary, Map<String, Long>> codesMap) {
+    public CashPlanLimit toEntity(UpdateCashPlanLimitXml updateDto, Map<Dictionary, Map<String, Long>> codesMap) {
 
         PlDirectionLine pl = updateDto.plDirectionLineWrapper().plDirectionLine();
 
         return CashPlanLimit.builder()
                 .year((long) LocalDate.now().getYear())
-                .kvsr(dictionaryIdByCode(codesMap, KVSR, updateDto.kadmrCode()))
-                .kfsr(dictionaryIdByCode(codesMap, KFSR, updateDto.kfsrCode()))
-                .kcsr(dictionaryIdByCode(codesMap, KCSR, updateDto.kcsrCode()))
-                .kvr(dictionaryIdByCode(codesMap, KVR, updateDto.kvrCode()))
-                .kosgu(dictionaryIdByCode(codesMap, KOSGU, updateDto.kesrCode()))
-                .dopEk(dictionaryIdByCode(codesMap, DOPEK, updateDto.kdeCode()))
-                .dopKr(dictionaryIdByCode(codesMap, DOPKR, updateDto.kdrCode()))
-                .purpose(dictionaryIdByCode(codesMap, PURPOSE, updateDto.purposeFulGrantCode()))
-                .dopFk(dictionaryIdByCode(codesMap, DOPFK, updateDto.kdfCode()))
+                .kvsr(dictionaryIdByCode(codesMap, KVSR, updateDto.kvsr()))
+                .kfsr(dictionaryIdByCode(codesMap, KFSR, updateDto.kfsr()))
+                .kcsr(dictionaryIdByCode(codesMap, KCSR, updateDto.kcsr()))
+                .kvr(dictionaryIdByCode(codesMap, KVR, updateDto.kvr()))
+                .kosgu(dictionaryIdByCode(codesMap, KOSGU, updateDto.kosgu()))
+                .dopEk(dictionaryIdByCode(codesMap, DOPEK, updateDto.dopEk()))
+                .dopKr(dictionaryIdByCode(codesMap, DOPKR, updateDto.dopKr()))
+                .dopFk(dictionaryIdByCode(codesMap, DOPFK, updateDto.dopKf()))
+                .purpose(dictionaryIdByCode(codesMap, PURPOSE, updateDto.purpose()))
                 .recipientInn(updateDto.recipientInn())
                 .recipientKpp(updateDto.recipientKpp())
                 .totalLimit(getTotalLimit(pl))
                 .federalBudget(getTotalFederal(pl))
                 .regionalBudget(getTotalRegional(pl))
-                .janLimit(updateDto.m01Amt())
-                .febLimit(updateDto.m02Amt())
-                .marLimit(updateDto.m03Amt())
-                .aprLimit(updateDto.m04Amt())
-                .mayLimit(updateDto.m05Amt())
-                .junLimit(updateDto.m06Amt())
-                .julLimit(updateDto.m07Amt())
-                .augLimit(updateDto.m08Amt())
-                .sepLimit(updateDto.m09Amt())
-                .octLimit(updateDto.m10Amt())
-                .novLimit(updateDto.m11Amt())
-                .decLimit(updateDto.m12Amt())
+                .janLimit(pl.janLimit())
+                .febLimit(pl.febLimit())
+                .marLimit(pl.marLimit())
+                .aprLimit(pl.aprLimit())
+                .mayLimit(pl.mayLimit())
+                .junLimit(pl.junLimit())
+                .julLimit(pl.julLimit())
+                .augLimit(pl.augLimit())
+                .sepLimit(pl.sepLimit())
+                .octLimit(pl.octLimit())
+                .novLimit(pl.novLimit())
+                .decLimit(pl.decLimit())
                 .build();
     }
 
@@ -123,6 +122,8 @@ public class CashPlanLimitMapper {
                 .recipientInn(extractData(attributes, RECIPIENT_INN))
                 .recipientKpp(extractData(attributes, RECIPIENT_KPP))
                 .totalLimit(extractData(attributes, TOTAL_LIMIT_ATTR))
+                .totalExpense(extractData(attributes, TOTAL_EXPENSE_ATTR))
+                .totalBalance(extractData(attributes, TOTAL_BALANCE_ATTR))
                 .federalBudget(extractData(attributes, FEDERAL_BUDGET_ATTR))
                 .regionalBudget(extractData(attributes, REGIONAL_BUDGET_ATTR))
                 .janLimit(extractData(attributes, JAN_LIMIT_ATTR))
@@ -161,14 +162,6 @@ public class CashPlanLimitMapper {
                 .octBalance(extractData(attributes, OCT_BALANCE_ATTR))
                 .novBalance(extractData(attributes, NOV_BALANCE_ATTR))
                 .decBalance(extractData(attributes, DEC_BALANCE_ATTR))
-                .fstQuarterExpense(extractData(attributes, Q_1_EXPENSE_ATTR))
-                .scdQuarterExpense(extractData(attributes, Q_2_EXPENSE_ATTR))
-                .trdQuarterExpense(extractData(attributes, Q_3_EXPENSE_ATTR))
-                .frtQuarterExpense(extractData(attributes, Q_4_EXPENSE_ATTR))
-                .fstQuarterBalance(extractData(attributes, Q_1_BALANCE_ATTR))
-                .scdQuarterBalance(extractData(attributes, Q_2_BALANCE_ATTR))
-                .trdQuarterBalance(extractData(attributes, Q_3_BALANCE_ATTR))
-                .frtQuarterBalance(extractData(attributes, Q_4_BALANCE_ATTR))
                 .build();
     }
 

@@ -6,12 +6,10 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KCSR;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.NO_CONTENT;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
-import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.getThirdLevelSpRequestDto;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToFindSecondLevelSubsidyPrograms;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.INN_ATTR;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.buildGettingRecipientsByInnsRequestDto;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +17,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -49,13 +46,11 @@ public class LoanAgreementService {
     private final SubsidyRecipientMapper srMapper;
     private final SubsidyProgramMapper spMapper;
     private final SubsidyAmountMapper saMapper;
-    private final ObjectMapper objectMapper;
 
-    @SneakyThrows
     public void createSubsidyAmountsFromXml(MultipartFile file) {
         CreatingSubsidiesAmountsXml xml =
                 xmlExtractor.extractFromFile(file, CreatingSubsidiesAmountsXml.class);
-        List<SubsidyAmountXml> amountXmlList = xml.objects();
+        List<SubsidyAmountXml> amountXmlList = xml.amountXmlList();
         if (amountXmlList == null || amountXmlList.isEmpty()) {
             throw new InvalidXmlException(NO_CONTENT.formatted(file.getOriginalFilename()));
         }
@@ -76,7 +71,7 @@ public class LoanAgreementService {
 
         List<InstanceDto> foundSpInstances = plicanteRestClient.getTableAttributesList(requestDtoToFindSecondLevelSubsidyPrograms());
         if (foundSpInstances.isEmpty()) {
-            log.warn("Third level subsidy programs not found");
+            log.warn("Subsidy programs not found");
             return;
         }
         Map<Dictionary, Map<String, Long>> codesMap = apkPlicanteService.getDictionariesCodesMap(Set.of(KCSR, DOPKR));
@@ -114,7 +109,6 @@ public class LoanAgreementService {
                 SubsidyRecipient recipient = srMapper.toEntity(dto);
                 recipient.setInn(inn);
                 CreateInstanceRequestDto creatingDto = srMapper.toCreatingDto(recipient);
-                String s = objectMapper.writeValueAsString(creatingDto);
                 InstanceDto createdInstance = plicanteRestClient.createInstance(creatingDto);
                 SubsidyRecipient createdRecipient = srMapper.toEntity(createdInstance);
                 log.debug("Created Recipient: [{}]", createdRecipient);

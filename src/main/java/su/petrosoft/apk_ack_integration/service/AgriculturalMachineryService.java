@@ -61,7 +61,7 @@ import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportU
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.RECIPIENT_ID;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.requestDtoForGetReportById;
 import static su.petrosoft.apk_ack_integration.util.AgriculturalMachineryReportUtil.requestDtoForUpdateReportByParks;
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.FAILED_TO_PARSE_JSON_FILE;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.FAILED_TO_PARSE_JSON;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.INCORRECT_PARKS_COUNT;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.INSTANCE_NOT_FOUND_BY_ID;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.INVALID_FIELD_NAME;
@@ -254,7 +254,7 @@ public class AgriculturalMachineryService {
             }
             return result;
         } catch (Exception e) {
-            throw new MachineryParkReportParsingException(FAILED_TO_PARSE_JSON_FILE.formatted(e.getMessage()), e);
+            throw new MachineryParkReportParsingException(FAILED_TO_PARSE_JSON.formatted(e.getMessage()), e);
         }
     }
 

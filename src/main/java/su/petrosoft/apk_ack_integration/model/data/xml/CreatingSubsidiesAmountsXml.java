@@ -11,7 +11,7 @@ import java.util.List;
 public record CreatingSubsidiesAmountsXml(
         @JacksonXmlElementWrapper(useWrapping = false)
         @JacksonXmlProperty(localName = "Object")
-        List<SubsidyAmountXml> objects
+        List<SubsidyAmountXml> amountXmlList
 ) {
     public record SubsidyAmountXml(
             @JacksonXmlProperty(localName = "Year")

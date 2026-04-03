@@ -11,18 +11,24 @@ import su.petrosoft.apk_ack_integration.client.PlicanteSoapClient;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyRecipientMapper;
 import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
 import su.petrosoft.apk_ack_integration.model.dto.nifi.GetDataFromEgrulByInnDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceResponseDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DateAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.DateFilterAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.value.Value;
+import su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
-import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.defineUpdatedAttributes;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.requestDtoForUpdateRecipientData;
 import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.requestDtoToFindRecipientsByAppTypeForUpdate;
 
@@ -30,7 +36,7 @@ import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.request
 @Service
 @RequiredArgsConstructor
 public class ScriptService {
-    private final PlicanteRestClient apkRestClient;
+    private final PlicanteRestClient plicanteRestClient;
     private final NiFiRestClient niFiRestClient;
     private final SubsidyRecipientMapper recipientMapper;
     private final PlicanteSoapClient plicanteSoapClient;
@@ -38,7 +44,7 @@ public class ScriptService {
 
     @SneakyThrows
     public void updateMunicipalitiesData() {
-        List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(
+        List<InstanceDto> dtoList = plicanteRestClient.getTableAttributesList(
                 requestDtoToFindRecipientsByAppTypeForUpdate(652));
         log.info("Found [{}] recipients with AppType=652 to update", dtoList.size());
         for (InstanceDto dto : dtoList) {
@@ -54,18 +60,40 @@ public class ScriptService {
             if (updateInstanceRequestDto.instance().attributes().isEmpty()) {
                 continue;
             }
-            UpdateInstanceResponseDto responseDto = apkRestClient.updateInstance(updateInstanceRequestDto);
+            UpdateInstanceResponseDto responseDto = plicanteRestClient.updateInstance(updateInstanceRequestDto);
             log.info("Recipient [{}] updated", responseDto.id());
             System.out.println(egrulData);
         }
     }
 
 
-
     public void deleteInstancesByRange(long fromInclusive, long toInclusive) {
         List<Long> list = LongStream.range(fromInclusive, toInclusive + 1).boxed().toList();
         System.out.println(list);
         plicanteSoapClient.deleteInstancesList(list);
+    }
+
+    public void normalizeDate(long templateId, long attributeId, LocalDate date) {
+        List<InstanceDto> dtoList = plicanteRestClient.getTableAttributesList(GetAttributesListRequestDto.builder()
+                .templateId(templateId)
+                .attributes(List.of(
+                        new RequestedAttribute(attributeId)
+                ))
+                .filter(new Filter(List.of(
+                        new DateFilterAttribute(attributeId, toEpochMilli(date))
+                )))
+                .build());
+        dtoList.stream()
+                .map(dto -> new UpdateInstanceRequestDto(
+                        InstanceDto.builder()
+                                .id(dto.id())
+                                .version(dto.version())
+                                .attributes(List.of(
+                                        new DateAttribute(attributeId, toEpochMilli(date, ZoneId.of("UTC")))
+                                ))
+                                .build()
+                ))
+                .forEach(plicanteRestClient::updateInstance);
     }
 
     private void updateRecipientByNotNullValues(SubsidyRecipient recipient, GetDataFromEgrulByInnDto company) {

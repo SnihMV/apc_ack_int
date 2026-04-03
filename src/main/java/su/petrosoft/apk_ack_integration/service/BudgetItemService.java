@@ -1,5 +1,31 @@
 package su.petrosoft.apk_ack_integration.service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
+import su.petrosoft.apk_ack_integration.mapper.SubsidyProgramMapper;
+import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
+import su.petrosoft.apk_ack_integration.model.FinancingSource;
+import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
+import su.petrosoft.apk_ack_integration.model.data.CashPlanLimitData;
+import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
+import su.petrosoft.apk_ack_integration.model.dto.response.CreateBudgetItemsResponseDto;
+import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
+import su.petrosoft.apk_ack_integration.model.enums.Operation;
+
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
@@ -17,39 +43,15 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.PURPOSE;
 import static su.petrosoft.apk_ack_integration.model.enums.Operation.CREATED;
 import static su.petrosoft.apk_ack_integration.model.enums.Operation.UPDATED;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.TEMPLATE_TITLE;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.hasDifference;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.recalculateValues;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGettingCplEqualsFieldsByCurrentYear;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGettingExpenseFieldsById;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGetMonetaryFieldsById;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGetCplIdentAttrsByCurrentYear;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.FS_TITLE;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.requestDtoForGettingAllFsByCurrentYear;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.SP_TITLE;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoForUpdatingParentId;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToFindAllSubsidyPrograms;
-
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
-import su.petrosoft.apk_ack_integration.mapper.SubsidyProgramMapper;
-import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
-import su.petrosoft.apk_ack_integration.model.FinancingSource;
-import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
-import su.petrosoft.apk_ack_integration.model.data.CashPlanLimitData;
-import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
-import su.petrosoft.apk_ack_integration.model.dto.response.CreateBudgetItemsResponseDto;
-import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
-import su.petrosoft.apk_ack_integration.model.enums.Operation;
 
 @Slf4j
 @Component
@@ -270,7 +272,7 @@ public class BudgetItemService {
         Map<Operation, Map<String, Set<Long>>> statistics
     ) {
         Map<CashPlanLimit, Long> existingCplMap = apkService.findCashPlanLimits(
-                requestDtoToGettingCplEqualsFieldsByCurrentYear()).stream()
+                requestDtoToGetCplIdentAttrsByCurrentYear()).stream()
             .collect(toMap(
                 Function.identity(),
                 CashPlanLimit::getId
@@ -398,33 +400,14 @@ public class BudgetItemService {
     private Set<Long> updateAllCpl(Collection<CashPlanLimit> toUpdateCplList) {
         Set<Long> updatedCplIds = new HashSet<>();
         for (CashPlanLimit newCpl : toUpdateCplList) {
-            CashPlanLimit oldCpl = apkService.findCashPlanLimits(
-                requestDtoToGettingExpenseFieldsById(newCpl.getId())).iterator().next();
+            CashPlanLimit oldCpl = apkService.findCashPlanLimits(requestDtoToGetMonetaryFieldsById(newCpl.getId()))
+                    .iterator().next();
             if (hasDifference(oldCpl, newCpl)) {
                 CashPlanLimit recalculatedCpl = recalculateValues(oldCpl, newCpl);
                 updatedCplIds.add(apkService.updateCashPlanLimit(recalculatedCpl));
             }
         }
         return updatedCplIds;
-    }
-
-    private boolean hasDifference(CashPlanLimit oldCpl, CashPlanLimit newCpl) {
-
-        return oldCpl.getTotalLimit().compareTo(newCpl.getTotalLimit()) != 0
-               || oldCpl.getFederalBudget().compareTo(newCpl.getFederalBudget()) != 0
-               || oldCpl.getRegionalBudget().compareTo(newCpl.getRegionalBudget()) != 0
-               || oldCpl.getJanLimit().compareTo(newCpl.getJanLimit()) != 0
-               || oldCpl.getFebLimit().compareTo(newCpl.getFebLimit()) != 0
-               || oldCpl.getMarLimit().compareTo(newCpl.getMarLimit()) != 0
-               || oldCpl.getAprLimit().compareTo(newCpl.getAprLimit()) != 0
-               || oldCpl.getMayLimit().compareTo(newCpl.getMayLimit()) != 0
-               || oldCpl.getJunLimit().compareTo(newCpl.getJunLimit()) != 0
-               || oldCpl.getJulLimit().compareTo(newCpl.getJulLimit()) != 0
-               || oldCpl.getAugLimit().compareTo(newCpl.getAugLimit()) != 0
-               || oldCpl.getSepLimit().compareTo(newCpl.getSepLimit()) != 0
-               || oldCpl.getOctLimit().compareTo(newCpl.getOctLimit()) != 0
-               || oldCpl.getNovLimit().compareTo(newCpl.getNovLimit()) != 0
-               || oldCpl.getDecLimit().compareTo(newCpl.getDecLimit()) != 0;
     }
 
     private Map<Dictionary, Map<String, Long>> findOrCreateDictionariesFromFile(
@@ -492,7 +475,7 @@ public class BudgetItemService {
         Set<SubsidyProgram> savedSpList = new LinkedHashSet<>();
         Set<FinancingSource> savedFsList = new LinkedHashSet<>();
 
-        log.info("Start processing BudgetItems to save containing objects");
+        log.info("Start processing BudgetItems to save containing amountXmlList");
         for (DescriptedBudgetItemData row : rowsToProcess) {
             CashPlanLimit savedCpl = rowProcessor.saveCashPlanLimit(row, codesMap);
             savedCplList.add(savedCpl);
@@ -509,7 +492,7 @@ public class BudgetItemService {
     private <T extends CashPlanLimitData> List<T> getNotExistedCplRows(List<T> rows,
         Map<Dictionary, Map<String, Long>> codesMap) {
         Set<CashPlanLimit> currentYearExistingLimits = apkService.findCashPlanLimits(
-            requestDtoToGettingCplEqualsFieldsByCurrentYear());
+            requestDtoToGetCplIdentAttrsByCurrentYear());
         log.info("Found [{}] CashPlanLimits for [{}] year in DB", currentYearExistingLimits.size(),
             LocalDateTime.now().getYear());
         return rows.stream()
