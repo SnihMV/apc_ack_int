@@ -92,6 +92,17 @@ public class CashPlanLimitUtil {
     public static final long Q_3_EXPENSE_ATTR = 1625;
     public static final long Q_4_EXPENSE_ATTR = 1630;
 
+    public static GetAttributesListRequestDto requestDtoToGetCplById(long id) {
+        return GetAttributesListRequestDto.builder()
+                .templateId(TEMPLATE_ID)
+                .viewType(ViewType.DETAILED_FORM_VIEW)
+                .attributes(identAttributes())
+                .filter(new Filter(List.of(
+                        new LongFilterAttribute(ID_ATTR, id)
+                )))
+                .build();
+    }
+
     public static GetAttributesListRequestDto requestDtoToGetCplIdentAttrsByCurrentYear() {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
@@ -103,10 +114,11 @@ public class CashPlanLimitUtil {
                 .build();
     }
 
-    public static GetAttributesListRequestDto requestDtoToGetCplByYearAndInn(long year, String recipientInn) {
+    public static GetAttributesListRequestDto requestDtoToGetCplIdentAttrsByYearAndInn(long year, String recipientInn) {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(ViewType.DETAILED_FORM_VIEW)
+                .attributes(identAttributes())
                 .filter(new Filter(List.of(
                         new LongFilterAttribute(YEAR_ATTR, year),
                         new StringFilterAttribute(RECIPIENT_INN, recipientInn)
@@ -129,47 +141,7 @@ public class CashPlanLimitUtil {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(ViewType.DETAILED_FORM_VIEW)
-                .attributes(List.of(
-                        new RequestedAttribute(TOTAL_LIMIT_ATTR),
-                        new RequestedAttribute(FEDERAL_BUDGET_ATTR),
-                        new RequestedAttribute(REGIONAL_BUDGET_ATTR),
-                        new RequestedAttribute(JAN_LIMIT_ATTR),
-                        new RequestedAttribute(FEB_LIMIT_ATTR),
-                        new RequestedAttribute(MAR_LIMIT_ATTR),
-                        new RequestedAttribute(APR_LIMIT_ATTR),
-                        new RequestedAttribute(MAY_LIMIT_ATTR),
-                        new RequestedAttribute(JUN_LIMIT_ATTR),
-                        new RequestedAttribute(JUL_LIMIT_ATTR),
-                        new RequestedAttribute(AUG_LIMIT_ATTR),
-                        new RequestedAttribute(SEP_LIMIT_ATTR),
-                        new RequestedAttribute(OCT_LIMIT_ATTR),
-                        new RequestedAttribute(NOV_LIMIT_ATTR),
-                        new RequestedAttribute(DEC_LIMIT_ATTR),
-                        new RequestedAttribute(JAN_BALANCE_ATTR),
-                        new RequestedAttribute(FEB_BALANCE_ATTR),
-                        new RequestedAttribute(MAR_BALANCE_ATTR),
-                        new RequestedAttribute(APR_BALANCE_ATTR),
-                        new RequestedAttribute(MAY_BALANCE_ATTR),
-                        new RequestedAttribute(JUN_BALANCE_ATTR),
-                        new RequestedAttribute(JUL_BALANCE_ATTR),
-                        new RequestedAttribute(AUG_BALANCE_ATTR),
-                        new RequestedAttribute(SEP_BALANCE_ATTR),
-                        new RequestedAttribute(OCT_BALANCE_ATTR),
-                        new RequestedAttribute(NOV_BALANCE_ATTR),
-                        new RequestedAttribute(DEC_BALANCE_ATTR),
-                        new RequestedAttribute(JAN_EXPENSE_ATTR),
-                        new RequestedAttribute(FEB_EXPENSE_ATTR),
-                        new RequestedAttribute(MAR_EXPENSE_ATTR),
-                        new RequestedAttribute(APR_EXPENSE_ATTR),
-                        new RequestedAttribute(MAY_EXPENSE_ATTR),
-                        new RequestedAttribute(JUN_EXPENSE_ATTR),
-                        new RequestedAttribute(JUL_EXPENSE_ATTR),
-                        new RequestedAttribute(AUG_EXPENSE_ATTR),
-                        new RequestedAttribute(SEP_EXPENSE_ATTR),
-                        new RequestedAttribute(OCT_EXPENSE_ATTR),
-                        new RequestedAttribute(NOV_EXPENSE_ATTR),
-                        new RequestedAttribute(DEC_EXPENSE_ATTR)
-                ))
+                .attributes(monetaryAttributes())
                 .filter(new Filter(List.of(
                         new LongFilterAttribute(ID_ATTR, id)
                 )))
@@ -482,6 +454,51 @@ public class CashPlanLimitUtil {
                 new RequestedAttribute(PURPOSE_ATTR),
                 new RequestedAttribute(RECIPIENT_INN),
                 new RequestedAttribute(RECIPIENT_KPP)
+        );
+    }
+
+    private static List<RequestedAttribute> monetaryAttributes() {
+        return List.of(
+                new RequestedAttribute(TOTAL_LIMIT_ATTR),
+                new RequestedAttribute(TOTAL_BALANCE_ATTR),
+                new RequestedAttribute(FEDERAL_BUDGET_ATTR),
+                new RequestedAttribute(REGIONAL_BUDGET_ATTR),
+                new RequestedAttribute(JAN_LIMIT_ATTR),
+                new RequestedAttribute(FEB_LIMIT_ATTR),
+                new RequestedAttribute(MAR_LIMIT_ATTR),
+                new RequestedAttribute(APR_LIMIT_ATTR),
+                new RequestedAttribute(MAY_LIMIT_ATTR),
+                new RequestedAttribute(JUN_LIMIT_ATTR),
+                new RequestedAttribute(JUL_LIMIT_ATTR),
+                new RequestedAttribute(AUG_LIMIT_ATTR),
+                new RequestedAttribute(SEP_LIMIT_ATTR),
+                new RequestedAttribute(OCT_LIMIT_ATTR),
+                new RequestedAttribute(NOV_LIMIT_ATTR),
+                new RequestedAttribute(DEC_LIMIT_ATTR),
+                new RequestedAttribute(JAN_BALANCE_ATTR),
+                new RequestedAttribute(FEB_BALANCE_ATTR),
+                new RequestedAttribute(MAR_BALANCE_ATTR),
+                new RequestedAttribute(APR_BALANCE_ATTR),
+                new RequestedAttribute(MAY_BALANCE_ATTR),
+                new RequestedAttribute(JUN_BALANCE_ATTR),
+                new RequestedAttribute(JUL_BALANCE_ATTR),
+                new RequestedAttribute(AUG_BALANCE_ATTR),
+                new RequestedAttribute(SEP_BALANCE_ATTR),
+                new RequestedAttribute(OCT_BALANCE_ATTR),
+                new RequestedAttribute(NOV_BALANCE_ATTR),
+                new RequestedAttribute(DEC_BALANCE_ATTR),
+                new RequestedAttribute(JAN_EXPENSE_ATTR),
+                new RequestedAttribute(FEB_EXPENSE_ATTR),
+                new RequestedAttribute(MAR_EXPENSE_ATTR),
+                new RequestedAttribute(APR_EXPENSE_ATTR),
+                new RequestedAttribute(MAY_EXPENSE_ATTR),
+                new RequestedAttribute(JUN_EXPENSE_ATTR),
+                new RequestedAttribute(JUL_EXPENSE_ATTR),
+                new RequestedAttribute(AUG_EXPENSE_ATTR),
+                new RequestedAttribute(SEP_EXPENSE_ATTR),
+                new RequestedAttribute(OCT_EXPENSE_ATTR),
+                new RequestedAttribute(NOV_EXPENSE_ATTR),
+                new RequestedAttribute(DEC_EXPENSE_ATTR)
         );
     }
 }

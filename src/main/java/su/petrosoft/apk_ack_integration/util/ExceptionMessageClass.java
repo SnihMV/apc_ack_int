@@ -20,5 +20,6 @@ public class ExceptionMessageClass {
     public static final String DICTIONARY_DESCRIPTION_NOT_FOUND = "Не найдено описание кода [%s] в справочнике [%s]";
     public static final String MANAGED_DICTIONARY_NOT_FOUND = "Управляемый справочник [%s] не найден";
     public static final String INSTANCE_STALE_VERSION = "Объект [id = %d] был изменен в другой сессии";
+    public static final String EMPTY_INSTANCE_ID = "Идентификатор объекта не определен (null)";
 
 }

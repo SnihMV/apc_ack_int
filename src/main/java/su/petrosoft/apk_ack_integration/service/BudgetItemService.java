@@ -43,9 +43,6 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.PURPOSE;
 import static su.petrosoft.apk_ack_integration.model.enums.Operation.CREATED;
 import static su.petrosoft.apk_ack_integration.model.enums.Operation.UPDATED;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.TEMPLATE_TITLE;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.hasDifference;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.recalculateValues;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGetMonetaryFieldsById;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGetCplIdentAttrsByCurrentYear;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.FS_TITLE;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.requestDtoForGettingAllFsByCurrentYear;
@@ -64,6 +61,7 @@ public class BudgetItemService {
     private final CashPlanLimitMapper cplMapper;
     private final SubsidyProgramMapper spMapper;
     private final SubsidyProgramService subsidyProgramService;
+    private final InstanceUpdater instanceUpdater;
 
     public Set<SubsidyProgram> createSubsidyProgramsTree(
         List<DescriptedBudgetItemData> rowDtoList) {
@@ -302,9 +300,9 @@ public class BudgetItemService {
                 CashPlanLimit::getId
             ));
         if (!createdCplMap.isEmpty()) {
+            existingCplMap.putAll(createdCplMap);
             statistics.computeIfAbsent(CREATED, k -> new HashMap<>())
                 .put(TEMPLATE_TITLE, new HashSet<>(createdCplMap.values()));
-            existingCplMap.putAll(createdCplMap);
         }
         return existingCplMap;
     }
@@ -398,16 +396,11 @@ public class BudgetItemService {
     }
 
     private Set<Long> updateAllCpl(Collection<CashPlanLimit> toUpdateCplList) {
-        Set<Long> updatedCplIds = new HashSet<>();
-        for (CashPlanLimit newCpl : toUpdateCplList) {
-            CashPlanLimit oldCpl = apkService.findCashPlanLimits(requestDtoToGetMonetaryFieldsById(newCpl.getId()))
-                    .iterator().next();
-            if (hasDifference(oldCpl, newCpl)) {
-                CashPlanLimit recalculatedCpl = recalculateValues(oldCpl, newCpl);
-                updatedCplIds.add(apkService.updateCashPlanLimit(recalculatedCpl));
-            }
-        }
-        return updatedCplIds;
+        return toUpdateCplList.stream()
+                .map(instanceUpdater::updateCpl)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(toSet());
     }
 
     private Map<Dictionary, Map<String, Long>> findOrCreateDictionariesFromFile(

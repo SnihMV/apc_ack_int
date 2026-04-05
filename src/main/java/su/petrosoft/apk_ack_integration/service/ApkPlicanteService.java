@@ -48,9 +48,7 @@ public class ApkPlicanteService {
     private final OperationalReportMapper orMapper;
     private final CofinancingLevelMapper cflMapper;
 
-    public Set<CashPlanLimit> findCashPlanLimits(
-        GetAttributesListRequestDto requestDto
-    ) {
+    public Set<CashPlanLimit> findCashPlanLimits(GetAttributesListRequestDto requestDto) {
         log.info("Getting Existing Cash_Plan_Limits ...");
         List<InstanceDto> dtoList = apkRestClient.getTableAttributesList(requestDto);
         log.info("Found Cash_Plan_Limits count: [{}]", dtoList.size());

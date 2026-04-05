@@ -12,8 +12,6 @@ import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.data.CashPlanLimitData;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 import su.petrosoft.apk_ack_integration.model.data.xml.UpdateCashPlanLimitXml;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceResponseDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.response.AckGetUpdateMessageResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreatingInstancesFromFileResponseDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.UpdateCashPlanLimitResponseDto;
@@ -25,7 +23,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,11 +36,11 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVSR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.PURPOSE;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.TEMPLATE_TITLE;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getAttributesToUpdate;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoForUpdate;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGetCplByYearAndInn;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGetCplIdentAttrsByYearAndInn;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGetCplIdentAttrsByCurrentYear;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGetMonetaryFieldsById;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.INSTANCE_NOT_FOUND;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.INSTANCE_NOT_FOUND_BY_ID;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.creatingInstancesFromFileResponseDto;
 
 @Service
@@ -51,14 +48,13 @@ import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.creatin
 @RequiredArgsConstructor
 public class CashPlanLimitService {
 
-    private final PlicanteRestClient plicanteRestClient;
     private final ApkPlicanteService apkService;
     private final NiFiRestClient niFiRestClient;
     private final ExcelExtractor excelExtractor;
     private final XmlExtractor xmlExtractor;
     private final CashPlanLimitMapper cplMapper;
-    private final UniBudgetRowService uniBudgetRowService;
-    private final ExcelRowMapper excelRowMapper;
+    private final InstanceUpdater instanceUpdater;
+    private final PlicanteRestClient plicanteRestClient;
 
     public CreatingInstancesFromFileResponseDto createFromRosterKBKExcel(MultipartFile file) {
 
@@ -120,22 +116,20 @@ public class CashPlanLimitService {
                 Set.of(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
 
         CashPlanLimit updater = cplMapper.toEntity(xml, codesMap);
-        updateBy(updater).ifPresent(id -> response.updatedIds().add(id));
 
-        int i = 123;
+        updater.setId(plicanteRestClient.getTableAttributesList(
+                        requestDtoToGetCplIdentAttrsByYearAndInn(LocalDate.now().getYear(), updater.getRecipientInn()))
+                .stream()
+                .map(cplMapper::toEntity)
+                .filter(updater::equals)
+                .findFirst()
+                .map(CashPlanLimit::getId)
+                .orElseThrow(() -> new EntityNotFoundException(INSTANCE_NOT_FOUND.formatted(TEMPLATE_TITLE))));
+
+        instanceUpdater.updateCpl(updater).ifPresent(id -> response.updatedIds().add(id));
         return response;
     }
 
-    private Optional<Long> updateBy(CashPlanLimit updater) {
-
-        CashPlanLimit updating = findCplToUpdate(updater);
-        List<Attribute<?>> attributesToUpdate = getAttributesToUpdate(updating, updater);
-        if (attributesToUpdate.isEmpty()) {
-            return Optional.empty();
-        }
-        UpdateInstanceResponseDto responseDto = plicanteRestClient.updateInstance(requestDtoForUpdate(updating, attributesToUpdate));
-        return Optional.of(responseDto.id());
-    }
 
     public UpdateCashPlanLimitResponseDto updateByXml() {
         UpdateCashPlanLimitResponseDto response = UpdateCashPlanLimitResponseDto.builder()
@@ -174,13 +168,13 @@ public class CashPlanLimitService {
         return response;
     }
 
-    private CashPlanLimit findCplToUpdate(CashPlanLimit updater) {
-        Set<CashPlanLimit> cashPlanLimits = apkService.findCashPlanLimits(
-                requestDtoToGetCplByYearAndInn(LocalDate.now().getYear(), updater.getRecipientInn()));
-        return cashPlanLimits.stream()
-                .filter(updater::equals)
-                .findFirst()
-                .orElseThrow(() -> new EntityNotFoundException(INSTANCE_NOT_FOUND.formatted(TEMPLATE_TITLE)));
+
+    private CashPlanLimit findCplToUpdate(long id) {
+        Set<CashPlanLimit> cashPlanLimits = apkService.findCashPlanLimits(requestDtoToGetMonetaryFieldsById(id));
+        if (cashPlanLimits.isEmpty()) {
+            throw new EntityNotFoundException(INSTANCE_NOT_FOUND_BY_ID.formatted(id, TEMPLATE_TITLE));
+        }
+        return cashPlanLimits.iterator().next();
     }
 
     public Set<CashPlanLimit> getLimitsForCurrentYear() {
