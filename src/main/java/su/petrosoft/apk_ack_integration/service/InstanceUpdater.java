@@ -33,18 +33,16 @@ public class InstanceUpdater {
     @Retryable(
             retryFor = StaleVersionException.class,
             maxAttempts = 3,
-            backoff = @Backoff(delay = 100, multiplier = 3)
+            backoff = @Backoff(delay = 100, multiplier = 2)
     )
-    public Optional<Long> updateCpl(CashPlanLimit updater) {
-        if (updater.getId() == null) {
-            throw new IllegalStateException(EMPTY_INSTANCE_ID);
-        }
-        CashPlanLimit updating = findCplToUpdate(updater.getId());
+    public Optional<Long> updateCpl(CashPlanLimit updater, long updatingId) {
+        CashPlanLimit updating = findCplToUpdate(updatingId);
         List<Attribute<?>> attributesToUpdate = getAttributesToUpdate(updating, updater);
         if (attributesToUpdate.isEmpty()) {
             return Optional.empty();
         }
-        UpdateInstanceResponseDto responseDto = restClient.updateInstance(requestDtoForUpdate(updating, attributesToUpdate));
+        UpdateInstanceResponseDto responseDto = restClient.updateInstance(
+                requestDtoForUpdate(updating.getId(), updating.getVersion(), attributesToUpdate));
         return Optional.of(responseDto.id());
     }
 

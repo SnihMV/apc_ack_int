@@ -12,11 +12,15 @@ import java.util.stream.Stream;
 
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.data.xml.rpl.PlDirectionLine;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DoubleAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.StringFilterAttribute;
@@ -114,6 +118,16 @@ public class CashPlanLimitUtil {
                 .build();
     }
 
+    public static GetAttributesListRequestDto requestDtoToGetCplByCurrentYear() {
+        return GetAttributesListRequestDto.builder()
+                .templateId(TEMPLATE_ID)
+                .viewType(ViewType.DETAILED_FORM_VIEW)
+                .filter(new Filter(List.of(
+                        new LongFilterAttribute(YEAR_ATTR, LocalDate.now().getYear())
+                )))
+                .build();
+    }
+
     public static GetAttributesListRequestDto requestDtoToGetCplIdentAttrsByYearAndInn(long year, String recipientInn) {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
@@ -137,6 +151,15 @@ public class CashPlanLimitUtil {
                 .build();
     }
 
+    public static CreateInstanceRequestDto requestDtoToCreateCpl(List<Attribute<?>> attributes) {
+        return new CreateInstanceRequestDto(
+                InstanceDto.builder()
+                        .templateId(TEMPLATE_ID)
+                        .attributes(attributes)
+                        .build()
+        );
+    }
+
     public static GetAttributesListRequestDto requestDtoToGetMonetaryFieldsById(long id) {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
@@ -148,33 +171,71 @@ public class CashPlanLimitUtil {
                 .build();
     }
 
-    public static UpdateInstanceRequestDto requestDtoForUpdate(CashPlanLimit cpl, List<Attribute<?>> attributes) {
+    public static UpdateInstanceRequestDto requestDtoForUpdate(long id, long version, List<Attribute<?>> attributes) {
         return new UpdateInstanceRequestDto(
                 InstanceDto.builder()
-                        .id(cpl.getId())
-                        .version(cpl.getVersion())
+                        .id(id)
+                        .version(version)
                         .attributes(attributes)
                         .build()
         );
     }
 
-    public static boolean hasDifference(CashPlanLimit oldCpl, CashPlanLimit newCpl) {
+    public static List<Attribute<?>> getAttributesToCreate(CashPlanLimit creator) {
+        if (creator.getYear() == null || creator.getKfsr() == null || creator.getKcsr() == null ||
+                creator.getKvr() == null || creator.getKosgu() == null || creator.getKvsr() == null ||
+                creator.getDopFk() == null || creator.getDopEk() == null || creator.getDopKr() == null ||
+                creator.getPurpose() == null || creator.getRecipientInn() == null || creator.getRecipientKpp() == null
+        ) {
+            throw new IllegalStateException("Обязательный атрибут объекта не инициализирован");
+        }
+        List<Attribute<?>> attrs = new ArrayList<>(getIdentAttributes(creator));
+        processField(attrs, creator.getFederalBudget(), FEDERAL_BUDGET_ATTR);
+        processField(attrs, creator.getRegionalBudget(), REGIONAL_BUDGET_ATTR);
+        processField(attrs, creator.getTotalLimit(), TOTAL_LIMIT_ATTR, TOTAL_BALANCE_ATTR);
+        processField(attrs, creator.getJanLimit(), JAN_LIMIT_ATTR, JAN_BALANCE_ATTR);
+        processField(attrs, creator.getFebLimit(), FEB_LIMIT_ATTR, FEB_BALANCE_ATTR);
+        processField(attrs, creator.getMarLimit(), MAR_LIMIT_ATTR, MAR_BALANCE_ATTR);
+        processField(attrs, creator.getFstQuarterBalance(), Q_1_BALANCE_ATTR);
+        processField(attrs, creator.getAprLimit(), APR_LIMIT_ATTR, APR_BALANCE_ATTR);
+        processField(attrs, creator.getMayLimit(), MAY_LIMIT_ATTR, MAY_BALANCE_ATTR);
+        processField(attrs, creator.getJunLimit(), JUN_LIMIT_ATTR, JUN_BALANCE_ATTR);
+        processField(attrs, creator.getScdQuarterBalance(), Q_2_BALANCE_ATTR);
+        processField(attrs, creator.getJulLimit(), JUL_LIMIT_ATTR, JUL_BALANCE_ATTR);
+        processField(attrs, creator.getAugLimit(), AUG_LIMIT_ATTR, AUG_BALANCE_ATTR);
+        processField(attrs, creator.getSepLimit(), SEP_LIMIT_ATTR, SEP_BALANCE_ATTR);
+        processField(attrs, creator.getTrdQuarterBalance(), Q_3_BALANCE_ATTR);
+        processField(attrs, creator.getOctLimit(), OCT_LIMIT_ATTR, OCT_BALANCE_ATTR);
+        processField(attrs, creator.getNovLimit(), NOV_LIMIT_ATTR, NOV_BALANCE_ATTR);
+        processField(attrs, creator.getDecLimit(), DEC_LIMIT_ATTR, DEC_BALANCE_ATTR);
+        processField(attrs, creator.getFrtQuarterBalance(), Q_4_BALANCE_ATTR);
+        return attrs;
+    }
 
-        return oldCpl.getTotalLimit().compareTo(newCpl.getTotalLimit()) != 0
-                || oldCpl.getFederalBudget().compareTo(newCpl.getFederalBudget()) != 0
-                || oldCpl.getRegionalBudget().compareTo(newCpl.getRegionalBudget()) != 0
-                || oldCpl.getJanLimit().compareTo(newCpl.getJanLimit()) != 0
-                || oldCpl.getFebLimit().compareTo(newCpl.getFebLimit()) != 0
-                || oldCpl.getMarLimit().compareTo(newCpl.getMarLimit()) != 0
-                || oldCpl.getAprLimit().compareTo(newCpl.getAprLimit()) != 0
-                || oldCpl.getMayLimit().compareTo(newCpl.getMayLimit()) != 0
-                || oldCpl.getJunLimit().compareTo(newCpl.getJunLimit()) != 0
-                || oldCpl.getJulLimit().compareTo(newCpl.getJulLimit()) != 0
-                || oldCpl.getAugLimit().compareTo(newCpl.getAugLimit()) != 0
-                || oldCpl.getSepLimit().compareTo(newCpl.getSepLimit()) != 0
-                || oldCpl.getOctLimit().compareTo(newCpl.getOctLimit()) != 0
-                || oldCpl.getNovLimit().compareTo(newCpl.getNovLimit()) != 0
-                || oldCpl.getDecLimit().compareTo(newCpl.getDecLimit()) != 0;
+    private static List<Attribute<?>> getIdentAttributes(CashPlanLimit creator) {
+        return List.of(
+                new LongAttribute(YEAR_ATTR, creator.getYear()),
+                new LinkedAttribute(KVSR_ATTR, creator.getKvsr()),
+                new LinkedAttribute(KFSR_ATTR, creator.getKfsr()),
+                new LinkedAttribute(KCSR_ATTR, creator.getKcsr()),
+                new LinkedAttribute(KVR_ATTR, creator.getKvr()),
+                new LinkedAttribute(KOSGU_ATTR, creator.getKosgu()),
+                new LinkedAttribute(DOPFK_ATTR, creator.getDopFk()),
+                new LinkedAttribute(DOPEK_ATTR, creator.getDopEk()),
+                new LinkedAttribute(DOPKR_ATTR, creator.getDopKr()),
+                new LinkedAttribute(PURPOSE_ATTR, creator.getPurpose()),
+                new StringAttribute(RECIPIENT_NAME, creator.getRecipientName()),
+                new StringAttribute(RECIPIENT_INN, creator.getRecipientInn()),
+                new StringAttribute(RECIPIENT_KPP, creator.getRecipientKpp())
+        );
+    }
+
+    private static void processField(List<Attribute<?>> result, BigDecimal value, long... attrs) {
+        if (value != null && value.compareTo(BigDecimal.ZERO) != 0) {
+            for (long attr : attrs) {
+                result.add(new DoubleAttribute(attr, value));
+            }
+        }
     }
 
     public static List<Attribute<?>> getAttributesToUpdate(CashPlanLimit existed, CashPlanLimit updater) {
@@ -341,84 +402,6 @@ public class CashPlanLimitUtil {
             attributes.add(new DoubleAttribute(Q_4_BALANCE_ATTR, quarterBalance));
         }
         return quarterBalance;
-    }
-
-    public static CashPlanLimit recalculateValues(CashPlanLimit oldCpl, CashPlanLimit newCpl) {
-
-        BigDecimal janBal = newCpl.getJanLimit().subtract(oldCpl.getJanExpense());
-        BigDecimal febBal = newCpl.getFebLimit().subtract(oldCpl.getFebExpense());
-        BigDecimal marBal = newCpl.getMarLimit().subtract(oldCpl.getMarExpense());
-        BigDecimal aprBal = newCpl.getAprLimit().subtract(oldCpl.getAprExpense());
-        BigDecimal mayBal = newCpl.getMayLimit().subtract(oldCpl.getMayExpense());
-        BigDecimal junBal = newCpl.getJunLimit().subtract(oldCpl.getJunExpense());
-        BigDecimal julBal = newCpl.getJulLimit().subtract(oldCpl.getJulExpense());
-        BigDecimal augBal = newCpl.getAugLimit().subtract(oldCpl.getAugExpense());
-        BigDecimal sepBal = newCpl.getSepLimit().subtract(oldCpl.getSepExpense());
-        BigDecimal octBal = newCpl.getOctLimit().subtract(oldCpl.getOctExpense());
-        BigDecimal novBal = newCpl.getNovLimit().subtract(oldCpl.getNovExpense());
-        BigDecimal decBal = newCpl.getDecLimit().subtract(oldCpl.getDecExpense());
-        BigDecimal fstQrtExpense = oldCpl.getJanExpense().add(oldCpl.getFebExpense()).add(oldCpl.getMarExpense());
-        BigDecimal scdQrtExpense = oldCpl.getAprExpense().add(oldCpl.getMayExpense()).add(oldCpl.getJunExpense());
-        BigDecimal trdQrtExpense = oldCpl.getJulExpense().add(oldCpl.getAugExpense()).add(oldCpl.getSepExpense());
-        BigDecimal frtQrtExpense = oldCpl.getOctExpense().add(oldCpl.getNovExpense()).add(oldCpl.getDecExpense());
-        BigDecimal fstQrtBalance = janBal.add(febBal).add(marBal);
-        BigDecimal scdQrtBalance = aprBal.add(mayBal).add(junBal);
-        BigDecimal trdQrtBalance = julBal.add(augBal).add(sepBal);
-        BigDecimal frtQrtBalance = octBal.add(novBal).add(decBal);
-        BigDecimal totalBalance = fstQrtBalance.add(scdQrtBalance).add(trdQrtBalance).add(frtQrtBalance);
-
-        return CashPlanLimit.builder()
-                .id(oldCpl.getId())
-                .version(oldCpl.getVersion())
-                .totalLimit(newCpl.getTotalLimit())
-                .totalBalance(totalBalance)
-                .federalBudget(newCpl.getFederalBudget())
-                .regionalBudget(newCpl.getRegionalBudget())
-                .janLimit(newCpl.getJanLimit())
-                .febLimit(newCpl.getFebLimit())
-                .marLimit(newCpl.getMarLimit())
-                .aprLimit(newCpl.getAprLimit())
-                .mayLimit(newCpl.getMayLimit())
-                .junLimit(newCpl.getJunLimit())
-                .julLimit(newCpl.getJulLimit())
-                .augLimit(newCpl.getAugLimit())
-                .sepLimit(newCpl.getSepLimit())
-                .octLimit(newCpl.getOctLimit())
-                .novLimit(newCpl.getNovLimit())
-                .decLimit(newCpl.getDecLimit())
-                .janExpense(oldCpl.getJanExpense())
-                .febExpense(oldCpl.getFebExpense())
-                .marExpense(oldCpl.getMarExpense())
-                .aprExpense(oldCpl.getAprExpense())
-                .mayExpense(oldCpl.getMayExpense())
-                .junExpense(oldCpl.getJunExpense())
-                .julExpense(oldCpl.getJulExpense())
-                .augExpense(oldCpl.getAugExpense())
-                .sepExpense(oldCpl.getSepExpense())
-                .octExpense(oldCpl.getOctExpense())
-                .novExpense(oldCpl.getNovExpense())
-                .decExpense(oldCpl.getDecExpense())
-                .fstQuarterExpense(fstQrtExpense)
-                .scdQuarterExpense(scdQrtExpense)
-                .trdQuarterExpense(trdQrtExpense)
-                .frtQuarterExpense(frtQrtExpense)
-                .janBalance(janBal)
-                .febBalance(febBal)
-                .marBalance(marBal)
-                .aprBalance(aprBal)
-                .mayBalance(mayBal)
-                .junBalance(junBal)
-                .julBalance(julBal)
-                .augBalance(augBal)
-                .sepBalance(sepBal)
-                .octBalance(octBal)
-                .novBalance(novBal)
-                .decBalance(decBal)
-                .fstQuarterBalance(fstQrtBalance)
-                .scdQuarterBalance(scdQrtBalance)
-                .trdQuarterBalance(trdQrtBalance)
-                .frtQuarterBalance(frtQrtBalance)
-                .build();
     }
 
     public static BigDecimal getTotalLimit(PlDirectionLine line) {

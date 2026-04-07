@@ -117,16 +117,16 @@ public class CashPlanLimitService {
 
         CashPlanLimit updater = cplMapper.toEntity(xml, codesMap);
 
-        updater.setId(plicanteRestClient.getTableAttributesList(
+        Long updatingId = plicanteRestClient.getTableAttributesList(
                         requestDtoToGetCplIdentAttrsByYearAndInn(LocalDate.now().getYear(), updater.getRecipientInn()))
                 .stream()
                 .map(cplMapper::toEntity)
                 .filter(updater::equals)
                 .findFirst()
                 .map(CashPlanLimit::getId)
-                .orElseThrow(() -> new EntityNotFoundException(INSTANCE_NOT_FOUND.formatted(TEMPLATE_TITLE))));
+                .orElseThrow(() -> new EntityNotFoundException(INSTANCE_NOT_FOUND.formatted(TEMPLATE_TITLE)));
 
-        instanceUpdater.updateCpl(updater).ifPresent(id -> response.updatedIds().add(id));
+        instanceUpdater.updateCpl(updater, updatingId).ifPresent(id -> response.updatedIds().add(id));
         return response;
     }
 
