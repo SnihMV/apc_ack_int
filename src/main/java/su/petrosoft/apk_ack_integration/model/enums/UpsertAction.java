@@ -1,6 +1,6 @@
 package su.petrosoft.apk_ack_integration.model.enums;
 
-public enum Operation {
+public enum UpsertAction {
     CREATED,
     UPDATED,
     FAILED_UPDATE, DELETED

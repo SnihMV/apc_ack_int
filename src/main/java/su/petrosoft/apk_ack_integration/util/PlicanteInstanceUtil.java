@@ -1,5 +1,6 @@
 package su.petrosoft.apk_ack_integration.util;
 
+import static su.petrosoft.apk_ack_integration.model.enums.SqlOperation.*;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_CODE_NOT_FOUND;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_DESCRIPTION_NOT_FOUND;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_ID_NOT_FOUND;
@@ -18,7 +19,6 @@ import java.util.Set;
 import java.util.function.Function;
 
 import lombok.extern.slf4j.Slf4j;
-import su.petrosoft.apk_ack_integration.exception.AttributeNotFoundException;
 import su.petrosoft.apk_ack_integration.exception.DictionaryException;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
@@ -51,7 +51,7 @@ public class PlicanteInstanceUtil {
                         .toList());
     }
 
-    public static GetAttributesListRequestDto requestDtoForGettingDictionaryDataByCodes(
+    public static GetAttributesListRequestDto requestDtoToGetDictionaryDataByCodes(
             Dictionary dictionary, Set<String> codes) {
         return GetAttributesListRequestDto.builder()
                 .templateId(dictionary.getTemplateId())
@@ -59,8 +59,7 @@ public class PlicanteInstanceUtil {
                         new RequestedAttribute(dictionary.getCodeAttrId())
                 ))
                 .filter(new Filter(List.of(
-                        new StringFilterAttribute(dictionary.getCodeAttrId(), List.of(SqlOperation.IN),
-                                codes)
+                        new StringFilterAttribute(dictionary.getCodeAttrId(), List.of(IN), codes)
                 )))
                 .build();
     }

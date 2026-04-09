@@ -49,13 +49,7 @@ public record UniBudgetItemExcelRow(
 
         Double financeFederal,
         Double financeRegional
-) implements DescriptedBudgetItemData {
-//    @Override
-//    public String code() {
-//        return "16";
-//    }
-
-    @Override
+) {
     public String kfsr() {
         return section + subsection;
     }

@@ -50,18 +50,18 @@ public class CashPlanLimitController {
     public UpdateCashPlanLimitResponseDto updateByXmlFromEtl() {
         return service.updateByXml();
     }
-
-    @Operation(
-            summary = "Upload Excel file with Cash Plan Limits",
-            description = "Upload an Excel file to update existing Cash Plan Limits. " +
-                    "File should contain specific columns and format.")
-    @PatchMapping("excel")
-    @ResponseStatus(HttpStatus.OK)
-    public UpdateCashPlanLimitResponseDto updateByExcel(
-            @Parameter(description = "Excel file with Cash Plan Limits data",
-                    required = true,
-                    content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-            @RequestParam MultipartFile file) {
-        return service.updateByExcel(file);
-    }
+//
+//    @Operation(
+//            summary = "Upload Excel file with Cash Plan Limits",
+//            description = "Upload an Excel file to update existing Cash Plan Limits. " +
+//                    "File should contain specific columns and format.")
+//    @PatchMapping("excel")
+//    @ResponseStatus(HttpStatus.OK)
+//    public UpdateCashPlanLimitResponseDto updateByExcel(
+//            @Parameter(description = "Excel file with Cash Plan Limits data",
+//                    required = true,
+//                    content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+//            @RequestParam MultipartFile file) {
+//        return service.updateByExcel(file);
+//    }
 }

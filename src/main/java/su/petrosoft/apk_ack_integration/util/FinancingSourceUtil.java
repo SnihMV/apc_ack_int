@@ -27,7 +27,7 @@ public class FinancingSourceUtil {
     public static final long CASH_PLAN_LIMITS_ATTR = 4429;
     public static final long CONCAT_KBK_ATTR = 3842;
 
-    public static GetAttributesListRequestDto requestDtoForGettingAllFsByCurrentYear() {
+    public static GetAttributesListRequestDto requestDtoToGetFsByCurrentYear() {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(ViewType.DETAILED_FORM_VIEW)

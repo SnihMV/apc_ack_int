@@ -51,8 +51,7 @@ public record UniBudgetCodedItemExcelRow(
         Double financeFederal,
         Double financeRegional
 
-) implements DescriptedBudgetItemData {
-    @Override
+) {
     public String kfsr() {
         return section + subsection;
     }

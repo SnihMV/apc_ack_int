@@ -41,26 +41,26 @@ public class ExcelExtractor {
         return extractTableRows(file, UNI_BUDGET_2026_CLARIFIED, mapper::parseToUniBudget2026ClarifiedRow);
     }
 
-    public List<DescriptedBudgetItemData> getUniBudgetCodedRows(MultipartFile file) {
-        return extractTableRows(file, UNI_BUDGET_CODED, mapper::parseToUniBudgetCodedRow);
-    }
-
-    public List<DescriptedBudgetItemData> uniBudgetExcelRows(MultipartFile file) {
-        return extractTableRows(file, UNI_BUDGET, mapper::parseToUniBudgetRow);
-    }
-
-    public List<RosterKbkItemExcelRow> getRosterKbkRows(MultipartFile file) {
-        return extractTableRows(file, ROSTER_KBK, mapper::parseToRosterKbkRow);
-    }
-
-    public List<DescriptedBudgetItemData> getUniBudget20262801Rows(MultipartFile file) {
-        return extractTableRows(file, UNI_BUDGET_20262801, mapper::parseToUniBudget20262801Row);
-    }
-
-    public List<CofinancingLevelExcelRow> getCofinancingLevelRows(MultipartFile file) {
-        return extractTableRows(file, COFINANCING_LEVEL, mapper::toCofinancingLevelRow);
-    }
-
+//    public List<DescriptedBudgetItemData> getUniBudgetCodedRows(MultipartFile file) {
+//        return extractTableRows(file, UNI_BUDGET_CODED, mapper::parseToUniBudgetCodedRow);
+//    }
+//
+//    public List<DescriptedBudgetItemData> uniBudgetExcelRows(MultipartFile file) {
+//        return extractTableRows(file, UNI_BUDGET, mapper::parseToUniBudgetRow);
+//    }
+//
+//    public List<RosterKbkItemExcelRow> getRosterKbkRows(MultipartFile file) {
+//        return extractTableRows(file, ROSTER_KBK, mapper::parseToRosterKbkRow);
+//    }
+//
+//    public List<DescriptedBudgetItemData> getUniBudget20262801Rows(MultipartFile file) {
+//        return extractTableRows(file, UNI_BUDGET_20262801, mapper::parseToUniBudget20262801Row);
+//    }
+//
+//    public List<CofinancingLevelExcelRow> getCofinancingLevelRows(MultipartFile file) {
+//        return extractTableRows(file, COFINANCING_LEVEL, mapper::toCofinancingLevelRow);
+//    }
+//
     public List<CofinancingLevel2026ExcelRow> getCofinancingLevel2026Rows(MultipartFile file) {
         return extractTableRows(file, COFINANCING_LEVEL_2026, mapper::toCofinancingLevel2026Row);
     }

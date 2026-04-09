@@ -26,7 +26,7 @@ public class BudgetItemController {
 
     @PostMapping("excel")
     public CreateBudgetItemsResponseDto createBudgetItemsFromExcel(@RequestParam MultipartFile file) {
-        List<DescriptedBudgetItemData> uniBudgetRows = excelExtractor.getUniBudgetCodedRows(file);
+        List<DescriptedBudgetItemData> uniBudgetRows = excelExtractor.getUniBudget2026ClarifiedRows(file);
         if (uniBudgetRows.isEmpty()) {
             return new CreateBudgetItemsResponseDto(Collections.emptyMap());
         }

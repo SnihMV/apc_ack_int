@@ -2,17 +2,11 @@ package su.petrosoft.apk_ack_integration.model.data;
 
 public interface CashPlanLimitData extends FinancingSourceData {
 
-    default String recipientName() {
-        return "";
-    }
+    String recipientName();
 
-    default String recipientInn() {
-        return "";
-    }
+    String recipientInn();
 
-    default String recipientKpp() {
-        return "";
-    }
+    String recipientKpp();
 
     Double assignTotal();
 

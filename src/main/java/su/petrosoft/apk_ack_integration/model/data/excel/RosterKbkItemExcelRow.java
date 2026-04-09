@@ -39,13 +39,7 @@ public record RosterKbkItemExcelRow(
         Double financeFederal,
         Double financeRegional
 
-) implements BudgetItemData {
-//    @Override
-//    public String code() {
-//        return "16";
-//    }
-
-    @Override
+) {
     public String kfsr() {
         return section + subsection;
     }

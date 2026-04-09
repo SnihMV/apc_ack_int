@@ -12,10 +12,11 @@ import su.petrosoft.apk_ack_integration.model.FinancingSource;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.data.CashPlanLimitData;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
+import su.petrosoft.apk_ack_integration.model.data.DictionaryContaining;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateBudgetItemsResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
-import su.petrosoft.apk_ack_integration.model.enums.Operation;
+import su.petrosoft.apk_ack_integration.model.enums.UpsertAction;
 import su.petrosoft.apk_ack_integration.util.FinancingSourceUtil;
 import su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil;
 
@@ -32,6 +33,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import static java.util.Collections.emptyMap;
+import static java.util.Map.*;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toMap;
@@ -45,8 +47,8 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KOSGU;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVSR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.PURPOSE;
-import static su.petrosoft.apk_ack_integration.model.enums.Operation.CREATED;
-import static su.petrosoft.apk_ack_integration.model.enums.Operation.UPDATED;
+import static su.petrosoft.apk_ack_integration.model.enums.UpsertAction.CREATED;
+import static su.petrosoft.apk_ack_integration.model.enums.UpsertAction.UPDATED;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.TEMPLATE_ID;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.TEMPLATE_TITLE;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getAttributesToCreate;
@@ -56,7 +58,7 @@ import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDto
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGetCplByCurrentYear;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGetCplIdentAttrsByCurrentYear;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.FS_TITLE;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.requestDtoForGettingAllFsByCurrentYear;
+import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.requestDtoToGetFsByCurrentYear;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.SP_TITLE;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoForUpdatingParentId;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToFindAllSubsidyPrograms;
@@ -105,9 +107,9 @@ public class BudgetItemService {
         return createdSP;
     }
 
-    public Map<Operation, Map<Long, Set<Long>>> upsertBudgetItems(List<DescriptedBudgetItemData> rows) {
+    public Map<UpsertAction, Map<Long, Set<Long>>> upsertBudgetItems(List<DescriptedBudgetItemData> rows) {
 
-        Map<Operation, Map<Long, Set<Long>>> statistics = new HashMap<>(Map.of(
+        Map<UpsertAction, Map<Long, Set<Long>>> statistics = new HashMap<>(of(
                 CREATED, new HashMap<>(),
                 UPDATED, new HashMap<>()
         ));
@@ -127,32 +129,32 @@ public class BudgetItemService {
             Map<CashPlanLimit, CashPlanLimit> existingCplMap,
             Map<SubsidyProgram, Long> existingSpMap,
             Map<Dictionary, Map<String, Long>> codesMap,
-            Map<Operation, Map<Long, Set<Long>>> statistics
+            Map<UpsertAction, Map<Long, Set<Long>>> statistics
     ) {
-        Map<FinancingSource, Set<Long>> fsToCplMap = existingCplMap.keySet()
+        Map<FinancingSource, Set<Long>> fsToCplIdsMap = existingCplMap.keySet()
                 .stream()
                 .collect(groupingBy(
                         this::extractFsFromCpl,
                         mapping(
                                 CashPlanLimit::getId,
-                                toSet())));
+                                toSet()
+                        )));
 
-        Set<FinancingSource> existingFsList = apkService.findFinancingSources(
-                requestDtoForGettingAllFsByCurrentYear());
+        Set<FinancingSource> existingFsList = apkService.findFinancingSources(requestDtoToGetFsByCurrentYear());
 
-        Map<FinancingSource, Set<Long>> toUpdateFsMap = existingFsList.stream()
-                .filter(fsToCplMap::containsKey)
+        Map<FinancingSource, Set<Long>> fsMapToUpdate = existingFsList.stream()
+                .filter(fsToCplIdsMap::containsKey)
                 .collect(toMap(
                         Function.identity(),
-                        fsToCplMap::get
+                        fsToCplIdsMap::get
                 ));
 
-        Set<Long> updatedFsIds = updateAllFs(toUpdateFsMap, existingSpMap);
+        Set<Long> updatedFsIds = updateAllFs(fsMapToUpdate, existingSpMap);
         if (!updatedFsIds.isEmpty()) {
             statistics.computeIfAbsent(UPDATED, k -> new HashMap<>()).put(FinancingSourceUtil.TEMPLATE_ID, updatedFsIds);
         }
 
-        Map<FinancingSource, Set<Long>> toCreateFsMap = fsToCplMap.entrySet().stream()
+        Map<FinancingSource, Set<Long>> toCreateFsMap = fsToCplIdsMap.entrySet().stream()
                 .filter(entry -> !existingFsList.contains(entry.getKey()))
                 .collect(toMap(
                         Entry::getKey,
@@ -165,7 +167,7 @@ public class BudgetItemService {
     private Map<SubsidyProgram, Long> upsertSubsidyPrograms(
             List<DescriptedBudgetItemData> rows,
             Map<Dictionary, Map<String, Long>> codesMap,
-            Map<Operation, Map<Long, Set<Long>>> statistics
+            Map<UpsertAction, Map<Long, Set<Long>>> statistics
     ) {
         Map<SubsidyProgram, Long> existingSpMap = apkService.findSubsidyPrograms(
                         requestDtoToFindAllSubsidyPrograms()).stream()
@@ -175,7 +177,7 @@ public class BudgetItemService {
                 ));
 
         Map<SubsidyProgram, SubsidyProgram> incomingSpMap = rows.stream()
-                .map(row -> Map.entry(
+                .map(row -> entry(
                         spMapper.toSecondLevelSP(row, codesMap),
                         spMapper.toFirstLevelSP(row, codesMap)
                 ))
@@ -212,7 +214,7 @@ public class BudgetItemService {
             Set<SubsidyProgram> toUpdateScdLvlSpSet,
             Map<SubsidyProgram, Long> existingSpMap,
             Map<SubsidyProgram, SubsidyProgram> incomingSpMap,
-            Map<Operation, Map<Long, Set<Long>>> statistics
+            Map<UpsertAction, Map<Long, Set<Long>>> statistics
     ) {
         Set<Long> createdSp = new HashSet<>();
         Set<Long> updatedSp = new HashSet<>();
@@ -220,7 +222,7 @@ public class BudgetItemService {
             if (sp.getParentId() == null) {
                 Optional<Long> parentId = assignParentId(sp, existingSpMap, incomingSpMap);
                 if (sp.getParentId() == null) {
-                    statistics.computeIfAbsent(Operation.FAILED_UPDATE, k -> new HashMap<>())
+                    statistics.computeIfAbsent(UpsertAction.FAILED_UPDATE, k -> new HashMap<>())
                             .computeIfAbsent(SubsidyProgramUtil.TEMPLATE_ID, k -> new HashSet<>()).add(sp.getId());
                     continue;
                 }
@@ -282,7 +284,7 @@ public class BudgetItemService {
     private Map<CashPlanLimit, CashPlanLimit> upsertCashPlanLimits(
             List<DescriptedBudgetItemData> rows,
             Map<Dictionary, Map<String, Long>> codesMap,
-            Map<Operation, Map<Long, Set<Long>>> statistics
+            Map<UpsertAction, Map<Long, Set<Long>>> statistics
     ) {
 
         Map<CashPlanLimit, CashPlanLimit> existingCplMap = plicanteRestClient.getTableAttributesList(
@@ -339,7 +341,7 @@ public class BudgetItemService {
             Map<FinancingSource, Set<Long>> toCreateFsMap,
             Map<SubsidyProgram, Long> existingSpMap,
             Map<Dictionary, Map<String, Long>> codesMap,
-            Map<Operation, Map<Long, Set<Long>>> statistics
+            Map<UpsertAction, Map<Long, Set<Long>>> statistics
     ) {
         Set<Long> createdFsIds = new HashSet<>();
         for (Entry<FinancingSource, Set<Long>> entry : toCreateFsMap.entrySet()) {
@@ -424,8 +426,8 @@ public class BudgetItemService {
     }
 
     private Map<Dictionary, Map<String, Long>> findOrCreateDictionariesFromFile(
-            List<DescriptedBudgetItemData> rows,
-            Map<Operation, Map<Long, Set<Long>>> statistics
+            List<? extends DictionaryContaining> rows,
+            Map<UpsertAction, Map<Long, Set<Long>>> statistics
     ) {
 
         Map<Dictionary, Map<String, String>> dictionariesFromFile = rows.stream()
@@ -443,15 +445,14 @@ public class BudgetItemService {
             Dictionary dictionary = entry.getKey();
             Map<String, String> dictionaryData = entry.getValue();
 
-            Map<String, Long> foundCodes = dictionaryService.findByCodes(dictionary,
-                    dictionaryData.keySet());
+            Map<String, Long> foundCodes = dictionaryService.findByCodes(dictionary, dictionaryData.keySet());
             resultMap.put(dictionary, foundCodes);
 
             Set<String> codesToCreate = new HashSet<>(dictionaryData.keySet());
             codesToCreate.removeAll(foundCodes.keySet());
 
             Map<String, Long> createdCodes = codesToCreate.stream()
-                    .map(code -> Map.entry(
+                    .map(code -> entry(
                             dictionaryService.createNewDictionaryInstance(dictionary, code,
                                     dictionaryData.get(code)),
                             code))
@@ -518,7 +519,7 @@ public class BudgetItemService {
             Collection<SubsidyProgram> savedSpList,
             Collection<FinancingSource> savedFsList) {
         return new CreateBudgetItemsResponseDto(
-                Map.of(
+                of(
                         TEMPLATE_TITLE, savedCplList.stream()
                                 .map(CashPlanLimit::getId)
                                 .collect(toSet()),
@@ -528,38 +529,5 @@ public class BudgetItemService {
                         FS_TITLE, savedFsList.stream()
                                 .map(FinancingSource::getId)
                                 .collect(toSet())));
-    }
-
-    private CplKey buildKey(CashPlanLimit cpl) {
-        return new CplKey(
-                cpl.getYear(),
-                cpl.getKfsr(),
-                cpl.getKcsr(),
-                cpl.getKvr(),
-                cpl.getKosgu(),
-                cpl.getKvsr(),
-                cpl.getDopFk(),
-                cpl.getDopEk(),
-                cpl.getDopKr(),
-                cpl.getPurpose(),
-                cpl.getRecipientInn(),
-                cpl.getRecipientKpp()
-        );
-    }
-
-    private record CplKey(
-            long year,
-            long kfsr,
-            long kcsr,
-            long kvr,
-            long kosgu,
-            long kvsr,
-            long dopFk,
-            long dopEk,
-            long dopKr,
-            long purpose,
-            String recipientInn,
-            String recipientKpp
-    ) {
     }
 }

@@ -53,8 +53,7 @@ public record CofinancingLevelExcelRow(
 
         Double financeFederal,
         Double financeRegional
-) implements DescriptedBudgetItemData {
-    @Override
+) {
     public String kfsr() {
         return section + subsection;
     }

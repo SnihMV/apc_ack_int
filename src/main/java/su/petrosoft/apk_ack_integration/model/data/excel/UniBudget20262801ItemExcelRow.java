@@ -36,39 +36,6 @@ public record UniBudget20262801ItemExcelRow(
     Double novLimit,
     Double decLimit
 
-) implements DescriptedBudgetItemData {
-    @Override
-    public String kfsrTitle() {
-        return "";
-    }
+) {
 
-    @Override
-    public String kvsrTitle() {
-        return "";
-    }
-
-    @Override
-    public String kvrTitle() {
-        return "";
-    }
-
-    @Override
-    public String kosguTitle() {
-        return "";
-    }
-
-    @Override
-    public String dopEkTitle() {
-        return "";
-    }
-
-    @Override
-    public String purposeTitle() {
-        return "";
-    }
-
-    @Override
-    public String dopFkTitle() {
-        return "";
-    }
 }

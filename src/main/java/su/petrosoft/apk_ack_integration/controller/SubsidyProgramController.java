@@ -24,22 +24,22 @@ public class SubsidyProgramController {
     private final ExcelExtractor excelExtractor;
     private final BudgetItemService service;
 
-    @Operation(
-            summary = "Upload Excel file with subsidy programs",
-            description = "Upload an Excel file to create new subsidy programs. " +
-                    "File should contain specific columns and format."
-    )
-    @PostMapping("excel")
-    @ResponseStatus(HttpStatus.OK)
-    public void uploadExcel(
-            @Parameter(
-                    description = "Excel file with subsidy programs data",
-                    required = true,
-                    content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-            @RequestParam("file") MultipartFile file) {
+//    @Operation(
+//            summary = "Upload Excel file with subsidy programs",
+//            description = "Upload an Excel file to create new subsidy programs. " +
+//                    "File should contain specific columns and format."
+//    )
+//    @PostMapping("excel")
+//    @ResponseStatus(HttpStatus.OK)
+//    public void uploadExcel(
+//            @Parameter(
+//                    description = "Excel file with subsidy programs data",
+//                    required = true,
+//                    content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+//            @RequestParam("file") MultipartFile file) {
 //        List<BaseUniBudgetExcelRow> uniBudgetRows = excelExtractor.getUniBudgetCodedRows(file);
 //        List<DescriptedBudgetItemData> uniBudgetRows = excelExtractor.getUniBudget2026ClarifiedRows(file);
-        List<DescriptedBudgetItemData> uniBudgetRows = excelExtractor.getUniBudget20262801Rows(file);
-        service.createSubsidyProgramsTree(uniBudgetRows);
-    }
+//        List<DescriptedBudgetItemData> uniBudgetRows = excelExtractor.getUniBudget20262801Rows(file);
+//        service.createSubsidyProgramsTree(uniBudgetRows);
+//    }
 }

@@ -4,7 +4,7 @@ import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.creatingDictionaryInstanceRequestDto;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.requestDtoForGettingDictionaryDataByCodes;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.requestDtoToGetDictionaryDataByCodes;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -101,7 +101,7 @@ public class DictionaryService {
 
     public Map<String, Long> findByCodes(Dictionary dictionary, Set<String> codes) {
         List<InstanceDto> dtoList = restClient.getTableAttributesList(
-            requestDtoForGettingDictionaryDataByCodes(dictionary, codes));
+                requestDtoToGetDictionaryDataByCodes(dictionary, codes));
         return dtoList.stream()
             .collect(toMap(
                 dto -> extractData(dto.attributes(), dictionary.getCodeAttrId()),

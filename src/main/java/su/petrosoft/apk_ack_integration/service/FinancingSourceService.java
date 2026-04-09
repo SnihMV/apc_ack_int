@@ -9,7 +9,7 @@ import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import su.petrosoft.apk_ack_integration.model.enums.Operation;
+import su.petrosoft.apk_ack_integration.model.enums.UpsertAction;
 
 @Slf4j
 @Service
@@ -18,7 +18,7 @@ public class FinancingSourceService {
     private final ExcelExtractor excelExtractor;
     private final BudgetItemService budgetItemService;
 
-    public Map<Operation, Map<Long, Set<Long>>> createFinancingSources(MultipartFile file) {
+    public Map<UpsertAction, Map<Long, Set<Long>>> createFinancingSources(MultipartFile file) {
 //        List<UniBudgetCodedExcelRow> dtoList = excelExtractor.getUniBudgetCodedRows(file);
 //        List<DescriptedBudgetItemData> dtoList = excelExtractor.getUniBudget20262801Rows(file);
         List<DescriptedBudgetItemData> dtoList = excelExtractor.getUniBudget2026ClarifiedRows(file);

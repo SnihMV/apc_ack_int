@@ -30,11 +30,11 @@ public class ExtendedLimitService {
 //        return responseDto;
 //    }
 
-    public CreateBudgetItemsResponseDto createBudgetItem(MultipartFile file) {
-        List<DescriptedBudgetItemData> uniBudgetRows = excelExtractor.getUniBudgetCodedRows(file);
-        if (!uniBudgetRows.isEmpty()) {
-            budgetItemService.createNewBudgetItems(uniBudgetRows);
-        }
-        return new CreateBudgetItemsResponseDto(Collections.emptyMap());
-    }
+//    public CreateBudgetItemsResponseDto createBudgetItem(MultipartFile file) {
+//        List<DescriptedBudgetItemData> uniBudgetRows = excelExtractor.getUniBudgetCodedRows(file);
+//        if (!uniBudgetRows.isEmpty()) {
+//            budgetItemService.createNewBudgetItems(uniBudgetRows);
+//        }
+//        return new CreateBudgetItemsResponseDto(Collections.emptyMap());
+//    }
 }

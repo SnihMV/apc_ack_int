@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import su.petrosoft.apk_ack_integration.model.enums.UpsertAction;
 import su.petrosoft.apk_ack_integration.service.FinancingSourceService;
 
 import java.util.Map;
@@ -28,7 +29,7 @@ public class FinancingSourceController {
                     "File should contain specific columns and format.")
     @PostMapping("excel")
     @ResponseStatus(HttpStatus.OK)
-    public Map<su.petrosoft.apk_ack_integration.model.enums.Operation, Map<Long, Set<Long>>> createFinancingSources(
+    public Map<UpsertAction, Map<Long, Set<Long>>> createFinancingSources(
             @Parameter(description = "Excel file with financing sources data",
                     required = true,
                     content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
