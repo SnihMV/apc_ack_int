@@ -8,6 +8,7 @@ import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
 import su.petrosoft.apk_ack_integration.client.RestLoggingInterceptor;
 import su.petrosoft.apk_ack_integration.exception.StaleVersionException;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
+import su.petrosoft.apk_ack_integration.mapper.FinancingSourceMapper;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyProgramMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.DictionaryData;
@@ -17,7 +18,6 @@ import su.petrosoft.apk_ack_integration.model.data.CashPlanLimitData;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 import su.petrosoft.apk_ack_integration.model.data.DictionaryContaining;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateBudgetItemsResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.model.enums.UpsertAction;
@@ -60,13 +60,14 @@ import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getAttribu
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getAttributesToUpdate;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoForUpdate;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToCreateCpl;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGetCplByYear;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGetLimitsByYear;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGetCplIdentAttrsByCurrentYear;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.FS_TITLE;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.requestDtoToGetFsByCurrentYear;
+import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.requestDtoToGetSourcesByYear;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.*;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.SP_TITLE;
-import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoForUpdatingParentId;
-import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToFindAllSubsidyPrograms;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToUpdatingProgramByParentId;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToGetAllPrograms;
 
 @Slf4j
 @Component
@@ -77,12 +78,14 @@ public class BudgetItemService {
     private final DictionaryService dictionaryService;
     private final UniBudgetRowService rowProcessor;
     private final CashPlanLimitMapper cplMapper;
+    private final FinancingSourceMapper fsMapper;
     private final SubsidyProgramMapper spMapper;
     private final SubsidyProgramService subsidyProgramService;
     private final InstanceUpdater instanceUpdater;
     private final PlicanteRestClient plicanteRestClient;
     private final ExcelExtractor excelExtractor;
     private final RestLoggingInterceptor restLoggingInterceptor;
+    private final CashPlanLimitService cashPlanLimitService;
 
     public Set<SubsidyProgram> createSubsidyProgramsTree(
             List<DescriptedBudgetItemData> rowDtoList) {
@@ -144,7 +147,8 @@ public class BudgetItemService {
                                 toSet()
                         )));
 
-        Set<FinancingSource> existingFsList = apkService.findFinancingSources(requestDtoToGetFsByCurrentYear());
+        Set<FinancingSource> existingFsList = apkService.findFinancingSources(
+                requestDtoToGetSourcesByYear(LocalDate.now().getYear()));
 
         Map<FinancingSource, Set<Long>> fsMapToUpdate = existingFsList.stream()
                 .filter(fsToCplIdsMap::containsKey)
@@ -174,7 +178,7 @@ public class BudgetItemService {
             Map<UpsertAction, Map<Long, Set<Long>>> statistics
     ) {
         Map<SubsidyProgram, Long> existingSpMap = apkService.findSubsidyPrograms(
-                        requestDtoToFindAllSubsidyPrograms()).stream()
+                        requestDtoToGetAllPrograms()).stream()
                 .collect(toMap(
                         Function.identity(),
                         SubsidyProgram::getId
@@ -231,7 +235,7 @@ public class BudgetItemService {
                     continue;
                 }
                 parentId.ifPresent(createdSp::add);
-                long updatedSpId = apkService.updateSubsidyProgram(requestDtoForUpdatingParentId(sp));
+                long updatedSpId = apkService.updateSubsidyProgram(requestDtoToUpdatingProgramByParentId(sp));
                 updatedSp.add(updatedSpId);
             }
         }
@@ -292,7 +296,7 @@ public class BudgetItemService {
     ) {
 
         Map<CashPlanLimit, CashPlanLimit> existingCplMap = plicanteRestClient.getTableAttributesList(
-                requestDtoToGetCplByYear(LocalDate.now().getYear())).stream()
+                        requestDtoToGetLimitsByYear(LocalDate.now().getYear())).stream()
                 .map(cplMapper::toEntity)
                 .collect(toMap(
                         Function.identity(),
@@ -526,11 +530,34 @@ public class BudgetItemService {
 
     public Map<UpsertAction, Map<Long, Set<Long>>> saveAndUpdateBudgetItems(MultipartFile file) {
 
+        Map<UpsertAction, Map<Long, Set<Long>>> statistics = new HashMap<>(of(
+                CREATED, new HashMap<>(),
+                UPDATED, new HashMap<>()
+        ));
+
         List<DescriptedBudgetItemData> excelRows = excelExtractor.getUniBudget2026ClarifiedRows(file);
-        Map<UpsertAction, Map<Long, Set<Long>>> statistics = new HashMap<>();
+        if (excelRows.isEmpty()) {
+            return statistics;
+        }
 
         Map<Dictionary, Map<DictionaryData, Long>> dictionariesData = findOrCreateDictionariesData(excelRows, statistics);
-        List<InstanceDto> dtoList = plicanteRestClient.getTableAttributesList(requestDtoToGetCplByYear(LocalDate.now().getYear()));
+
+        Set<CashPlanLimit> currentYearLimits = plicanteRestClient.getTableAttributesList(
+                        requestDtoToGetLimitsByYear(LocalDate.now().getYear()))
+                .stream()
+                .map(cplMapper::toEntity)
+                .collect(toSet());
+
+        Set<FinancingSource> currentYearSources = plicanteRestClient.getTableAttributesList(
+                        requestDtoToGetSourcesByYear(LocalDate.now().getYear()))
+                .stream()
+                .map(fsMapper::toEntity)
+                .collect(toSet());
+
+        Set<SubsidyProgram> existingPrograms = plicanteRestClient.getTableAttributesList(requestDtoToGetAllPrograms())
+                .stream()
+                .map(spMapper::toEntity)
+                .collect(toSet());
 
         return statistics;
     }

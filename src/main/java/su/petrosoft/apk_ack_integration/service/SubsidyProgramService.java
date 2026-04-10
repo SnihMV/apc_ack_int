@@ -1,7 +1,7 @@
 package su.petrosoft.apk_ack_integration.service;
 
 import static java.util.stream.Collectors.toSet;
-import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToFindAllSubsidyPrograms;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToGetAllPrograms;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToFindSecondLevelSubsidyPrograms;
 
 import java.util.List;
@@ -51,7 +51,7 @@ public class SubsidyProgramService {
     public Set<SubsidyProgram> getAllSubsidyProgram(Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
         log.info("Getting all Subsidy_Programs ...");
         List<InstanceDto> dtoList = plicanteRestClient.getTableAttributesList(
-                requestDtoToFindAllSubsidyPrograms());
+                requestDtoToGetAllPrograms());
         Set<SubsidyProgram> subsidyPrograms = dtoList.stream()
                 .map(dto -> spMapper.toEntity(dto))
                 .collect(toSet());

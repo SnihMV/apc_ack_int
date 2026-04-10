@@ -15,6 +15,7 @@ public class ExceptionMessageClass {
     public static final String INCORRECT_PARKS_COUNT = "Количество техники, приобретенной с гос. поддержкой меньше текущего значения";
     public static final String INSTANCE_NOT_FOUND_BY_ID = "Экземпляр с id = [%d] журнала [%s] не найден";
     public static final String INSTANCE_NOT_FOUND = "Запрашиваемый экземпляр журнала [%s] не найден";
+    public static final String ATTRIBUTE_TYPE_MISMATCH = "Тип атрибута [id = %s] не соответствует ожидаемому";
     public static final String DICTIONARY_ID_NOT_FOUND = "Экземпляр справочника [%s] с id = [%d] не найден";
     public static final String DICTIONARY_CODE_NOT_FOUND = "Неверное значение [%s] справочника [%s]";
     public static final String DICTIONARY_NOT_OBTAINED = "Справочник [%s] не был извлечен из БД";

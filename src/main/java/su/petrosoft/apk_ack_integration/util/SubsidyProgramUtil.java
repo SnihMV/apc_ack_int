@@ -1,7 +1,9 @@
 package su.petrosoft.apk_ack_integration.util;
 
+import static su.petrosoft.apk_ack_integration.model.enums.SqlOperation.*;
 import static su.petrosoft.apk_ack_integration.model.enums.ViewType.DETAILED_FORM_VIEW;
 
+import java.util.Collection;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
@@ -44,10 +46,20 @@ public class SubsidyProgramUtil {
         return false;
     }
 
-    public static GetAttributesListRequestDto requestDtoToFindAllSubsidyPrograms() {
+    public static GetAttributesListRequestDto requestDtoToGetAllPrograms() {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(DETAILED_FORM_VIEW)
+                .build();
+    }
+
+    public static GetAttributesListRequestDto requestDtoToGetProgramsByKcsr(Collection<Long> kcsrIds) {
+        return GetAttributesListRequestDto.builder()
+                .templateId(TEMPLATE_ID)
+                .viewType(DETAILED_FORM_VIEW)
+                .filter(new Filter(List.of(
+                        new LinkedFilterAttribute(KCSR_ATTR, List.of(IN), kcsrIds)
+                )))
                 .build();
     }
 
@@ -67,23 +79,6 @@ public class SubsidyProgramUtil {
                 .build();
     }
 
-    public static GetAttributesListRequestDto getThirdLevelSpRequestDto() {
-        return GetAttributesListRequestDto.builder()
-                .templateId(TEMPLATE_ID)
-                .viewType(DETAILED_FORM_VIEW)
-                .attributes(List.of(
-                        new RequestedAttribute(NAME_ATTR),
-                        new RequestedAttribute(CODE_ATTR),
-                        new RequestedAttribute(LEVEL_ATTR),
-                        new RequestedAttribute(PARENT_ATTR),
-                        new RequestedAttribute(KCSR_ATTR),
-                        new RequestedAttribute(DOPKR_ATTR)
-                ))
-                .filter(new Filter(List.of(
-                        new LongFilterAttribute(LEVEL_ATTR, 3))))
-                .build();
-    }
-
     public static GetAttributesListRequestDto requestDtoToFindSubsidyProgramsForCreationCofinancingLevels() {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
@@ -98,20 +93,7 @@ public class SubsidyProgramUtil {
                 .build();
     }
 
-    public static GetAttributesListRequestDto getSpByKcsrAndDopkrRequestDto(String kcsrCode, String dopkrCode) {
-        return GetAttributesListRequestDto.builder()
-                .templateId(TEMPLATE_ID)
-                .viewType(DETAILED_FORM_VIEW)
-                .attributes(List.of(
-                        new RequestedAttribute(COFIN_LVL_ATTR)))
-                .filter(new Filter(List.of(
-                        new LongFilterAttribute(LEVEL_ATTR, 3),
-                        new LinkedFilterAttribute(KCSR_ATTR, kcsrCode),
-                        new LinkedFilterAttribute(DOPKR_ATTR, dopkrCode))))
-                .build();
-    }
-
-    public static UpdateInstanceRequestDto buildUpdatingByCofinLevelsRequestDto(SubsidyProgram updatedSP) {
+    public static UpdateInstanceRequestDto requestDtoToUpdatingProgramByCofinLevels(SubsidyProgram updatedSP) {
         return new UpdateInstanceRequestDto(
                 InstanceDto.builder()
                         .id(updatedSP.getId())
@@ -122,7 +104,7 @@ public class SubsidyProgramUtil {
                         .build());
     }
 
-    public static UpdateInstanceRequestDto requestDtoForUpdatingParentId(SubsidyProgram sp) {
+    public static UpdateInstanceRequestDto requestDtoToUpdatingProgramByParentId(SubsidyProgram sp) {
         return new UpdateInstanceRequestDto(
             InstanceDto.builder()
                 .id(sp.getId())
