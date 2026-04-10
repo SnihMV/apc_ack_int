@@ -9,6 +9,7 @@ import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
 import su.petrosoft.apk_ack_integration.exception.EntityNotFoundException;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
+import su.petrosoft.apk_ack_integration.model.DictionaryData;
 import su.petrosoft.apk_ack_integration.model.data.CashPlanLimitData;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 import su.petrosoft.apk_ack_integration.model.data.xml.UpdateCashPlanLimitXml;
@@ -55,6 +56,7 @@ public class CashPlanLimitService {
     private final CashPlanLimitMapper cplMapper;
     private final InstanceUpdater instanceUpdater;
     private final PlicanteRestClient plicanteRestClient;
+    private final DictionaryService dictionaryService;
 
 //    public CreatingInstancesFromFileResponseDto createFromRosterKBKExcel(MultipartFile file) {
 //
@@ -112,7 +114,7 @@ public class CashPlanLimitService {
 
         UpdateCashPlanLimitXml xml = xmlExtractor.extractFromFile(file, UpdateCashPlanLimitXml.class);
 
-        Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
+        Map<Dictionary, Map<DictionaryData, Long>> codesMap = dictionaryService.getDataMap(
                 Set.of(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
 
         CashPlanLimit updater = cplMapper.toEntity(xml, codesMap);
@@ -142,7 +144,7 @@ public class CashPlanLimitService {
         }
         log.debug("Received request for Cash Plan Limit update: [{}]", xml);
 
-        Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
+        Map<Dictionary, Map<DictionaryData, Long>> codesMap = dictionaryService.getDataMap(
                 Set.of(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
         CashPlanLimit updatingCPL = cplMapper.toEntity(xml, codesMap);
         log.debug("Mapped to CashPlanLimit: [{}]", updatingCPL);

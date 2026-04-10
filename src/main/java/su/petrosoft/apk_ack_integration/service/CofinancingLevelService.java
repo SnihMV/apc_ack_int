@@ -28,6 +28,7 @@ import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
 import su.petrosoft.apk_ack_integration.mapper.CofinancingLevelMapper;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyProgramMapper;
 import su.petrosoft.apk_ack_integration.model.CofinancingLevel;
+import su.petrosoft.apk_ack_integration.model.DictionaryData;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.data.excel.CofinancingLevel2026ExcelRow;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
@@ -46,6 +47,7 @@ public class CofinancingLevelService {
     private final ApkPlicanteService plicanteService;
     private final CofinancingLevelMapper cflMapper;
     private final SubsidyProgramMapper spMapper;
+    private final DictionaryService dictionaryService;
 
     @SneakyThrows
     public CreateCofinancingLevelsFromExcelResponseDto createFromExcel(MultipartFile file) {
@@ -54,7 +56,7 @@ public class CofinancingLevelService {
 
         Map<Long, Set<Long>> updatedByFile = new HashMap<>();
         Map<Long, Set<Long>> updatedByDefault = new HashMap<>();
-        Map<Dictionary, Map<String, Long>> codesMap = plicanteService.getDictionariesCodesMap(
+        Map<Dictionary, Map<DictionaryData, Long>> codesMap = dictionaryService.getDataMap(
             Set.of(KCSR, DOPKR, OWNERSHIP_FORM, FINANCING_FORM));
         Map<SubsidyProgram, Set<CofinancingLevel>> excelEntitiesMap = rows.stream()
                 .collect(groupingBy(
@@ -82,7 +84,7 @@ public class CofinancingLevelService {
         return new CreateCofinancingLevelsFromExcelResponseDto(updatedByFile, updatedByDefault);
     }
 
-    private Map<Long, Set<Long>> updateSubsidyProgramsByDefaultCofinLevel(HashSet<SubsidyProgram> unAffectedSps, Map<Dictionary, Map<String, Long>> codesMap) {
+    private Map<Long, Set<Long>> updateSubsidyProgramsByDefaultCofinLevel(HashSet<SubsidyProgram> unAffectedSps, Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
         Map<Long, Set<Long>> result = new HashMap<>();
         Set<SubsidyProgram> emptySubsidyPrograms = unAffectedSps.stream()
                 .filter(sp -> sp.getCofinancingLevelIds().isEmpty())
@@ -111,7 +113,7 @@ public class CofinancingLevelService {
     private Map<Long, Set<Long>> updateSubsidyProgramsByCofinLevelsFromFile(
             HashSet<SubsidyProgram> affectedSps,
             Map<SubsidyProgram, Set<CofinancingLevel>> excelEntitiesMap,
-            Map<Dictionary, Map<String, Long>> codesMap
+            Map<Dictionary, Map<DictionaryData, Long>> codesMap
     ) {
         if (!affectedSps.isEmpty()) {
             log.info("Updating Subsidy_Programs by Cofinancing_Levels from file ...");
@@ -139,7 +141,7 @@ public class CofinancingLevelService {
             log.debug("Count of new Cofinancing_Levels to create: [{}]", fromFileCflList.size());
             Set<Long> savedCflIds = new HashSet<>();
             for (CofinancingLevel cflToSave : fromFileCflList) {
-                InstanceDto savedInstance = plicanteRestClient.createInstance(creatingRequestDto(cflToSave, codesMap));
+                InstanceDto savedInstance = plicanteRestClient.createInstance(creatingRequestDto(cflToSave));
                 savedCflIds.add(savedInstance.id());
             }
             existingCflIdList.addAll(savedCflIds);

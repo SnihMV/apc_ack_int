@@ -4,7 +4,6 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractShortForm;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -24,6 +23,7 @@ import su.petrosoft.apk_ack_integration.mapper.SubsidyProgramMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.CofinancingLevel;
 import su.petrosoft.apk_ack_integration.model.CropProductionMainForm;
+import su.petrosoft.apk_ack_integration.model.DictionaryData;
 import su.petrosoft.apk_ack_integration.model.FinancingSource;
 import su.petrosoft.apk_ack_integration.model.OperationalReport;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
@@ -100,7 +100,7 @@ public class ApkPlicanteService {
         return spMapper.toEntity(instance);
     }
 
-    public FinancingSource createFinancingSource(FinancingSource financingSource, Map<Dictionary, Map<String, Long>> codesMap) {
+    public FinancingSource createFinancingSource(FinancingSource financingSource, Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
         CreateInstanceRequestDto createDto = fsMapper.toCreatingDto(financingSource, codesMap);
         log.info("Creating new Financing_Source ...");
         InstanceDto instance = apkRestClient.createInstance(createDto);
@@ -108,10 +108,10 @@ public class ApkPlicanteService {
         return fsMapper.toEntity(instance);
     }
 
-    public CofinancingLevel createCofinancingLevel(CofinancingLevel cofinancingLevel, Map<Dictionary, Map<String, Long>> codesMap) {
+    public CofinancingLevel createCofinancingLevel(CofinancingLevel cofinancingLevel, Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
         CreateInstanceRequestDto creatingDto = cflMapper.toCreatingDto(cofinancingLevel, codesMap);
         InstanceDto created = apkRestClient.createInstance(creatingDto);
-        return cflMapper.toEntity(created, codesMap);
+        return cflMapper.toEntity(created);
     }
 
     public long updateCashPlanLimit(CashPlanLimit updatedCpl) {

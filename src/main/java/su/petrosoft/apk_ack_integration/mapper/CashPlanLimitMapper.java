@@ -15,6 +15,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
+import su.petrosoft.apk_ack_integration.model.DictionaryData;
 import su.petrosoft.apk_ack_integration.model.data.CashPlanLimitData;
 import su.petrosoft.apk_ack_integration.model.data.xml.CreateCashPlanLimitsXml.Line;
 import su.petrosoft.apk_ack_integration.model.data.xml.UpdateCashPlanLimitXml;
@@ -33,7 +34,7 @@ import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 @RequiredArgsConstructor
 public class CashPlanLimitMapper {
 
-    public CashPlanLimit toEntity(Line line, Map<Dictionary, Map<String, Long>> codesMap) {
+    public CashPlanLimit toEntity(Line line, Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
 
         PlDirectionLine pl = getPlDirectionLine(line);
 
@@ -66,7 +67,7 @@ public class CashPlanLimitMapper {
                 .build();
     }
 
-    public CashPlanLimit toEntity(UpdateCashPlanLimitXml updateDto, Map<Dictionary, Map<String, Long>> codesMap) {
+    public CashPlanLimit toEntity(UpdateCashPlanLimitXml updateDto, Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
 
         PlDirectionLine pl = updateDto.plDirectionLineWrapper().plDirectionLine();
 
@@ -167,20 +168,20 @@ public class CashPlanLimitMapper {
 
     public CashPlanLimit toEntity(
             CashPlanLimitData dto,
-            Map<Dictionary, Map<String, Long>> codesMap
+            Map<Dictionary, Map<DictionaryData, Long>> codesMap
     ) {
 
         return CashPlanLimit.builder()
                 .year((long) LocalDateTime.now().getYear())
-                .kfsr(dictionaryIdByCode(codesMap, KFSR, dto.kfsr()))
-                .kvsr(dictionaryIdByCode(codesMap, KVSR, dto.kvsr()))
-                .kcsr(dictionaryIdByCode(codesMap, KCSR, dto.kcsr()))
-                .kvr(dictionaryIdByCode(codesMap, KVR, dto.kvr()))
-                .kosgu(dictionaryIdByCode(codesMap, KOSGU, dto.kosgu()))
-                .dopEk(dictionaryIdByCode(codesMap, DOPEK, dto.dopEk()))
-                .dopKr(dictionaryIdByCode(codesMap, DOPKR, dto.dopKr()))
-                .purpose(dictionaryIdByCode(codesMap, PURPOSE, dto.purpose()))
-                .dopFk(dictionaryIdByCode(codesMap, DOPFK, dto.dopFk()))
+                .kfsr(codesMap.get(KFSR).get(new DictionaryData(dto.kfsr(), null)))
+                .kvsr(codesMap.get(KVSR).get(new DictionaryData(dto.kvsr(), null)))
+                .kcsr(codesMap.get(KCSR).get(new DictionaryData(dto.kcsr(), null)))
+                .kvr(codesMap.get(KVR).get(new DictionaryData(dto.kvr(), null)))
+                .kosgu(codesMap.get(KOSGU).get(new DictionaryData(dto.kosgu(), null)))
+                .dopEk(codesMap.get(DOPEK).get(new DictionaryData(dto.dopEk(), null)))
+                .dopKr(codesMap.get(DOPKR).get(new DictionaryData(dto.dopKr(), null)))
+                .purpose(codesMap.get(PURPOSE).get(new DictionaryData(dto.purpose(), null)))
+                .dopFk(codesMap.get(DOPFK).get(new DictionaryData(dto.dopFk(), null)))
                 .recipientName(dto.recipientName())
                 .recipientInn(dto.recipientInn())
                 .recipientKpp(dto.recipientKpp())

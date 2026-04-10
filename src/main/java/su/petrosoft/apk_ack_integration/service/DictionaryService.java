@@ -2,10 +2,12 @@ package su.petrosoft.apk_ack_integration.service;
 
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.creatingDictionaryInstanceRequestDto;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.requestDtoToCreateDictionaryInstance;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.requestDtoToGetDictionaryData;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.requestDtoToGetDictionaryDataByCodes;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
+import su.petrosoft.apk_ack_integration.model.DictionaryData;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 import su.petrosoft.apk_ack_integration.model.data.DictionaryContaining;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
@@ -70,13 +73,13 @@ public class DictionaryService {
             DictionaryContaining containable,
             Map<String, Long> existingValues
     ) {
-        String code = containable.dictionariesData().get(dictionary).getKey();
-        String description = containable.dictionariesData().get(dictionary).getValue();
+        String code = containable.dictionariesData().get(dictionary).getCode();
+        String description = containable.dictionariesData().get(dictionary).getDescription();
 
         return existingValues.entrySet().stream()
                 .anyMatch(entry -> code.equalsIgnoreCase(entry.getKey()))
                 ? Optional.empty()
-                : Optional.of(createNewDictionaryInstance(dictionary, code, description));
+                : Optional.of(createNewDictionaryInstance(dictionary, new DictionaryData(code, description)));
     }
 
 //    private long updateDictionaryDescription(
@@ -87,25 +90,40 @@ public class DictionaryService {
 //restClient.updateInstance()
 //    }
 
-    public long createNewDictionaryInstance(
-            Dictionary dictionary,
-            String code,
-            String description
-    ) {
-        log.info("Creating new [{}] dictionary instance ...", dictionary);
-        long id = restClient.createInstance(creatingDictionaryInstanceRequestDto(dictionary, code, description)).id();
-        log.info("Added new [{}] dictionary instance. Code: [{}], Description: [{}], id: [{}]",
-                dictionary, code, description, id);
-        return id;
+    public long createNewDictionaryInstance(Dictionary dictionary, DictionaryData data) {
+        return restClient.createInstance(
+                requestDtoToCreateDictionaryInstance(dictionary, data.getCode(), data.getDescription())).id();
     }
 
-    public Map<String, Long> findByCodes(Dictionary dictionary, Set<String> codes) {
+    public Map<DictionaryData, Long> findByCodes(Dictionary dictionary, Set<String> codes) {
         List<InstanceDto> dtoList = restClient.getTableAttributesList(
                 requestDtoToGetDictionaryDataByCodes(dictionary, codes));
         return dtoList.stream()
             .collect(toMap(
-                dto -> extractData(dto.attributes(), dictionary.getCodeAttrId()),
+                dto -> new DictionaryData(
+                        extractData(dto.attributes(), dictionary.getCodeAttrId()),
+                        extractData(dto.attributes(), dictionary.getDescriptionAttrId())),
                 InstanceDto::id
             ));
+    }
+
+    public Map<Dictionary, Map<DictionaryData, Long>> getDataMap(Set<Dictionary> dictionaries) {
+        Map<Dictionary, Map<DictionaryData, Long>> dictionaryDataMap = new EnumMap<>(Dictionary.class);
+        for (Dictionary dictionary : dictionaries) {
+            Map<DictionaryData, Long> dictionaryData = getDictionaryData(dictionary);
+            dictionaryDataMap.put(dictionary, dictionaryData);
+        }
+        return dictionaryDataMap;
+
+    }
+
+    public Map<DictionaryData, Long> getDictionaryData(Dictionary dictionary) {
+        return restClient.getTableAttributesList(requestDtoToGetDictionaryData(dictionary)).stream()
+                .collect(toMap(
+                        dto -> new DictionaryData(
+                                extractData(dto.attributes(), dictionary.getCodeAttrId()),
+                                extractData(dto.attributes(), dictionary.getDescriptionAttrId())),
+                        InstanceDto::id
+                ));
     }
 }

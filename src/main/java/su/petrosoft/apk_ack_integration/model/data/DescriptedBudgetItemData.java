@@ -1,6 +1,8 @@
 package su.petrosoft.apk_ack_integration.model.data;
 
 import java.util.Map.Entry;
+
+import su.petrosoft.apk_ack_integration.model.DictionaryData;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
 import java.util.Map;
@@ -36,17 +38,17 @@ public interface DescriptedBudgetItemData extends BudgetItemData, DictionaryCont
     String dopFkTitle();
 
     @Override
-    default Map<Dictionary, Entry<String, String>> dictionariesData() {
+    default Map<Dictionary, DictionaryData> dictionariesData() {
         return Map.of(
-            KFSR, Map.entry(kfsr(), kfsrTitle()),
-            KVSR, Map.entry(kvsr(), kvsrTitle()),
-            KCSR, Map.entry(kcsr(), kcsrTitle()),
-            KVR, Map.entry(kvr(), kvrTitle()),
-            KOSGU, Map.entry(kosgu(), kosguTitle()),
-            DOPEK, Map.entry(dopEk(), dopEkTitle()),
-            DOPKR, Map.entry(dopKr(), dopKrTitle()),
-            DOPFK, Map.entry(dopFk(), dopFkTitle()),
-            PURPOSE, Map.entry(purpose(), purposeTitle())
+                KFSR, new DictionaryData(kfsr(), kfsrTitle()),
+                KVSR, new DictionaryData(kvsr(), kvsrTitle()),
+                KCSR, new DictionaryData(kcsr(), kcsrTitle()),
+                KVR, new DictionaryData(kvr(), kvrTitle()),
+                KOSGU, new DictionaryData(kosgu(), kosguTitle()),
+                DOPEK, new DictionaryData(dopEk(), dopEkTitle()),
+                DOPKR, new DictionaryData(dopKr(), dopKrTitle()),
+                DOPFK, new DictionaryData(dopFk(), dopFkTitle()),
+                PURPOSE, new DictionaryData(purpose(), purposeTitle())
         );
     }
 }

@@ -1,7 +1,5 @@
 package su.petrosoft.apk_ack_integration.mapper;
 
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.FINANCING_FORM;
-import static su.petrosoft.apk_ack_integration.model.enums.FinancingForm.finFormByCode;
 import static su.petrosoft.apk_ack_integration.model.enums.FinancingForm.finFormByCoeffs;
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.COEFF_FB_ATTR;
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.COEFF_OB_ATTR;
@@ -10,7 +8,6 @@ import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.OWN_FORM_
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.START_DATE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.TEMPLATE_ID;
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.YEAR_ATTR;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryCodeById;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.toEpochMilli;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.toLocalDate;
@@ -22,6 +19,7 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.CofinancingLevel;
+import su.petrosoft.apk_ack_integration.model.DictionaryData;
 import su.petrosoft.apk_ack_integration.model.data.CofinancingLevelData;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
@@ -31,7 +29,6 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttri
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
-import su.petrosoft.apk_ack_integration.model.enums.FinancingForm;
 import su.petrosoft.apk_ack_integration.util.DictionaryUtil;
 
 @Slf4j
@@ -50,7 +47,7 @@ public class CofinancingLevelMapper {
                 .build();
     }
 
-    public CofinancingLevel toEntity(InstanceDto created, Map<Dictionary, Map<String, Long>> codesMap) {
+    public CofinancingLevel toEntity(InstanceDto created) {
 
         List<Attribute<?>> attributes = created.attributes();
 
@@ -66,7 +63,7 @@ public class CofinancingLevelMapper {
                 .build();
     }
 
-    public CofinancingLevel toEntity(List<Attribute<?>> attributes, Map<Dictionary, Map<String, Long>> codesMap) {
+    public CofinancingLevel toEntity(List<Attribute<?>> attributes, Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
 
 //        FinancingForm financingForm = finFormByCode(dictionaryCodeById(codesMap, FINANCING_FORM, extractData(attributes, FIN_FORM_ATTR)));
 
@@ -80,7 +77,7 @@ public class CofinancingLevelMapper {
                 .build();
     }
 
-    public CreateInstanceRequestDto toCreatingDto(CofinancingLevel cl, Map<Dictionary, Map<String, Long>> codesMap) {
+    public CreateInstanceRequestDto toCreatingDto(CofinancingLevel cl, Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
 
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()

@@ -3,23 +3,28 @@ package su.petrosoft.apk_ack_integration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
+import su.petrosoft.apk_ack_integration.client.RestLoggingInterceptor;
 import su.petrosoft.apk_ack_integration.exception.StaleVersionException;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyProgramMapper;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
+import su.petrosoft.apk_ack_integration.model.DictionaryData;
 import su.petrosoft.apk_ack_integration.model.FinancingSource;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.data.CashPlanLimitData;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 import su.petrosoft.apk_ack_integration.model.data.DictionaryContaining;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateBudgetItemsResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.model.enums.UpsertAction;
 import su.petrosoft.apk_ack_integration.util.FinancingSourceUtil;
 import su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
@@ -55,7 +60,7 @@ import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getAttribu
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getAttributesToUpdate;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoForUpdate;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToCreateCpl;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGetCplByCurrentYear;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGetCplByYear;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGetCplIdentAttrsByCurrentYear;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.FS_TITLE;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.requestDtoToGetFsByCurrentYear;
@@ -76,20 +81,19 @@ public class BudgetItemService {
     private final SubsidyProgramService subsidyProgramService;
     private final InstanceUpdater instanceUpdater;
     private final PlicanteRestClient plicanteRestClient;
+    private final ExcelExtractor excelExtractor;
+    private final RestLoggingInterceptor restLoggingInterceptor;
 
     public Set<SubsidyProgram> createSubsidyProgramsTree(
             List<DescriptedBudgetItemData> rowDtoList) {
 
-        Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
-                Set.of(KCSR, DOPKR));
-        Set<SubsidyProgram> existingSndLvlSubsidyPrograms = subsidyProgramService.getAllSecondLevelSpFromDb(
-                codesMap);
+        Map<Dictionary, Map<DictionaryData, Long>> codesMap = dictionaryService.getDataMap(Set.of(KCSR, DOPKR));
+        Set<SubsidyProgram> existingSndLvlSubsidyPrograms = subsidyProgramService.getAllSecondLevelSpFromDb(codesMap);
         log.info("Found [{}] Subsidy Programs in DB with level 2",
                 existingSndLvlSubsidyPrograms.size());
 
         List<DescriptedBudgetItemData> unknownSpRows = rowDtoList.stream()
-                .filter(row -> !existingSndLvlSubsidyPrograms.contains(
-                        spMapper.toSecondLevelSP(row, codesMap)))
+                .filter(row -> !existingSndLvlSubsidyPrograms.contains(spMapper.toSecondLevelSP(row, codesMap)))
                 .toList();
 
         Set<SubsidyProgram> createdSP = new LinkedHashSet<>();
@@ -114,7 +118,7 @@ public class BudgetItemService {
                 UPDATED, new HashMap<>()
         ));
 
-        Map<Dictionary, Map<String, Long>> codesMap = findOrCreateDictionariesFromFile(rows, statistics);
+        Map<Dictionary, Map<DictionaryData, Long>> codesMap = findOrCreateDictionariesData(rows, statistics);
 
         Map<CashPlanLimit, CashPlanLimit> updatedCplMap = upsertCashPlanLimits(rows, codesMap, statistics);
 
@@ -128,7 +132,7 @@ public class BudgetItemService {
     private void upsertFinancingSources(
             Map<CashPlanLimit, CashPlanLimit> existingCplMap,
             Map<SubsidyProgram, Long> existingSpMap,
-            Map<Dictionary, Map<String, Long>> codesMap,
+            Map<Dictionary, Map<DictionaryData, Long>> codesMap,
             Map<UpsertAction, Map<Long, Set<Long>>> statistics
     ) {
         Map<FinancingSource, Set<Long>> fsToCplIdsMap = existingCplMap.keySet()
@@ -166,7 +170,7 @@ public class BudgetItemService {
 
     private Map<SubsidyProgram, Long> upsertSubsidyPrograms(
             List<DescriptedBudgetItemData> rows,
-            Map<Dictionary, Map<String, Long>> codesMap,
+            Map<Dictionary, Map<DictionaryData, Long>> codesMap,
             Map<UpsertAction, Map<Long, Set<Long>>> statistics
     ) {
         Map<SubsidyProgram, Long> existingSpMap = apkService.findSubsidyPrograms(
@@ -283,12 +287,12 @@ public class BudgetItemService {
 
     private Map<CashPlanLimit, CashPlanLimit> upsertCashPlanLimits(
             List<DescriptedBudgetItemData> rows,
-            Map<Dictionary, Map<String, Long>> codesMap,
+            Map<Dictionary, Map<DictionaryData, Long>> codesMap,
             Map<UpsertAction, Map<Long, Set<Long>>> statistics
     ) {
 
         Map<CashPlanLimit, CashPlanLimit> existingCplMap = plicanteRestClient.getTableAttributesList(
-                requestDtoToGetCplByCurrentYear()).stream()
+                requestDtoToGetCplByYear(LocalDate.now().getYear())).stream()
                 .map(cplMapper::toEntity)
                 .collect(toMap(
                         Function.identity(),
@@ -340,7 +344,7 @@ public class BudgetItemService {
     private Set<Long> createAllFs(
             Map<FinancingSource, Set<Long>> toCreateFsMap,
             Map<SubsidyProgram, Long> existingSpMap,
-            Map<Dictionary, Map<String, Long>> codesMap,
+            Map<Dictionary, Map<DictionaryData, Long>> codesMap,
             Map<UpsertAction, Map<Long, Set<Long>>> statistics
     ) {
         Set<Long> createdFsIds = new HashSet<>();
@@ -425,56 +429,47 @@ public class BudgetItemService {
                 .build();
     }
 
-    private Map<Dictionary, Map<String, Long>> findOrCreateDictionariesFromFile(
+    private Map<Dictionary, Map<DictionaryData, Long>> findOrCreateDictionariesData(
             List<? extends DictionaryContaining> rows,
             Map<UpsertAction, Map<Long, Set<Long>>> statistics
     ) {
 
-        Map<Dictionary, Map<String, String>> dictionariesFromFile = rows.stream()
+        Map<Dictionary, Set<DictionaryData>> dictionariesFromRows = rows.stream()
                 .flatMap(row -> row.dictionariesData().entrySet().stream())
                 .collect(groupingBy(
-                        Map.Entry::getKey,
-                        toMap(
-                                entry -> entry.getValue().getKey(),
-                                entry -> entry.getValue().getValue(),
-                                (v1, v2) -> v1
-                        )));
+                        Entry::getKey,
+                        mapping(Entry::getValue, toSet())
+                ));
 
-        Map<Dictionary, Map<String, Long>> resultMap = new HashMap<>();
-        for (Entry<Dictionary, Map<String, String>> entry : dictionariesFromFile.entrySet()) {
+        Map<Dictionary, Map<DictionaryData, Long>> result = new HashMap<>();
+        for (Entry<Dictionary, Set<DictionaryData>> entry : dictionariesFromRows.entrySet()) {
             Dictionary dictionary = entry.getKey();
-            Map<String, String> dictionaryData = entry.getValue();
+            Set<String> codes = entry.getValue().stream()
+                    .map(DictionaryData::getCode)
+                    .collect(toSet());
 
-            Map<String, Long> foundCodes = dictionaryService.findByCodes(dictionary, dictionaryData.keySet());
-            resultMap.put(dictionary, foundCodes);
+            Map<DictionaryData, Long> foundData = dictionaryService.findByCodes(dictionary, codes);
+            result.put(dictionary, foundData);
 
-            Set<String> codesToCreate = new HashSet<>(dictionaryData.keySet());
-            codesToCreate.removeAll(foundCodes.keySet());
+            HashSet<DictionaryData> dataToCreate = new HashSet<>(dictionariesFromRows.get(dictionary));
+            dataToCreate.removeAll(foundData.keySet());
 
-            Map<String, Long> createdCodes = codesToCreate.stream()
-                    .map(code -> entry(
-                            dictionaryService.createNewDictionaryInstance(dictionary, code,
-                                    dictionaryData.get(code)),
-                            code))
-                    .collect(toMap(
-                            Entry::getValue,
-                            Entry::getKey
-                    ));
-            if (!createdCodes.isEmpty()) {
-                statistics.computeIfAbsent(CREATED, k -> new HashMap<>())
-                        .put(dictionary.getTemplateId(), new HashSet<>(createdCodes.values()));
-                resultMap.computeIfAbsent(dictionary, k -> new HashMap<>()).putAll(createdCodes);
+            Map<DictionaryData, Long> createdData = new HashMap<>();
+            for (DictionaryData data : dataToCreate) {
+                long createdId = dictionaryService.createNewDictionaryInstance(dictionary, data);
+                createdData.put(data, createdId);
             }
+            statistics.get(CREATED).put(dictionary.getTemplateId(), new HashSet<>(createdData.values()));
         }
-        return resultMap;
+
+        return result;
     }
 
     public CreateBudgetItemsResponseDto createNewBudgetItems(
             List<? extends DescriptedBudgetItemData> rows) {
-        Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
+        Map<Dictionary, Map<DictionaryData, Long>> codesMap = dictionaryService.getDataMap(
                 Set.of(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
-        List<? extends DescriptedBudgetItemData> rowsToProcess = getNotExistedCplRows(rows,
-                codesMap);
+        List<? extends DescriptedBudgetItemData> rowsToProcess = getNotExistedCplRows(rows, codesMap);
         if (rowsToProcess.isEmpty()) {
             log.info("No one unique BudgetItems in excel found to be saved");
             return new CreateBudgetItemsResponseDto(emptyMap());
@@ -493,18 +488,16 @@ public class BudgetItemService {
         for (DescriptedBudgetItemData row : rowsToProcess) {
             CashPlanLimit savedCpl = rowProcessor.saveCashPlanLimit(row, codesMap);
             savedCplList.add(savedCpl);
-            SubsidyProgram thirdLevelSp = rowProcessor.getOrCreateSubsidyProgram(row,
-                    existingSpList, codesMap);
+            SubsidyProgram thirdLevelSp = rowProcessor.getOrCreateSubsidyProgram(row, existingSpList, codesMap);
             savedSpList.add(thirdLevelSp);
-            FinancingSource savedFs = rowProcessor.saveFinancingSource(row, savedCpl, thirdLevelSp,
-                    codesMap);
+            FinancingSource savedFs = rowProcessor.saveFinancingSource(row, savedCpl, thirdLevelSp, codesMap);
             savedFsList.add(savedFs);
         }
         return buildResponse(savedCplList, savedSpList, savedFsList);
     }
 
     private <T extends CashPlanLimitData> List<T> getNotExistedCplRows(List<T> rows,
-                                                                       Map<Dictionary, Map<String, Long>> codesMap) {
+                                                                       Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
         Set<CashPlanLimit> currentYearExistingLimits = apkService.findCashPlanLimits(
                 requestDtoToGetCplIdentAttrsByCurrentYear());
         log.info("Found [{}] CashPlanLimits for [{}] year in DB", currentYearExistingLimits.size(),
@@ -530,4 +523,17 @@ public class BudgetItemService {
                                 .map(FinancingSource::getId)
                                 .collect(toSet())));
     }
+
+    public Map<UpsertAction, Map<Long, Set<Long>>> saveAndUpdateBudgetItems(MultipartFile file) {
+
+        List<DescriptedBudgetItemData> excelRows = excelExtractor.getUniBudget2026ClarifiedRows(file);
+        Map<UpsertAction, Map<Long, Set<Long>>> statistics = new HashMap<>();
+
+        Map<Dictionary, Map<DictionaryData, Long>> dictionariesData = findOrCreateDictionariesData(excelRows, statistics);
+        List<InstanceDto> dtoList = plicanteRestClient.getTableAttributesList(requestDtoToGetCplByYear(LocalDate.now().getYear()));
+
+        return statistics;
+    }
+
+
 }

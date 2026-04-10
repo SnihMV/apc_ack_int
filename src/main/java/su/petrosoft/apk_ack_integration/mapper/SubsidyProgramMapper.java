@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import su.petrosoft.apk_ack_integration.model.DictionaryData;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.data.CofinancingLevelData;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
@@ -59,7 +60,7 @@ public class SubsidyProgramMapper {
 //                .build();
 //    }
 
-    public SubsidyProgram toFirstLevelSP(DescriptedBudgetItemData dto, Map<Dictionary, Map<String, Long>> codesMap) {
+    public SubsidyProgram toFirstLevelSP(DescriptedBudgetItemData dto, Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
         return SubsidyProgram.builder()
             .level(1L)
             .title(dto.kcsrTitle())
@@ -67,7 +68,7 @@ public class SubsidyProgramMapper {
                 .build();
     }
 
-    public SubsidyProgram toSecondLevelSP(DescriptedBudgetItemData dto, Map<Dictionary, Map<String, Long>> codesMap) {
+    public SubsidyProgram toSecondLevelSP(DescriptedBudgetItemData dto, Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
         return SubsidyProgram.builder()
                 .level(2L)
                 .title(dto.dopKrTitle())
@@ -94,7 +95,7 @@ public class SubsidyProgramMapper {
         );
     }
 
-    public SubsidyProgram toEntity(CofinancingLevelData row, Map<Dictionary, Map<String, Long>> codesMap) {
+    public SubsidyProgram toEntity(CofinancingLevelData row, Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
         return SubsidyProgram.builder()
                 .level(2L)
                 .kcsr(dictionaryIdByCode(codesMap, KCSR, row.kcsr()))

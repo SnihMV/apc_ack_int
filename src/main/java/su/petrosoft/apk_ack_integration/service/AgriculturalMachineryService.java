@@ -15,6 +15,7 @@ import su.petrosoft.apk_ack_integration.exception.MachineryParkReportParsingExce
 import su.petrosoft.apk_ack_integration.mapper.AgriculturalMachineryParkMapper;
 import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryPark;
 import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryReport;
+import su.petrosoft.apk_ack_integration.model.DictionaryData;
 import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceResponseDto;
@@ -90,6 +91,7 @@ public class AgriculturalMachineryService {
     private final AgriculturalMachineryParkMapper ampMapper;
     private final ObjectMapper objectMapper;
     private final PlicanteSoapClient plicanteSoapClient;
+    private final DictionaryService dictionaryService;
 
     public void processReport(Long id) {
         AgriculturalMachineryReport report = getAgriculturalMachineryReport(id);
@@ -164,7 +166,7 @@ public class AgriculturalMachineryService {
     private List<AgriculturalMachineryPark> createMachineryParks(AgriculturalMachineryReport jsonReport, SubsidyRecipient recipient) {
         Map<Integer, List<String>> groupedValues = parseJsonReport(jsonReport.getJsonReport());
 
-        Map<Dictionary, Map<String, Long>> codesMap = apkPlicanteService.getDictionariesCodesMap(
+        Map<Dictionary, Map<DictionaryData, Long>> codesMap = dictionaryService.getDataMap(
                 Set.of(DISTRICT, TR_V_M, KOM_ZER, KOM_KOR, MAS_SH, MAS_ZH, MAS_ZH_PT_KOR, DIS_BEN_GEN,
                         MAS_KART, IZD_AVT_PR, TECH_FISHING, OTHER_TECH, PROD_COUNTRY, TECH_STATE));
 
@@ -283,7 +285,7 @@ public class AgriculturalMachineryService {
         }
     }
 
-    private AgriculturalMachineryPark createParkFromFieldList(List<String> fields, Map<Dictionary, Map<String, Long>> codesMap) {
+    private AgriculturalMachineryPark createParkFromFieldList(List<String> fields, Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
         Map<String, Long> indicateMap = Map.of(
                 "Тракторы всех марок", 537L,
                 "Комбайны зерноуборочные", 538L,

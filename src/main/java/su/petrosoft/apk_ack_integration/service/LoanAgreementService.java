@@ -26,6 +26,7 @@ import su.petrosoft.apk_ack_integration.exception.InvalidXmlException;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyAmountMapper;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyProgramMapper;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyRecipientMapper;
+import su.petrosoft.apk_ack_integration.model.DictionaryData;
 import su.petrosoft.apk_ack_integration.model.SubsidyAmount;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.SubsidyRecipient;
@@ -46,6 +47,7 @@ public class LoanAgreementService {
     private final SubsidyRecipientMapper srMapper;
     private final SubsidyProgramMapper spMapper;
     private final SubsidyAmountMapper saMapper;
+    private final DictionaryService dictionaryService;
 
     public void createSubsidyAmountsFromXml(MultipartFile file) {
         CreatingSubsidiesAmountsXml xml =
@@ -74,7 +76,7 @@ public class LoanAgreementService {
             log.warn("Subsidy programs not found");
             return;
         }
-        Map<Dictionary, Map<String, Long>> codesMap = apkPlicanteService.getDictionariesCodesMap(Set.of(KCSR, DOPKR));
+        Map<Dictionary, Map<DictionaryData, Long>> codesMap = dictionaryService.getDataMap(Set.of(KCSR, DOPKR));
         Map<SubsidyProgram, Long> spMap = foundSpInstances.stream()
                 .map(spMapper::toEntity)
                 .collect(Collectors.toMap(

@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import su.petrosoft.apk_ack_integration.model.CofinancingLevel;
+import su.petrosoft.apk_ack_integration.model.DictionaryData;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DateAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DoubleAttribute;
@@ -49,7 +50,7 @@ public class CofinanceLevelUtil {
                 .build();
     }
 
-    public static CreateInstanceRequestDto creatingRequestDto(CofinancingLevel cflToSave, Map<Dictionary, Map<String, Long>> codesMap) {
+    public static CreateInstanceRequestDto creatingRequestDto(CofinancingLevel cflToSave) {
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()
                         .templateId(TEMPLATE_ID)

@@ -118,12 +118,12 @@ public class CashPlanLimitUtil {
                 .build();
     }
 
-    public static GetAttributesListRequestDto requestDtoToGetCplByCurrentYear() {
+    public static GetAttributesListRequestDto requestDtoToGetCplByYear(long year) {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(ViewType.DETAILED_FORM_VIEW)
                 .filter(new Filter(List.of(
-                        new LongFilterAttribute(YEAR_ATTR, LocalDate.now().getYear())
+                        new LongFilterAttribute(YEAR_ATTR, year)
                 )))
                 .build();
     }

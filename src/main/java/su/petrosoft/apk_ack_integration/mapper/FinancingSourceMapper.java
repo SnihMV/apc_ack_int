@@ -22,7 +22,6 @@ import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.PURPOSE_
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.SUBSIDY_PROGRAM_ATTR;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.TEMPLATE_ID;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.YEAR_ATTR;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryCodeById;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractAllData;
@@ -35,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import su.petrosoft.apk_ack_integration.model.DictionaryData;
 import su.petrosoft.apk_ack_integration.model.FinancingSource;
 import su.petrosoft.apk_ack_integration.model.data.BudgetItemData;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
@@ -45,7 +45,6 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribu
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
-import su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil;
 
 @Slf4j
 @Component
@@ -73,7 +72,7 @@ public class FinancingSourceMapper {
             .build();
     }
 
-    public FinancingSource toEntity(BudgetItemData row, Map<Dictionary, Map<String, Long>> codesMap) {
+    public FinancingSource toEntity(BudgetItemData row, Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
         return FinancingSource.builder()
             .year((long) LocalDate.now().getYear())
             .kvsr(dictionaryIdByCode(codesMap, KVSR, row.kvsr()))
@@ -91,7 +90,7 @@ public class FinancingSourceMapper {
     }
 
     public CreateInstanceRequestDto toCreatingDto(FinancingSource fs,
-        Map<Dictionary, Map<String, Long>> codesMap) {
+                                                  Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
         long ownershipFormId = ownershipForm(dictionaryCodeById(codesMap, KOSGU, fs.getKosgu()));
         return new CreateInstanceRequestDto(
             InstanceDto.builder()
@@ -146,7 +145,7 @@ public class FinancingSourceMapper {
         return sb.toString();
     }
 
-    private String concatKBK(FinancingSource fs, Map<Dictionary, Map<String, Long>> codesMap) {
+    private String concatKBK(FinancingSource fs, Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
         return LocalDateTime.now().getYear() +
                "-" +
                 dictionaryCodeById(codesMap, KVSR, fs.getKvsr()) +

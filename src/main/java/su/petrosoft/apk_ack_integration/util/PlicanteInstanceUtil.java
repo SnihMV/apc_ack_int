@@ -4,6 +4,7 @@ import static su.petrosoft.apk_ack_integration.model.enums.SqlOperation.*;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_CODE_NOT_FOUND;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_DESCRIPTION_NOT_FOUND;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_ID_NOT_FOUND;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_NOT_OBTAINED;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -20,6 +21,7 @@ import java.util.function.Function;
 
 import lombok.extern.slf4j.Slf4j;
 import su.petrosoft.apk_ack_integration.exception.DictionaryException;
+import su.petrosoft.apk_ack_integration.model.DictionaryData;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
@@ -31,7 +33,6 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.StringFilterAt
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreatingInstancesFromFileResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
-import su.petrosoft.apk_ack_integration.model.enums.SqlOperation;
 
 @Slf4j
 public class PlicanteInstanceUtil {
@@ -56,7 +57,8 @@ public class PlicanteInstanceUtil {
         return GetAttributesListRequestDto.builder()
                 .templateId(dictionary.getTemplateId())
                 .attributes(List.of(
-                        new RequestedAttribute(dictionary.getCodeAttrId())
+                        new RequestedAttribute(dictionary.getCodeAttrId()),
+                        new RequestedAttribute(dictionary.getDescriptionAttrId())
                 ))
                 .filter(new Filter(List.of(
                         new StringFilterAttribute(dictionary.getCodeAttrId(), List.of(IN), codes)
@@ -64,7 +66,7 @@ public class PlicanteInstanceUtil {
                 .build();
     }
 
-    public static CreateInstanceRequestDto creatingDictionaryInstanceRequestDto(
+    public static CreateInstanceRequestDto requestDtoToCreateDictionaryInstance(
             Dictionary type, String code, String description) {
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()
@@ -86,20 +88,27 @@ public class PlicanteInstanceUtil {
 //                        .build());
 //    }
 
-    public static Long dictionaryIdByCode(Map<Dictionary, Map<String, Long>> codesMap,
-                                          Dictionary dictionary, String code) {
-        Long id = codesMap.get(dictionary).get(code);
+    public static Long dictionaryIdByCode(
+            Map<Dictionary, Map<DictionaryData, Long>> codesMap,
+            Dictionary dictionary,
+            String code
+    ) {
+        Map<DictionaryData, Long> dataToIdMap= codesMap.get(dictionary);
+        if (dataToIdMap == null) {
+            throw new IllegalStateException(DICTIONARY_NOT_OBTAINED.formatted(dictionary));
+        }
+        Long id = dataToIdMap.get(new DictionaryData(code));
         if (id == null) {
             throw new DictionaryException(DICTIONARY_CODE_NOT_FOUND.formatted(code, dictionary));
         }
         return id;
     }
 
-    public static String dictionaryCodeById(Map<Dictionary, Map<String, Long>> codesMap, Dictionary dictionary, long id) {
+    public static String dictionaryCodeById(Map<Dictionary, Map<DictionaryData, Long>> codesMap, Dictionary dictionary, long id) {
         return codesMap.get(dictionary).entrySet().stream()
                 .filter(entry -> entry.getValue().equals(id))
                 .findFirst()
-                .map(Entry::getKey)
+                .map(entry -> entry.getKey().getCode())
                 .orElseThrow(() -> new DictionaryException(DICTIONARY_ID_NOT_FOUND.formatted(dictionary, id)));
     }
 
@@ -173,6 +182,16 @@ public class PlicanteInstanceUtil {
         return findAttribute(attributes, attributeId)
                 .map(Attribute::getAllPairs)
                 .orElse(Collections.emptyList());
+    }
+
+    public static GetAttributesListRequestDto requestDtoToGetDictionaryData(Dictionary dictionary) {
+        return GetAttributesListRequestDto.builder()
+                .templateId(dictionary.getTemplateId())
+                .attributes(List.of(
+                        new RequestedAttribute(dictionary.getCodeAttrId()),
+                        new RequestedAttribute(dictionary.getDescriptionAttrId())
+                ))
+                .build();
     }
 
     private static Optional<Attribute<?>> findAttribute(List<Attribute<?>> attributes, long attributeId) {
