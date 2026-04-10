@@ -27,12 +27,12 @@ public class FinancingSourceUtil {
     public static final long CASH_PLAN_LIMITS_ATTR = 4429;
     public static final long CONCAT_KBK_ATTR = 3842;
 
-    public static GetAttributesListRequestDto requestDtoToGetFsByCurrentYear() {
+    public static GetAttributesListRequestDto requestDtoToGetSourcesByYear(long year) {
         return GetAttributesListRequestDto.builder()
                 .templateId(TEMPLATE_ID)
                 .viewType(ViewType.DETAILED_FORM_VIEW)
                 .filter(new Filter(List.of(
-                    new LongFilterAttribute(YEAR_ATTR, LocalDateTime.now().getYear())
+                    new LongFilterAttribute(YEAR_ATTR, year)
                 )))
                 .build();
     }

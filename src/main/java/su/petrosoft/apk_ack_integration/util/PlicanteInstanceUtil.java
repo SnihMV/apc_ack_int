@@ -1,6 +1,7 @@
 package su.petrosoft.apk_ack_integration.util;
 
 import static su.petrosoft.apk_ack_integration.model.enums.SqlOperation.*;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.ATTRIBUTE_TYPE_MISMATCH;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_CODE_NOT_FOUND;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_DESCRIPTION_NOT_FOUND;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_ID_NOT_FOUND;
@@ -21,6 +22,7 @@ import java.util.function.Function;
 
 import lombok.extern.slf4j.Slf4j;
 import su.petrosoft.apk_ack_integration.exception.DictionaryException;
+import su.petrosoft.apk_ack_integration.exception.InstanceIllegalStateException;
 import su.petrosoft.apk_ack_integration.model.DictionaryData;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
@@ -151,37 +153,11 @@ public class PlicanteInstanceUtil {
             .orElse(null);
     }
 
-    public static String extractShortForm(List<Attribute<?>> attributes, Long attributeId) {
-        return findAttribute(attributes, attributeId)
-                .map(Attribute::getShortForm)
-                .orElse(null);
-    }
-
     @SuppressWarnings("unchecked")
-    public static <T> Collection<T> extractAllData(List<Attribute<?>> attributes,
-                                                   long attributeId) {
+    public static <T> Collection<T> extractAllData(List<Attribute<?>> attributes, long attributeId) {
         return findAttribute(attributes, attributeId)
                 .map(attr -> (Collection<T>) attr.getAllData())
                 .orElse(new ArrayList<>());
-    }
-
-    public static List<String> extractAllShortForms(List<Attribute<?>> attributes,
-                                                    long attributeId) {
-        return findAttribute(attributes, attributeId)
-                .map(Attribute::getAllShortForms)
-                .orElse(Collections.emptyList());
-    }
-
-    public static Pair extractPair(List<Attribute<?>> attributes, long attributeId) {
-        return findAttribute(attributes, attributeId)
-                .map(Attribute::getPair)
-                .orElse(null);
-    }
-
-    public static List<Pair> extractAllPairs(List<Attribute<?>> attributes, long attributeId) {
-        return findAttribute(attributes, attributeId)
-                .map(Attribute::getAllPairs)
-                .orElse(Collections.emptyList());
     }
 
     public static GetAttributesListRequestDto requestDtoToGetDictionaryData(Dictionary dictionary) {

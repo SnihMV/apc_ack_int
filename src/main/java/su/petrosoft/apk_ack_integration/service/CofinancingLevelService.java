@@ -10,7 +10,7 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.OWNERSHIP_
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.creatingRequestDto;
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.getCofinLevelRepresentationRequestDto;
 import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.getDefaultCfl;
-import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.buildUpdatingByCofinLevelsRequestDto;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToUpdatingProgramByCofinLevels;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToFindSubsidyProgramsForCreationCofinancingLevels;
 
 import java.util.Collection;
@@ -100,7 +100,7 @@ public class CofinancingLevelService {
             for (SubsidyProgram updatedSp : emptySubsidyPrograms) {
                 updatedSp.setCofinancingLevelIds(List.of(defaultInstanceId));
                 log.info("Save updating Subsidy_Program [{}]", updatedSp);
-                plicanteRestClient.updateInstance(buildUpdatingByCofinLevelsRequestDto(updatedSp));
+                plicanteRestClient.updateInstance(requestDtoToUpdatingProgramByCofinLevels(updatedSp));
                 result.put(updatedSp.getId(), Set.of(defaultInstanceId));
             }
         } else {
@@ -146,7 +146,7 @@ public class CofinancingLevelService {
             }
             existingCflIdList.addAll(savedCflIds);
             log.info("Save updating Subsidy_Program [{}]", updatedSp);
-            plicanteRestClient.updateInstance(buildUpdatingByCofinLevelsRequestDto(updatedSp));
+            plicanteRestClient.updateInstance(requestDtoToUpdatingProgramByCofinLevels(updatedSp));
             result.put(subsidyProgramId, savedCflIds);
         }
         log.info("Updated [{}] Subsidy_Programs by excel data: [{}]",result.size(), result);

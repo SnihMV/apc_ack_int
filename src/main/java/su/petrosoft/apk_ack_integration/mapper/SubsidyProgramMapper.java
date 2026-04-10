@@ -47,7 +47,7 @@ public class SubsidyProgramMapper {
             .level(level)
             .parentId(extractData(attributes, PARENT_ATTR))
             .kcsr(extractData(attributes, KCSR_ATTR))
-            .dopKr(level == 2 ?  extractData(attributes, DOPKR_ATTR) : null)
+            .dopKr(level == 2 ? extractData(attributes, DOPKR_ATTR) : null)
             .cofinancingLevelIds(extractAllData(attributes, COFIN_LVL_ATTR))
             .build();
     }
@@ -80,7 +80,6 @@ public class SubsidyProgramMapper {
     public CreateInstanceRequestDto toCreateDto(SubsidyProgram sp) {
         List<Attribute<?>> attributes = new ArrayList<>(List.of(
                 new StringAttribute(NAME_ATTR, sp.getTitle()),
-//                new StringAttribute(CODE_ATTR, sp.getCode()),
                 new LongAttribute(LEVEL_ATTR, sp.getLevel()),
                 new LinkedAttribute(PARENT_ATTR, sp.getParentId()),
                 new LinkedAttribute(KCSR_ATTR,  sp.getKcsr())));
@@ -101,23 +100,5 @@ public class SubsidyProgramMapper {
                 .kcsr(dictionaryIdByCode(codesMap, KCSR, row.kcsr()))
                 .dopKr(dictionaryIdByCode(codesMap, DOPKR, row.dopKr()))
                 .build();
-    }
-
-
-    public UpdateInstanceRequestDto toUpdatingDto(SubsidyProgram subsidyProgram) {
-        return new UpdateInstanceRequestDto(
-                InstanceDto.builder()
-                        .id(subsidyProgram.getId())
-                        .templateId(CropProductionUtil.TEMPLATE_ID)
-                        .version(subsidyProgram.getVersion())
-                        .attributes(List.of(
-                                new LinkedAttribute(COFIN_LVL_ATTR, subsidyProgram.getCofinancingLevelIds())))
-                        .build());
-    }
-
-    private List<LinkedValue> getLinkedValuesFromIds(List<Long> linkedIds) {
-        return linkedIds.stream()
-                .map(LinkedValue::new)
-                .toList();
     }
 }
