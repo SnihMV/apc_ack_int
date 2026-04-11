@@ -1,28 +1,22 @@
 package su.petrosoft.apk_ack_integration.service;
 
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.requestDtoToCreateDictionaryInstance;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.requestDtoToGetDictionaryData;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.requestDtoToGetDictionaryDataByCodes;
-
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
+import su.petrosoft.apk_ack_integration.exception.DictionaryException;
 import su.petrosoft.apk_ack_integration.model.DictionaryData;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 import su.petrosoft.apk_ack_integration.model.data.DictionaryContaining;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
+
+import java.util.*;
+
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.SAVING_WITHOUT_DESCRIPTION;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
 
 @Slf4j
 @Service
@@ -91,6 +85,9 @@ public class DictionaryService {
 //    }
 
     public long createNewDictionaryInstance(Dictionary dictionary, DictionaryData data) {
+        if (data.getDescription() == null || data.getDescription().isBlank()) {
+            throw new DictionaryException(SAVING_WITHOUT_DESCRIPTION.formatted(dictionary, data.getCode()));
+        }
         return restClient.createInstance(
                 requestDtoToCreateDictionaryInstance(dictionary, data.getCode(), data.getDescription())).id();
     }

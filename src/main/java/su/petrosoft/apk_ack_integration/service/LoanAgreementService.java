@@ -3,7 +3,7 @@ package su.petrosoft.apk_ack_integration.service;
 import static su.petrosoft.apk_ack_integration.model.data.xml.CreatingSubsidiesAmountsXml.SubsidyAmountXml;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPKR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KCSR;
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.NO_CONTENT;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.FILE_NO_CONTENT;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToFindSecondLevelSubsidyPrograms;
@@ -54,7 +54,7 @@ public class LoanAgreementService {
                 xmlExtractor.extractFromFile(file, CreatingSubsidiesAmountsXml.class);
         List<SubsidyAmountXml> amountXmlList = xml.amountXmlList();
         if (amountXmlList == null || amountXmlList.isEmpty()) {
-            throw new InvalidXmlException(NO_CONTENT.formatted(file.getOriginalFilename()));
+            throw new InvalidXmlException(FILE_NO_CONTENT.formatted(file.getOriginalFilename()));
         }
         List<String> innListFromXml = amountXmlList.stream()
                 .map(SubsidyAmountXml::recipientINN)

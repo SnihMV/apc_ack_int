@@ -2,8 +2,10 @@ package su.petrosoft.apk_ack_integration.util;
 
 public class ExceptionMessageClass {
     public static final String FILE_IS_EMPTY = "Файл [%s] пустой";
-    public static final String FAILED_TO_PARSE_XML = "Не удалось обработать xml. Причина: %s\"";
-    public static final String NO_CONTENT = "File [%s] has no effective content";
+    public static final String FILE_NO_CODE_DESCRIPTION = "В файле отсутствует наименование кода [%s] справочника [%s]";
+    public static final String MISMATCH_CODE_DESCRIPTIONS = "Наименование кода [%s] справочника [%s] в файле [%s] не соответствует существующему [%s]";
+    public static final String FAILED_TO_PARSE_XML = "Не удалось обработать xml. Причина: \"%s\"";
+    public static final String FILE_NO_CONTENT = "Файл [%s] не содержит предметной информации";
     public static final String MARKER_NOT_FOUND = "Не найдена строка с маркерами района [%s%s] в шаблоне";
     public static final String INVALID_MARKER = "Неверный формат маркера: [%s]";
     public static final String REPORTS_NOT_FOUND = "Не нашлось ни одного оперативного отчета с заданными параметрами";
@@ -20,6 +22,7 @@ public class ExceptionMessageClass {
     public static final String DICTIONARY_CODE_NOT_FOUND = "Неверное значение [%s] справочника [%s]";
     public static final String DICTIONARY_NOT_OBTAINED = "Справочник [%s] не был извлечен из БД";
     public static final String DICTIONARY_DESCRIPTION_NOT_FOUND = "Не найдено описание кода [%s] в справочнике [%s]";
+    public static final String SAVING_WITHOUT_DESCRIPTION = "Попытка сохранить экземпляр справочника [%s] без расшифровки для кода [%s]";
     public static final String MANAGED_DICTIONARY_NOT_FOUND = "Управляемый справочник [%s] не найден";
     public static final String INSTANCE_STALE_VERSION = "Объект [id = %d] был изменен в другой сессии";
     public static final String EMPTY_INSTANCE_ID = "Идентификатор объекта не определен (null)";
