@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
 import su.petrosoft.apk_ack_integration.client.RestLoggingInterceptor;
+import su.petrosoft.apk_ack_integration.exception.ExcelFileException;
 import su.petrosoft.apk_ack_integration.exception.StaleVersionException;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.mapper.FinancingSourceMapper;
@@ -21,53 +22,30 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateBudgetItemsResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.model.enums.UpsertAction;
+import su.petrosoft.apk_ack_integration.util.ExceptionMessageClass;
 import su.petrosoft.apk_ack_integration.util.FinancingSourceUtil;
 import su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 
 import static java.util.Collections.emptyMap;
-import static java.util.Map.*;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPEK;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPFK;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPKR;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KCSR;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KFSR;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KOSGU;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVR;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVSR;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.PURPOSE;
+import static java.util.Map.entry;
+import static java.util.Map.of;
+import static java.util.stream.Collectors.*;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.*;
 import static su.petrosoft.apk_ack_integration.model.enums.UpsertAction.CREATED;
 import static su.petrosoft.apk_ack_integration.model.enums.UpsertAction.UPDATED;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.TEMPLATE_ID;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.TEMPLATE_TITLE;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getAttributesToCreate;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.getAttributesToUpdate;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoForUpdate;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToCreateCpl;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGetLimitsByYear;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGetCplIdentAttrsByCurrentYear;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.*;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.FILE_NO_CODE_DESCRIPTION;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.MISMATCH_CODE_DESCRIPTIONS;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.FS_TITLE;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.requestDtoToGetSourcesByYear;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.*;
-import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.SP_TITLE;
-import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToUpdatingProgramByParentId;
-import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.requestDtoToGetAllPrograms;
 
 @Slf4j
 @Component
@@ -121,7 +99,9 @@ public class BudgetItemService {
                 UPDATED, new HashMap<>()
         ));
 
-        Map<Dictionary, Map<DictionaryData, Long>> codesMap = findOrCreateDictionariesData(rows, statistics);
+        Map<Dictionary, Map<DictionaryData, Long>> codesMap = new HashMap<>();
+
+        fillDictionaryMapByRows(rows, codesMap, statistics);
 
         Map<CashPlanLimit, CashPlanLimit> updatedCplMap = upsertCashPlanLimits(rows, codesMap, statistics);
 
@@ -433,40 +413,82 @@ public class BudgetItemService {
                 .build();
     }
 
-    private Map<Dictionary, Map<DictionaryData, Long>> findOrCreateDictionariesData(
+    private void fillDictionaryMapByRows(
             List<? extends DictionaryContaining> rows,
+            Map<Dictionary, Map<DictionaryData, Long>> dictionaryMap,
             Map<UpsertAction, Map<Long, Set<Long>>> statistics
     ) {
+        Map<Dictionary, Set<DictionaryData>> dictionariesDataFromRows = collectDictionaryData(rows);
 
-        Map<Dictionary, Set<DictionaryData>> dictionariesFromRows = rows.stream()
+        for (Entry<Dictionary, Set<DictionaryData>> entry : dictionariesDataFromRows.entrySet()) {
+            Dictionary dictionary = entry.getKey();
+            Set<DictionaryData> data = entry.getValue();
+
+            Map<DictionaryData, Long> foundData = findDictionaryData(dictionary, data);
+
+            HashSet<DictionaryData> dataToCreate = new HashSet<>(dictionariesDataFromRows.get(dictionary));
+            dataToCreate.removeAll(foundData.keySet());
+
+            Map<DictionaryData, Long> createdData = createData(dictionary, dataToCreate);
+            foundData.putAll(createdData);
+
+            dictionaryMap.computeIfAbsent(dictionary, k -> new HashMap<>()).putAll(foundData);
+
+            if (!createdData.isEmpty()) {
+                statistics.computeIfAbsent(CREATED, k -> new HashMap<>())
+                        .computeIfAbsent(dictionary.getTemplateId(), m -> new HashSet<>())
+                        .addAll(createdData.values());
+            }
+        }
+    }
+
+    private Map<DictionaryData, Long> findDictionaryData(Dictionary dictionary, Set<DictionaryData> inputData) {
+        Set<String> codes = inputData.stream()
+                .map(DictionaryData::getCode)
+                .collect(toSet());
+        Map<DictionaryData, Long> foundData = dictionaryService.findByCodes(dictionary, codes);
+        if (!foundData.isEmpty()) {
+            checkSafety(dictionary, inputData, foundData);
+        }
+        return foundData;
+    }
+
+    private static void checkSafety(Dictionary dictionary, Set<DictionaryData> inputData, Map<DictionaryData, Long> foundData) {
+        Map<DictionaryData, String> searchingMap = inputData.stream()
+                .collect(toMap(
+                        Function.identity(),
+                        DictionaryData::getDescription
+                ));
+        for (DictionaryData data : foundData.keySet()) {
+            String foundDescription = data.getDescription().trim();
+            String inputDescription = searchingMap.get(data);
+            if (inputDescription != null && !inputDescription.isBlank()
+                    && !foundDescription.equalsIgnoreCase(inputDescription)) {
+                throw new ExcelFileException(MISMATCH_CODE_DESCRIPTIONS.formatted(
+                        data.getCode(), dictionary, foundDescription, inputDescription));
+            }
+        }
+    }
+
+    private Map<Dictionary, Set<DictionaryData>> collectDictionaryData(List<? extends DictionaryContaining> rows) {
+        return rows.stream()
                 .flatMap(row -> row.dictionariesData().entrySet().stream())
                 .collect(groupingBy(
                         Entry::getKey,
                         mapping(Entry::getValue, toSet())
                 ));
+    }
 
-        Map<Dictionary, Map<DictionaryData, Long>> result = new HashMap<>();
-        for (Entry<Dictionary, Set<DictionaryData>> entry : dictionariesFromRows.entrySet()) {
-            Dictionary dictionary = entry.getKey();
-            Set<String> codes = entry.getValue().stream()
-                    .map(DictionaryData::getCode)
-                    .collect(toSet());
-
-            Map<DictionaryData, Long> foundData = dictionaryService.findByCodes(dictionary, codes);
-            result.put(dictionary, foundData);
-
-            HashSet<DictionaryData> dataToCreate = new HashSet<>(dictionariesFromRows.get(dictionary));
-            dataToCreate.removeAll(foundData.keySet());
-
-            Map<DictionaryData, Long> createdData = new HashMap<>();
-            for (DictionaryData data : dataToCreate) {
-                long createdId = dictionaryService.createNewDictionaryInstance(dictionary, data);
-                createdData.put(data, createdId);
+    private Map<DictionaryData, Long> createData(Dictionary dictionary, HashSet<DictionaryData> dataToCreate) {
+        Map<DictionaryData, Long> createdData = new HashMap<>();
+        for (DictionaryData data : dataToCreate) {
+            if (data.getDescription() == null || data.getDescription().isBlank()) {
+                throw new ExcelFileException(FILE_NO_CODE_DESCRIPTION.formatted(data.getCode(), dictionary));
             }
-            statistics.get(CREATED).put(dictionary.getTemplateId(), new HashSet<>(createdData.values()));
+            long createdId = dictionaryService.createNewDictionaryInstance(dictionary, data);
+            createdData.put(data, createdId);
         }
-
-        return result;
+        return createdData;
     }
 
     public CreateBudgetItemsResponseDto createNewBudgetItems(
@@ -530,17 +552,16 @@ public class BudgetItemService {
 
     public Map<UpsertAction, Map<Long, Set<Long>>> saveAndUpdateBudgetItems(MultipartFile file) {
 
+        List<DescriptedBudgetItemData> excelRows = excelExtractor.getUniBudget2026ClarifiedRows(file);
+        if (excelRows.isEmpty()) {
+            throw new ExcelFileException(ExceptionMessageClass.FILE_IS_EMPTY.formatted(file.getOriginalFilename()));
+        }
+        Map<Dictionary, Map<DictionaryData, Long>> dictionaryMap = new HashMap<>();
         Map<UpsertAction, Map<Long, Set<Long>>> statistics = new HashMap<>(of(
                 CREATED, new HashMap<>(),
                 UPDATED, new HashMap<>()
         ));
-
-        List<DescriptedBudgetItemData> excelRows = excelExtractor.getUniBudget2026ClarifiedRows(file);
-        if (excelRows.isEmpty()) {
-            return statistics;
-        }
-
-        Map<Dictionary, Map<DictionaryData, Long>> dictionariesData = findOrCreateDictionariesData(excelRows, statistics);
+        fillDictionaryMapByRows(excelRows, dictionaryMap, statistics);
 
         Set<CashPlanLimit> currentYearLimits = plicanteRestClient.getTableAttributesList(
                         requestDtoToGetLimitsByYear(LocalDate.now().getYear()))
