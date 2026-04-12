@@ -22,7 +22,6 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateBudgetItemsResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.model.enums.UpsertAction;
-import su.petrosoft.apk_ack_integration.util.ExceptionMessageClass;
 import su.petrosoft.apk_ack_integration.util.FinancingSourceUtil;
 import su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil;
 
@@ -41,8 +40,7 @@ import static su.petrosoft.apk_ack_integration.model.enums.UpsertAction.CREATED;
 import static su.petrosoft.apk_ack_integration.model.enums.UpsertAction.UPDATED;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.TEMPLATE_ID;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.*;
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.FILE_NO_CODE_DESCRIPTION;
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.MISMATCH_CODE_DESCRIPTIONS;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.*;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.FS_TITLE;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.requestDtoToGetSourcesByYear;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.*;
@@ -101,7 +99,7 @@ public class BudgetItemService {
 
         Map<Dictionary, Map<DictionaryData, Long>> codesMap = new HashMap<>();
 
-        fillDictionaryMapByRows(rows, codesMap, statistics);
+        fillDictionaryMapByRows(codesMap, rows, statistics);
 
         Map<CashPlanLimit, CashPlanLimit> updatedCplMap = upsertCashPlanLimits(rows, codesMap, statistics);
 
@@ -305,7 +303,7 @@ public class BudgetItemService {
         Set<Long> createdIds = new HashSet<>();
         for (CashPlanLimit incoming : incomingCplSet) {
             if (!existingCplMap.containsKey(incoming)) {
-                Long id = plicanteRestClient.createInstance(requestDtoToCreateCpl(getAttributesToCreate(incoming))).id();
+                Long id = plicanteRestClient.createInstance(requestDtoToCreateCpl(incoming)).id();
                 incoming.setId(id);
                 createdIds.add(id);
                 existingCplMap.put(incoming, incoming);
@@ -414,8 +412,8 @@ public class BudgetItemService {
     }
 
     private void fillDictionaryMapByRows(
-            List<? extends DictionaryContaining> rows,
             Map<Dictionary, Map<DictionaryData, Long>> dictionaryMap,
+            List<? extends DictionaryContaining> rows,
             Map<UpsertAction, Map<Long, Set<Long>>> statistics
     ) {
         Map<Dictionary, Set<DictionaryData>> dictionariesDataFromRows = collectDictionaryData(rows);
@@ -435,8 +433,8 @@ public class BudgetItemService {
             dictionaryMap.computeIfAbsent(dictionary, k -> new HashMap<>()).putAll(foundData);
 
             if (!createdData.isEmpty()) {
-                statistics.computeIfAbsent(CREATED, k -> new HashMap<>())
-                        .computeIfAbsent(dictionary.getTemplateId(), m -> new HashSet<>())
+                statistics.get(CREATED)
+                        .computeIfAbsent(dictionary.getTemplateId(), k -> new HashSet<>())
                         .addAll(createdData.values());
             }
         }
@@ -447,9 +445,9 @@ public class BudgetItemService {
                 .map(DictionaryData::getCode)
                 .collect(toSet());
         Map<DictionaryData, Long> foundData = dictionaryService.findByCodes(dictionary, codes);
-        if (!foundData.isEmpty()) {
-            checkSafety(dictionary, inputData, foundData);
-        }
+//        if (!foundData.isEmpty()) {
+//            checkSafety(dictionary, inputData, foundData);
+//        }
         return foundData;
     }
 
@@ -465,7 +463,7 @@ public class BudgetItemService {
             if (inputDescription != null && !inputDescription.isBlank()
                     && !foundDescription.equalsIgnoreCase(inputDescription)) {
                 throw new ExcelFileException(MISMATCH_CODE_DESCRIPTIONS.formatted(
-                        data.getCode(), dictionary, foundDescription, inputDescription));
+                        data.getCode(), dictionary.getName(), inputDescription, foundDescription));
             }
         }
     }
@@ -554,34 +552,69 @@ public class BudgetItemService {
 
         List<DescriptedBudgetItemData> excelRows = excelExtractor.getUniBudget2026ClarifiedRows(file);
         if (excelRows.isEmpty()) {
-            throw new ExcelFileException(ExceptionMessageClass.FILE_IS_EMPTY.formatted(file.getOriginalFilename()));
+            throw new ExcelFileException(FILE_IS_EMPTY.formatted(file.getOriginalFilename()));
         }
-        Map<Dictionary, Map<DictionaryData, Long>> dictionaryMap = new HashMap<>();
         Map<UpsertAction, Map<Long, Set<Long>>> statistics = new HashMap<>(of(
                 CREATED, new HashMap<>(),
                 UPDATED, new HashMap<>()
         ));
-        fillDictionaryMapByRows(excelRows, dictionaryMap, statistics);
 
-        Set<CashPlanLimit> currentYearLimits = plicanteRestClient.getTableAttributesList(
-                        requestDtoToGetLimitsByYear(LocalDate.now().getYear()))
-                .stream()
-                .map(cplMapper::toEntity)
-                .collect(toSet());
+        Map<Dictionary, Map<DictionaryData, Long>> dictionaryMap = new HashMap<>();
+        fillDictionaryMapByRows(dictionaryMap, excelRows, statistics);
 
-        Set<FinancingSource> currentYearSources = plicanteRestClient.getTableAttributesList(
-                        requestDtoToGetSourcesByYear(LocalDate.now().getYear()))
-                .stream()
-                .map(fsMapper::toEntity)
-                .collect(toSet());
+        Set<CashPlanLimit> existingLimits = getLimits();
+        Set<FinancingSource> existingSources = getSources();
+        restoreSources(existingLimits, existingSources);
 
-        Set<SubsidyProgram> existingPrograms = plicanteRestClient.getTableAttributesList(requestDtoToGetAllPrograms())
-                .stream()
-                .map(spMapper::toEntity)
-                .collect(toSet());
+        Set<SubsidyProgram> existingPrograms = getPrograms(existingSources);
+        restorePrograms(existingSources, existingPrograms);
 
         return statistics;
     }
 
+    private void restoreSources(Set<CashPlanLimit> existingLimits, Set<FinancingSource> existingSources) {
+        Map<FinancingSource, Set<Long>> sourceFromLimitMap = existingLimits.stream()
+                .collect(groupingBy(
+                        this::extractFsFromCpl,
+                        mapping(CashPlanLimit::getId, toSet())
+                ));
+        Set<FinancingSource> sourcesToCreate = new HashSet<>(sourceFromLimitMap.keySet());
+        sourcesToCreate.removeAll(existingSources);
+        for (FinancingSource source : sourcesToCreate) {
+            source.setCashPlanLimitIds(sourceFromLimitMap.get(source));
+            plicanteRestClient.createInstance(FinancingSourceUtil.requestDtoToCreateFinancingSource(source))
+        }
+    }
+
+    private void restorePrograms(Set<FinancingSource> existingSources, Set<SubsidyProgram> existingPrograms) {
+
+    }
+
+    private Set<SubsidyProgram> getPrograms(Set<FinancingSource> sources) {
+        Set<Long> ids = sources.stream()
+                .map(FinancingSource::getKcsr)
+                .collect(toSet());
+        return plicanteRestClient.getTableAttributesList(
+                        requestDtoToGetProgramsByKcsrIds(ids))
+                .stream()
+                .map(spMapper::toEntity)
+                .collect(toSet());
+    }
+
+    private Set<FinancingSource> getSources() {
+        return plicanteRestClient.getTableAttributesList(
+                        requestDtoToGetSourcesByYear(LocalDate.now().getYear()))
+                .stream()
+                .map(fsMapper::toEntity)
+                .collect(toSet());
+    }
+
+    private Set<CashPlanLimit> getLimits() {
+        return plicanteRestClient.getTableAttributesList(
+                        requestDtoToGetLimitsByYear(LocalDate.now().getYear()))
+                .stream()
+                .map(cplMapper::toEntity)
+                .collect(toSet());
+    }
 
 }

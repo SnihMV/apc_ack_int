@@ -1,6 +1,17 @@
 package su.petrosoft.apk_ack_integration.util;
 
-import static su.petrosoft.apk_ack_integration.model.enums.SqlOperation.IN;
+import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
+import su.petrosoft.apk_ack_integration.model.data.xml.rpl.PlDirectionLine;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.*;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.StringFilterAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
+import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -10,22 +21,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
-import su.petrosoft.apk_ack_integration.model.data.xml.rpl.PlDirectionLine;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.DoubleAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.StringFilterAttribute;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.enums.ViewType;
+import static su.petrosoft.apk_ack_integration.model.enums.SqlOperation.IN;
 
 public class CashPlanLimitUtil {
 
@@ -151,11 +147,11 @@ public class CashPlanLimitUtil {
                 .build();
     }
 
-    public static CreateInstanceRequestDto requestDtoToCreateCpl(List<Attribute<?>> attributes) {
+    public static CreateInstanceRequestDto requestDtoToCreateCpl(CashPlanLimit limit) {
         return new CreateInstanceRequestDto(
                 InstanceDto.builder()
                         .templateId(TEMPLATE_ID)
-                        .attributes(attributes)
+                        .attributes(getAttributesToCreate(limit))
                         .build()
         );
     }
