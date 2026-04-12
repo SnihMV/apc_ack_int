@@ -1,11 +1,20 @@
 package su.petrosoft.apk_ack_integration.util;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import su.petrosoft.apk_ack_integration.model.FinancingSource;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class FinancingSourceUtil {
     public static final long TEMPLATE_ID = 25387;
@@ -32,18 +41,55 @@ public class FinancingSourceUtil {
                 .templateId(TEMPLATE_ID)
                 .viewType(ViewType.DETAILED_FORM_VIEW)
                 .filter(new Filter(List.of(
-                    new LongFilterAttribute(YEAR_ATTR, year)
+                        new LongFilterAttribute(YEAR_ATTR, year)
                 )))
                 .build();
     }
 
     public static GetAttributesListRequestDto requestDtoForGettingFsById(long id) {
         return GetAttributesListRequestDto.builder()
-            .templateId(TEMPLATE_ID)
-            .viewType(ViewType.DETAILED_FORM_VIEW)
-            .filter(new Filter(List.of(
-                new LongFilterAttribute(ID_ATTR, id)
-            )))
-            .build();
+                .templateId(TEMPLATE_ID)
+                .viewType(ViewType.DETAILED_FORM_VIEW)
+                .filter(new Filter(List.of(
+                        new LongFilterAttribute(ID_ATTR, id)
+                )))
+                .build();
+    }
+
+    public static CreateInstanceRequestDto requestDtoToCreateFinancingSource(FinancingSource source) {
+        return new CreateInstanceRequestDto(
+                InstanceDto.builder()
+                        .templateId(TEMPLATE_ID)
+                        .attributes(getAttributesToCreate(source))
+                        .build()
+        );
+    }
+
+    private static List<Attribute<?>> getAttributesToCreate(FinancingSource creator) {
+        if (creator.getYear() == null || creator.getKfsr() == null ||
+                creator.getKcsr() == null || creator.getKvr() == null ||
+                creator.getKosgu() == null || creator.getKvsr() == null ||
+                creator.getDopFk() == null || creator.getDopEk() == null ||
+                creator.getDopKr() == null || creator.getPurpose() == null
+        ) {
+            throw new IllegalStateException("Обязательный атрибут объекта не инициализирован");
+        }
+        List<Attribute<?>> attrs = new ArrayList<>(getIdentAttributes(creator));
+
+    }
+
+    private static Collection<? extends Attribute<?>> getIdentAttributes(FinancingSource creator) {
+        return List.of(
+                new LongAttribute(YEAR_ATTR, creator.getYear()),
+                new LinkedAttribute(KVSR_ATTR, creator.getKvsr()),
+                new LinkedAttribute(KFSR_ATTR, creator.getKfsr()),
+                new LinkedAttribute(KCSR_ATTR, creator.getKcsr()),
+                new LinkedAttribute(KVR_ATTR, creator.getKvr()),
+                new LinkedAttribute(KOSGU_ATTR, creator.getKosgu()),
+                new LinkedAttribute(DOPFK_ATTR, creator.getDopFk()),
+                new LinkedAttribute(DOPEK_ATTR, creator.getDopEk()),
+                new LinkedAttribute(DOPKR_ATTR, creator.getDopKr()),
+                new LinkedAttribute(PURPOSE_ATTR, creator.getPurpose())
+        );
     }
 }
