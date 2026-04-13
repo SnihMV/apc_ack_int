@@ -1,8 +1,10 @@
 package su.petrosoft.apk_ack_integration.util;
 
+import su.petrosoft.apk_ack_integration.model.DictionaryData;
 import su.petrosoft.apk_ack_integration.model.FinancingSource;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
@@ -10,11 +12,22 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttri
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
+import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPKR;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KCSR;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KFSR;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVR;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVSR;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryCodeById;
 
 public class FinancingSourceUtil {
     public static final long TEMPLATE_ID = 25387;
@@ -65,17 +78,37 @@ public class FinancingSourceUtil {
         );
     }
 
+    public static UpdateInstanceRequestDto requestDtoForUpdateByLimits(long id, long version, Set<Long> limitIds) {
+        return new UpdateInstanceRequestDto(
+                InstanceDto.builder()
+                        .id(id)
+                        .version(version)
+                        .attributes(List.of(
+                                new LinkedAttribute(CASH_PLAN_LIMITS_ATTR, limitIds)
+                        ))
+                        .build()
+        );
+    }
+
     private static List<Attribute<?>> getAttributesToCreate(FinancingSource creator) {
         if (creator.getYear() == null || creator.getKfsr() == null ||
                 creator.getKcsr() == null || creator.getKvr() == null ||
                 creator.getKosgu() == null || creator.getKvsr() == null ||
                 creator.getDopFk() == null || creator.getDopEk() == null ||
-                creator.getDopKr() == null || creator.getPurpose() == null
+                creator.getDopKr() == null || creator.getPurpose() == null ||
+                creator.getConcatenatedKBK() == null || creator.getConcatenatedKBK().isBlank()
         ) {
             throw new IllegalStateException("Обязательный атрибут объекта не инициализирован");
         }
         List<Attribute<?>> attrs = new ArrayList<>(getIdentAttributes(creator));
-
+        attrs.add(new StringAttribute(CONCAT_KBK_ATTR, creator.getConcatenatedKBK()));
+        if (creator.getOwnershipForm() != null) {
+            attrs.add(new LinkedAttribute(OWNERSHIP_FORM_ATTR, creator.getOwnershipForm()));
+        }
+        if (creator.getCashPlanLimitIds() != null && !creator.getCashPlanLimitIds().isEmpty()) {
+            attrs.add(new LinkedAttribute(CASH_PLAN_LIMITS_ATTR, creator.getCashPlanLimitIds()));
+        }
+        return attrs;
     }
 
     private static Collection<? extends Attribute<?>> getIdentAttributes(FinancingSource creator) {
@@ -91,5 +124,16 @@ public class FinancingSourceUtil {
                 new LinkedAttribute(DOPKR_ATTR, creator.getDopKr()),
                 new LinkedAttribute(PURPOSE_ATTR, creator.getPurpose())
         );
+    }
+
+    public static String buildConcatKBK(FinancingSource fs, Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
+        return fs.getYear() +
+                "-" +
+                dictionaryCodeById(codesMap, KVSR, fs.getKvsr()) +
+                dictionaryCodeById(codesMap, KFSR, fs.getKfsr()) +
+                dictionaryCodeById(codesMap, KCSR, fs.getKcsr()) +
+                dictionaryCodeById(codesMap, KVR, fs.getKvr()) +
+                "-" +
+                dictionaryCodeById(codesMap, DOPKR, fs.getDopKr());
     }
 }

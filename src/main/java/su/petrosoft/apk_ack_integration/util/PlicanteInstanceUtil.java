@@ -31,6 +31,7 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Pair;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.StringFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreatingInstancesFromFileResponseDto;
@@ -64,6 +65,20 @@ public class PlicanteInstanceUtil {
                 ))
                 .filter(new Filter(List.of(
                         new StringFilterAttribute(dictionary.getCodeAttrId(), List.of(IN), codes)
+                )))
+                .build();
+    }
+
+    public static GetAttributesListRequestDto requestDtoToGetDictionaryDataByIds(
+            Dictionary dictionary, Set<Long> ids) {
+        return GetAttributesListRequestDto.builder()
+                .templateId(dictionary.getTemplateId())
+                .attributes(List.of(
+                        new RequestedAttribute(dictionary.getCodeAttrId()),
+                        new RequestedAttribute(dictionary.getDescriptionAttrId())
+                ))
+                .filter(new Filter(List.of(
+                        new LongFilterAttribute(dictionary.getIdAttrId(), List.of(IN), ids)
                 )))
                 .build();
     }

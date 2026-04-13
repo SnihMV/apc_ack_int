@@ -1,7 +1,5 @@
 package su.petrosoft.apk_ack_integration.model.data;
 
-import java.util.Map.Entry;
-
 import su.petrosoft.apk_ack_integration.model.DictionaryData;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
@@ -17,7 +15,7 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVSR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.PURPOSE;
 
-public interface DescriptedBudgetItemData extends BudgetItemData, DictionaryContaining {
+public interface DescriptedBudgetItemData extends BudgetItemData, DictionaryDataContaining {
 
     String kfsrTitle();
 

@@ -1,17 +1,20 @@
 package su.petrosoft.apk_ack_integration.model;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import lombok.AllArgsConstructor;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
+
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.*;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
-@SuperBuilder
-public class FinancingSource extends PlicanteInstance {
+@SuperBuilder(toBuilder = true)
+public class FinancingSource extends PlicanteInstance implements DictionaryIdContaining {
     private Long year;
     private Long kvsr;
     private Long kfsr;
@@ -41,5 +44,20 @@ public class FinancingSource extends PlicanteInstance {
     @Override
     public int hashCode() {
         return Objects.hash(year, kvsr, kfsr, kcsr, kvr, kosgu, dopFk, dopEk, dopKr, purpose);
+    }
+
+    @Override
+    public Map<Dictionary, Long> dictionaryIds() {
+        return Map.of(
+                KVSR, getKvsr(),
+                KFSR, getKfsr(),
+                KCSR, getKcsr(),
+                DOPKR, getDopKr(),
+                KVR, getKvr(),
+                KOSGU, getKosgu(),
+                DOPFK, getDopFk(),
+                DOPEK, getDopEk(),
+                PURPOSE, getPurpose()
+        );
     }
 }

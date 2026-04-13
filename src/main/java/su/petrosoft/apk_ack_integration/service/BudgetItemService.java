@@ -17,8 +17,9 @@ import su.petrosoft.apk_ack_integration.model.FinancingSource;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.data.CashPlanLimitData;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
-import su.petrosoft.apk_ack_integration.model.data.DictionaryContaining;
+import su.petrosoft.apk_ack_integration.model.data.DictionaryDataContaining;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.dto.response.CreateBudgetItemsResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.model.enums.UpsertAction;
@@ -30,6 +31,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Map.entry;
@@ -41,6 +43,7 @@ import static su.petrosoft.apk_ack_integration.model.enums.UpsertAction.UPDATED;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.TEMPLATE_ID;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.*;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.*;
+import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.*;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.FS_TITLE;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.requestDtoToGetSourcesByYear;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.*;
@@ -285,7 +288,6 @@ public class BudgetItemService {
                 .map(row -> cplMapper.toEntity(row, codesMap))
                 .collect(toSet());
 
-        //Updating
         Set<Long> updatedIds = new HashSet<>();
         for (CashPlanLimit incoming : incomingCplSet) {
             CashPlanLimit existing = existingCplMap.get(incoming);
@@ -413,7 +415,7 @@ public class BudgetItemService {
 
     private void fillDictionaryMapByRows(
             Map<Dictionary, Map<DictionaryData, Long>> dictionaryMap,
-            List<? extends DictionaryContaining> rows,
+            List<? extends DictionaryDataContaining> rows,
             Map<UpsertAction, Map<Long, Set<Long>>> statistics
     ) {
         Map<Dictionary, Set<DictionaryData>> dictionariesDataFromRows = collectDictionaryData(rows);
@@ -468,7 +470,7 @@ public class BudgetItemService {
         }
     }
 
-    private Map<Dictionary, Set<DictionaryData>> collectDictionaryData(List<? extends DictionaryContaining> rows) {
+    private Map<Dictionary, Set<DictionaryData>> collectDictionaryData(List<? extends DictionaryDataContaining> rows) {
         return rows.stream()
                 .flatMap(row -> row.dictionariesData().entrySet().stream())
                 .collect(groupingBy(
@@ -564,7 +566,7 @@ public class BudgetItemService {
 
         Set<CashPlanLimit> existingLimits = getLimits();
         Set<FinancingSource> existingSources = getSources();
-        restoreSources(existingLimits, existingSources);
+        restoreSources(existingLimits, existingSources, dictionaryMap, statistics);
 
         Set<SubsidyProgram> existingPrograms = getPrograms(existingSources);
         restorePrograms(existingSources, existingPrograms);
@@ -572,17 +574,79 @@ public class BudgetItemService {
         return statistics;
     }
 
-    private void restoreSources(Set<CashPlanLimit> existingLimits, Set<FinancingSource> existingSources) {
-        Map<FinancingSource, Set<Long>> sourceFromLimitMap = existingLimits.stream()
+    private void restoreSources(
+            Set<CashPlanLimit> existingLimits,
+            Set<FinancingSource> existingSources,
+            Map<Dictionary, Map<DictionaryData, Long>> codesMap,
+            Map<UpsertAction, Map<Long, Set<Long>>> statistics
+    ) {
+        Map<FinancingSource, Set<Long>> sourcesFromLimitsMap = existingLimits.stream()
                 .collect(groupingBy(
                         this::extractFsFromCpl,
                         mapping(CashPlanLimit::getId, toSet())
                 ));
-        Set<FinancingSource> sourcesToCreate = new HashSet<>(sourceFromLimitMap.keySet());
+        createMissingSources(sourcesFromLimitsMap, existingSources, codesMap, statistics);
+        recoverLostLinkage(sourcesFromLimitsMap, existingSources, statistics);
+
+        int i = 123;
+    }
+
+    private void recoverLostLinkage(
+            Map<FinancingSource, Set<Long>> sourcesFromLimitsMap,
+            Set<FinancingSource> existingSources,
+            Map<UpsertAction, Map<Long, Set<Long>>> statistics
+    ) {
+        for (FinancingSource fs : existingSources) {
+            Set<Long> actual = fs.getCashPlanLimitIds();
+            Set<Long> needed = sourcesFromLimitsMap.get(fs);
+            if (!actual.equals(needed)) {
+                plicanteRestClient.updateInstance(requestDtoForUpdateByLimits(fs.getId(), fs.getVersion(), needed));
+            }
+        }
+    }
+
+    private void createMissingSources(
+            Map<FinancingSource, Set<Long>> sourcesFromLimitsMap,
+            Set<FinancingSource> existingSources,
+            Map<Dictionary, Map<DictionaryData, Long>> codesMap,
+            Map<UpsertAction, Map<Long, Set<Long>>> statistics
+    ) {
+        Set<FinancingSource> sourcesToCreate = sourcesFromLimitsMap.entrySet().stream()
+                .map(entry -> entry.getKey().toBuilder()
+                        .cashPlanLimitIds(entry.getValue())
+                        .build())
+                .collect(toSet());
         sourcesToCreate.removeAll(existingSources);
+        fillDictionaryMapByFinSources(codesMap, sourcesToCreate);
         for (FinancingSource source : sourcesToCreate) {
-            source.setCashPlanLimitIds(sourceFromLimitMap.get(source));
-            plicanteRestClient.createInstance(FinancingSourceUtil.requestDtoToCreateFinancingSource(source))
+            source.setConcatenatedKBK(buildConcatKBK(source, codesMap));
+            InstanceDto savedSource = plicanteRestClient.createInstance(requestDtoToCreateFinancingSource(source));
+            source.setId(savedSource.id());
+            source.setVersion(savedSource.version());
+            existingSources.add(source);
+        }
+    }
+
+    private void fillDictionaryMapByFinSources(
+            Map<Dictionary, Map<DictionaryData, Long>> dictionaryMap,
+            Set<FinancingSource> finSources
+    ) {
+        Map<Dictionary, Set<Long>> requiredDictionaries = finSources.stream()
+                .flatMap(source -> source.dictionaryIds().entrySet().stream())
+                .collect(groupingBy(
+                        Entry::getKey,
+                        mapping(Entry::getValue, toSet())
+                ));
+        for (Entry<Dictionary, Set<Long>> entry : requiredDictionaries.entrySet()) {
+            Dictionary dictionary = entry.getKey();
+            Set<Long> requiredIds = entry.getValue();
+            Collection<Long> existingIds = dictionaryMap.get(dictionary).values();
+            requiredIds.removeAll(existingIds);
+            if (requiredIds.isEmpty()) {
+                continue;
+            }
+            Map<DictionaryData, Long> foundData = dictionaryService.findByIds(dictionary, requiredIds);
+            dictionaryMap.computeIfAbsent(dictionary, k -> new HashMap<>()).putAll(foundData);
         }
     }
 
