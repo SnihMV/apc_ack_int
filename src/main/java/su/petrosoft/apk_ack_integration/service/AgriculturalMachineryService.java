@@ -48,7 +48,6 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KOM_ZER;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.MAS_KART;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.MAS_SH;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.MAS_ZH;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.MAS_ZH_PT_KOR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.OTHER_TECH;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.PROD_COUNTRY;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.TECH_FISHING;
@@ -167,7 +166,7 @@ public class AgriculturalMachineryService {
         Map<Integer, List<String>> groupedValues = parseJsonReport(jsonReport.getJsonReport());
 
         Map<Dictionary, Map<DictionaryData, Long>> codesMap = dictionaryService.getDataMap(
-                Set.of(DISTRICT, TR_V_M, KOM_ZER, KOM_KOR, MAS_SH, MAS_ZH, MAS_ZH_PT_KOR, DIS_BEN_GEN,
+                Set.of(DISTRICT, TR_V_M, KOM_ZER, KOM_KOR, MAS_SH, MAS_ZH, DIS_BEN_GEN,
                         MAS_KART, IZD_AVT_PR, TECH_FISHING, OTHER_TECH, PROD_COUNTRY, TECH_STATE));
 
         List<AgriculturalMachineryPark> result = new ArrayList<>();

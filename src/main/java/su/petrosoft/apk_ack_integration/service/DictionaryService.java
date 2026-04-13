@@ -7,7 +7,7 @@ import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
 import su.petrosoft.apk_ack_integration.exception.DictionaryException;
 import su.petrosoft.apk_ack_integration.model.DictionaryData;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
-import su.petrosoft.apk_ack_integration.model.data.DictionaryContaining;
+import su.petrosoft.apk_ack_integration.model.data.DictionaryDataContaining;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
@@ -50,7 +50,7 @@ public class DictionaryService {
     }
 
     private void updateDictionariesByContainableObject(
-            DictionaryContaining containable,
+            DictionaryDataContaining containable,
             Set<Dictionary> updatableDictionaries,
             Map<Dictionary, Map<String, Long>> existingDictionariesMap,
             Map<Dictionary, Set<Long>> createdDictionaries
@@ -64,7 +64,7 @@ public class DictionaryService {
 
     private Optional<Long> createNewIfPresent(
             Dictionary dictionary,
-            DictionaryContaining containable,
+            DictionaryDataContaining containable,
             Map<String, Long> existingValues
     ) {
         String code = containable.dictionariesData().get(dictionary).getCode();
@@ -102,6 +102,18 @@ public class DictionaryService {
                         extractData(dto.attributes(), dictionary.getDescriptionAttrId())),
                 InstanceDto::id
             ));
+    }
+
+    public Map<DictionaryData, Long> findByIds(Dictionary dictionary, Set<Long> ids) {
+        List<InstanceDto> dtoList = restClient.getTableAttributesList(
+                requestDtoToGetDictionaryDataByIds(dictionary, ids));
+        return dtoList.stream()
+                .collect(toMap(
+                        dto -> new DictionaryData(
+                                extractData(dto.attributes(), dictionary.getCodeAttrId()),
+                                extractData(dto.attributes(), dictionary.getDescriptionAttrId())),
+                        InstanceDto::id
+                ));
     }
 
     public Map<Dictionary, Map<DictionaryData, Long>> getDataMap(Set<Dictionary> dictionaries) {
