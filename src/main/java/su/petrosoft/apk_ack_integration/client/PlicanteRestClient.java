@@ -93,7 +93,7 @@ public class PlicanteRestClient {
                 if ("STALE_VERSION".equals(errorDto.code())) {
                     throw new StaleVersionException(INSTANCE_STALE_VERSION.formatted(dto.instance().id()));
                 }
-                throw new RuntimeException(e);
+                throw e;
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }

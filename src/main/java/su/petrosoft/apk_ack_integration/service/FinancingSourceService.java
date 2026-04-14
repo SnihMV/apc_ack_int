@@ -21,11 +21,12 @@ public class FinancingSourceService {
     public Map<UpsertAction, Map<Long, Set<Long>>> createFinancingSources(MultipartFile file) {
 //        List<UniBudgetCodedExcelRow> dtoList = excelExtractor.getUniBudgetCodedRows(file);
 //        List<DescriptedBudgetItemData> dtoList = excelExtractor.getUniBudget20262801Rows(file);
-        List<DescriptedBudgetItemData> dtoList = excelExtractor.getUniBudget2026ClarifiedRows(file);
+//        List<DescriptedBudgetItemData> dtoList = excelExtractor.getUniBudget2026ClarifiedRows(file);
 
 //            return budgetItemService.createBudgetItems(dtoList);
 //        return budgetItemService.upsertBudgetItems(dtoList);
-        return budgetItemService.saveAndUpdateBudgetItems(file);
+//        return budgetItemService.saveAndUpdateBudgetItems(file);
+        return budgetItemService.restoreBudgetItemsConsistency();
 //        return null;
     }
 }

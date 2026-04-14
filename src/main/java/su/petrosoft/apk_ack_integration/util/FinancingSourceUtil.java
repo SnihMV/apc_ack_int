@@ -90,23 +90,23 @@ public class FinancingSourceUtil {
         );
     }
 
-    private static List<Attribute<?>> getAttributesToCreate(FinancingSource creator) {
-        if (creator.getYear() == null || creator.getKfsr() == null ||
-                creator.getKcsr() == null || creator.getKvr() == null ||
-                creator.getKosgu() == null || creator.getKvsr() == null ||
-                creator.getDopFk() == null || creator.getDopEk() == null ||
-                creator.getDopKr() == null || creator.getPurpose() == null ||
-                creator.getConcatenatedKBK() == null || creator.getConcatenatedKBK().isBlank()
+    private static List<Attribute<?>> getAttributesToCreate(FinancingSource source) {
+        if (source.getYear() == null || source.getKfsr() == null ||
+                source.getKcsr() == null || source.getKvr() == null ||
+                source.getKosgu() == null || source.getKvsr() == null ||
+                source.getDopFk() == null || source.getDopEk() == null ||
+                source.getDopKr() == null || source.getPurpose() == null ||
+                source.getConcatenatedKBK() == null || source.getConcatenatedKBK().isBlank()
         ) {
             throw new IllegalStateException("Обязательный атрибут объекта не инициализирован");
         }
-        List<Attribute<?>> attrs = new ArrayList<>(getIdentAttributes(creator));
-        attrs.add(new StringAttribute(CONCAT_KBK_ATTR, creator.getConcatenatedKBK()));
-        if (creator.getOwnershipForm() != null) {
-            attrs.add(new LinkedAttribute(OWNERSHIP_FORM_ATTR, creator.getOwnershipForm()));
+        List<Attribute<?>> attrs = new ArrayList<>(getIdentAttributes(source));
+        attrs.add(new StringAttribute(CONCAT_KBK_ATTR, source.getConcatenatedKBK()));
+        if (source.getOwnershipForm() != null) {
+            attrs.add(new LinkedAttribute(OWNERSHIP_FORM_ATTR, source.getOwnershipForm()));
         }
-        if (creator.getCashPlanLimitIds() != null && !creator.getCashPlanLimitIds().isEmpty()) {
-            attrs.add(new LinkedAttribute(CASH_PLAN_LIMITS_ATTR, creator.getCashPlanLimitIds()));
+        if (source.getCashPlanLimitIds() != null && !source.getCashPlanLimitIds().isEmpty()) {
+            attrs.add(new LinkedAttribute(CASH_PLAN_LIMITS_ATTR, source.getCashPlanLimitIds()));
         }
         return attrs;
     }

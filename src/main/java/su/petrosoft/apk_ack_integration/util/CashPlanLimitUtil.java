@@ -177,34 +177,34 @@ public class CashPlanLimitUtil {
         );
     }
 
-    public static List<Attribute<?>> getAttributesToCreate(CashPlanLimit creator) {
-        if (creator.getYear() == null || creator.getKfsr() == null || creator.getKcsr() == null ||
-                creator.getKvr() == null || creator.getKosgu() == null || creator.getKvsr() == null ||
-                creator.getDopFk() == null || creator.getDopEk() == null || creator.getDopKr() == null ||
-                creator.getPurpose() == null || creator.getRecipientInn() == null || creator.getRecipientKpp() == null
+    public static List<Attribute<?>> getAttributesToCreate(CashPlanLimit limit) {
+        if (limit.getYear() == null || limit.getKfsr() == null || limit.getKcsr() == null ||
+                limit.getKvr() == null || limit.getKosgu() == null || limit.getKvsr() == null ||
+                limit.getDopFk() == null || limit.getDopEk() == null || limit.getDopKr() == null ||
+                limit.getPurpose() == null || limit.getRecipientInn() == null || limit.getRecipientKpp() == null
         ) {
             throw new IllegalStateException("Обязательный атрибут объекта не инициализирован");
         }
-        List<Attribute<?>> attrs = new ArrayList<>(getIdentAttributes(creator));
-        processField(attrs, creator.getFederalBudget(), FEDERAL_BUDGET_ATTR);
-        processField(attrs, creator.getRegionalBudget(), REGIONAL_BUDGET_ATTR);
-        processField(attrs, creator.getTotalLimit(), TOTAL_LIMIT_ATTR, TOTAL_BALANCE_ATTR);
-        processField(attrs, creator.getJanLimit(), JAN_LIMIT_ATTR, JAN_BALANCE_ATTR);
-        processField(attrs, creator.getFebLimit(), FEB_LIMIT_ATTR, FEB_BALANCE_ATTR);
-        processField(attrs, creator.getMarLimit(), MAR_LIMIT_ATTR, MAR_BALANCE_ATTR);
-        processField(attrs, creator.getFstQuarterBalance(), Q_1_BALANCE_ATTR);
-        processField(attrs, creator.getAprLimit(), APR_LIMIT_ATTR, APR_BALANCE_ATTR);
-        processField(attrs, creator.getMayLimit(), MAY_LIMIT_ATTR, MAY_BALANCE_ATTR);
-        processField(attrs, creator.getJunLimit(), JUN_LIMIT_ATTR, JUN_BALANCE_ATTR);
-        processField(attrs, creator.getScdQuarterBalance(), Q_2_BALANCE_ATTR);
-        processField(attrs, creator.getJulLimit(), JUL_LIMIT_ATTR, JUL_BALANCE_ATTR);
-        processField(attrs, creator.getAugLimit(), AUG_LIMIT_ATTR, AUG_BALANCE_ATTR);
-        processField(attrs, creator.getSepLimit(), SEP_LIMIT_ATTR, SEP_BALANCE_ATTR);
-        processField(attrs, creator.getTrdQuarterBalance(), Q_3_BALANCE_ATTR);
-        processField(attrs, creator.getOctLimit(), OCT_LIMIT_ATTR, OCT_BALANCE_ATTR);
-        processField(attrs, creator.getNovLimit(), NOV_LIMIT_ATTR, NOV_BALANCE_ATTR);
-        processField(attrs, creator.getDecLimit(), DEC_LIMIT_ATTR, DEC_BALANCE_ATTR);
-        processField(attrs, creator.getFrtQuarterBalance(), Q_4_BALANCE_ATTR);
+        List<Attribute<?>> attrs = new ArrayList<>(getIdentAttributes(limit));
+        processField(attrs, limit.getFederalBudget(), FEDERAL_BUDGET_ATTR);
+        processField(attrs, limit.getRegionalBudget(), REGIONAL_BUDGET_ATTR);
+        processField(attrs, limit.getTotalLimit(), TOTAL_LIMIT_ATTR, TOTAL_BALANCE_ATTR);
+        processField(attrs, limit.getJanLimit(), JAN_LIMIT_ATTR, JAN_BALANCE_ATTR);
+        processField(attrs, limit.getFebLimit(), FEB_LIMIT_ATTR, FEB_BALANCE_ATTR);
+        processField(attrs, limit.getMarLimit(), MAR_LIMIT_ATTR, MAR_BALANCE_ATTR);
+        processField(attrs, limit.getFstQuarterBalance(), Q_1_BALANCE_ATTR);
+        processField(attrs, limit.getAprLimit(), APR_LIMIT_ATTR, APR_BALANCE_ATTR);
+        processField(attrs, limit.getMayLimit(), MAY_LIMIT_ATTR, MAY_BALANCE_ATTR);
+        processField(attrs, limit.getJunLimit(), JUN_LIMIT_ATTR, JUN_BALANCE_ATTR);
+        processField(attrs, limit.getScdQuarterBalance(), Q_2_BALANCE_ATTR);
+        processField(attrs, limit.getJulLimit(), JUL_LIMIT_ATTR, JUL_BALANCE_ATTR);
+        processField(attrs, limit.getAugLimit(), AUG_LIMIT_ATTR, AUG_BALANCE_ATTR);
+        processField(attrs, limit.getSepLimit(), SEP_LIMIT_ATTR, SEP_BALANCE_ATTR);
+        processField(attrs, limit.getTrdQuarterBalance(), Q_3_BALANCE_ATTR);
+        processField(attrs, limit.getOctLimit(), OCT_LIMIT_ATTR, OCT_BALANCE_ATTR);
+        processField(attrs, limit.getNovLimit(), NOV_LIMIT_ATTR, NOV_BALANCE_ATTR);
+        processField(attrs, limit.getDecLimit(), DEC_LIMIT_ATTR, DEC_BALANCE_ATTR);
+        processField(attrs, limit.getFrtQuarterBalance(), Q_4_BALANCE_ATTR);
         return attrs;
     }
 
