@@ -406,6 +406,13 @@ public class BudgetItemService {
                 .build();
     }
 
+    private SubsidyProgram extractProgramFromSource(FinancingSource source) {
+        return SubsidyProgram.builder()
+                .kcsr(source.getKcsr())
+                .dopKr(source.getDopKr())
+                .build();
+    }
+
     private SubsidyProgram extractScdLvlSpFromFs(FinancingSource fs) {
         return SubsidyProgram.builder()
                 .level(2L)
@@ -577,6 +584,14 @@ public class BudgetItemService {
                 ));
         createMissingSources(ctx, sourcesFromLimitsMap);
         restoreLimitsLinkage(ctx, sourcesFromLimitsMap);
+
+        Map<SubsidyProgram, Set<Long>> programsFromSourcesMap = ctx.existingSources.stream()
+                .collect(groupingBy(
+                        this::extractProgramFromSource,
+                        mapping(FinancingSource::getId, toSet())
+                ));
+        createMissingPrograms(ctx, programsFromSourcesMap);
+        restoreSourcesLinkage(ctx, programsFromSourcesMap);
     }
 
     private BudgetItemContext initContext() {
