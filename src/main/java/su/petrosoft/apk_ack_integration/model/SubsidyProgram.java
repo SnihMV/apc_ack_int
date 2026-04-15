@@ -1,17 +1,20 @@
 package su.petrosoft.apk_ack_integration.model;
 
-import java.util.Collection;
-import java.util.Objects;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
+
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPKR;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
-@SuperBuilder
-public class SubsidyProgram extends PlicanteInstance{
+@SuperBuilder(toBuilder = true)
+public class SubsidyProgram extends PlicanteInstance implements DictionaryDataRequester {
     private Long parentId;
     private Long level;
     private Long kcsr;
@@ -29,6 +32,13 @@ public class SubsidyProgram extends PlicanteInstance{
     @Override
     public int hashCode() {
         return Objects.hash(kcsr, dopKr);
+    }
+
+    @Override
+    public Map<Dictionary, Long> requestedDictionaryIds() {
+        return Map.of(
+                DOPKR, getDopKr()
+        );
     }
 }
 

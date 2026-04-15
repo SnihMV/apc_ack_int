@@ -12,10 +12,7 @@ import su.petrosoft.apk_ack_integration.exception.StaleVersionException;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.mapper.FinancingSourceMapper;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyProgramMapper;
-import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
-import su.petrosoft.apk_ack_integration.model.DictionaryData;
-import su.petrosoft.apk_ack_integration.model.FinancingSource;
-import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
+import su.petrosoft.apk_ack_integration.model.*;
 import su.petrosoft.apk_ack_integration.model.data.CashPlanLimitData;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 import su.petrosoft.apk_ack_integration.model.data.DictionaryDataContaining;
@@ -39,7 +36,6 @@ import static java.util.Map.of;
 import static java.util.stream.Collectors.*;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.*;
 import static su.petrosoft.apk_ack_integration.model.enums.UpsertAction.CREATED;
-import static su.petrosoft.apk_ack_integration.model.enums.UpsertAction.FAILED_UPDATE;
 import static su.petrosoft.apk_ack_integration.model.enums.UpsertAction.UPDATED;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.TEMPLATE_ID;
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.*;
@@ -408,6 +404,7 @@ public class BudgetItemService {
 
     private SubsidyProgram extractProgramFromSource(FinancingSource source) {
         return SubsidyProgram.builder()
+                .level(2L)
                 .kcsr(source.getKcsr())
                 .dopKr(source.getDopKr())
                 .build();
@@ -594,6 +591,32 @@ public class BudgetItemService {
         restoreSourcesLinkage(ctx, programsFromSourcesMap);
     }
 
+    private void createMissingPrograms(BudgetItemContext ctx, Map<SubsidyProgram, Set<Long>> programsFromSourcesMap) {
+        Set<SubsidyProgram> programsToSave = programsFromSourcesMap.entrySet().stream()
+                .map(e -> e.getKey().toBuilder()
+                        .cofinancingLevelIds(e.getValue())
+                        .build())
+                .collect(toSet());
+        programsToSave.removeAll(ctx.existingPrograms);
+        ctx.completeDictionaryMapForRequesters(programsToSave);
+        for (SubsidyProgram program : programsToSave) {
+            InstanceDto saved = plicanteRestClient.createInstance(SubsidyProgramUtil.requestDtoToCreateSubsidyProgram(program));
+            program
+        }
+    }
+
+    private void fillDictionaryMapByPrograms(
+            Map<Dictionary, Map<DictionaryData, Long>> dictionaryMap,
+            Set<SubsidyProgram> programsToSave
+    ) {
+        Map<Dictionary, Set<Long>> requiredDictionaries = programsToSave.stream()
+                .flatMap(sp -> sp.requestedDictionaryIds().entrySet().stream())
+                .collect(groupingBy(
+                        Entry::getKey,
+                        mapping(Entry::getValue, toSet())
+                ));
+    }
+
     private BudgetItemContext initContext() {
         Map<UpsertAction, Map<Long, Set<Long>>> statistics = new EnumMap<>(UpsertAction.class);
         Map<Dictionary, Map<DictionaryData, Long>> dictionaryMap = new EnumMap<>(Dictionary.class);
@@ -615,7 +638,7 @@ public class BudgetItemService {
                         .build())
                 .collect(toSet());
         sourcesToCreate.removeAll(ctx.existingSources);
-        fillDictionaryMapByFinSources(ctx.dictionaryMap, sourcesToCreate);
+        ctx.completeDictionaryMapForRequesters(sourcesToCreate);
         for (FinancingSource source : sourcesToCreate) {
             source.setConcatenatedKBK(buildConcatKBK(source, ctx.dictionaryMap));
             InstanceDto savedSource = plicanteRestClient.createInstance(requestDtoToCreateFinancingSource(source));
@@ -640,28 +663,6 @@ public class BudgetItemService {
         }
     }
 
-    private void fillDictionaryMapByFinSources(
-            Map<Dictionary, Map<DictionaryData, Long>> dictionaryMap,
-            Set<FinancingSource> finSources
-    ) {
-        Map<Dictionary, Set<Long>> requiredDictionaries = finSources.stream()
-                .flatMap(source -> source.dictionaryIds().entrySet().stream())
-                .collect(groupingBy(
-                        Entry::getKey,
-                        mapping(Entry::getValue, toSet())
-                ));
-        for (Entry<Dictionary, Set<Long>> entry : requiredDictionaries.entrySet()) {
-            Dictionary dictionary = entry.getKey();
-            Set<Long> requiredIds = entry.getValue();
-            Collection<Long> existingIds = dictionaryMap.computeIfAbsent(dictionary, k -> new HashMap<>()).values();
-            requiredIds.removeAll(existingIds);
-            if (requiredIds.isEmpty()) {
-                continue;
-            }
-            Map<DictionaryData, Long> foundData = dictionaryService.findByIds(dictionary, requiredIds);
-            dictionaryMap.get(dictionary).putAll(foundData);
-        }
-    }
 
     private void restorePrograms(Set<FinancingSource> existingSources, Set<SubsidyProgram> existingPrograms) {
 
@@ -707,12 +708,32 @@ public class BudgetItemService {
 
     @RequiredArgsConstructor
     @Getter
-    private static class BudgetItemContext {
+    private class BudgetItemContext {
         private final Set<CashPlanLimit> existingLimits;
         private final Set<FinancingSource> existingSources;
         private final Set<SubsidyProgram> existingPrograms;
         private final Map<Dictionary, Map<DictionaryData, Long>> dictionaryMap;
         private final Map<UpsertAction, Map<Long, Set<Long>>> statistics;
+
+        private void completeDictionaryMapForRequesters(Collection<? extends DictionaryDataRequester> requesters) {
+            Map<Dictionary, Set<Long>> requestedDictionaries = requesters.stream()
+                    .flatMap(requester -> requester.requestedDictionaryIds().entrySet().stream())
+                    .collect(groupingBy(
+                            Entry::getKey,
+                            mapping(Entry::getValue, toSet())
+                    ));
+            for (Entry<Dictionary, Set<Long>> entry : requestedDictionaries.entrySet()) {
+                Dictionary dictionary = entry.getKey();
+                Set<Long> requestedIds = entry.getValue();
+                Collection<Long> existingIds = dictionaryMap.computeIfAbsent(dictionary, k -> new HashMap<>()).values();
+                requestedIds.removeAll(existingIds);
+                if (requestedIds.isEmpty()) {
+                    continue;
+                }
+                Map<DictionaryData, Long> foundData = dictionaryService.findByIds(dictionary, requestedIds);
+                dictionaryMap.get(dictionary).putAll(foundData);
+            }
+        }
     }
 
 }
