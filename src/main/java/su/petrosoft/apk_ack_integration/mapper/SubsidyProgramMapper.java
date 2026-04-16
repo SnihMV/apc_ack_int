@@ -9,7 +9,7 @@ import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.COFIN_LVL
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.DOPKR_ATTR;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.KCSR_ATTR;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.LEVEL_ATTR;
-import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.NAME_ATTR;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.TITLE_ATTR;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.PARENT_ATTR;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.TEMPLATE_ID;
 
@@ -23,15 +23,12 @@ import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.data.CofinancingLevelData;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.Attribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LinkedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.dto.plicante.value.LinkedValue;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
-import su.petrosoft.apk_ack_integration.util.CropProductionUtil;
 
 @Slf4j
 @Component
@@ -43,22 +40,14 @@ public class SubsidyProgramMapper {
         return SubsidyProgram.builder()
             .id(dto.id())
             .version(dto.version())
-            .title(extractData(attributes, NAME_ATTR))
+            .title(extractData(attributes, TITLE_ATTR))
             .level(level)
             .parentId(extractData(attributes, PARENT_ATTR))
             .kcsr(extractData(attributes, KCSR_ATTR))
             .dopKr(level == 2 ? extractData(attributes, DOPKR_ATTR) : null)
-            .cofinancingLevelIds(extractAllData(attributes, COFIN_LVL_ATTR))
+            .cofinLevelIds(extractAllData(attributes, COFIN_LVL_ATTR))
             .build();
     }
-
-//    public SubsidyProgram toFirstLevelSP(DescriptedBudgetItemData dto) {
-//        return SubsidyProgram.builder()
-//                .level(1L)
-//                .code(dto.code())
-//                .title("Направление № " + dto.code())
-//                .build();
-//    }
 
     public SubsidyProgram toFirstLevelSP(DescriptedBudgetItemData dto, Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
         return SubsidyProgram.builder()
@@ -79,7 +68,7 @@ public class SubsidyProgramMapper {
 
     public CreateInstanceRequestDto toCreateDto(SubsidyProgram sp) {
         List<Attribute<?>> attributes = new ArrayList<>(List.of(
-                new StringAttribute(NAME_ATTR, sp.getTitle()),
+                new StringAttribute(TITLE_ATTR, sp.getTitle()),
                 new LongAttribute(LEVEL_ATTR, sp.getLevel()),
                 new LinkedAttribute(PARENT_ATTR, sp.getParentId()),
                 new LinkedAttribute(KCSR_ATTR,  sp.getKcsr())));
@@ -101,4 +90,5 @@ public class SubsidyProgramMapper {
                 .dopKr(dictionaryIdByCode(codesMap, DOPKR, row.dopKr()))
                 .build();
     }
+
 }

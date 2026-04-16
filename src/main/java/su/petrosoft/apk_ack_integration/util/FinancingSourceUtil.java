@@ -15,7 +15,6 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -27,7 +26,7 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KCSR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KFSR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVSR;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryCodeById;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryDataById;
 
 public class FinancingSourceUtil {
     public static final long TEMPLATE_ID = 25387;
@@ -129,11 +128,11 @@ public class FinancingSourceUtil {
     public static String buildConcatKBK(FinancingSource fs, Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
         return fs.getYear() +
                 "-" +
-                dictionaryCodeById(codesMap, KVSR, fs.getKvsr()) +
-                dictionaryCodeById(codesMap, KFSR, fs.getKfsr()) +
-                dictionaryCodeById(codesMap, KCSR, fs.getKcsr()) +
-                dictionaryCodeById(codesMap, KVR, fs.getKvr()) +
+                dictionaryDataById(codesMap, KVSR, fs.getKvsr()).getCode() +
+                dictionaryDataById(codesMap, KFSR, fs.getKfsr()).getCode() +
+                dictionaryDataById(codesMap, KCSR, fs.getKcsr()).getCode() +
+                dictionaryDataById(codesMap, KVR, fs.getKvr()).getCode() +
                 "-" +
-                dictionaryCodeById(codesMap, DOPKR, fs.getDopKr());
+                dictionaryDataById(codesMap, DOPKR, fs.getDopKr()).getCode();
     }
 }

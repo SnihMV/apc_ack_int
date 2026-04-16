@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
 import su.petrosoft.apk_ack_integration.exception.DictionaryException;
 import su.petrosoft.apk_ack_integration.model.DictionaryData;
+import su.petrosoft.apk_ack_integration.model.DictionaryDataRequester;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 import su.petrosoft.apk_ack_integration.model.data.DictionaryDataContaining;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
@@ -13,6 +14,8 @@ import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
 import java.util.*;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.SAVING_WITHOUT_DESCRIPTION;
@@ -134,5 +137,28 @@ public class DictionaryService {
                                 extractData(dto.attributes(), dictionary.getDescriptionAttrId())),
                         InstanceDto::id
                 ));
+    }
+
+    public void completeDictionaryMapForRequesters(
+            Collection<? extends DictionaryDataRequester> requesters,
+            Map<Dictionary, Map<DictionaryData, Long>> dictionaryMap
+            ) {
+        Map<Dictionary, Set<Long>> requestedDictionaries = requesters.stream()
+                .flatMap(requester -> requester.requestedDictionaryIds().entrySet().stream())
+                .collect(groupingBy(
+                        Map.Entry::getKey,
+                        mapping(Map.Entry::getValue, toSet())
+                ));
+        for (Map.Entry<Dictionary, Set<Long>> entry : requestedDictionaries.entrySet()) {
+            Dictionary dictionary = entry.getKey();
+            Set<Long> requestedIds = entry.getValue();
+            Collection<Long> existingIds = dictionaryMap.computeIfAbsent(dictionary, k -> new HashMap<>()).values();
+            requestedIds.removeAll(existingIds);
+            if (requestedIds.isEmpty()) {
+                continue;
+            }
+            Map<DictionaryData, Long> foundData = findByIds(dictionary, requestedIds);
+            dictionaryMap.get(dictionary).putAll(foundData);
+        }
     }
 }

@@ -26,5 +26,6 @@ public class ExceptionMessageClass {
     public static final String MANAGED_DICTIONARY_NOT_FOUND = "Управляемый справочник [%s] не найден";
     public static final String INSTANCE_STALE_VERSION = "Объект [id = %d] был изменен в другой сессии";
     public static final String EMPTY_INSTANCE_ID = "Идентификатор объекта не определен (null)";
+    public static final String ILLEGAL_CREATE_STATE = "Объект находится в недопустимом для сохранения состоянии";
 
 }
