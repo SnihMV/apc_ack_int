@@ -31,11 +31,7 @@ public class SubsidyProgramService {
         Set<SubsidyProgram> allSecondLevelSpFromDB = apkService.findSubsidyPrograms(
                 requestDtoToFindSecondLevelSubsidyPrograms());
         log.debug("Found [{}] Subsidy Programs in DB with level 2", allSecondLevelSpFromDB.size());
-        Set<SubsidyProgram> allValidSecondLvlSPFromDb = allSecondLevelSpFromDB.stream()
-                .filter(SubsidyProgramUtil::validate)
-                .collect(toSet());
-        log.info("Found [{}] valid Subsidy Programs in DB with level 2", allValidSecondLvlSPFromDb.size());
-        return allValidSecondLvlSPFromDb;
+        return allSecondLevelSpFromDB;
     }
 
 //    public Set<SubsidyProgram> getAllThirdLevelSpFromDb() {
@@ -53,7 +49,7 @@ public class SubsidyProgramService {
         List<InstanceDto> dtoList = plicanteRestClient.getTableAttributesList(
                 requestDtoToGetAllPrograms());
         Set<SubsidyProgram> subsidyPrograms = dtoList.stream()
-                .map(dto -> spMapper.toEntity(dto))
+                .map(spMapper::toEntity)
                 .collect(toSet());
         log.info("Found Subsidy_Programs count: [{}]", subsidyPrograms.size());
         return subsidyPrograms;

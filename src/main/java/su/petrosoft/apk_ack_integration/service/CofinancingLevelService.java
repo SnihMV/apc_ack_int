@@ -87,7 +87,7 @@ public class CofinancingLevelService {
     private Map<Long, Set<Long>> updateSubsidyProgramsByDefaultCofinLevel(HashSet<SubsidyProgram> unAffectedSps, Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
         Map<Long, Set<Long>> result = new HashMap<>();
         Set<SubsidyProgram> emptySubsidyPrograms = unAffectedSps.stream()
-                .filter(sp -> sp.getCofinancingLevelIds().isEmpty())
+                .filter(sp -> sp.getCofinLevelIds().isEmpty())
                 .collect(toSet());
         if (!emptySubsidyPrograms.isEmpty()) {
             log.info("Updating Subsidy_Programs by default Cofinancing_Level ...");
@@ -98,7 +98,7 @@ public class CofinancingLevelService {
 
             log.info("Updating Subsidy_Programs by Default Cofinancing_Level ...");
             for (SubsidyProgram updatedSp : emptySubsidyPrograms) {
-                updatedSp.setCofinancingLevelIds(List.of(defaultInstanceId));
+                updatedSp.setCofinLevelIds(List.of(defaultInstanceId));
                 log.info("Save updating Subsidy_Program [{}]", updatedSp);
                 plicanteRestClient.updateInstance(requestDtoToUpdatingProgramByCofinLevels(updatedSp));
                 result.put(updatedSp.getId(), Set.of(defaultInstanceId));
@@ -121,7 +121,7 @@ public class CofinancingLevelService {
         Map<Long, Set<Long>> result = new HashMap<>();
         for (SubsidyProgram updatedSp : affectedSps) {
             Long subsidyProgramId = updatedSp.getId();
-            Collection<Long> existingCflIdList = updatedSp.getCofinancingLevelIds();
+            Collection<Long> existingCflIdList = updatedSp.getCofinLevelIds();
             log.debug("Updated Subsidy_Program [{}] has Cofinancing_Levels: {}", subsidyProgramId, existingCflIdList);
 
             Set<CofinancingLevel> existingCflList = new HashSet<>();

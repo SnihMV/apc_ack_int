@@ -22,7 +22,7 @@ import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.PURPOSE_
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.SUBSIDY_PROGRAM_ATTR;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.TEMPLATE_ID;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.YEAR_ATTR;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryCodeById;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryDataById;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractAllData;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
@@ -91,7 +91,7 @@ public class FinancingSourceMapper {
 
     public CreateInstanceRequestDto toCreatingDto(FinancingSource fs,
                                                   Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
-        long ownershipFormId = ownershipForm(dictionaryCodeById(codesMap, KOSGU, fs.getKosgu()));
+        long ownershipFormId = ownershipForm(dictionaryDataById(codesMap, KOSGU, fs.getKosgu()));
         return new CreateInstanceRequestDto(
             InstanceDto.builder()
                 .templateId(TEMPLATE_ID)
@@ -148,11 +148,11 @@ public class FinancingSourceMapper {
     private String concatKBK(FinancingSource fs, Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
         return LocalDateTime.now().getYear() +
                "-" +
-                dictionaryCodeById(codesMap, KVSR, fs.getKvsr()) +
-                dictionaryCodeById(codesMap, KFSR, fs.getKfsr()) +
-                dictionaryCodeById(codesMap, KCSR, fs.getKcsr()) +
-                dictionaryCodeById(codesMap, KVR, fs.getKvr()) +
+                dictionaryDataById(codesMap, KVSR, fs.getKvsr()).getCode() +
+                dictionaryDataById(codesMap, KFSR, fs.getKfsr()).getCode() +
+                dictionaryDataById(codesMap, KCSR, fs.getKcsr()).getCode() +
+                dictionaryDataById(codesMap, KVR, fs.getKvr()).getCode() +
                 "-" +
-                dictionaryCodeById(codesMap, DOPKR, fs.getDopKr());
+                dictionaryDataById(codesMap, DOPKR, fs.getDopKr()).getCode();
     }
 }
