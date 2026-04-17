@@ -1,5 +1,6 @@
 package su.petrosoft.apk_ack_integration.util;
 
+import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.DictionaryData;
 import su.petrosoft.apk_ack_integration.model.FinancingSource;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
@@ -123,6 +124,21 @@ public class FinancingSourceUtil {
                 new LinkedAttribute(DOPKR_ATTR, creator.getDopKr()),
                 new LinkedAttribute(PURPOSE_ATTR, creator.getPurpose())
         );
+    }
+
+    public static FinancingSource extractFromLimit(CashPlanLimit cpl) {
+        return FinancingSource.builder()
+                .year(cpl.getYear())
+                .kvsr(cpl.getKvsr())
+                .kfsr(cpl.getKfsr())
+                .kcsr(cpl.getKcsr())
+                .kvr(cpl.getKvr())
+                .kosgu(cpl.getKosgu())
+                .dopFk(cpl.getDopFk())
+                .dopEk(cpl.getDopEk())
+                .dopKr(cpl.getDopKr())
+                .purpose(cpl.getPurpose())
+                .build();
     }
 
     public static String buildConcatKBK(FinancingSource fs, Map<Dictionary, Map<DictionaryData, Long>> codesMap) {

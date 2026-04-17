@@ -116,7 +116,7 @@ public class BudgetItemService {
         Map<FinancingSource, Set<Long>> fsToCplIdsMap = existingCplMap.keySet()
                 .stream()
                 .collect(groupingBy(
-                        this::extractFsFromCpl,
+                        FinancingSourceUtil::extractFromLimit,
                         mapping(
                                 CashPlanLimit::getId,
                                 toSet()
@@ -384,37 +384,6 @@ public class BudgetItemService {
         return updatedFsIds;
     }
 
-    private FinancingSource extractFsFromCpl(CashPlanLimit cpl) {
-        return FinancingSource.builder()
-                .year(cpl.getYear())
-                .kvsr(cpl.getKvsr())
-                .kfsr(cpl.getKfsr())
-                .kcsr(cpl.getKcsr())
-                .kvr(cpl.getKvr())
-                .kosgu(cpl.getKosgu())
-                .dopFk(cpl.getDopFk())
-                .dopEk(cpl.getDopEk())
-                .dopKr(cpl.getDopKr())
-                .purpose(cpl.getPurpose())
-                .build();
-    }
-
-    private SubsidyProgram extractProgramFromSource(FinancingSource source) {
-        return SubsidyProgram.builder()
-                .level(2L)
-                .kcsr(source.getKcsr())
-                .dopKr(source.getDopKr())
-                .build();
-    }
-
-    private SubsidyProgram extractScdLvlSpFromFs(FinancingSource fs) {
-        return SubsidyProgram.builder()
-                .level(2L)
-                .kcsr(fs.getKcsr())
-                .dopKr(fs.getDopKr())
-                .build();
-    }
-
     private void fillDictionaryMapByRows(
             Map<Dictionary, Map<DictionaryData, Long>> dictionaryMap,
             List<? extends DictionaryDataContaining> rows,
@@ -559,95 +528,105 @@ public class BudgetItemService {
             throw new ExcelFileException(FILE_IS_EMPTY.formatted(file.getOriginalFilename()));
         }
         BudgetItemContext ctx = initContext();
-        restoreBudgetItemsConsistency(ctx);
+        rebuildBudgetItemsContext(ctx);
 
         return ctx.statistics;
     }
 
     public Map<UpsertAction, Map<Long, Set<Long>>> restoreBudgetItemsConsistency() {
         BudgetItemContext ctx = initContext();
-        restoreBudgetItemsConsistency(ctx);
+        rebuildBudgetItemsContext(ctx);
         return ctx.statistics;
     }
 
-    private void restoreBudgetItemsConsistency(BudgetItemContext ctx) {
-        Map<FinancingSource, Set<Long>> sourcesFromLimitsMap = ctx.existingLimits.stream()
+    private void rebuildBudgetItemsContext(BudgetItemContext ctx) {
+        Map<FinancingSource, Set<Long>> sourcesFromExistingLimits = ctx.existingLimits.keySet().stream()
                 .collect(groupingBy(
-                        this::extractFsFromCpl,
+                        FinancingSourceUtil::extractFromLimit,
                         mapping(CashPlanLimit::getId, toSet())
                 ));
-        createMissingSources(ctx, sourcesFromLimitsMap);
-        restoreLimitsLinkage(ctx, sourcesFromLimitsMap);
+        createMissingSources(ctx, sourcesFromExistingLimits);
+        relinkSourceToLimits(ctx, sourcesFromExistingLimits);
 
-        Map<SubsidyProgram, Set<Long>> programsFromSourcesMap = ctx.existingSources.stream()
+        Map<SubsidyProgram, Set<Long>> programsFromExistingSources = ctx.existingSources.keySet().stream()
                 .collect(groupingBy(
-                        this::extractProgramFromSource,
+                        SubsidyProgramUtil::extractScdLvlSpFromFs,
                         mapping(FinancingSource::getId, toSet())
                 ));
-        createMissingPrograms(ctx, programsFromSourcesMap);
-        restoreSourcesLinkage(ctx, programsFromSourcesMap);
+        createMissingPrograms(ctx, programsFromExistingSources);
+        relinkProgramToSource(ctx, programsFromExistingSources);
     }
 
-    private void createMissingPrograms(BudgetItemContext ctx, Map<SubsidyProgram, Set<Long>> programsFromSourcesMap) {
-        Set<SubsidyProgram> programsToSave = programsFromSourcesMap.entrySet().stream()
+    private void createMissingPrograms(
+            BudgetItemContext ctx,
+            Map<SubsidyProgram, Set<Long>> programsFromExistingSources
+    ) {
+        Set<SubsidyProgram> missingScdLvlPrograms = programsFromExistingSources.entrySet().stream()
+                .filter(entry -> !ctx.existingPrograms.containsKey(entry.getKey()))
                 .map(e -> e.getKey().toBuilder()
                         .financingSourceIds(e.getValue())
                         .build())
                 .collect(toSet());
-        programsToSave.removeAll(ctx.existingPrograms);
-        dictionaryService.completeDictionaryMapForRequesters(programsToSave, ctx.dictionaryMap);
-        for (SubsidyProgram program : programsToSave) {
-            program.setTitle(defineTitle(program, ctx.dictionaryMap));
-            InstanceDto saved = plicanteRestClient.createInstance(requestDtoToCreateSubsidyProgram(program));
-
-        }
+        dictionaryService.completeDictionaryMapForRequesters(missingScdLvlPrograms, ctx.dictionaryMap);
+        missingScdLvlPrograms.forEach(p -> createProgram(p, ctx));
     }
 
-    private void fillDictionaryMapByPrograms(
-            Map<Dictionary, Map<DictionaryData, Long>> dictionaryMap,
-            Set<SubsidyProgram> programsToSave
+    private SubsidyProgram createProgram(SubsidyProgram program, BudgetItemContext ctx) {
+        program.setTitle(defineTitle(program, ctx.dictionaryMap));
+        if (program.getLevel() > LOWEST_LEVEL) { // условие выхода из рекурсии
+            program.setParentId(obtainParentId(program, ctx));
+        }
+        InstanceDto dto = plicanteRestClient.createInstance(requestDtoToCreateSubsidyProgram(program));
+        program.setId(dto.id());
+        program.setVersion(dto.version());
+        ctx.existingPrograms.put(program, program);
+        addStat(ctx, CREATED, SubsidyProgramUtil.TEMPLATE_ID, dto.id());
+        return program;
+    }
+
+    private Long obtainParentId(
+            SubsidyProgram program,
+            BudgetItemContext ctx
     ) {
-        Map<Dictionary, Set<Long>> requiredDictionaries = programsToSave.stream()
-                .flatMap(sp -> sp.requestedDictionaryIds().entrySet().stream())
-                .collect(groupingBy(
-                        Entry::getKey,
-                        mapping(Entry::getValue, toSet())
-                ));
+        SubsidyProgram searchKey = extractParentKey(program);
+        SubsidyProgram parent = ctx.existingPrograms
+                .computeIfAbsent(searchKey, p -> createProgram(p, ctx));
+        return parent.getId();
     }
 
     private BudgetItemContext initContext() {
         Map<UpsertAction, Map<Long, Set<Long>>> statistics = new EnumMap<>(UpsertAction.class);
         Map<Dictionary, Map<DictionaryData, Long>> dictionaryMap = new EnumMap<>(Dictionary.class);
 
-        Set<CashPlanLimit> existingLimits = getCurrentYearLimits();
-        Set<FinancingSource> existingSources = getCurrentYearSources();
-        Set<SubsidyProgram> existingPrograms = getProgramsBySources(existingSources);
+        Map<CashPlanLimit, CashPlanLimit> existingLimits = getCurrentYearLimits();
+        Map<FinancingSource, FinancingSource> existingSources = getCurrentYearSources();
+        Map<SubsidyProgram, SubsidyProgram> existingPrograms = getProgramsBySources(existingSources.keySet());
 
         return new BudgetItemContext(existingLimits, existingSources, existingPrograms, dictionaryMap, statistics);
     }
 
     private void createMissingSources(
             BudgetItemContext ctx,
-            Map<FinancingSource, Set<Long>> sourcesToLimitIdsMap
+            Map<FinancingSource, Set<Long>> sourcesFromExistingLimits
     ) {
-        Set<FinancingSource> sourcesToCreate = sourcesToLimitIdsMap.entrySet().stream()
+        Set<FinancingSource> missingSources = sourcesFromExistingLimits.entrySet().stream()
+                .filter(entry -> !ctx.existingSources.containsKey(entry.getKey()))
                 .map(entry -> entry.getKey().toBuilder()
                         .cashPlanLimitIds(entry.getValue())
                         .build())
                 .collect(toSet());
-        sourcesToCreate.removeAll(ctx.existingSources);
-        dictionaryService.completeDictionaryMapForRequesters(sourcesToCreate, ctx.dictionaryMap);
-        for (FinancingSource source : sourcesToCreate) {
+        dictionaryService.completeDictionaryMapForRequesters(missingSources, ctx.dictionaryMap);
+        for (FinancingSource source : missingSources) {
             source.setConcatenatedKBK(buildConcatKBK(source, ctx.dictionaryMap));
-            InstanceDto savedSource = plicanteRestClient.createInstance(requestDtoToCreateFinancingSource(source));
-            source.setId(savedSource.id());
-            source.setVersion(savedSource.version());
-            ctx.existingSources.add(source);
-            addStat(ctx, CREATED, FinancingSourceUtil.TEMPLATE_ID, savedSource.id());
+            InstanceDto savedSourceDto = plicanteRestClient.createInstance(requestDtoToCreateFinancingSource(source));
+            source.setId(savedSourceDto.id());
+            source.setVersion(savedSourceDto.version());
+            ctx.existingSources.put(source, source);
+            addStat(ctx, CREATED, FinancingSourceUtil.TEMPLATE_ID, savedSourceDto.id());
         }
     }
 
-    private void restoreLimitsLinkage(
+    private void relinkSourceToLimits(
             BudgetItemContext ctx,
             Map<FinancingSource, Set<Long>> sourcesToLimitIdsMap
     ) {
@@ -661,12 +640,7 @@ public class BudgetItemService {
         }
     }
 
-
-    private void restorePrograms(Set<FinancingSource> existingSources, Set<SubsidyProgram> existingPrograms) {
-
-    }
-
-    private Set<SubsidyProgram> getProgramsBySources(Set<FinancingSource> sources) {
+    private Map<SubsidyProgram, SubsidyProgram> getProgramsBySources(Set<FinancingSource> sources) {
         Set<Long> ids = sources.stream()
                 .map(FinancingSource::getKcsr)
                 .collect(toSet());
@@ -674,23 +648,32 @@ public class BudgetItemService {
                         requestDtoToGetProgramsByKcsrIds(ids))
                 .stream()
                 .map(spMapper::toEntity)
-                .collect(toSet());
+                .collect(toMap(
+                        Function.identity(),
+                        Function.identity()
+                ));
     }
 
-    private Set<FinancingSource> getCurrentYearSources() {
+    private Map<FinancingSource, FinancingSource> getCurrentYearSources() {
         return plicanteRestClient.getTableAttributesList(
                         requestDtoToGetSourcesByYear(LocalDate.now().getYear()))
                 .stream()
                 .map(fsMapper::toEntity)
-                .collect(toSet());
+                .collect(toMap(
+                        Function.identity(),
+                        Function.identity()
+                ));
     }
 
-    private Set<CashPlanLimit> getCurrentYearLimits() {
+    private Map<CashPlanLimit, CashPlanLimit> getCurrentYearLimits() {
         return plicanteRestClient.getTableAttributesList(
                         requestDtoToGetLimitsByYear(LocalDate.now().getYear()))
                 .stream()
                 .map(cplMapper::toEntity)
-                .collect(toSet());
+                .collect(toMap(
+                        Function.identity(),
+                        Function.identity()
+                ));
     }
 
     private void addStat(
@@ -707,9 +690,9 @@ public class BudgetItemService {
     @RequiredArgsConstructor
     @Getter
     private static class BudgetItemContext {
-        private final Set<CashPlanLimit> existingLimits;
-        private final Set<FinancingSource> existingSources;
-        private final Set<SubsidyProgram> existingPrograms;
+        private final Map<CashPlanLimit, CashPlanLimit> existingLimits;
+        private final Map<FinancingSource, FinancingSource> existingSources;
+        private final Map<SubsidyProgram, SubsidyProgram> existingPrograms;
         private final Map<Dictionary, Map<DictionaryData, Long>> dictionaryMap;
         private final Map<UpsertAction, Map<Long, Set<Long>>> statistics;
     }

@@ -14,8 +14,6 @@ import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KCSR;
 @Data
 @SuperBuilder(toBuilder = true)
 public class SubsidyProgram extends PlicanteInstance implements DictionaryDataRequester {
-    public static final int MAX_LEVEL = 2;
-
     private final Long level;
     private final Long kcsr;
     private final Long dopKr;
