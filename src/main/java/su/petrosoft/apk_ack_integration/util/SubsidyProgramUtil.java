@@ -2,6 +2,7 @@ package su.petrosoft.apk_ack_integration.util;
 
 import lombok.extern.slf4j.Slf4j;
 import su.petrosoft.apk_ack_integration.model.DictionaryData;
+import su.petrosoft.apk_ack_integration.model.FinancingSource;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
@@ -31,6 +32,9 @@ import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.diction
 
 @Slf4j
 public class SubsidyProgramUtil {
+    public static final long MAX_LEVEL = 2;
+    public static final long LOWEST_LEVEL = 1;
+
 
     public static final long TEMPLATE_ID = 9492;
     public static final String SP_TITLE = "Направления (программы) субсидирования";
@@ -119,6 +123,21 @@ public class SubsidyProgramUtil {
                         .build());
     }
 
+    public static SubsidyProgram extractFstLvlSpFromFs(FinancingSource fs) {
+        return SubsidyProgram.builder()
+                .level(1L)
+                .kcsr(fs.getKcsr())
+                .build();
+    }
+
+    public static SubsidyProgram extractScdLvlSpFromFs(FinancingSource fs) {
+        return SubsidyProgram.builder()
+                .level(2L)
+                .kcsr(fs.getKcsr())
+                .dopKr(fs.getDopKr())
+                .build();
+    }
+
     public static String defineTitle(SubsidyProgram program, Map<Dictionary, Map<DictionaryData, Long>> dictionaryMap) {
         if (program.getLevel() == 1) {
             return dictionaryDataById(dictionaryMap, KCSR, program.getKcsr()).getDescription();
@@ -143,23 +162,29 @@ public class SubsidyProgramUtil {
         if (sp.getFinancingSourceIds() != null && !sp.getFinancingSourceIds().isEmpty()) {
             attributes.add(new LinkedAttribute(FIN_SRC_ATTR, sp.getFinancingSourceIds()));
         }
+        if (sp.getCofinLevelIds() != null && !sp.getCofinLevelIds().isEmpty()) {
+            attributes.add(new LinkedAttribute(COFIN_LVL_ATTR, sp.getCofinLevelIds()));
+        }
         return attributes;
     }
 
     private static boolean validateToCreate(SubsidyProgram sp) {
-        if (sp.getLevel() == null || sp.getTitle() == null) {
+        if (sp.getLevel() == null || sp.getTitle() == null || sp.getKcsr() == null) {
             return false;
         }
         if (sp.getLevel() == 1) {
-            return sp.getKcsr() != null &&
-                    sp.getDopKr() == null &&
-                    sp.getParentId() == null;
+            return sp.getDopKr() == null && sp.getParentId() == null;
         }
         if (sp.getLevel() == 2) {
-            return sp.getKcsr() != null &&
-                    sp.getDopKr() != null &&
-                    sp.getParentId() != null;
+            return sp.getDopKr() != null && sp.getParentId() != null;
         }
         return false;
+    }
+
+    public static SubsidyProgram extractParentKey(SubsidyProgram program) {
+        return SubsidyProgram.builder()
+                .level(program.getLevel() - 1)
+                .kcsr(program.getKcsr())
+                .build();
     }
 }
