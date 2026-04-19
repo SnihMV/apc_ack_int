@@ -27,5 +27,5 @@ public class ExceptionMessageClass {
     public static final String INSTANCE_STALE_VERSION = "Объект [id = %d] был изменен в другой сессии";
     public static final String EMPTY_INSTANCE_ID = "Идентификатор объекта не определен (null)";
     public static final String ILLEGAL_CREATE_STATE = "Объект находится в недопустимом для сохранения состоянии";
-
+    public static final String ILLEGAL_ATTR_VALUE = "Атрибут [id = %d] имеет недопустимое значение [%s]";
 }
