@@ -178,11 +178,7 @@ public class CashPlanLimitUtil {
     }
 
     public static List<Attribute<?>> getAttributesToCreate(CashPlanLimit limit) {
-        if (limit.getYear() == null || limit.getKfsr() == null || limit.getKcsr() == null ||
-                limit.getKvr() == null || limit.getKosgu() == null || limit.getKvsr() == null ||
-                limit.getDopFk() == null || limit.getDopEk() == null || limit.getDopKr() == null ||
-                limit.getPurpose() == null || limit.getRecipientInn() == null || limit.getRecipientKpp() == null
-        ) {
+        if (!isValid(limit)) {
             throw new IllegalStateException("Обязательный атрибут объекта не инициализирован");
         }
         List<Attribute<?>> attrs = new ArrayList<>(getIdentAttributes(limit));
@@ -206,6 +202,13 @@ public class CashPlanLimitUtil {
         processField(attrs, limit.getDecLimit(), DEC_LIMIT_ATTR, DEC_BALANCE_ATTR);
         processField(attrs, limit.getFrtQuarterBalance(), Q_4_BALANCE_ATTR);
         return attrs;
+    }
+
+    private static boolean isValid(CashPlanLimit limit) {
+        return limit.getYear() != null && limit.getKfsr() != null && limit.getKcsr() != null &&
+                limit.getKvr() != null && limit.getKosgu() != null && limit.getKvsr() != null &&
+                limit.getDopFk() != null && limit.getDopEk() != null && limit.getDopKr() != null &&
+                limit.getPurpose() != null && limit.getRecipientInn() != null && limit.getRecipientKpp() != null;
     }
 
     private static List<Attribute<?>> getIdentAttributes(CashPlanLimit creator) {

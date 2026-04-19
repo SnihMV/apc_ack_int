@@ -91,13 +91,7 @@ public class FinancingSourceUtil {
     }
 
     private static List<Attribute<?>> getAttributesToCreate(FinancingSource source) {
-        if (source.getYear() == null || source.getKfsr() == null ||
-                source.getKcsr() == null || source.getKvr() == null ||
-                source.getKosgu() == null || source.getKvsr() == null ||
-                source.getDopFk() == null || source.getDopEk() == null ||
-                source.getDopKr() == null || source.getPurpose() == null ||
-                source.getConcatenatedKBK() == null || source.getConcatenatedKBK().isBlank()
-        ) {
+        if (!isValid(source)) {
             throw new IllegalStateException("Обязательный атрибут объекта не инициализирован");
         }
         List<Attribute<?>> attrs = new ArrayList<>(getIdentAttributes(source));
@@ -109,6 +103,13 @@ public class FinancingSourceUtil {
             attrs.add(new LinkedAttribute(CASH_PLAN_LIMITS_ATTR, source.getCashPlanLimitIds()));
         }
         return attrs;
+    }
+
+    private static boolean isValid(FinancingSource source) {
+        return source.getYear() != null && source.getKfsr() != null && source.getKcsr() != null &&
+                source.getKvr() != null && source.getKosgu() != null && source.getKvsr() != null &&
+                source.getDopFk() != null && source.getDopEk() != null && source.getDopKr() != null &&
+                source.getPurpose() != null && source.getConcatenatedKBK() != null;
     }
 
     private static Collection<? extends Attribute<?>> getIdentAttributes(FinancingSource creator) {

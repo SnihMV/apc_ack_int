@@ -1,37 +1,5 @@
 package su.petrosoft.apk_ack_integration.mapper;
 
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPKR;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KCSR;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KFSR;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KOSGU;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVR;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVSR;
-import static su.petrosoft.apk_ack_integration.util.DictionaryUtil.ownershipForm;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.CASH_PLAN_LIMITS_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.CONCAT_KBK_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.DOPEK_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.DOPFK_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.DOPKR_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.KCSR_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.KFSR_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.KOSGU_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.KVR_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.KVSR_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.OWNERSHIP_FORM_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.PURPOSE_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.SUBSIDY_PROGRAM_ATTR;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.TEMPLATE_ID;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.YEAR_ATTR;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryDataById;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractAllData;
-import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import su.petrosoft.apk_ack_integration.model.DictionaryData;
@@ -45,6 +13,17 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.LongAttribu
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.StringAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.*;
+import static su.petrosoft.apk_ack_integration.util.DictionaryUtil.ownershipForm;
+import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.*;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
 
 @Slf4j
 @Component
@@ -91,7 +70,7 @@ public class FinancingSourceMapper {
 
     public CreateInstanceRequestDto toCreatingDto(FinancingSource fs,
                                                   Map<Dictionary, Map<DictionaryData, Long>> codesMap) {
-        long ownershipFormId = ownershipForm(dictionaryDataById(codesMap, KOSGU, fs.getKosgu()));
+        long ownershipFormId = ownershipForm(dictionaryDataById(codesMap, KOSGU, fs.getKosgu()).getCode());
         return new CreateInstanceRequestDto(
             InstanceDto.builder()
                 .templateId(TEMPLATE_ID)

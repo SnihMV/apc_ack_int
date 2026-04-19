@@ -1,6 +1,5 @@
 package su.petrosoft.apk_ack_integration.service;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -11,7 +10,10 @@ import su.petrosoft.apk_ack_integration.exception.StaleVersionException;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.mapper.FinancingSourceMapper;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyProgramMapper;
-import su.petrosoft.apk_ack_integration.model.*;
+import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
+import su.petrosoft.apk_ack_integration.model.DictionaryData;
+import su.petrosoft.apk_ack_integration.model.FinancingSource;
+import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.data.CashPlanLimitData;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 import su.petrosoft.apk_ack_integration.model.data.DictionaryDataContaining;
@@ -40,8 +42,6 @@ import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.TEMPLATE_I
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.*;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.*;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.*;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.FS_TITLE;
-import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.requestDtoToGetSourcesByYear;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.*;
 
 @Slf4j
@@ -528,43 +528,60 @@ public class BudgetItemService {
             throw new ExcelFileException(FILE_IS_EMPTY.formatted(file.getOriginalFilename()));
         }
         BudgetItemContext ctx = initContext();
-        rebuildBudgetItemsContext(ctx);
+        rebuildContext(ctx);
 
         return ctx.statistics;
     }
 
     public Map<UpsertAction, Map<Long, Set<Long>>> restoreBudgetItemsConsistency() {
         BudgetItemContext ctx = initContext();
-        rebuildBudgetItemsContext(ctx);
+        rebuildContext(ctx);
         return ctx.statistics;
     }
 
-    private void rebuildBudgetItemsContext(BudgetItemContext ctx) {
+    private void rebuildContext(BudgetItemContext ctx) {
         Map<FinancingSource, Set<Long>> sourcesFromExistingLimits = ctx.existingLimits.keySet().stream()
                 .collect(groupingBy(
                         FinancingSourceUtil::extractFromLimit,
                         mapping(CashPlanLimit::getId, toSet())
                 ));
-        createMissingSources(ctx, sourcesFromExistingLimits);
-        relinkSourceToLimits(ctx, sourcesFromExistingLimits);
+        createMissingSources(sourcesFromExistingLimits, ctx);
+        relinkSourceToLimits(sourcesFromExistingLimits, ctx);
 
         Map<SubsidyProgram, Set<Long>> programsFromExistingSources = ctx.existingSources.keySet().stream()
                 .collect(groupingBy(
                         SubsidyProgramUtil::extractScdLvlSpFromFs,
                         mapping(FinancingSource::getId, toSet())
                 ));
-        createMissingPrograms(ctx, programsFromExistingSources);
-        relinkProgramToSource(ctx, programsFromExistingSources);
+        createMissingPrograms(programsFromExistingSources, ctx);
+        relinkProgramToSource(programsFromExistingSources, ctx);
+    }
+
+    private void relinkProgramToSource(
+            Map<SubsidyProgram, Set<Long>> programsFromExistingSources,
+            BudgetItemContext ctx
+    ) {
+        for (SubsidyProgram sp : ctx.existingPrograms.keySet()) {
+            Set<Long> properIds = programsFromExistingSources.get(sp);
+            if (properIds == null) {
+                continue;
+            }
+            Collection<Long> actualIds = sp.getFinancingSourceIds();
+            if (!properIds.equals(actualIds)) {
+                plicanteRestClient.updateInstance(requestDtoForUpdateBySources(sp.getId(), sp.getVersion(), actualIds));
+                addStat(ctx, UPDATED, SubsidyProgramUtil.TEMPLATE_ID, sp.getId());
+            }
+        }
     }
 
     private void createMissingPrograms(
-            BudgetItemContext ctx,
-            Map<SubsidyProgram, Set<Long>> programsFromExistingSources
+            Map<SubsidyProgram, Set<Long>> programsFromExistingSources,
+            BudgetItemContext ctx
     ) {
         Set<SubsidyProgram> missingScdLvlPrograms = programsFromExistingSources.entrySet().stream()
                 .filter(entry -> !ctx.existingPrograms.containsKey(entry.getKey()))
-                .map(e -> e.getKey().toBuilder()
-                        .financingSourceIds(e.getValue())
+                .map(entry -> entry.getKey().toBuilder()
+                        .financingSourceIds(entry.getValue())
                         .build())
                 .collect(toSet());
         dictionaryService.completeDictionaryMapForRequesters(missingScdLvlPrograms, ctx.dictionaryMap);
@@ -573,25 +590,16 @@ public class BudgetItemService {
 
     private SubsidyProgram createProgram(SubsidyProgram program, BudgetItemContext ctx) {
         program.setTitle(defineTitle(program, ctx.dictionaryMap));
-        if (program.getLevel() > LOWEST_LEVEL) { // условие выхода из рекурсии
-            program.setParentId(obtainParentId(program, ctx));
+        if (program.getLevel() > MIN_LEVEL) { // условие выхода из рекурсии
+            SubsidyProgram searchKey = extractParentKey(program);
+            SubsidyProgram parent = ctx.existingPrograms.computeIfAbsent(searchKey, p -> createProgram(p, ctx));
+            program.setParentId(parent.getId());
         }
         InstanceDto dto = plicanteRestClient.createInstance(requestDtoToCreateSubsidyProgram(program));
         program.setId(dto.id());
         program.setVersion(dto.version());
-        ctx.existingPrograms.put(program, program);
         addStat(ctx, CREATED, SubsidyProgramUtil.TEMPLATE_ID, dto.id());
         return program;
-    }
-
-    private Long obtainParentId(
-            SubsidyProgram program,
-            BudgetItemContext ctx
-    ) {
-        SubsidyProgram searchKey = extractParentKey(program);
-        SubsidyProgram parent = ctx.existingPrograms
-                .computeIfAbsent(searchKey, p -> createProgram(p, ctx));
-        return parent.getId();
     }
 
     private BudgetItemContext initContext() {
@@ -606,8 +614,8 @@ public class BudgetItemService {
     }
 
     private void createMissingSources(
-            BudgetItemContext ctx,
-            Map<FinancingSource, Set<Long>> sourcesFromExistingLimits
+            Map<FinancingSource, Set<Long>> sourcesFromExistingLimits,
+            BudgetItemContext ctx
     ) {
         Set<FinancingSource> missingSources = sourcesFromExistingLimits.entrySet().stream()
                 .filter(entry -> !ctx.existingSources.containsKey(entry.getKey()))
@@ -627,15 +635,18 @@ public class BudgetItemService {
     }
 
     private void relinkSourceToLimits(
-            BudgetItemContext ctx,
-            Map<FinancingSource, Set<Long>> sourcesToLimitIdsMap
+            Map<FinancingSource, Set<Long>> sourcesFromExistingLimits,
+            BudgetItemContext ctx
     ) {
-        for (FinancingSource fs : ctx.existingSources) {
-            Set<Long> actual = fs.getCashPlanLimitIds();
-            Set<Long> needed = sourcesToLimitIdsMap.get(fs);
-            if (!needed.equals(actual)) {
-                    plicanteRestClient.updateInstance(requestDtoForUpdateByLimits(fs.getId(), fs.getVersion(), needed));
-                    addStat(ctx, UPDATED, FinancingSourceUtil.TEMPLATE_ID, fs.getId());
+        for (FinancingSource fs : ctx.existingSources.keySet()) {
+            Set<Long> properIds = sourcesFromExistingLimits.get(fs);
+            if (properIds == null) {
+                continue;
+            }
+            Set<Long> actualIds = fs.getCashPlanLimitIds();
+            if (!properIds.equals(actualIds)) {
+                plicanteRestClient.updateInstance(requestDtoForUpdateByLimits(fs.getId(), fs.getVersion(), properIds));
+                addStat(ctx, UPDATED, FinancingSourceUtil.TEMPLATE_ID, fs.getId());
             }
         }
     }
@@ -644,8 +655,7 @@ public class BudgetItemService {
         Set<Long> ids = sources.stream()
                 .map(FinancingSource::getKcsr)
                 .collect(toSet());
-        return plicanteRestClient.getTableAttributesList(
-                        requestDtoToGetProgramsByKcsrIds(ids))
+        return plicanteRestClient.getTableAttributesList(requestDtoToGetProgramsByKcsrIds(ids))
                 .stream()
                 .map(spMapper::toEntity)
                 .collect(toMap(
@@ -687,14 +697,13 @@ public class BudgetItemService {
                 .add(instanceId);
     }
 
-    @RequiredArgsConstructor
-    @Getter
-    private static class BudgetItemContext {
-        private final Map<CashPlanLimit, CashPlanLimit> existingLimits;
-        private final Map<FinancingSource, FinancingSource> existingSources;
-        private final Map<SubsidyProgram, SubsidyProgram> existingPrograms;
-        private final Map<Dictionary, Map<DictionaryData, Long>> dictionaryMap;
-        private final Map<UpsertAction, Map<Long, Set<Long>>> statistics;
+    private record BudgetItemContext(
+            Map<CashPlanLimit, CashPlanLimit> existingLimits,
+            Map<FinancingSource, FinancingSource> existingSources,
+            Map<SubsidyProgram, SubsidyProgram> existingPrograms,
+            Map<Dictionary, Map<DictionaryData, Long>> dictionaryMap,
+            Map<UpsertAction, Map<Long, Set<Long>>> statistics
+    ) {
     }
 
 }

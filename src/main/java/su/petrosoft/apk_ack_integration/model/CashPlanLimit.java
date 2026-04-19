@@ -84,11 +84,11 @@ public class CashPlanLimit extends PlicanteInstance {
         }
         CashPlanLimit that = (CashPlanLimit) o;
         return Objects.equals(year, that.year) && Objects.equals(kfsr, that.kfsr)
-               && Objects.equals(kcsr, that.kcsr) && Objects.equals(kvr, that.kvr)
-               && Objects.equals(kosgu, that.kosgu) && Objects.equals(kvsr, that.kvsr)
-               && Objects.equals(dopFk, that.dopFk) && Objects.equals(dopEk, that.dopEk)
-               && Objects.equals(dopKr, that.dopKr) && Objects.equals(purpose, that.purpose)
-               && Objects.equals(recipientInn, that.recipientInn) && Objects.equals(recipientKpp, that.recipientKpp);
+                && Objects.equals(kcsr, that.kcsr) && Objects.equals(kvr, that.kvr)
+                && Objects.equals(kosgu, that.kosgu) && Objects.equals(kvsr, that.kvsr)
+                && Objects.equals(dopFk, that.dopFk) && Objects.equals(dopEk, that.dopEk)
+                && Objects.equals(dopKr, that.dopKr) && Objects.equals(purpose, that.purpose)
+                && Objects.equals(recipientInn, that.recipientInn) && Objects.equals(recipientKpp, that.recipientKpp);
     }
 
     @Override
