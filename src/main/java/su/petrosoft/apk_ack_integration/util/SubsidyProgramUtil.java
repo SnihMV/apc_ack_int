@@ -18,8 +18,10 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttr
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 
@@ -182,24 +184,34 @@ public class SubsidyProgramUtil {
 
     public static SubsidyProgram extractParentKey(SubsidyProgram program) {
         if (program.getLevel() == 2) {
-             return SubsidyProgram.builder()
+            return SubsidyProgram.builder()
                     .level(program.getLevel() - 1)
                     .kcsr(program.getKcsr())
                     .build();
         }
-        throw new IllegalStateException(ExceptionMessageClass.ILLEGAL_ATTR_VALUE
-                .formatted(PARENT_ATTR, program.getLevel()));
+        throw new IllegalStateException(ExceptionMessageClass.ILLEGAL_PARENT_EXTRACT);
     }
 
     public static UpdateInstanceRequestDto requestDtoForUpdateBySources(Long id, Long version, Collection<Long> sourceIds) {
-            return new UpdateInstanceRequestDto(
-                    InstanceDto.builder()
-                            .id(id)
-                            .version(version)
-                            .attributes(List.of(
-                                    new LinkedAttribute(FIN_SRC_ATTR, sourceIds)
-                            ))
-                            .build()
-            );
+        return new UpdateInstanceRequestDto(
+                InstanceDto.builder()
+                        .id(id)
+                        .version(version)
+                        .attributes(List.of(
+                                new LinkedAttribute(FIN_SRC_ATTR, sourceIds)
+                        ))
+                        .build()
+        );
+    }
+
+    public static Deque<SubsidyProgram> getHierarchicalChain(SubsidyProgram maxLevelProgram) {
+        Deque<SubsidyProgram> hierarchicalChain = new ArrayDeque<>();
+        SubsidyProgram currentKey = maxLevelProgram;
+        while (currentKey.getLevel() > MIN_LEVEL) {
+            hierarchicalChain.addFirst(currentKey);
+            currentKey = extractParentKey(currentKey);
+        }
+        hierarchicalChain.addFirst(currentKey);
+        return hierarchicalChain;
     }
 }
