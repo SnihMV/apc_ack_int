@@ -4,9 +4,10 @@ import lombok.Data;
 import lombok.experimental.SuperBuilder;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPKR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KCSR;
@@ -19,8 +20,8 @@ public class SubsidyProgram extends PlicanteInstance implements DictionaryDataRe
     private final Long dopKr;
     private Long parentId;
     private String title;
-    private Collection<Long> financingSourceIds;
-    private Collection<Long> cofinLevelIds;
+    private Set<Long> financingSourceIds;
+    private Set<Long> cofinLevelIds;
 
     @Override
     public boolean equals(Object o) {
@@ -38,10 +39,14 @@ public class SubsidyProgram extends PlicanteInstance implements DictionaryDataRe
 
     @Override
     public Map<Dictionary, Long> requestedDictionaryIds() {
-        return Map.of(
-                KCSR, getKcsr(),
-                DOPKR, getDopKr()
-        );
+        Map<Dictionary, Long> requested = new HashMap<>();
+        requested.put(KCSR, getKcsr());
+        requested.put(DOPKR, getDopKr());
+        return requested;
+//        return Map.of(
+//                KCSR, getKcsr(),
+//                DOPKR, getDopKr()
+//        );
     }
 }
 

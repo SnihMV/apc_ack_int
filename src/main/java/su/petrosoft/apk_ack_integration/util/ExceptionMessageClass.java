@@ -28,4 +28,5 @@ public class ExceptionMessageClass {
     public static final String EMPTY_INSTANCE_ID = "Идентификатор объекта не определен (null)";
     public static final String ILLEGAL_CREATE_STATE = "Объект находится в недопустимом для сохранения состоянии";
     public static final String ILLEGAL_ATTR_VALUE = "Атрибут [id = %d] имеет недопустимое значение [%s]";
+    public static final String ILLEGAL_PARENT_EXTRACT = "Попытка извлечь родительский объект у направления низшего уровня";
 }

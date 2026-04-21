@@ -98,7 +98,7 @@ public class CofinancingLevelService {
 
             log.info("Updating Subsidy_Programs by Default Cofinancing_Level ...");
             for (SubsidyProgram updatedSp : emptySubsidyPrograms) {
-                updatedSp.setCofinLevelIds(List.of(defaultInstanceId));
+                updatedSp.setCofinLevelIds(Set.of(defaultInstanceId));
                 log.info("Save updating Subsidy_Program [{}]", updatedSp);
                 plicanteRestClient.updateInstance(requestDtoToUpdatingProgramByCofinLevels(updatedSp));
                 result.put(updatedSp.getId(), Set.of(defaultInstanceId));

@@ -534,8 +534,14 @@ public class BudgetItemService {
     }
 
     public Map<UpsertAction, Map<Long, Set<Long>>> restoreBudgetItemsConsistency() {
+        long start = System.currentTimeMillis();
         BudgetItemContext ctx = initContext();
+        long initCtx = System.currentTimeMillis();
+        System.out.println("=== init ctx time: " + (initCtx - start) + "ms");
         rebuildContext(ctx);
+        long rebuildCtx = System.currentTimeMillis();
+        System.out.println("=== rebuild ctx time: " + (rebuildCtx - initCtx) + "ms");
+
         return ctx.statistics;
     }
 
@@ -566,33 +572,65 @@ public class BudgetItemService {
             if (properIds == null) {
                 continue;
             }
-            Collection<Long> actualIds = sp.getFinancingSourceIds();
+            Set<Long> actualIds = sp.getFinancingSourceIds();
             if (!properIds.equals(actualIds)) {
-                plicanteRestClient.updateInstance(requestDtoForUpdateBySources(sp.getId(), sp.getVersion(), actualIds));
+                plicanteRestClient.updateInstance(requestDtoForUpdateBySources(sp.getId(), sp.getVersion(), properIds));
                 addStat(ctx, UPDATED, SubsidyProgramUtil.TEMPLATE_ID, sp.getId());
             }
         }
     }
 
     private void createMissingPrograms(
-            Map<SubsidyProgram, Set<Long>> programsFromExistingSources,
+            Map<SubsidyProgram, Set<Long>> maxLevelProgramKeys,
             BudgetItemContext ctx
     ) {
-        Set<SubsidyProgram> missingScdLvlPrograms = programsFromExistingSources.entrySet().stream()
-                .filter(entry -> !ctx.existingPrograms.containsKey(entry.getKey()))
+        Set<Deque<SubsidyProgram>> programChains = maxLevelProgramKeys.entrySet().stream()
                 .map(entry -> entry.getKey().toBuilder()
                         .financingSourceIds(entry.getValue())
                         .build())
+                .map(SubsidyProgramUtil::getHierarchicalChain)
                 .collect(toSet());
-        dictionaryService.completeDictionaryMapForRequesters(missingScdLvlPrograms, ctx.dictionaryMap);
-        missingScdLvlPrograms.forEach(p -> createProgram(p, ctx));
+        Set<SubsidyProgram> uniquePrograms = programChains.stream()
+                .flatMap(Collection::stream)
+                .filter(p -> !ctx.existingPrograms.containsKey(p))
+                .collect(toSet());
+        dictionaryService.completeDictionaryMapForRequesters(uniquePrograms, ctx.dictionaryMap);
+        for (Entry<SubsidyProgram, Set<Long>> entry : maxLevelProgramKeys.entrySet()) {
+            SubsidyProgram programKey = entry.getKey();
+            programKey.setFinancingSourceIds(entry.getValue());
+            createHierarchically(programKey, ctx);
+        }
+
+//
+//        Set<SubsidyProgram> missingMaxLvlPrograms = maxLevelProgramKeys.entrySet().stream()
+//                .filter(entry -> !ctx.existingPrograms.containsKey(entry.getKey()))
+//                .map(entry -> entry.getKey().toBuilder()
+//                        .financingSourceIds(entry.getValue())
+//                        .build())
+//                .collect(toSet());
+//
+//        missingMaxLvlPrograms.forEach(p -> createProgram(p, ctx));
+    }
+
+    private void createHierarchically(SubsidyProgram programKey, BudgetItemContext ctx) {
+        while (true) {
+            SubsidyProgram program = ctx.existingPrograms.get(programKey);
+            if (program == null) {
+                program = createProgram(programKey, ctx);
+            }
+            if (program.getLevel() == MIN_LEVEL) {
+                break;
+            }
+            programKey = extractParentKey(program);
+        }
     }
 
     private SubsidyProgram createProgram(SubsidyProgram program, BudgetItemContext ctx) {
         program.setTitle(defineTitle(program, ctx.dictionaryMap));
-        if (program.getLevel() > MIN_LEVEL) { // условие выхода из рекурсии
+        if (program.getLevel() > MIN_LEVEL) {
             SubsidyProgram searchKey = extractParentKey(program);
-            SubsidyProgram parent = ctx.existingPrograms.computeIfAbsent(searchKey, p -> createProgram(p, ctx));
+            SubsidyProgram parent = ctx.existingPrograms.computeIfAbsent(searchKey,
+                    p -> createProgram(p, ctx));
             program.setParentId(parent.getId());
         }
         InstanceDto dto = plicanteRestClient.createInstance(requestDtoToCreateSubsidyProgram(program));
