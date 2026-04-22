@@ -1,16 +1,16 @@
 package su.petrosoft.apk_ack_integration.model;
 
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+import static su.petrosoft.apk_ack_integration.util.CofinanceLevelUtil.TEMPLATE_ID;
+
+@Getter
+@Setter
 @SuperBuilder
 public class CofinancingLevel extends PlicanteInstance {
     private Long year;
@@ -19,6 +19,11 @@ public class CofinancingLevel extends PlicanteInstance {
     private BigDecimal fbCoeff;
     private Long financingForm;
     private Long ownershipForm;
+
+    @Override
+    public long getTemplateId() {
+        return TEMPLATE_ID;
+    }
 
     @Override
     public boolean equals(Object o) {

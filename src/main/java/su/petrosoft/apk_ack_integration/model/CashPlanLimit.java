@@ -1,16 +1,16 @@
 package su.petrosoft.apk_ack_integration.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.TEMPLATE_ID;
+
+@Getter
+@Setter
 @SuperBuilder
 public class CashPlanLimit extends PlicanteInstance {
 
@@ -76,6 +76,11 @@ public class CashPlanLimit extends PlicanteInstance {
     private BigDecimal scdQuarterBalance;
     private BigDecimal trdQuarterBalance;
     private BigDecimal frtQuarterBalance;
+
+    @Override
+    public long getTemplateId() {
+        return TEMPLATE_ID;
+    }
 
     @Override
     public boolean equals(Object o) {

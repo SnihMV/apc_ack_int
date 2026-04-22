@@ -3,6 +3,7 @@ package su.petrosoft.apk_ack_integration.util;
 import lombok.extern.slf4j.Slf4j;
 import su.petrosoft.apk_ack_integration.exception.DictionaryException;
 import su.petrosoft.apk_ack_integration.model.DictionaryData;
+import su.petrosoft.apk_ack_integration.model.PlicanteInstance;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
@@ -12,42 +13,35 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.StringFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
-import su.petrosoft.apk_ack_integration.model.dto.response.CreatingInstancesFromFileResponseDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.Map.Entry;
 import java.util.function.Function;
 
+import static java.util.stream.Collectors.*;
 import static su.petrosoft.apk_ack_integration.model.enums.SqlOperation.IN;
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_CODE_NOT_FOUND;
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_DESCRIPTION_NOT_FOUND;
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_ID_NOT_FOUND;
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.DICTIONARY_NOT_OBTAINED;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.*;
 
 @Slf4j
 public class PlicanteInstanceUtil {
 
     public static final ZoneId MOSCOW_ZONE = ZoneId.of("Europe/Moscow");
 
-    public static <T> CreatingInstancesFromFileResponseDto creatingInstancesFromFileResponseDto(
-            List<?> dtoList,
-            List<T> createdInstances,
-            Function<T, Long> function
-    ) {
-        return new CreatingInstancesFromFileResponseDto(
-                dtoList.size(),
-                createdInstances.size(),
-                createdInstances.stream()
-                        .map(function)
-                        .toList());
+    public static Map<Long, List<List<Long>>> getDuplicates(List<? extends PlicanteInstance> instances) {
+        Map<PlicanteInstance, List<PlicanteInstance>> grouped = instances.stream()
+                .collect(groupingBy(Function.identity()));
+        return grouped.entrySet().stream()
+                .filter(e -> e.getValue().size() > 1)
+                .map(e -> Map.entry(
+                        e.getKey().getTemplateId(),
+                        e.getValue().stream().map(PlicanteInstance::getId).toList()))
+                .collect(groupingBy(
+                        Entry::getKey,
+                        mapping(Entry::getValue, toList())));
     }
 
     public static GetAttributesListRequestDto requestDtoToGetDictionaryDataByCodes(
@@ -89,17 +83,6 @@ public class PlicanteInstanceUtil {
                         .build());
     }
 
-//    public static UpdateInstanceRequestDto requestDtoForUpdatingDictionaryDescription(Dictionary dictionary, long id, String description) {
-//        return new UpdateInstanceRequestDto(
-//                InstanceDto.builder()
-//                        .id(id)
-//                        .templateId(dictionary.getTemplateId())
-//                        .version(updatedSP.getVersion())
-//                        .attributes(List.of(
-//                                new LinkedAttribute(COFIN_LVL_ATTR, updatedSP.getCofinancingLevelIds())))
-//                        .build());
-//    }
-
     public static Long dictionaryIdByCode(
             Map<Dictionary, Map<DictionaryData, Long>> codesMap,
             Dictionary dictionary,
@@ -120,7 +103,7 @@ public class PlicanteInstanceUtil {
         return codesMap.get(dictionary).entrySet().stream()
                 .filter(entry -> entry.getValue().equals(id))
                 .findFirst()
-                .map(Map.Entry::getKey)
+                .map(Entry::getKey)
                 .orElseThrow(() -> new DictionaryException(DICTIONARY_ID_NOT_FOUND.formatted(dictionary, id)));
     }
 

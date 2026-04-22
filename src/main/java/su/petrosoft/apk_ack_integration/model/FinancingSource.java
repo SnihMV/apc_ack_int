@@ -1,7 +1,7 @@
 package su.petrosoft.apk_ack_integration.model;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
@@ -10,9 +10,10 @@ import java.util.Objects;
 import java.util.Set;
 
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.*;
+import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.TEMPLATE_ID;
 
-@Data
-@NoArgsConstructor
+@Getter
+@Setter
 @SuperBuilder(toBuilder = true)
 public class FinancingSource extends PlicanteInstance implements DictionaryDataRequester {
     private Long year;
@@ -29,6 +30,11 @@ public class FinancingSource extends PlicanteInstance implements DictionaryDataR
     private Long subsidyProgramId;
     private Set<Long> cashPlanLimitIds;
     private String concatenatedKBK;
+
+    @Override
+    public long getTemplateId() {
+        return TEMPLATE_ID;
+    }
 
     @Override
     public boolean equals(Object o) {
