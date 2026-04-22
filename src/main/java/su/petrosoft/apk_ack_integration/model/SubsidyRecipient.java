@@ -1,16 +1,17 @@
 package su.petrosoft.apk_ack_integration.model;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.TEMPLATE_ID;
+
+@Getter
+@Setter
 @SuperBuilder
 public class SubsidyRecipient extends PlicanteInstance {
     private String fullTitle;
@@ -24,22 +25,20 @@ public class SubsidyRecipient extends PlicanteInstance {
     private Long appType;
 
     @Override
+    public long getTemplateId() {
+        return TEMPLATE_ID;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        SubsidyRecipient that = (SubsidyRecipient) o;
-        return Objects.equals(inn, that.inn);
+        if (!super.equals(o)) return false;
+        SubsidyRecipient recipient = (SubsidyRecipient) o;
+        return Objects.equals(inn, recipient.inn) && Objects.equals(kpp, recipient.kpp);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(inn);
-    }
-
-    public boolean deepEquals(SubsidyRecipient that) {
-        return Objects.equals(fullTitle, that.fullTitle) &&
-                Objects.equals(shortTitle, that.shortTitle) &&
-                Objects.equals(ogrn, that.ogrn) &&
-                Objects.equals(ogrnDate, that.ogrnDate) &&
-                Objects.equals(kpp, that.kpp);
+        return Objects.hash(super.hashCode(), inn, kpp);
     }
 }

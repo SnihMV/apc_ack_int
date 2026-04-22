@@ -1,15 +1,15 @@
 package su.petrosoft.apk_ack_integration.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+import static su.petrosoft.apk_ack_integration.util.CropProductionUtil.TEMPLATE_ID;
+
+@Getter
+@Setter
 @SuperBuilder
 public class CropProductionMainForm extends PlicanteInstance{
     private Long date;
@@ -225,4 +225,8 @@ public class CropProductionMainForm extends PlicanteInstance{
     private BigDecimal b3_l16_a5;
     private BigDecimal b3_l16_a6;
 
+    @Override
+    public long getTemplateId() {
+        return TEMPLATE_ID;
+    }
 }

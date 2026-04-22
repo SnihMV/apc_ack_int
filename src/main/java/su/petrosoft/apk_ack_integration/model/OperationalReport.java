@@ -1,16 +1,17 @@
 package su.petrosoft.apk_ack_integration.model;
 
-import java.math.BigDecimal;
-import java.util.Map;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import su.petrosoft.apk_ack_integration.model.enums.ReportType;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+import java.math.BigDecimal;
+import java.util.Map;
+
+import static su.petrosoft.apk_ack_integration.util.OperationalReportUtil.TEMPLATE_ID;
+
+@Getter
+@Setter
 @SuperBuilder
 public class OperationalReport extends PlicanteInstance {
     private Long recipientId;
@@ -20,5 +21,10 @@ public class OperationalReport extends PlicanteInstance {
 
     public void addValue(String fieldCode, BigDecimal value) {
         reportValues.put(fieldCode, value);
+    }
+
+    @Override
+    public long getTemplateId() {
+        return TEMPLATE_ID;
     }
 }

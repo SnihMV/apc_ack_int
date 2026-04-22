@@ -1,6 +1,7 @@
 package su.petrosoft.apk_ack_integration.model;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
@@ -11,8 +12,10 @@ import java.util.Set;
 
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPKR;
 import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KCSR;
+import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.TEMPLATE_ID;
 
-@Data
+@Getter
+@Setter
 @SuperBuilder(toBuilder = true)
 public class SubsidyProgram extends PlicanteInstance implements DictionaryDataRequester {
     private final Long level;
@@ -43,10 +46,11 @@ public class SubsidyProgram extends PlicanteInstance implements DictionaryDataRe
         requested.put(KCSR, getKcsr());
         requested.put(DOPKR, getDopKr());
         return requested;
-//        return Map.of(
-//                KCSR, getKcsr(),
-//                DOPKR, getDopKr()
-//        );
+    }
+
+    @Override
+    public long getTemplateId() {
+        return TEMPLATE_ID;
     }
 }
 

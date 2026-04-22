@@ -6,14 +6,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import su.petrosoft.apk_ack_integration.client.PlicanteRestClient;
 import su.petrosoft.apk_ack_integration.exception.ExcelFileException;
+import su.petrosoft.apk_ack_integration.exception.InstanceDuplicateException;
 import su.petrosoft.apk_ack_integration.exception.StaleVersionException;
 import su.petrosoft.apk_ack_integration.mapper.CashPlanLimitMapper;
 import su.petrosoft.apk_ack_integration.mapper.FinancingSourceMapper;
 import su.petrosoft.apk_ack_integration.mapper.SubsidyProgramMapper;
-import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
-import su.petrosoft.apk_ack_integration.model.DictionaryData;
-import su.petrosoft.apk_ack_integration.model.FinancingSource;
-import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
+import su.petrosoft.apk_ack_integration.model.*;
 import su.petrosoft.apk_ack_integration.model.data.CashPlanLimitData;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 import su.petrosoft.apk_ack_integration.model.data.DictionaryDataContaining;
@@ -42,6 +40,7 @@ import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.TEMPLATE_I
 import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.*;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.*;
 import static su.petrosoft.apk_ack_integration.util.FinancingSourceUtil.*;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
 import static su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil.*;
 
 @Slf4j
@@ -584,13 +583,13 @@ public class BudgetItemService {
             Map<SubsidyProgram, Set<Long>> maxLevelProgramKeys,
             BudgetItemContext ctx
     ) {
-        Set<Deque<SubsidyProgram>> programChains = maxLevelProgramKeys.entrySet().stream()
+        Set<Deque<SubsidyProgram>> programsChain = maxLevelProgramKeys.entrySet().stream()
                 .map(entry -> entry.getKey().toBuilder()
                         .financingSourceIds(entry.getValue())
                         .build())
                 .map(SubsidyProgramUtil::getHierarchicalChain)
                 .collect(toSet());
-        Set<SubsidyProgram> uniquePrograms = programChains.stream()
+        Set<SubsidyProgram> uniquePrograms = programsChain.stream()
                 .flatMap(Collection::stream)
                 .filter(p -> !ctx.existingPrograms.containsKey(p))
                 .collect(toSet());
@@ -641,14 +640,22 @@ public class BudgetItemService {
     }
 
     private BudgetItemContext initContext() {
-        Map<UpsertAction, Map<Long, Set<Long>>> statistics = new EnumMap<>(UpsertAction.class);
-        Map<Dictionary, Map<DictionaryData, Long>> dictionaryMap = new EnumMap<>(Dictionary.class);
+        BudgetItemContext ctx = new BudgetItemContext(
+                new HashMap<>(),
+                new HashMap<>(),
+                new HashMap<>(),
+                new HashMap<>(),
+                new EnumMap<>(Dictionary.class),
+                new EnumMap<>(UpsertAction.class)
+        );
+        getCurrentYearLimits(ctx);
+        getCurrentYearSources(ctx);
+        getProgramsBySources(ctx);
 
-        Map<CashPlanLimit, CashPlanLimit> existingLimits = getCurrentYearLimits();
-        Map<FinancingSource, FinancingSource> existingSources = getCurrentYearSources();
-        Map<SubsidyProgram, SubsidyProgram> existingPrograms = getProgramsBySources(existingSources.keySet());
-
-        return new BudgetItemContext(existingLimits, existingSources, existingPrograms, dictionaryMap, statistics);
+        if (!ctx.duplicates.isEmpty()) {
+            throw new InstanceDuplicateException(ctx.duplicates);
+        }
+        return ctx;
     }
 
     private void createMissingSources(
@@ -689,20 +696,25 @@ public class BudgetItemService {
         }
     }
 
-    private Map<SubsidyProgram, SubsidyProgram> getProgramsBySources(Set<FinancingSource> sources) {
-        Set<Long> ids = sources.stream()
+    private void getProgramsBySources(BudgetItemContext ctx) {
+        Set<Long> ids = ctx.existingSources.keySet().stream()
                 .map(FinancingSource::getKcsr)
                 .collect(toSet());
-        return plicanteRestClient.getTableAttributesList(requestDtoToGetProgramsByKcsrIds(ids))
-                .stream()
+        List<SubsidyProgram> programs = plicanteRestClient.getTableAttributesList(
+                        requestDtoToGetProgramsByKcsrIds(ids)).stream()
                 .map(spMapper::toEntity)
-                .collect(toMap(
-                        Function.identity(),
-                        Function.identity()
-                ));
+                .toList();
+        ctx.addDuplicates(getDuplicates(programs));
+        if (ctx.duplicates.get(SubsidyProgramUtil.TEMPLATE_ID).isEmpty()) {
+            ctx.existingPrograms.putAll(programs.stream()
+                    .collect(toMap(
+                            Function.identity(),
+                            Function.identity()
+                    )));
+        }
     }
 
-    private Map<FinancingSource, FinancingSource> getCurrentYearSources() {
+    private Map<FinancingSource, FinancingSource> getCurrentYearSources(BudgetItemContext ctx) {
         return plicanteRestClient.getTableAttributesList(
                         requestDtoToGetSourcesByYear(LocalDate.now().getYear()))
                 .stream()
@@ -713,15 +725,19 @@ public class BudgetItemService {
                 ));
     }
 
-    private Map<CashPlanLimit, CashPlanLimit> getCurrentYearLimits() {
-        return plicanteRestClient.getTableAttributesList(
+    private Map<CashPlanLimit, CashPlanLimit> getCurrentYearLimits(BudgetItemContext ctx) {
+        List<CashPlanLimit> limits = plicanteRestClient.getTableAttributesList(
                         requestDtoToGetLimitsByYear(LocalDate.now().getYear()))
                 .stream()
                 .map(cplMapper::toEntity)
+                .toList();
+        ctx.duplicates.putAll(getDuplicates(limits));
+        return limits.stream()
                 .collect(toMap(
                         Function.identity(),
                         Function.identity()
                 ));
+
     }
 
     private void addStat(
@@ -739,9 +755,16 @@ public class BudgetItemService {
             Map<CashPlanLimit, CashPlanLimit> existingLimits,
             Map<FinancingSource, FinancingSource> existingSources,
             Map<SubsidyProgram, SubsidyProgram> existingPrograms,
+            Map<Long, List<List<Long>>> duplicates,
             Map<Dictionary, Map<DictionaryData, Long>> dictionaryMap,
             Map<UpsertAction, Map<Long, Set<Long>>> statistics
     ) {
+        public void addDuplicates(Map<Long, List<List<Long>>> duplicates) {
+            for (Entry<Long, List<List<Long>>> entry : duplicates.entrySet()) {
+                this.duplicates.computeIfAbsent(entry.getKey(), k -> new ArrayList<>())
+                        .addAll(entry.getValue());
+            }
+        }
     }
 
 }
