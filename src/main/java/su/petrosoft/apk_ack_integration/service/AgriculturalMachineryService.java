@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -109,7 +110,6 @@ public class AgriculturalMachineryService {
         updateReport(report, savedParkIds);
 
         removeFormerRecipientParks(existedParkIds);
-
     }
 
     private void checkParksCount(Map<Long, Long> existing, Map<Long, Long> fromReport) {
@@ -134,6 +134,9 @@ public class AgriculturalMachineryService {
     }
 
     private Map<Long, Long> getParksWithSupportCount(Collection<Long> existedParkIds) {
+        if (existedParkIds.isEmpty()) {
+            return new HashMap<>();
+        }
         List<InstanceDto> dtoList = plicanteRestClient.getTableAttributesList(requestDtoForGetParksByIdsAndSupportToValidation(existedParkIds, true));
         return dtoList.stream()
                 .collect(groupingBy(
