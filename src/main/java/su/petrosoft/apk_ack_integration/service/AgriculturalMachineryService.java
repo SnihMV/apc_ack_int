@@ -101,7 +101,7 @@ public class AgriculturalMachineryService {
 
         List<AgriculturalMachineryPark> parksFromReport = createMachineryParks(report, recipient);
 
-//        validateCounts(getParksWithSupportCount(existedParkIds), getParksWithSupportCount(parksFromReport));
+        validateCounts(getParksWithSupportCount(existedParkIds), getParksWithSupportCount(parksFromReport));
 
         List<Long> savedParkIds = saveMachineryParks(parksFromReport);
 
