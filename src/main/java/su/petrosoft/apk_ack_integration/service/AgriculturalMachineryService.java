@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -100,7 +101,7 @@ public class AgriculturalMachineryService {
 
         List<AgriculturalMachineryPark> parksFromReport = createMachineryParks(report, recipient);
 
-        validateCounts(getParksWithSupportCount(existedParkIds), getParksWithSupportCount(parksFromReport));
+        checkParksCount(getParksWithSupportCount(existedParkIds), getParksWithSupportCount(parksFromReport));
 
         List<Long> savedParkIds = saveMachineryParks(parksFromReport);
 
@@ -108,10 +109,9 @@ public class AgriculturalMachineryService {
         updateReport(report, savedParkIds);
 
         removeFormerRecipientParks(existedParkIds);
-
     }
 
-    private void validateCounts(Map<Long, Long> existing, Map<Long, Long> fromReport) {
+    private void checkParksCount(Map<Long, Long> existing, Map<Long, Long> fromReport) {
         Set<Long> problemTypes = new HashSet<>();
         for (Entry<Long, Long> entry : existing.entrySet()) {
             if (fromReport.getOrDefault(entry.getKey(), 0L) < entry.getValue()) {
@@ -133,6 +133,9 @@ public class AgriculturalMachineryService {
     }
 
     private Map<Long, Long> getParksWithSupportCount(Collection<Long> existedParkIds) {
+        if (existedParkIds.isEmpty()) {
+            return new HashMap<>();
+        }
         List<InstanceDto> dtoList = plicanteRestClient.getTableAttributesList(requestDtoForGetParksByIdsAndSupportToValidation(existedParkIds, true));
         return dtoList.stream()
                 .collect(groupingBy(
@@ -302,7 +305,7 @@ public class AgriculturalMachineryService {
                 .machineryAndEquip(dictionaryIdByCode(codesMap, getType(fields.get(0)), getField(fields, 1)))
                 .brandModel(getField(fields, 2))
                 .serialNumber(getField(fields, 3))
-                .count(parseLong(getField(fields, 4)))
+                .count(validateCountField(parseLong(getField(fields, 4))))
                 .power(parseBigDecimal(getField(fields, 5)))
                 .cost(parseBigDecimal(getField(fields, 6)))
                 .productionCountry(dictionaryIdByCode(codesMap, PROD_COUNTRY, getField(fields, 7)))
@@ -310,6 +313,13 @@ public class AgriculturalMachineryService {
                 .stateSupport(parseBoolean(getField(fields, 9)))
                 .techState(dictionaryIdByCode(codesMap, TECH_STATE, getField(fields, 10)))
                 .build();
+    }
+
+    private Long validateCountField(Long value) {
+        if (value == null || value < 1) {
+            throw new IllegalArgumentException("В поле \"Количество\" недопустимое значение: [%d]".formatted(value));
+        }
+        return value;
     }
 
     /**
