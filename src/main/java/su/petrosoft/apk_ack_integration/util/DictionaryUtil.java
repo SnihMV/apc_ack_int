@@ -9,6 +9,7 @@ public class DictionaryUtil {
         "245", 75728L,
         "246", 75729L
     );
+
     public static final long DEFAULT_OWNERSHIP_FORM = 75730;
 
     public static long ownershipForm(String kosgu) {

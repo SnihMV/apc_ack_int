@@ -37,6 +37,14 @@ public class FinancingSource extends PlicanteInstance implements DictionaryDataR
     }
 
     @Override
+    public boolean isValid() {
+        return year != null && kfsr != null && kcsr != null &&
+                kvr != null && kosgu != null && kvsr != null &&
+                dopFk != null && dopEk != null && dopKr != null &&
+                purpose != null && concatenatedKBK != null && ownershipForm != null;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         FinancingSource that = (FinancingSource) o;
@@ -59,7 +67,8 @@ public class FinancingSource extends PlicanteInstance implements DictionaryDataR
                 KFSR, getKfsr(),
                 KCSR, getKcsr(),
                 DOPKR, getDopKr(),
-                KVR, getKvr()
+                KVR, getKvr(),
+                KOSGU, getKosgu()
         );
     }
 }

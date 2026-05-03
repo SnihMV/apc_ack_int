@@ -21,28 +21,16 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPEK;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPFK;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPKR;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KCSR;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KFSR;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KOSGU;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVR;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVSR;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.PURPOSE;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.TEMPLATE_TITLE;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGetCplIdentAttrsByYearAndInn;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGetCplIdentAttrsByCurrentYear;
-import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.requestDtoToGetMonetaryFieldsById;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.*;
+import static su.petrosoft.apk_ack_integration.util.CashPlanLimitUtil.*;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.INSTANCE_NOT_FOUND;
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.INSTANCE_NOT_FOUND_BY_ID;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class CashPlanLimitService {
 
-    private final ApkPlicanteService apkService;
+    private final PlicanteInstanceService apkService;
     private final NiFiRestClient niFiRestClient;
     private final ExcelExtractor excelExtractor;
     private final XmlExtractor xmlExtractor;
@@ -50,55 +38,6 @@ public class CashPlanLimitService {
     private final InstanceUpdater instanceUpdater;
     private final PlicanteRestClient plicanteRestClient;
     private final DictionaryService dictionaryService;
-
-//    public CreatingInstancesFromFileResponseDto createFromRosterKBKExcel(MultipartFile file) {
-//
-//        List<? extends CashPlanLimitData> dtoList = excelExtractor.getRosterKbkRows(file);
-//        log.debug("Extracted from excel file: [{}] CashPlanLimit rows", dtoList.size());
-//        List<CashPlanLimit> createdLimits = new ArrayList<>();
-//        if (!dtoList.isEmpty()) {
-//            Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
-//                    Set.of(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
-//            Set<CashPlanLimit> existedLimits = apkService.findCashPlanLimits(
-//                    requestDtoToGetCplIdentAttrsByCurrentYear());
-//            log.debug("Found in Plicante {} CashPlanLimits in total", existedLimits.size());
-//
-//            List<CashPlanLimit> limitsFromExcel = dtoList.stream()
-//                    .map(dto -> cplMapper.toEntity(dto, codesMap))
-//                    .collect(Collectors.toList());
-//
-//            limitsFromExcel.removeAll(existedLimits);
-//            if (!limitsFromExcel.isEmpty()) {
-//
-//                limitsFromExcel.stream()
-//                        .map(cpl -> apkService.createCashPlanLimit(cpl))
-//                        .forEach(createdLimits::add);
-//            }
-//        }
-//        return creatingInstancesFromFileResponseDto(dtoList, createdLimits, CashPlanLimit::getId);
-//    }
-
-   /* public CreatingInstancesFromFileResponseDto createFromUniBudgetExcel(MultipartFile file) {
-        List<BaseUniBudgetExcelRow> dtoList = excelExtractor.getUniBudgetCodedRows(file);
-        List<DescriptedBudgetItemData> dtoList = excelExtractor.getUniBudget2026ClarifiedRows(file);
-        List<DescriptedBudgetItemData> dtoList = excelExtractor.getUniBudget20262801Rows(file);
-        Set<CashPlanLimit> existingCPL = getLimitsForCurrentYear();
-        List<CashPlanLimit> fromExcelCPL = uniBudgetRowService.getLimitsFromExcel(dtoList);
-        fromExcelCPL.removeAll(existingCPL);
-        log.info("Limits to save count: [{}]", fromExcelCPL.size());
-
-        List<CashPlanLimit> createdLimits = new ArrayList<>();
-        if (!fromExcelCPL.isEmpty()) {
-            Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
-                Set.of(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
-
-            createdLimits = fromExcelCPL.stream()
-                .map(cpl -> apkService.createCashPlanLimit(cpl, codesMap))
-                .toList();
-        }
-        return creatingInstancesFromFileResponseDto(dtoList, createdLimits, CashPlanLimit::getId);
-    }*/
-
 
     public UpdateCashPlanLimitResponseDto updateByXmlFile(MultipartFile file) {
         UpdateCashPlanLimitResponseDto response = UpdateCashPlanLimitResponseDto.builder()
@@ -124,7 +63,6 @@ public class CashPlanLimitService {
         instanceUpdater.updateCpl(updater, updatingId).ifPresent(id -> response.updatedIds().add(id));
         return response;
     }
-
 
     public UpdateCashPlanLimitResponseDto updateByXml() {
         UpdateCashPlanLimitResponseDto response = UpdateCashPlanLimitResponseDto.builder()
@@ -163,15 +101,6 @@ public class CashPlanLimitService {
         return response;
     }
 
-
-    private CashPlanLimit findCplToUpdate(long id) {
-        Set<CashPlanLimit> cashPlanLimits = apkService.findCashPlanLimits(requestDtoToGetMonetaryFieldsById(id));
-        if (cashPlanLimits.isEmpty()) {
-            throw new EntityNotFoundException(INSTANCE_NOT_FOUND_BY_ID.formatted(id, TEMPLATE_TITLE));
-        }
-        return cashPlanLimits.iterator().next();
-    }
-
     public Set<CashPlanLimit> getLimitsForCurrentYear() {
         Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
                 Set.of(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
@@ -181,37 +110,4 @@ public class CashPlanLimitService {
                 LocalDateTime.now().getYear());
         return allSplByCurrentYear;
     }
-//
-//    public UpdateCashPlanLimitResponseDto updateByExcel(MultipartFile file) {
-//        Map<Dictionary, Map<String, Long>> codesMap = apkService.getDictionariesCodesMap(
-//                Set.of(KVSR, KFSR, KCSR, KVR, KOSGU, DOPEK, DOPKR, DOPFK, PURPOSE));
-//        List<DescriptedBudgetItemData> uniBudgetExcelRows = excelExtractor.uniBudgetExcelRows(file);
-//        Set<CashPlanLimit> limitsFromExcel = uniBudgetExcelRows.stream()
-//                .map(cpl -> cplMapper.toEntity(cpl, codesMap))
-//                .collect(Collectors.toSet());
-//        Set<CashPlanLimit> existingCurrentYearLimits = getLimitsForCurrentYear();
-//
-//        Set<CashPlanLimit> intersection = new HashSet<>(limitsFromExcel);
-//        intersection.retainAll(existingCurrentYearLimits);
-//        ArrayList<Long> updatedCplIds = new ArrayList<>();
-//        if (!intersection.isEmpty()) {
-//            log.info("[{}] CashPlanLimits found to be updated", intersection.size());
-//
-//            for (CashPlanLimit excelCpl : intersection) {
-//                for (CashPlanLimit existingCpl : existingCurrentYearLimits) {
-//                    if (existingCpl.equals(excelCpl)) {
-//                        excelCpl.setId(existingCpl.getId());
-//                        excelCpl.setVersion(existingCpl.getVersion());
-//                        long updatedCplId = apkService.updateCashPlanLimit(excelCpl);
-//                        updatedCplIds.add(updatedCplId);
-//                    }
-//                }
-//            }
-//        }
-//        return UpdateCashPlanLimitResponseDto.builder()
-//                .incomingCount(limitsFromExcel.size())
-//                .intersectedCount(intersection.size())
-//                .updatedIds(updatedCplIds)
-//                .build();
-//    }
 }

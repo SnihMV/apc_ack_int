@@ -3,6 +3,7 @@ package su.petrosoft.apk_ack_integration.util;
 import su.petrosoft.apk_ack_integration.model.CashPlanLimit;
 import su.petrosoft.apk_ack_integration.model.DictionaryData;
 import su.petrosoft.apk_ack_integration.model.FinancingSource;
+import su.petrosoft.apk_ack_integration.model.data.BudgetItemData;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.CreateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.GetAttributesListRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
@@ -16,17 +17,15 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 import su.petrosoft.apk_ack_integration.model.enums.ViewType;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.DOPKR;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KCSR;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KFSR;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVR;
-import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.KVSR;
+import static su.petrosoft.apk_ack_integration.model.enums.Dictionary.*;
+import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryDataById;
 
 public class FinancingSourceUtil {
@@ -91,25 +90,18 @@ public class FinancingSourceUtil {
     }
 
     private static List<Attribute<?>> getAttributesToCreate(FinancingSource source) {
-        if (!isValid(source)) {
+        if (!source.isValid()) {
             throw new IllegalStateException("Обязательный атрибут объекта не инициализирован");
         }
         List<Attribute<?>> attrs = new ArrayList<>(getIdentAttributes(source));
+
         attrs.add(new StringAttribute(CONCAT_KBK_ATTR, source.getConcatenatedKBK()));
-        if (source.getOwnershipForm() != null) {
-            attrs.add(new LinkedAttribute(OWNERSHIP_FORM_ATTR, source.getOwnershipForm()));
-        }
+        attrs.add(new LinkedAttribute(OWNERSHIP_FORM_ATTR, source.getOwnershipForm()));
+
         if (source.getCashPlanLimitIds() != null && !source.getCashPlanLimitIds().isEmpty()) {
             attrs.add(new LinkedAttribute(CASH_PLAN_LIMITS_ATTR, source.getCashPlanLimitIds()));
         }
         return attrs;
-    }
-
-    private static boolean isValid(FinancingSource source) {
-        return source.getYear() != null && source.getKfsr() != null && source.getKcsr() != null &&
-                source.getKvr() != null && source.getKosgu() != null && source.getKvsr() != null &&
-                source.getDopFk() != null && source.getDopEk() != null && source.getDopKr() != null &&
-                source.getPurpose() != null && source.getConcatenatedKBK() != null;
     }
 
     private static Collection<? extends Attribute<?>> getIdentAttributes(FinancingSource creator) {
@@ -127,7 +119,7 @@ public class FinancingSourceUtil {
         );
     }
 
-    public static FinancingSource extractFromLimit(CashPlanLimit cpl) {
+    public static FinancingSource sourceKeyFromLimit(CashPlanLimit cpl) {
         return FinancingSource.builder()
                 .year(cpl.getYear())
                 .kvsr(cpl.getKvsr())
@@ -151,5 +143,32 @@ public class FinancingSourceUtil {
                 dictionaryDataById(codesMap, KVR, fs.getKvr()).getCode() +
                 "-" +
                 dictionaryDataById(codesMap, DOPKR, fs.getDopKr()).getCode();
+    }
+
+    public static String concatKBK(BudgetItemData row) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(LocalDateTime.now().getYear());
+        sb.append("-");
+        sb.append(row.kvsr());
+        sb.append(row.kfsr());
+        sb.append(row.kcsr());
+        sb.append(row.kvr());
+        sb.append("-");
+        sb.append(row.dopKr());
+        return sb.toString();
+    }
+
+    public static Long defineOwnershipForm(
+            FinancingSource source,
+            Map<Dictionary, Map<DictionaryData, Long>> dictionaryMap
+    ) {
+        Long kosguId = source.getKosgu();
+        String kosguCode = dictionaryDataById(dictionaryMap, KOSGU, kosguId).getCode();
+        Map<DictionaryData, Long> ownershipForms = dictionaryDataMap(dictionaryMap, OWNERSHIP_FORM);
+        return ownershipForms.entrySet().stream()
+                .filter(entry -> kosguCode.equals(entry.getKey().getCode()))
+                .findFirst()
+                .map(Map.Entry::getValue)
+                .orElseGet(() -> ownershipForms.get(new DictionaryData(null)));
     }
 }

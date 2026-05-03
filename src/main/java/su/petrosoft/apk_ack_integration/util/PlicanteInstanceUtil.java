@@ -22,7 +22,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.groupingBy;
 import static su.petrosoft.apk_ack_integration.model.enums.SqlOperation.IN;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.*;
 
@@ -31,17 +31,18 @@ public class PlicanteInstanceUtil {
 
     public static final ZoneId MOSCOW_ZONE = ZoneId.of("Europe/Moscow");
 
-    public static Map<Long, List<List<Long>>> getDuplicates(List<? extends PlicanteInstance> instances) {
+    public static List<List<Long>> findDuplicates(List<? extends PlicanteInstance> instances) {
+        Objects.requireNonNull(instances);
+
         Map<PlicanteInstance, List<PlicanteInstance>> grouped = instances.stream()
                 .collect(groupingBy(Function.identity()));
-        return grouped.entrySet().stream()
-                .filter(e -> e.getValue().size() > 1)
-                .map(e -> Map.entry(
-                        e.getKey().getTemplateId(),
-                        e.getValue().stream().map(PlicanteInstance::getId).toList()))
-                .collect(groupingBy(
-                        Entry::getKey,
-                        mapping(Entry::getValue, toList())));
+
+        return grouped.values().stream()
+                .filter(list -> list.size() > 1)
+                .map(list -> list.stream()
+                        .map(PlicanteInstance::getId)
+                        .toList())
+                .toList();
     }
 
     public static GetAttributesListRequestDto requestDtoToGetDictionaryDataByCodes(
@@ -88,19 +89,32 @@ public class PlicanteInstanceUtil {
             Dictionary dictionary,
             String code
     ) {
-        Map<DictionaryData, Long> dataToIdMap= codesMap.get(dictionary);
-        if (dataToIdMap == null) {
-            throw new IllegalStateException(DICTIONARY_NOT_OBTAINED.formatted(dictionary));
-        }
+        Map<DictionaryData, Long> dataToIdMap = codesMap.get(dictionary);
+        Objects.requireNonNull(dataToIdMap, DICTIONARY_NOT_OBTAINED.formatted(dictionary));
+
         Long id = dataToIdMap.get(new DictionaryData(code));
-        if (id == null) {
-            throw new DictionaryException(DICTIONARY_CODE_NOT_FOUND.formatted(code, dictionary));
-        }
+        Objects.requireNonNull(id, DICTIONARY_CODE_NOT_FOUND.formatted(code, dictionary));
+
         return id;
     }
 
-    public static DictionaryData dictionaryDataById(Map<Dictionary, Map<DictionaryData, Long>> codesMap, Dictionary dictionary, long id) {
-        return codesMap.get(dictionary).entrySet().stream()
+    public static Map<DictionaryData, Long> dictionaryDataMap(
+            Map<Dictionary, Map<DictionaryData, Long>> codesMap,
+            Dictionary dictionary
+    ) {
+        Map<DictionaryData, Long> dataToIdMap = codesMap.get(dictionary);
+        Objects.requireNonNull(dataToIdMap, DICTIONARY_NOT_OBTAINED.formatted(dictionary));
+        return dataToIdMap;
+    }
+
+    public static DictionaryData dictionaryDataById(
+            Map<Dictionary, Map<DictionaryData, Long>> codesMap,
+            Dictionary dictionary,
+            long id
+    ) {
+        Map<DictionaryData, Long> dataToIdMap = dictionaryDataMap(codesMap, dictionary);
+
+        return dataToIdMap.entrySet().stream()
                 .filter(entry -> entry.getValue().equals(id))
                 .findFirst()
                 .map(Entry::getKey)
@@ -142,8 +156,8 @@ public class PlicanteInstanceUtil {
     @SuppressWarnings("unchecked")
     public static <T> T extractData(List<Attribute<?>> attributes, long attributeId) {
         return findAttribute(attributes, attributeId)
-            .map(attr -> (T) attr.getData())
-            .orElse(null);
+                .map(attr -> (T) attr.getData())
+                .orElse(null);
     }
 
     @SuppressWarnings("unchecked")

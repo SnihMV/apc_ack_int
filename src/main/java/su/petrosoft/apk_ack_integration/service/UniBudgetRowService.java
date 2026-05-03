@@ -1,7 +1,5 @@
 package su.petrosoft.apk_ack_integration.service;
 
-import java.util.Map;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,12 +14,15 @@ import su.petrosoft.apk_ack_integration.model.data.CashPlanLimitData;
 import su.petrosoft.apk_ack_integration.model.data.DescriptedBudgetItemData;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 
+import java.util.Map;
+import java.util.Set;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class UniBudgetRowService {
 
-    private final ApkPlicanteService apkService;
+    private final PlicanteInstanceService apkService;
     private final CashPlanLimitMapper cplMapper;
     private final SubsidyProgramMapper spMapper;
     private final FinancingSourceMapper fsMapper;
@@ -147,6 +148,6 @@ public class UniBudgetRowService {
         FinancingSource financingSource = fsMapper.toEntity(row, codesMap);
         financingSource.getCashPlanLimitIds().add(savedCpl.getId());
         financingSource.setSubsidyProgramId(trdLevelSp.getId());
-        return apkService.createFinancingSource(financingSource, codesMap);
+        return apkService.createFinancingSource(financingSource);
     }
 }

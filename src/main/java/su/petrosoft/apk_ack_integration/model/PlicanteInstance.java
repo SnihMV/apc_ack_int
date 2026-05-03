@@ -1,7 +1,6 @@
 package su.petrosoft.apk_ack_integration.model;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
@@ -26,5 +25,9 @@ public abstract class PlicanteInstance {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
+    }
+
+    public boolean isValid() {
+        return true;
     }
 }

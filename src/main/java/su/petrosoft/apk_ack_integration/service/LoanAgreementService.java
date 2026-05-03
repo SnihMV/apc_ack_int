@@ -42,7 +42,7 @@ import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
 public class LoanAgreementService {
     private final XmlExtractor xmlExtractor;
     private final PlicanteRestClient plicanteRestClient;
-    private final ApkPlicanteService apkPlicanteService;
+    private final PlicanteInstanceService plicanteInstanceService;
     private final NiFiRestClient niFiRestClient;
     private final SubsidyRecipientMapper srMapper;
     private final SubsidyProgramMapper spMapper;

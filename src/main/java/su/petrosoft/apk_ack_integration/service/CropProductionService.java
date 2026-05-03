@@ -18,7 +18,6 @@ import static su.petrosoft.apk_ack_integration.util.SubsidyRecipientUtil.request
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +52,7 @@ import su.petrosoft.apk_ack_integration.util.CropProductionUtil;
 @RequiredArgsConstructor
 public class CropProductionService {
 
-    private final ApkPlicanteService plicanteService;
+    private final PlicanteInstanceService plicanteService;
     private final PlicanteRestClient plicanteRestClient;
     private final SubsidyRecipientMapper srMapper;
     private final ExcelReportFiller excelReportFiller;

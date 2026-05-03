@@ -8,6 +8,7 @@ import su.petrosoft.apk_ack_integration.model.dto.plicante.RequestedAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.UpdateInstanceRequestDto;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.attribute.*;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.Filter;
+import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.FilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.LongFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.filter.StringFilterAttribute;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
@@ -111,6 +112,18 @@ public class CashPlanLimitUtil {
                 .filter(new Filter(List.of(
                         new LongFilterAttribute(YEAR_ATTR, LocalDate.now().getYear())
                 )))
+                .build();
+    }
+
+    public static GetAttributesListRequestDto requestDtoToGetLimits(
+            List<RequestedAttribute> reqAttrs,
+            List<FilterAttribute<?>> attrFilters
+    ) {
+        return GetAttributesListRequestDto.builder()
+                .templateId(TEMPLATE_ID)
+                .viewType(ViewType.DETAILED_FORM_VIEW)
+                .attributes(reqAttrs)
+                .filter(new Filter(attrFilters))
                 .build();
     }
 

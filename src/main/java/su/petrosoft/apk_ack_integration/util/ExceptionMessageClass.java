@@ -20,7 +20,7 @@ public class ExceptionMessageClass {
     public static final String ATTRIBUTE_TYPE_MISMATCH = "Тип атрибута [id = %s] не соответствует ожидаемому";
     public static final String DICTIONARY_ID_NOT_FOUND = "Экземпляр справочника [%s] с id = [%d] не найден";
     public static final String DICTIONARY_CODE_NOT_FOUND = "Неверное значение [%s] справочника [%s]";
-    public static final String DICTIONARY_NOT_OBTAINED = "Справочник [%s] не был извлечен из БД";
+    public static final String DICTIONARY_NOT_OBTAINED = "Справочник [%s] не был добавлен в контекст";
     public static final String DICTIONARY_DESCRIPTION_NOT_FOUND = "Не найдено описание кода [%s] в справочнике [%s]";
     public static final String SAVING_WITHOUT_DESCRIPTION = "Попытка сохранить экземпляр справочника [%s] без расшифровки для кода [%s]";
     public static final String MANAGED_DICTIONARY_NOT_FOUND = "Управляемый справочник [%s] не найден";

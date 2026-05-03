@@ -3,29 +3,25 @@ package su.petrosoft.apk_ack_integration.exception;
 import lombok.Getter;
 
 import java.util.List;
-import java.util.Map;
-
-import static java.util.stream.Collectors.joining;
 
 @Getter
 public class InstanceDuplicateException extends RuntimeException {
 
-    private final Map<Long, List<List<Long>>> duplicates;
+    public static final String NEW_LINE_BEGINNING = "\n   - ";
 
-    public InstanceDuplicateException(Map<Long, List<List<Long>>> duplicates) {
-        super(buildMessage(duplicates));
-        this.duplicates = duplicates;
+    private final List<List<Long>> duplicateIdsList;
+
+    public InstanceDuplicateException(long templateId, List<List<Long>> duplicateIdsList) {
+        super(buildMessage(templateId, duplicateIdsList));
+        this.duplicateIdsList = duplicateIdsList;
     }
 
-    private static String buildMessage(Map<Long, List<List<Long>>> duplicates) {
-        return duplicates.entrySet().stream()
-                .map(entry -> String.format(
-                        "  Среди объектов шаблона %d:\n%s",
-                        entry.getKey(),
-                        entry.getValue().stream()
-                                .map(ids -> "    - " + ids)
-                                .collect(joining("\n"))
-                ))
-                .collect(joining("\n", "Найдены дубликаты:\n", ""));
+    private static String buildMessage(long templateId, List<List<Long>> duplicateIdsList) {
+        StringBuilder sb = new StringBuilder("Среди объектов шаблона [%d] найдены дубликаты:".formatted(templateId));
+
+        for (List<Long> duplicateIds : duplicateIdsList) {
+            sb.append(NEW_LINE_BEGINNING).append(duplicateIds);
+        }
+        return sb.toString();
     }
 }

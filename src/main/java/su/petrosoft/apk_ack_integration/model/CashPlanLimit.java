@@ -83,6 +83,14 @@ public class CashPlanLimit extends PlicanteInstance {
     }
 
     @Override
+    public boolean isValid() {
+        return year != null && kfsr != null && kcsr != null &&
+                kvr != null && kosgu != null && kvsr != null &&
+                dopFk != null && dopEk != null && dopKr != null &&
+                purpose != null && recipientInn != null && recipientKpp != null;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
             return false;

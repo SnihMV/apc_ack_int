@@ -44,7 +44,7 @@ public class CofinancingLevelService {
 
     private final ExcelExtractor excelExtractor;
     private final PlicanteRestClient plicanteRestClient;
-    private final ApkPlicanteService plicanteService;
+    private final PlicanteInstanceService plicanteService;
     private final CofinancingLevelMapper cflMapper;
     private final SubsidyProgramMapper spMapper;
     private final DictionaryService dictionaryService;

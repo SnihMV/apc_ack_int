@@ -87,7 +87,7 @@ public class AgriculturalMachineryService {
     private static final String VALUES_NODE_NAME = "data";
     private static final String VALUE_FIELD_PREFIX = "value_1_";
     private final PlicanteRestClient plicanteRestClient;
-    private final ApkPlicanteService apkPlicanteService;
+    private final PlicanteInstanceService plicanteInstanceService;
     private final AgriculturalMachineryParkMapper ampMapper;
     private final ObjectMapper objectMapper;
     private final PlicanteSoapClient plicanteSoapClient;

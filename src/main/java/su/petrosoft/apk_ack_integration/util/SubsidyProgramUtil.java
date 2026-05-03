@@ -131,7 +131,7 @@ public class SubsidyProgramUtil {
                 .build();
     }
 
-    public static SubsidyProgram extractScdLvlSpFromFs(FinancingSource fs) {
+    public static SubsidyProgram extractScdLvlProgramKeyFromSource(FinancingSource fs) {
         return SubsidyProgram.builder()
                 .level(2L)
                 .kcsr(fs.getKcsr())

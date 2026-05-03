@@ -16,14 +16,13 @@ import su.petrosoft.apk_ack_integration.model.DictionaryData;
 import su.petrosoft.apk_ack_integration.model.SubsidyProgram;
 import su.petrosoft.apk_ack_integration.model.dto.plicante.instance.InstanceDto;
 import su.petrosoft.apk_ack_integration.model.enums.Dictionary;
-import su.petrosoft.apk_ack_integration.util.SubsidyProgramUtil;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class SubsidyProgramService {
 
-    private final ApkPlicanteService apkService;
+    private final PlicanteInstanceService apkService;
     private final PlicanteRestClient plicanteRestClient;
     private final SubsidyProgramMapper spMapper;
 

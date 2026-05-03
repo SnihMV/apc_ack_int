@@ -27,7 +27,7 @@ import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.*;
 public class DictionaryService {
 
     private final PlicanteRestClient restClient;
-    private final ApkPlicanteService apkPlicanteService;
+    private final PlicanteInstanceService plicanteInstanceService;
 
     public Map<Dictionary, Set<Long>> addNewDictionaryCodes(
             Map<Dictionary, Map<String, Long>> existingDictionariesMap,
@@ -49,7 +49,7 @@ public class DictionaryService {
         Set<Dictionary> extraDictionaries = extractableDictionaries.stream()
                 .filter(d -> !codesMap.containsKey(d))
                 .collect(toSet());
-        codesMap.putAll(apkPlicanteService.getDictionariesCodesMap(extraDictionaries));
+        codesMap.putAll(plicanteInstanceService.getDictionariesCodesMap(extraDictionaries));
     }
 
     private void updateDictionariesByContainableObject(
