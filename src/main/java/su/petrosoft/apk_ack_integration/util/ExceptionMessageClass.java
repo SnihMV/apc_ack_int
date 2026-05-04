@@ -9,8 +9,8 @@ public class ExceptionMessageClass {
     public static final String MARKER_NOT_FOUND = "Не найдена строка с маркерами района [%s%s] в шаблоне";
     public static final String INVALID_MARKER = "Неверный формат маркера: [%s]";
     public static final String REPORTS_NOT_FOUND = "Не нашлось ни одного оперативного отчета с заданными параметрами";
-    public static final String REPORT_READING_PROBLEM = "Не удалось интерпретировать [%d] строку отчета. Причина: %s";
-    public static final String FAILED_TO_PARSE_JSON = "Не удалось обработать json. Причина: %s";
+    public static final String MACHINERY_REPORT_READING_ERROR = "Проблема в [%d] позиции отчета с id = [%d]: [\"%s\"]";
+    public static final String FAILED_TO_PARSE_JSON = "Не удалось обработать json файл оперативного отчета с id = [%d]. Причина: %s";
     public static final String INVALID_FIELD_NAME = "Недопустимое имя поля [%s]";
     public static final String JSON_NODE_ABSENT = "Обязательное поле [%s] не найдено в json файле";
     public static final String JSON_FIELDS_ABSENT = "Обязательные поля вида [%s*] отсутствуют в json файле";
@@ -26,6 +26,9 @@ public class ExceptionMessageClass {
     public static final String MANAGED_DICTIONARY_NOT_FOUND = "Управляемый справочник [%s] не найден";
     public static final String INSTANCE_STALE_VERSION = "Объект [id = %d] был изменен в другой сессии";
     public static final String EMPTY_INSTANCE_ID = "Идентификатор объекта не определен (null)";
+    public static final String CONVERT_TO_BIGDECIMAL_ERROR = "Не удалось преобразовать к типу BigDecimal значение: [%s]";
+    public static final String JSON_NODE_UNEXPECTABLE_TYPE = "Неожиданный тип значения в json файле: [%s]";
+
     public static final String ILLEGAL_CREATE_STATE = "Объект находится в недопустимом для сохранения состоянии";
     public static final String ILLEGAL_ATTR_VALUE = "Атрибут [id = %d] имеет недопустимое значение [%s]";
     public static final String ILLEGAL_PARENT_EXTRACT = "Попытка извлечь родительский объект у направления низшего уровня";

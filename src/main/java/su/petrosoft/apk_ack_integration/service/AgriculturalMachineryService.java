@@ -11,7 +11,7 @@ import su.petrosoft.apk_ack_integration.exception.DictionaryException;
 import su.petrosoft.apk_ack_integration.exception.EntityNotFoundException;
 import su.petrosoft.apk_ack_integration.exception.JsonParsingException;
 import su.petrosoft.apk_ack_integration.exception.MachineryParkReportCountValidationException;
-import su.petrosoft.apk_ack_integration.exception.MachineryParkReportParsingException;
+import su.petrosoft.apk_ack_integration.exception.OperationalReportJsonParsingException;
 import su.petrosoft.apk_ack_integration.mapper.AgriculturalMachineryParkMapper;
 import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryPark;
 import su.petrosoft.apk_ack_integration.model.AgriculturalMachineryReport;
@@ -69,7 +69,7 @@ import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.INVALI
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.JSON_FIELDS_ABSENT;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.JSON_NODE_ABSENT;
 import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.MANAGED_DICTIONARY_NOT_FOUND;
-import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.REPORT_READING_PROBLEM;
+import static su.petrosoft.apk_ack_integration.util.ExceptionMessageClass.MACHINERY_REPORT_READING_ERROR;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.dictionaryIdByCode;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractAllData;
 import static su.petrosoft.apk_ack_integration.util.PlicanteInstanceUtil.extractData;
@@ -165,8 +165,8 @@ public class AgriculturalMachineryService {
         return savedIds;
     }
 
-    private List<AgriculturalMachineryPark> createMachineryParks(AgriculturalMachineryReport jsonReport, SubsidyRecipient recipient) {
-        Map<Integer, List<String>> groupedValues = parseJsonReport(jsonReport.getJsonReport());
+    private List<AgriculturalMachineryPark> createMachineryParks(AgriculturalMachineryReport report, SubsidyRecipient recipient) {
+        Map<Integer, List<String>> groupedValues = parseJsonFromReport(report);
 
         Map<Dictionary, Map<DictionaryData, Long>> codesMap = dictionaryService.getDataMap(
                 Set.of(DISTRICT, TR_V_M, KOM_ZER, KOM_KOR, MAS_SH, MAS_ZH, DIS_BEN_GEN,
@@ -185,7 +185,8 @@ public class AgriculturalMachineryService {
                 machineryPark.setDistrictId(recipient.getDistrictId());
                 result.add(machineryPark);
             } catch (RuntimeException e) {
-                throw new MachineryParkReportParsingException(REPORT_READING_PROBLEM.formatted(entry.getKey(), e.getMessage()));
+                throw new OperationalReportJsonParsingException(
+                        MACHINERY_REPORT_READING_ERROR.formatted(entry.getKey(), report.getId(), e.getMessage()));
             }
         }
         return result;
@@ -240,9 +241,9 @@ public class AgriculturalMachineryService {
         log.info("Machinery Park Instances [{}] deleted", parkIds);
     }
 
-    private Map<Integer, List<String>> parseJsonReport(String jsonReport) {
+    private Map<Integer, List<String>> parseJsonFromReport(AgriculturalMachineryReport report) {
         try {
-            JsonNode root = objectMapper.readTree(jsonReport);
+            JsonNode root = objectMapper.readTree(report.getJsonReport());
             JsonNode dataNode = root.path("data");
 
             if (dataNode.isMissingNode()) {
@@ -258,7 +259,7 @@ public class AgriculturalMachineryService {
             }
             return result;
         } catch (Exception e) {
-            throw new MachineryParkReportParsingException(FAILED_TO_PARSE_JSON.formatted(e.getMessage()), e);
+            throw new OperationalReportJsonParsingException(FAILED_TO_PARSE_JSON.formatted(report.getId(), e.getMessage()), e);
         }
     }
 
